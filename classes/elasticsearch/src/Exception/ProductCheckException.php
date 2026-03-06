@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -18,5 +19,4 @@ use RuntimeException;
 
 class ProductCheckException extends RuntimeException implements ElasticsearchException
 {
-    
 }

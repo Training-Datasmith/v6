@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -10,7 +11,7 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Elastic\Elasticsearch\Traits;
 
@@ -20,10 +21,11 @@ use Elastic\Elasticsearch\Exception\MissingParameterException;
 use Elastic\Transport\Serializer\JsonSerializer;
 use Elastic\Transport\Serializer\NDJsonSerializer;
 use Http\Discovery\Psr17FactoryDiscovery;
-use Psr\Http\Message\RequestInterface;
 
 use function http_build_query;
-use function strpos;
+
+use Psr\Http\Message\RequestInterface;
+
 use function sprintf;
 
 trait EndpointTrait
@@ -57,7 +59,7 @@ trait EndpointTrait
     /**
      * Converts array to comma-separated list;
      * Converts boolean value to true', 'false' string
-     * 
+     *
      * @param mixed $value
      */
     private function convertValue($value): string
@@ -65,7 +67,7 @@ trait EndpointTrait
         // Convert a boolean value in 'true' or 'false' string
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
-        // Convert to comma-separated list if array
+            // Convert to comma-separated list if array
         } elseif (is_array($value) && $this->isNestedArray($value) === false) {
             return implode(',', $value);
         }
@@ -74,7 +76,7 @@ trait EndpointTrait
 
     /**
      * Encode a value for a valid URL
-     * 
+     *
      * @param mixed $value
      */
     protected function encode($value): string
@@ -102,28 +104,28 @@ trait EndpointTrait
 
     /**
      * Serialize the body using the Content-Type
-     * 
+     *
      * @param mixed $body
      */
     protected function bodySerialize($body, string $contentType): string
     {
-        if (strpos($contentType, 'application/x-ndjson') !== false ||
-            strpos($contentType, 'application/vnd.elasticsearch+x-ndjson') !== false) {
+        if (str_contains($contentType, 'application/x-ndjson') ||
+            str_contains($contentType, 'application/vnd.elasticsearch+x-ndjson')) {
             return NDJsonSerializer::serialize($body, ['remove_null' => false]);
         }
-        if (strpos($contentType, 'application/json') !== false ||
-            strpos($contentType, 'application/vnd.elasticsearch+json') !== false) {
+        if (str_contains($contentType, 'application/json') ||
+            str_contains($contentType, 'application/vnd.elasticsearch+json')) {
             return JsonSerializer::serialize($body, ['remove_null' => false]);
         }
         throw new ContentTypeException(sprintf(
-            "The Content-Type %s is not managed by Elasticsearch serializer",
+            'The Content-Type %s is not managed by Elasticsearch serializer',
             $contentType
         ));
     }
 
     /**
      * Create a PSR-7 request
-     * 
+     *
      * @param array|string $body
      */
     protected function createRequest(string $method, string $url, array $headers, $body = null): RequestInterface
@@ -136,8 +138,8 @@ trait EndpointTrait
         if (!empty($body)) {
             if (!isset($headers['Content-Type'])) {
                 throw new ContentTypeException(sprintf(
-                    "The Content-Type is missing for %s %s", 
-                    $method, 
+                    'The Content-Type is missing for %s %s',
+                    $method,
                     $url
                 ));
             }
@@ -156,7 +158,7 @@ trait EndpointTrait
     /**
      * Build the API compatibility headers
      * transfrom Content-Type and Accept adding vnd.elasticsearch+ and compatible-with
-     * 
+     *
      * @see https://github.com/elastic/elasticsearch-php/pull/1142
      */
     protected function buildCompatibilityHeaders(array $headers): array

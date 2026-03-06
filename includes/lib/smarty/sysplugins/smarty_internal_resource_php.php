@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Internal Plugin Resource PHP
  * Implements the file system as resource for PHP templates
@@ -68,11 +70,11 @@ class Smarty_Internal_Resource_Php extends Smarty_Internal_Resource_File
         $compiled->timestamp = $_template->source->timestamp;
         $compiled->exists = $_template->source->exists;
         $compiled->file_dependency[ $_template->source->uid ] =
-            array(
+            [
                 $compiled->filepath,
                 $compiled->timestamp,
                 $_template->source->type,
-            );
+            ];
     }
 
     /**

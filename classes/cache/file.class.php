@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -39,11 +41,11 @@ class Cache extends Cache_Controler
     final protected function __construct()
     {
         $this->_mode = 'File';
-        
+
         //Run the parent constructor
         parent::__construct();
     }
-    
+
     public function __destruct()
     {
         if ($this->_empties_added) {
@@ -56,7 +58,7 @@ class Cache extends Cache_Controler
      *
      * @return instance
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -66,15 +68,12 @@ class Cache extends Cache_Controler
     }
 
     //=====[ Public ]=======================================
-
     /**
      * Clear all the cache
      *
      * @param string $type Cache type prefix
-     *
-     * @return bool
      */
-    public function clear($type = '')
+    public function clear($type = ''): bool
     {
         $this->_clearFileCache();
         clearstatcache();
@@ -89,7 +88,7 @@ class Cache extends Cache_Controler
      */
     public function delete($id)
     {
-        $id = shortHash($id, 8, array($this->_empties_id));
+        $id = shortHash($id, 8, [$this->_empties_id]);
         $file = $this->_cache_path.$this->_makeName($id);
         clearstatcache(true, $file);
         if (file_exists($file)) {
@@ -113,7 +112,7 @@ class Cache extends Cache_Controler
         if (!$this->status && !$this->statusException($id)) {
             return false;
         }
-        $id = shortHash($id, 8, array($this->_empties_id));
+        $id = shortHash($id, 8, [$this->_empties_id]);
         $file = $this->_cache_path.$this->_makeName($id);
         clearstatcache(true, $file);
 
@@ -129,8 +128,8 @@ class Cache extends Cache_Controler
     {
         if (empty($this->_ids)) {
             foreach (glob($this->_cache_path.'*'.$this->_suffix, GLOB_NOSORT) as $file) {
-                if (strpos($file, $this->_prefix) !== false) {
-                    $this->_ids[] = str_replace(array($this->_prefix, $this->_suffix, CC_CACHE_DIR), '', $file);
+                if (str_contains($file, $this->_prefix)) {
+                    $this->_ids[] = str_replace([$this->_prefix, $this->_suffix, CC_CACHE_DIR], '', $file);
                 }
             }
         }
@@ -149,14 +148,14 @@ class Cache extends Cache_Controler
         if (!$this->status && !$this->statusException($id)) {
             return false;
         }
-        
-        $id = shortHash($id, 8, array($this->_empties_id));
-        
-        if ($this->_empties_id!==$id && isset($this->_empties[$id])) {
-            return array('empty' => true, 'data' => $this->_empties[$id]);
+
+        $id = shortHash($id, 8, [$this->_empties_id]);
+
+        if ($this->_empties_id !== $id && isset($this->_empties[$id])) {
+            return ['empty' => true, 'data' => $this->_empties[$id]];
         }
-        
-        if ($this->_empties_id!==$id && isset($this->_dupes[$id])) {
+
+        if ($this->_empties_id !== $id && isset($this->_dupes[$id])) {
             return $this->_dupes[$id];
         }
 
@@ -171,13 +170,13 @@ class Cache extends Cache_Controler
             $this->_page_cache_usage += strlen($contents);
             $this->_page_cache_file_count++;
             //If there is no boundary then the file isn't valid
-            if (strpos($contents, $this->_file_data_split) === false) {
+            if (!str_contains($contents, (string) $this->_file_data_split)) {
                 @unlink($file);
                 return false;
             }
 
             //Split meta and data
-            list($meta, $data) = explode($this->_file_data_split, $contents, 2);
+            [$meta, $data] = explode($this->_file_data_split, $contents, 2);
             $meta = unserialize($meta);
 
             //Check to see if the cache is past the experation date
@@ -200,21 +199,21 @@ class Cache extends Cache_Controler
      * @param int $expire Force a time to live
      * return bool
      */
-    public function write($data, $id, $expire = '', $serialize = true)
+    public function write($data, $id, $expire = '', $serialize = true): bool
     {
         if (!$this->status && !$this->statusException($id)) {
             return false;
         }
 
-        $id = shortHash($id, 8, array($this->_empties_id));
-        if ($this->_empties_id!==$id && empty($data)) {
+        $id = shortHash($id, 8, [$this->_empties_id]);
+        if ($this->_empties_id !== $id && empty($data)) {
             if (!isset($this->_empties[$id])) {
                 $this->_empties[$id] = $data;
                 $this->_empties_added = true;
             }
             return false;
         }
-        
+
         try {
             $data = ($serialize) ? serialize($data) : $data;
         } catch (Exception $e) {
@@ -223,12 +222,12 @@ class Cache extends Cache_Controler
         }
 
         $name = $this->_makeName($id);
-        
+
         //Create the metadata for the file
-        $meta = array(
+        $meta = [
             'time'  => time(),
             'expire' => (!empty($expire) && is_numeric($expire)) ? $expire : $this->_expire,
-        );
+        ];
         //Combine the meta and the data
         $data  = serialize($meta).$this->_file_data_split.$data;
 
@@ -242,10 +241,8 @@ class Cache extends Cache_Controler
 
     /**
      * Calculates the cache usage
-     *
-     * @return string
      */
-    public function usage()
+    public function usage(): string
     {
         $cache_size = 0;
         $cache_files = 0;
@@ -254,12 +251,12 @@ class Cache extends Cache_Controler
             $cache_files++;
         }
         return 'Cache Used: '.(
-          ($cache_size > 0)
+            ($cache_size > 0)
           ? formatBytes($this->_page_cache_usage, true).' of ' .
              formatBytes($cache_size, true) .
-             ' ('.number_format((($this->_page_cache_usage/$cache_size) * 100), 2).'%)'
+             ' ('.number_format((($this->_page_cache_usage / $cache_size) * 100), 2).'%)'
           : '0%'
-        )."<br>Hits: ".$this->_page_cache_file_count.' / '.$cache_files;
+        ).'<br>Hits: '.$this->_page_cache_file_count.' / '.$cache_files;
     }
 
     //=====[ Private ]=======================================
@@ -270,6 +267,6 @@ class Cache extends Cache_Controler
     protected function _getEmpties()
     {
         $this->_setPrefix();
-        $this->_empties = ($this->read($this->_empties_id))?:array();
+        $this->_empties = ($this->read($this->_empties_id)) ?: [];
     }
 }

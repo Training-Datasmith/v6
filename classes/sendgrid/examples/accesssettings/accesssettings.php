@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -87,7 +89,7 @@ try {
 // Retrieve a specific whitelisted IP #
 // GET /access_settings/whitelist/{rule_id} #
 
-$rule_id = "test_url_param";
+$rule_id = 'test_url_param';
 
 try {
     $response = $sg->client->access_settings()->whitelist()->_($rule_id)->get();
@@ -102,7 +104,7 @@ try {
 // Remove a specific IP from the whitelist #
 // DELETE /access_settings/whitelist/{rule_id} #
 
-$rule_id = "test_url_param";
+$rule_id = 'test_url_param';
 
 try {
     $response = $sg->client->access_settings()->whitelist()->_($rule_id)->delete();

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Cc object for a /mail/send API call
  */

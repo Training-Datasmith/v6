@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -18,7 +20,6 @@
  */
 class SSL
 {
-
     /**
      * Class instance
      *
@@ -27,13 +28,10 @@ class SSL
     protected static $_instance;
 
     ##############################################
-
     /**
      * Setup the instance (singleton)
-     *
-     * @return SSL
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -49,11 +47,11 @@ class SSL
      * @param string $redir
      * @return bool
      */
-    public function validRedirect($redir)
+    public function validRedirect($redir): string|bool
     {
         if (preg_match('#^http#iU', $redir)) {
-            $standard_domain = preg_replace("#^https?://|^www.#", "", $GLOBALS['config']->get('config', 'standard_url'));
-            return stristr($redir, $standard_domain);
+            $standard_domain = preg_replace('#^https?://|^www.#', '', (string) $GLOBALS['config']->get('config', 'standard_url'));
+            return stristr($redir, (string) $standard_domain);
         }
         return true;
     }

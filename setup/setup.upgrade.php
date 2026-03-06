@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -16,7 +18,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
     if (!file_exists($global_file)) {
         touch($global_file);
     }
-    $targets = array(
+    $targets = [
         'backup/',
         'cache/',
         'cache/skin/',
@@ -29,7 +31,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
         'includes/extra/',
         'includes/global.inc.php',
         'language/',
-    );
+    ];
     if (file_exists(CC_ROOT_DIR.'/images/uploads')) {
         $targets[] = 'images/uploads/';
     }
@@ -46,7 +48,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
                 $errors[] = sprintf($strings['setup']['error_x_not_writable'], $target);
             }
         }
-        $GLOBALS['smarty']->append('PERMISSIONS', array('name' => $target, 'status' => (bool)$perm_status));
+        $GLOBALS['smarty']->append('PERMISSIONS', ['name' => $target, 'status' => (bool)$perm_status]);
     }
     if (!$permissions) {
         $proceed = false;
@@ -63,7 +65,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
     ## Admin Session thingy
 
     ## Get version history
-    if (($versions = $db->select('CubeCart_history', array('version'), null, array('id' => 'DESC'), false, false, false)) !== false) {
+    if (($versions = $db->select('CubeCart_history', ['version'], null, ['id' => 'DESC'], false, false, false)) !== false) {
         ## Version 4
         $current = $versions[0]['version'];
         foreach ($versions as $version) {
@@ -97,7 +99,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
         ## Confirmation
         if (version_compare($current, CC_VERSION, '<')) {
             $step = 4;
-            $GLOBALS['smarty']->assign('UPGRADE', array('from' => $current, 'to' => CC_VERSION));
+            $GLOBALS['smarty']->assign('UPGRADE', ['from' => $current, 'to' => CC_VERSION]);
             $_SESSION['setup']['start_version'] = $current;
             $GLOBALS['smarty']->assign('LANG_UPGRADE_FROM_TO', sprintf($strings['setup']['upgrade_from_to'], $current, CC_VERSION));
             $GLOBALS['smarty']->assign('MODE_UPGRADE_CONFIRM', true);
@@ -120,24 +122,24 @@ if (!isset($_SESSION['setup']['permissions'])) {
         if (!$_SESSION['setup']['config_converted'] && version_compare($current, '4.0.0', '<')) {
 
             ## Version 3: Upgrade config data
-            $config_string = $db->select('CubeCart_config', array('array'), array('name' => 'config'));
+            $config_string = $db->select('CubeCart_config', ['array'], ['name' => 'config']);
             if ($config_string) {
                 $old_config = unserialize($config_string[0]['array']);
                 foreach ($old_config as $key => $value) {
                     $new_config[base64_decode($key)] = stripslashes(base64_decode($value));
                 }
-                $db->update('CubeCart_config', array('array' => base64_encode(json_encode($new_config))), array('name' => 'config'));
+                $db->update('CubeCart_config', ['array' => base64_encode(json_encode($new_config))], ['name' => 'config']);
             }
             $_SESSION['setup']['short_lang_identifier'] = $new_config['defaultLang'];
             unset($old_config, $new_config, $config_string);
 
             ## Upgrade v3 global file to v5 spec
             include $global_file;
-            $append = array(
+            $append = [
                 'adminFolder' => 'admin',
                 'adminFile'  => 'admin.php',
-                'cache'  => 'file'
-            );
+                'cache'  => 'file',
+            ];
             $global = array_merge($glob, $append);
             ksort($global);
             ## Write new file
@@ -145,20 +147,20 @@ if (!isset($_SESSION['setup']['permissions'])) {
             writeGlobalConfig($global, $global_file);
             $_SESSION['setup']['config_converted'] = true;
 
-        ## Updates from version 4
+            ## Updates from version 4
         } elseif (!$_SESSION['setup']['config_converted'] && version_compare($current, '5.0.0', '<')) {
 
             ## Version 4: Upgrade config data
-            $config_string = $db->select('CubeCart_config', array('array'), array('name' => 'config'));
+            $config_string = $db->select('CubeCart_config', ['array'], ['name' => 'config']);
             if ($config_string) {
                 $new_config = unserialize($config_string[0]['array']);
                 $new_config['offLineContent'] = base64_decode($new_config['offLineContent']);
-                $db->update('CubeCart_config', array('array' => base64_encode(json_encode($new_config))), array('name' => 'config'));
+                $db->update('CubeCart_config', ['array' => base64_encode(json_encode($new_config))], ['name' => 'config']);
             }
 
             ## Upgrade v4 global file to v5 spec
             include $global_file;
-            $append = array('cache'  => 'file');
+            $append = ['cache'  => 'file'];
             $global = array_merge($glob, $append);
             unset($glob['license_key'], $glob['rootDir'], $glob['rootRel'], $glob['storeURL']);
             ksort($glob);
@@ -169,7 +171,6 @@ if (!isset($_SESSION['setup']['permissions'])) {
             $_SESSION['setup']['config_converted'] = true;
             unset($config_string, $new_config, $country_config);
         }
-
 
         ## List of versions to upgrade though
         $files_sql = glob($setup_path.'db/upgrade/*.sql');
@@ -204,7 +205,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
             ## Check for updates to process
             natsort($updates);
             foreach ($updates as $version) {
-                $GLOBALS['smarty']->assign('UPGRADE', array('from' => $current, 'to' => $version));
+                $GLOBALS['smarty']->assign('UPGRADE', ['from' => $current, 'to' => $version]);
                 $file_sql = 'db/upgrade/'.$version.'.sql';
                 if (file_exists($file_sql)) {
                     ## Process file
@@ -217,8 +218,8 @@ if (!isset($_SESSION['setup']['permissions'])) {
                     include $file_php;
                 }
                 ## Add version history record if less than current as its added at the end
-                if (version_compare(CC_VERSION, '4.0.0') >= 0 && !$db->select('CubeCart_history', false, array('version' => $version))) {
-                    $db->insert('CubeCart_history', array('version' => $version, 'time' => time()));
+                if (version_compare(CC_VERSION, '4.0.0') >= 0 && !$db->select('CubeCart_history', false, ['version' => $version])) {
+                    $db->insert('CubeCart_history', ['version' => $version, 'time' => time()]);
                 }
                 break;
             }
@@ -245,8 +246,8 @@ if (!isset($_SESSION['setup']['permissions'])) {
             }
 
             ## Set version number
-            if (version_compare(CC_VERSION, '4.0.0') >= 0 && !$GLOBALS['db']->select('CubeCart_history', false, array('version' => CC_VERSION))) {
-                $GLOBALS['db']->insert('CubeCart_history', array('version' => CC_VERSION, 'time' => time()));
+            if (version_compare(CC_VERSION, '4.0.0') >= 0 && !$GLOBALS['db']->select('CubeCart_history', false, ['version' => CC_VERSION])) {
+                $GLOBALS['db']->insert('CubeCart_history', ['version' => CC_VERSION, 'time' => time()]);
             }
 
             ## Progressive updates completed

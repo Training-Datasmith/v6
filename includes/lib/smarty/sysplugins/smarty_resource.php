@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Resource Plugin
  *
@@ -25,14 +27,14 @@ abstract class Smarty_Resource
      *
      * @var array
      */
-    public static $sysplugins = array(
+    public static $sysplugins = [
         'file'    => 'smarty_internal_resource_file.php',
         'string'  => 'smarty_internal_resource_string.php',
         'extends' => 'smarty_internal_resource_extends.php',
         'stream'  => 'smarty_internal_resource_stream.php',
         'eval'    => 'smarty_internal_resource_eval.php',
-        'php'     => 'smarty_internal_resource_php.php'
-    );
+        'php'     => 'smarty_internal_resource_php.php',
+    ];
 
     /**
      * Source is bypassing compiler
@@ -87,10 +89,10 @@ abstract class Smarty_Resource
             } else {
                 $smarty->registerResource(
                     $type,
-                    array(
+                    [
                         "smarty_resource_{$type}_source", "smarty_resource_{$type}_timestamp",
-                        "smarty_resource_{$type}_secure", "smarty_resource_{$type}_trusted"
-                    )
+                        "smarty_resource_{$type}_secure", "smarty_resource_{$type}_trusted",
+                    ]
                 );
                 // give it another try, now that the resource is registered properly
                 return self::load($smarty, $type);
@@ -131,7 +133,7 @@ abstract class Smarty_Resource
             $type = $default_resource;
             $name = $resource_name;
         }
-        return array($name, $type);
+        return [$name, $type];
     }
 
     /**

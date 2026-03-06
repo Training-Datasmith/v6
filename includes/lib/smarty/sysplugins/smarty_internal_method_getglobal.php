@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Method GetGlobal
  *
@@ -37,7 +39,7 @@ class Smarty_Internal_Method_GetGlobal
                 return '';
             }
         } else {
-            $_result = array();
+            $_result = [];
             foreach (Smarty::$global_tpl_vars as $key => $var) {
                 $_result[ $key ] = $var->value;
             }

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -20,49 +22,34 @@
  */
 class ACP
 {
-
     /**
      * Hide navigation on the admin screen
-     *
-     * @var bool
      */
-    private $_hide_navigation = false;
+    private bool $_hide_navigation = false;
     /**
      * Navigation
-     *
-     * @var array
      */
-    private $_navigation  = array();
+    private array $_navigation  = [];
     /**
      * Tabs
-     *
-     * @var array
      */
-    private $_tabs    = array();
+    private array $_tabs    = [];
     /**
      * Tab key prefix
-     *
-     * @var string
      */
-    private $_tab_key_prefix    = 'k_';
+    private string $_tab_key_prefix    = 'k_';
     /**
      * Tabs Priority
-     *
-     * @var int
      */
-    private $_tab_priority    = 0;
+    private int $_tab_priority    = 0;
     /**
      * Wiki namespace
-     *
-     * @var string
      */
-    private $_wiki_namespace = 'ACP';
+    private string $_wiki_namespace = 'ACP';
     /**
      * Wiki page
-     *
-     * @var string
      */
-    private $_wiki_page   = null;
+    private ?string $_wiki_page   = null;
 
     /**
      * Class instance
@@ -79,10 +66,8 @@ class ACP
 
     /**
      * Setup the instance (singleton)
-     *
-     * @return ACP
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -99,25 +84,25 @@ class ACP
      * @param string $group
      * @param array $array (name => url)
      */
-    public function addNavItem($group, $array)
+    public function addNavItem($group, $array): void
     {
         if (!empty($array)) {
             foreach ($array as $name => $url) {
                 if (is_array($url)) {
-                    $this->_navigation[$group][] = array(
-                        'name' => strip_tags($name),
+                    $this->_navigation[$group][] = [
+                        'name' => strip_tags((string) $name),
                         'url' => $url['address'],
                         'target' => (isset($url['target']) && !empty($url['target'])) ? $url['target'] : '_self',
                         'id' => (isset($url['id']) && !empty($url['id'])) ? $url['id'] : '',
-                        'icon' => (isset($url['icon']) && !empty($url['icon'])) ? $url['icon'] : ''
-                    );
+                        'icon' => (isset($url['icon']) && !empty($url['icon'])) ? $url['icon'] : '',
+                    ];
                 } else {
-                    $this->_navigation[$group][] = array(
-                        'name' => strip_tags($name),
+                    $this->_navigation[$group][] = [
+                        'name' => strip_tags((string) $name),
                         'url' => $url,
                         'target' => '_self',
-                        'id' => ''
-                    );
+                        'id' => '',
+                    ];
                 }
             }
         }
@@ -131,23 +116,22 @@ class ACP
      * @param string $url
      * @param string $accesskey
      * @param string $notify_count
-     * @return bool
      */
-    public function addTabControl($name, $target = '', $url = null, $accesskey = null, $notify_count = false, $a_target = '_self', $priority = null, $onclick = '')
+    public function addTabControl($name, $target = '', $url = null, $accesskey = null, $notify_count = false, $a_target = '_self', $priority = null, $onclick = ''): bool
     {
-        if (!empty(settype($name,'string'))) {
+        if (!empty(settype($name, 'string'))) {
             $url = (!empty($url) && is_array($url)) ? currentPage(null, $url) : $url;
             $url = is_null($url) ? '' : preg_replace('/(#.*)$/i', '', $url);
             $priority = $this->_setTabPriority($priority);
-            $this->_tabs[$this->_tab_key_prefix.$priority] = array(
+            $this->_tabs[$this->_tab_key_prefix.$priority] = [
                 'name'  => $name,
                 'target' => $target,
                 'url'  => $url,
                 'accesskey' => $accesskey,
                 'notify' => number_format((float)$notify_count),
                 'a_target' => $a_target,
-                'onclick' => $onclick
-            );
+                'onclick' => $onclick,
+            ];
             return true;
         }
         return false;
@@ -158,37 +142,37 @@ class ACP
      *
      * @param string $message
      */
-    public function adminLog($message)
+    public function adminLog($message): void
     {
         $item_id = null;
         $item_type = null;
-        if(isset($_REQUEST['order_id'])) {
+        if (isset($_REQUEST['order_id'])) {
             $item_id = $_REQUEST['order_id'];
             $item_type = 'oid';
         }
-        if(isset($_REQUEST['product_id'])) {
+        if (isset($_REQUEST['product_id'])) {
             $item_id = $_REQUEST['product_id'];
             $item_type = 'prod';
         }
-        if(isset($_REQUEST['cat_id'])) {
+        if (isset($_REQUEST['cat_id'])) {
             $item_id = $_REQUEST['cat_id'];
             $item_type = 'cat';
         }
-        if(isset($_REQUEST['doc_id'])) {
+        if (isset($_REQUEST['doc_id'])) {
             $item_id = $_REQUEST['doc_id'];
             $item_type = 'doc';
         }
 
         if (!empty($message)) {
-            $record = array(
+            $record = [
                 'admin_id'  => Admin::getInstance()->getId(),
                 'ip_address' => get_ip_address(),
                 'time'   => time(),
                 'description' => $message,
                 'item_id' => $item_id,
-                'item_type' => $item_type
-            );
-            
+                'item_type' => $item_type,
+            ];
+
             $log_days = $GLOBALS['config']->get('config', 'r_admin_activity');
             if (ctype_digit((string)$log_days) &&  $log_days > 0) {
                 $GLOBALS['db']->insert('CubeCart_admin_log', $record);
@@ -208,11 +192,11 @@ class ACP
      * @param int $i
      * @return data/false
      */
-    public function getCategoryPath($cat_id, $i = 0)
+    public function getCategoryPath($cat_id, $i = 0): array|false
     {
         // get the path for a single category
         if (is_int($cat_id)) {
-            if (($parent = $GLOBALS['db']->select('CubeCart_category', array('cat_id', 'cat_parent_id', 'cat_name'), array('cat_id' => $cat_id))) !== false) {
+            if (($parent = $GLOBALS['db']->select('CubeCart_category', ['cat_id', 'cat_parent_id', 'cat_name'], ['cat_id' => $cat_id])) !== false) {
                 $data[$i] = $parent[0];
                 if (((int)$parent[0]['cat_parent_id']) != 0) {
                     ++$i;
@@ -230,7 +214,7 @@ class ACP
      *
      * @param bool $status
      */
-    public function hideNavigation($status = false)
+    public function hideNavigation($status = false): void
     {
         $this->_hide_navigation = (bool)$status;
     }
@@ -238,27 +222,22 @@ class ACP
     /**
      * Import admin node
      *
-     * @param string $request
      * @param string $node
-     * @return string
      */
-    public function importNode($request, $node = false)
+    public function importNode(string $request, $node = false): string
     {
         $base = CC_ROOT_DIR.'/'.$GLOBALS['config']->get('config', 'adminFolder').'/'.'sources'.'/';
         $node = (!empty($node)) ? $node : 'index';
 
-        $source = implode('.', array($request, $node, 'inc.php'));
+        $source = implode('.', [$request, $node, 'inc.php']);
 
         if (file_exists($base.$source)) {
             return $base.$source;
-        } else {
-            if (!is_dir($base.$request) && file_exists($base.$request.'inc.php')) {
-                $source = CC_ROOT_DIR.'/'.$GLOBALS['config']->get('config', 'adminFolder').'/'.'sources/'.$request.'.inc.php';
-            } else {
-                $source = CC_ROOT_DIR.'/'.$GLOBALS['config']->get('config', 'adminFolder').'/'.'sources/'.$request.'/'.$node.'.inc.php';
-            }
-            return $source;
         }
+        if (!is_dir($base.$request) && file_exists($base.$request.'inc.php')) {
+            return CC_ROOT_DIR.'/'.$GLOBALS['config']->get('config', 'adminFolder').'/'.'sources/'.$request.'.inc.php';
+        }
+        return CC_ROOT_DIR.'/'.$GLOBALS['config']->get('config', 'adminFolder').'/'.'sources/'.$request.'/'.$node.'.inc.php';
     }
 
     /**
@@ -267,52 +246,51 @@ class ACP
      * @param string $list_name
      * @param int $requested_amount
      * @param int $default_amount
-     * @return int
      */
-    public function itemsPerPage($list_name, $requested_amount = 0, $default_amount = 25) {
+    public function itemsPerPage($list_name, $requested_amount = 0, $default_amount = 25): int
+    {
         $cookie_name = 'cc_rs_limit';
-        if(isset($_COOKIE[$cookie_name])) {
-            $rs_limit = json_decode(html_entity_decode($_COOKIE[$cookie_name],ENT_QUOTES), true);
-            if(!is_array($rs_limit)) {
-                $rs_limit = array();
+        if (isset($_COOKIE[$cookie_name])) {
+            $rs_limit = json_decode(html_entity_decode((string) $_COOKIE[$cookie_name], ENT_QUOTES), true);
+            if (!is_array($rs_limit)) {
+                $rs_limit = [];
             }
         } else {
-            $rs_limit = array();
+            $rs_limit = [];
         }
-        if($requested_amount>0) {
-            $cookie_value = (count($rs_limit) > 0) ? array_merge($rs_limit, array((string)$list_name => (int)$requested_amount)) : array((string)$list_name => (int)$requested_amount);
-            $GLOBALS['session']->set_cookie($cookie_name, json_encode($cookie_value), time() + (3600*24*30));
+        if ($requested_amount > 0) {
+            $cookie_value = (count($rs_limit) > 0) ? array_merge($rs_limit, [(string)$list_name => (int)$requested_amount]) : [(string)$list_name => (int)$requested_amount];
+            $GLOBALS['session']->set_cookie($cookie_name, json_encode($cookie_value), time() + (3600 * 24 * 30));
             return (int)$requested_amount;
-        } else if(is_array($rs_limit) && isset($rs_limit[$list_name]) && $rs_limit[$list_name]>0) {
-            return (int)$rs_limit[$list_name];
-        } else {
-            return (int)$default_amount;
         }
+        if (is_array($rs_limit) && isset($rs_limit[$list_name]) && $rs_limit[$list_name] > 0) {
+            return (int)$rs_limit[$list_name];
+        }
+        return (int)$default_amount;
     }
-    
+
     /**
      * Get latest release URL
      *
      * @return string
      */
-    public function newFeatureRedir() {
-        $li = '';
+    public function newFeatureRedir()
+    {
         $release_notes_path = CC_ROOT_DIR.'/'.$GLOBALS['config']->get('config', 'adminFolder').'/sources/release_notes/*.inc.php';
         $list = glob($release_notes_path);
         arsort($list, SORT_NATURAL);
         foreach ($list as $filename) {
             $version = basename($filename);
-            $version = rtrim($version,'.inc.php');
+            $version = rtrim($version, '.inc.php');
             return '?_g=release_notes&node='.$version;
         }
     }
-    
+
     /**
      * Get release notes
-     *
-     * @return string
      */
-    public function newFeatures($version, $features, $total, $notes = '', $security = array()) {
+    public function newFeatures($version, $features, $total, $notes = '', $security = []): string
+    {
         $li = '';
         $release_notes_path = CC_ROOT_DIR.'/'.$GLOBALS['config']->get('config', 'adminFolder').'/sources/release_notes/*.inc.php';
         $options = '';
@@ -320,28 +298,28 @@ class ACP
         arsort($list, SORT_NATURAL);
         foreach ($list as $filename) {
             $version = basename($filename);
-            $version = rtrim($version,'.inc.php');
+            $version = rtrim($version, '.inc.php');
             $selected = $_GET['node'] == $version ? ' selected="selected"' : '';
             $options .= '<option value="?_g=release_notes&node='.$version.'"'.$selected.'>'.$version.'</option>';
         }
-        $switcher = "<select name=\"version\" class=\"select_url\">".$options."</select>";
-        if(!empty($features)) {
-            foreach($features as $id => $feature) {
+        $switcher = '<select name="version" class="select_url">'.$options.'</select>';
+        if (!empty($features)) {
+            foreach ($features as $id => $feature) {
                 $security_class = in_array($id, $security) ? 'security' : '' ;
-                if (preg_match('/^GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}$/i', $id)) {
+                if (preg_match('/^GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}$/i', (string) $id)) {
                     $url = 'https://github.com/cubecart/v6/security/advisories/'.$id;
                     $security_class = 'security';
                 } else {
                     $url = 'https://github.com/cubecart/v6/issues/'.$id;
                     $id = '#'.$id;
                 }
-                
+
                 $li .= "<tr><td class=\"text-left $security_class\" valign=\"top\"><a href=\"$url\" target=\"_blank\">$id</a></td><td valign=\"top\">$feature</td></tr>";
             }
         } else {
-            $li = "<tr><td  colspan=\"2\">This is a maintenance release with no new features of any significance.</td></tr>";
+            $li = '<tr><td  colspan="2">This is a maintenance release with no new features of any significance.</td></tr>';
         }
-        $page_content = <<<END
+        return <<<END
         <div id="general" class="tab_content">
             <h3 style="clear: right;">CubeCart {$_GET['node']}</h3>
             <p>The table below shows changes in this version.</p>
@@ -355,16 +333,14 @@ class ACP
             </table>
         </div>
         END;
-        return $page_content;
     }
 
     /**
      * Remove tab control
      *
      * @param string $name
-     * @return self
      */
-    public function removeTabControl($name)
+    public function removeTabControl($name): static
     {
         if (!empty($name)) {
             foreach ($this->_tabs as $key => $tab) {
@@ -379,17 +355,17 @@ class ACP
     /**
      * Setup admin data
      */
-    public function setTemplate()
+    public function setTemplate(): void
     {
         if (Admin::getInstance()->is()) {
-            $full_name = trim(Admin::getInstance()->get('name'));
+            $full_name = trim((string) Admin::getInstance()->get('name'));
             $names = explode(' ', $full_name);
 
             $GLOBALS['smarty']->assign('ADMIN_USER_FIRST_NAME', $names[0]);
             $GLOBALS['smarty']->assign('ADMIN_USER', $full_name);
             $GLOBALS['smarty']->assign('ADMIN_UID', Admin::getInstance()->getId());
 
-            if (Admin::getInstance()->get('tour_shown')=='0') {
+            if (Admin::getInstance()->get('tour_shown') == '0') {
                 $GLOBALS['smarty']->assign('TOUR_AUTO_START', 'true');
             } else {
                 $GLOBALS['smarty']->assign('TOUR_AUTO_START', 'false');
@@ -403,7 +379,7 @@ class ACP
      *
      * @param string $message
      */
-    public function errorMessage($message, $show_once = false, $display = true)
+    public function errorMessage($message, $show_once = false, $display = true): void
     {
         $this->setACPWarning($message, $show_once, $display);
     }
@@ -414,7 +390,7 @@ class ACP
      *
      * @param string $message
      */
-    public function successMessage($message, $log = true)
+    public function successMessage($message, $log = true): void
     {
         $this->setACPNotify($message, $log);
     }
@@ -425,11 +401,11 @@ class ACP
      *
      * @param string $message
      */
-    public function setACPNotify($message, $log = true)
+    public function setACPNotify($message, $log = true): void
     {
         $GLOBALS['gui']->setNotify($message);
         // Add record to admin log
-        if($log) {
+        if ($log) {
             $this->adminLog($message);
         }
     }
@@ -440,22 +416,22 @@ class ACP
      *
      * @param string $message
      */
-    public function setACPWarning($message, $show_once = false, $display = true)
+    public function setACPWarning($message, $show_once = false, $display = true): void
     {
         if (empty($message)) {
             return;
         }
         // Log message and don't show again to current staff member
         if ($show_once) {
-            if (!$GLOBALS['db']->select('CubeCart_admin_error_log', 'log_id', array('message' => $message, 'admin_id' => Admin::getInstance()->get('admin_id')))) {
+            if (!$GLOBALS['db']->select('CubeCart_admin_error_log', 'log_id', ['message' => $message, 'admin_id' => Admin::getInstance()->get('admin_id')])) {
                 $log_days = $GLOBALS['config']->get('config', 'r_admin_error');
                 if (ctype_digit((string)$log_days) &&  $log_days > 0) {
-                    $GLOBALS['db']->insert('CubeCart_admin_error_log', array('message' => $message, 'admin_id' => Admin::getInstance()->get('admin_id'), 'time' => time()));
+                    $GLOBALS['db']->insert('CubeCart_admin_error_log', ['message' => $message, 'admin_id' => Admin::getInstance()->get('admin_id'), 'time' => time()]);
                     if (executionChance(10)) { // 10% probability
                         $GLOBALS['db']->delete('CubeCart_admin_error_log', 'time < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL '.$log_days.' DAY))', 500);
                     }
                 } elseif (empty($log_days) || !$log_days) {
-                    $GLOBALS['db']->insert('CubeCart_admin_error_log', array('message' => $message, 'admin_id' => Admin::getInstance()->get('admin_id'), 'time' => time()));
+                    $GLOBALS['db']->insert('CubeCart_admin_error_log', ['message' => $message, 'admin_id' => Admin::getInstance()->get('admin_id'), 'time' => time()]);
                 }
 
                 if ($display) {
@@ -470,13 +446,13 @@ class ACP
     /**
      * Show help
      */
-    public function showHelp()
+    public function showHelp(): void
     {
         if (Admin::getInstance()->is()) {
             if (empty($this->_wiki_page)) {
                 if (isset($_GET['_g']) && !empty($_GET['_g'])) {
                     $pages[] = $_GET['_g'];
-                    if (isset($_GET['node']) && !empty($_GET['node']) && strtolower($_GET['node']) != 'index') {
+                    if (isset($_GET['node']) && !empty($_GET['node']) && strtolower((string) $_GET['node']) != 'index') {
                         $pages[] = $_GET['node'];
                     }
                     if (isset($_GET['action']) && !empty($_GET['action'])) {
@@ -496,15 +472,13 @@ class ACP
 
     /**
      * Show admin tabs
-     *
-     * @return bool
      */
-    public function showTabs()
+    public function showTabs(): bool
     {
         if (Admin::getInstance()->is() && !empty($this->_tabs) && is_array($this->_tabs)) {
             ksort($this->_tabs);
             foreach ($this->_tabs as $tab) {
-                $tab['name'] = ucfirst($tab['name']);
+                $tab['name'] = ucfirst((string) $tab['name']);
                 $tab['tab_id'] = empty($tab['target']) ? '' : 'tab_'.str_replace(' ', '_', $tab['target']);
                 $tab['target'] = (!empty($tab['target'])) ? '#'.$tab['target'] : '';
                 $tabs[] = $tab;
@@ -520,41 +494,39 @@ class ACP
 
     /**
      * Show admin navigation
-     *
-     * @return bool
      */
-    public function showNavigation()
+    public function showNavigation(): bool
     {
         if (Admin::getInstance()->is() && is_array($this->_navigation) && !$this->_hide_navigation) {
             //Try cache first
             $admin_session_language = Admin::getInstance()->get('language');
             $GLOBALS['smarty']->assign('val_admin_lang', $admin_session_language);
             if (($navigation = $GLOBALS['cache']->read('acp.showNavigation.'.$admin_session_language)) === false) {
-                $navigation = array();
+                $navigation = [];
                 foreach ($this->_navigation as $group => $menu) {
                     $title = $group;
                     $group = str_replace(' ', '_', $group);
-                    
+
                     if (isset($_COOKIE['cc_nav_'.$group])) {
                         $visible = $_COOKIE['cc_nav_'.$group];
                     } else {
                         $visible = 'true';
                     }
 
-                    $item = array(
+                    $item = [
                         'title' => $title,
                         'group' => $group,
-                        'visible' => $visible
-                    );
-                    
+                        'visible' => $visible,
+                    ];
+
                     foreach ($menu as $submenu) {
-                        $item['members'][] = array(
-                            'title' => ucwords($submenu['name']),
+                        $item['members'][] = [
+                            'title' => ucwords((string) $submenu['name']),
                             'url' => $submenu['url'],
-                            'target' => isset($submenu['target']) ? $submenu['target'] : '',
-                            'id' => isset($submenu['id']) ? $submenu['id'] : '',
-                            'icon' => isset($submenu['icon']) ? $submenu['icon'] : ''
-                        );
+                            'target' => $submenu['target'] ?? '',
+                            'id' => $submenu['id'] ?? '',
+                            'icon' => $submenu['icon'] ?? '',
+                        ];
                     }
                     $navigation[] = $item;
                 }
@@ -572,7 +544,7 @@ class ACP
      * @param string $ns
      * @param string $page
      */
-    public function wiki($ns = null, $page = null)
+    public function wiki($ns = null, $page = null): void
     {
         $this->wikiNamespace($ns);
         $this->wikiPage($page);
@@ -583,7 +555,7 @@ class ACP
      *
      * @param string $ns
      */
-    public function wikiNamespace($ns)
+    public function wikiNamespace($ns): void
     {
         if (!empty($ns)) {
             $this->_wiki_namespace = ucfirst($ns);
@@ -595,7 +567,7 @@ class ACP
      *
      * @param string $page
      */
-    public function wikiPage($page = null)
+    public function wikiPage($page = null): void
     {
         $this->_wiki_page = (!empty($page)) ? ucwords($page) : 'Index';
     }
@@ -609,17 +581,15 @@ class ACP
      */
     private function _setTabPriority($priority = null)
     {
-        if ($priority>0) {
+        if ($priority > 0) {
             if (isset($this->_tabs[$this->_tab_key_prefix.$priority])) {
                 $priority += 0.01;
                 return $this->_setTabPriority($priority);
-            } else {
-                return $priority;
             }
-        } else {
-            $priority = $this->_tab_priority;
-            $this->_tab_priority++;
             return $priority;
         }
+        $priority = $this->_tab_priority;
+        $this->_tab_priority++;
+        return $priority;
     }
 }

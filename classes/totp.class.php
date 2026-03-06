@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -17,9 +19,9 @@
  */
 class TOTP
 {
-    const DIGITS  = 6;
-    const PERIOD  = 30;
-    const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    public const DIGITS  = 6;
+    public const PERIOD  = 30;
+    public const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
     /**
      * Generate a random base32-encoded secret (20 bytes = 160-bit)
@@ -38,7 +40,7 @@ class TOTP
      * @param int    $offset  time step offset (0 = now, -1 = previous step, 1 = next step)
      * @return string  6-digit code, zero-padded
      */
-    public static function getCode($secret, $offset = 0)
+    public static function getCode($secret, $offset = 0): string
     {
         $counter = floor(time() / self::PERIOD) + (int)$offset;
         $key     = self::base32Decode($secret);
@@ -47,9 +49,9 @@ class TOTP
         $ofs     = ord($hash[19]) & 0x0f;
         $code    = (
             (ord($hash[$ofs])   & 0x7f) << 24 |
-            (ord($hash[$ofs+1]) & 0xff) << 16 |
-            (ord($hash[$ofs+2]) & 0xff) <<  8 |
-            (ord($hash[$ofs+3]) & 0xff)
+            (ord($hash[$ofs + 1]) & 0xff) << 16 |
+            (ord($hash[$ofs + 2]) & 0xff) <<  8 |
+            (ord($hash[$ofs + 3]) & 0xff)
         ) % 1000000;
         return str_pad((string)$code, self::DIGITS, '0', STR_PAD_LEFT);
     }
@@ -59,12 +61,11 @@ class TOTP
      *
      * @param string $secret  base32-encoded secret
      * @param string $code    code submitted by the user
-     * @return bool
      */
-    public static function verifyCode($secret, $code)
+    public static function verifyCode($secret, $code): bool
     {
         $code = preg_replace('/\s+/', '', (string)$code);
-        if (strlen($code) !== self::DIGITS || !ctype_digit($code)) {
+        if (strlen((string) $code) !== self::DIGITS || !ctype_digit((string) $code)) {
             return false;
         }
         foreach ([-1, 0, 1] as $offset) {
@@ -81,9 +82,8 @@ class TOTP
      * @param string $secret  base32-encoded secret
      * @param string $label   account label (e.g. admin email)
      * @param string $issuer  issuer name (e.g. store name)
-     * @return string
      */
-    public static function otpauthURI($secret, $label, $issuer)
+    public static function otpauthURI($secret, $label, $issuer): string
     {
         return 'otpauth://totp/' . rawurlencode($label)
             . '?secret='  . rawurlencode($secret)
@@ -95,9 +95,8 @@ class TOTP
      * Encode raw bytes to base32 string
      *
      * @param string $bytes  raw binary string
-     * @return string
      */
-    public static function base32Encode($bytes)
+    public static function base32Encode($bytes): string
     {
         $alphabet = self::ALPHABET;
         $output   = '';
@@ -124,10 +123,10 @@ class TOTP
      * @param string $str  base32-encoded string
      * @return string  raw binary string
      */
-    public static function base32Decode($str)
+    public static function base32Decode($str): string
     {
         $alphabet = self::ALPHABET;
-        $str      = strtoupper(preg_replace('/[^A-Z2-7]/i', '', $str));
+        $str      = strtoupper((string) preg_replace('/[^A-Z2-7]/i', '', $str));
         $output   = '';
         $v        = 0;
         $vbits    = 0;

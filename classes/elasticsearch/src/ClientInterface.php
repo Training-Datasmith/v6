@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -10,7 +11,7 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Elastic\Elasticsearch;
 
@@ -32,9 +33,9 @@ interface ClientInterface
      */
     public function getLogger(): LoggerInterface;
 
-     /**
-     * Set the asyncronous HTTP request
-     */
+    /**
+    * Set the asyncronous HTTP request
+    */
     public function setAsync(bool $async): self;
 
     /**
@@ -52,20 +53,20 @@ interface ClientInterface
      */
     public function getElasticMetaHeader(): bool;
 
-     /**
-     * Enable or disable the response Exception
-     */
+    /**
+    * Enable or disable the response Exception
+    */
     public function setResponseException(bool $active): self;
 
-     /**
-     * Get the status of response Exception
-     */
+    /**
+    * Get the status of response Exception
+    */
     public function getResponseException(): bool;
 
     /**
      * Send the HTTP request using the Elastic Transport.
      * It manages syncronous and asyncronus requests using Client::getAsync()
-     * 
+     *
      * @return Elasticsearch|Promise
      */
     public function sendRequest(RequestInterface $request);

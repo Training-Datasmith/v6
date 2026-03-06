@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin CacheResource File
  *
@@ -34,16 +36,16 @@ class Smarty_Internal_CacheResource_File extends Smarty_CacheResource
         $cached->filepath = $smarty->getCacheDir();
         if (isset($_template->cache_id)) {
             $cached->filepath .= preg_replace(
-                                     array(
+                [
                                          '![^\w|]+!',
-                                         '![|]+!'
-                                     ),
-                                     array(
+                                         '![|]+!',
+                                     ],
+                [
                                          '_',
-                                         $_compile_dir_sep
-                                     ),
-                                     $_template->cache_id
-                                 ) . $_compile_dir_sep;
+                                         $_compile_dir_sep,
+                                     ],
+                $_template->cache_id
+            ) . $_compile_dir_sep;
         }
         if (isset($_template->compile_id)) {
             $cached->filepath .= preg_replace('![^\w]+!', '_', $_template->compile_id) . $_compile_dir_sep;
@@ -120,10 +122,10 @@ class Smarty_Internal_CacheResource_File extends Smarty_CacheResource
     public function writeCachedContent(Smarty_Internal_Template $_template, $content)
     {
         if ($_template->smarty->ext->_writeFile->writeFile(
-                $_template->cached->filepath,
-                $content,
-                $_template->smarty
-            ) === true
+            $_template->cached->filepath,
+            $content,
+            $_template->smarty
+        ) === true
         ) {
             if (function_exists('opcache_invalidate')
                 && (!function_exists('ini_get') || strlen(ini_get('opcache.restrict_api'))) < 1

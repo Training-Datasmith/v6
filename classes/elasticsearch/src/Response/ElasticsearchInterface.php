@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -10,7 +11,7 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Elastic\Elasticsearch\Response;
 
@@ -19,7 +20,7 @@ use Psr\Http\Message\ResponseInterface;
 interface ElasticsearchInterface
 {
     /**
-     * Set the HTTP PSR-7 response 
+     * Set the HTTP PSR-7 response
      */
     public function setResponse(ResponseInterface $response, bool $throwException = true): void;
 }

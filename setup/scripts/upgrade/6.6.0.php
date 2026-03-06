@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Migrate CubeCart_config from base64-JSON blob storage to NVP (Name-Value Pair) rows.
  * The SQL upgrade has already renamed the old table to CubeCart_config_legacy
@@ -43,20 +45,20 @@ if ($legacy_rows) {
                 continue;
             }
             $encoded_value = is_array($value) ? json_encode($value) : (string)$value;
-            $db->insert('CubeCart_config', array(
+            $db->insert('CubeCart_config', [
                 'name'         => $name,
                 'config_key'   => $key,
-                'config_value' => $encoded_value
-            ));
+                'config_value' => $encoded_value,
+            ]);
         }
     }
 }
 
 // Drop the legacy table
-$db->misc("DROP TABLE IF EXISTS `".$glob['dbprefix']."CubeCart_config_legacy`");
+$db->misc('DROP TABLE IF EXISTS `'.$glob['dbprefix'].'CubeCart_config_legacy`');
 
 // Remove discontinued cache backends (memcache and xcache)
-if (isset($glob['cache']) && in_array($glob['cache'], array('memcache', 'xcache'))) {
+if (isset($glob['cache']) && in_array($glob['cache'], ['memcache', 'xcache'])) {
     $glob['cache'] = 'file';
     $contents = file_get_contents($global_file);
     if ($contents !== false) {
@@ -80,8 +82,12 @@ if (isset($glob['redis_parameters'])) {
         $host = $m[1];
         $port = (int)$m[2];
     } elseif (is_array($params)) {
-        if (isset($params['host'])) $host = $params['host'];
-        if (isset($params['port'])) $port = (int)$params['port'];
+        if (isset($params['host'])) {
+            $host = $params['host'];
+        }
+        if (isset($params['port'])) {
+            $port = (int)$params['port'];
+        }
     }
     $contents = file_get_contents($global_file);
     if ($contents !== false) {
@@ -157,7 +163,9 @@ if (is_array($languages) && !empty($languages)) {
                     for ($i = 0; $i < $zip->numFiles; $i++) {
                         $entry = $zip->getNameIndex($i);
                         $file_data = $zip->getFromIndex($i);
-                        if ($file_data === false) continue;
+                        if ($file_data === false) {
+                            continue;
+                        }
                         if (preg_match('/\.png$/i', $entry)) {
                             file_put_contents(CC_LANGUAGE_DIR.'flags/'.basename($entry), $file_data);
                         } else {

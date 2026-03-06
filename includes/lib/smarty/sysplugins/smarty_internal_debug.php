@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Debug
  * Class to collect data for the Smarty Debugging Console
@@ -21,14 +23,14 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
      *
      * @var array
      */
-    public $template_data = array();
+    public $template_data = [];
 
     /**
      * List of uid's which shall be ignored
      *
      * @var array
      */
-    public $ignore_uid = array();
+    public $ignore_uid = [];
 
     /**
      * Index of display() and fetch() calls
@@ -81,7 +83,7 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
      */
     public function start_compile(Smarty_Internal_Template $template)
     {
-        static $_is_stringy = array('string' => true, 'eval' => true);
+        static $_is_stringy = ['string' => true, 'eval' => true];
         if (!empty($template->compiler->trace_uid)) {
             $key = $template->compiler->trace_uid;
             if (!isset($this->template_data[ $this->index ][ $key ])) {
@@ -222,11 +224,11 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
         $debObj->error_reporting = E_ALL & ~E_NOTICE;
         $debObj->debug_tpl =
             isset($smarty->debug_tpl) ? $smarty->debug_tpl : 'file:' . __DIR__ . '/../debug.tpl';
-        $debObj->registered_plugins = array();
-        $debObj->registered_resources = array();
-        $debObj->registered_filters = array();
-        $debObj->autoload_filters = array();
-        $debObj->default_modifiers = array();
+        $debObj->registered_plugins = [];
+        $debObj->registered_resources = [];
+        $debObj->registered_filters = [];
+        $debObj->autoload_filters = [];
+        $debObj->default_modifiers = [];
         $debObj->escape_html = true;
         $debObj->caching = Smarty::CACHING_OFF;
         $debObj->compile_id = null;
@@ -270,7 +272,7 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
      */
     public function get_debug_vars($obj)
     {
-        $config_vars = array();
+        $config_vars = [];
         foreach ($obj->config_vars as $key => $var) {
             $config_vars[ $key ][ 'value' ] = $var;
             if ($obj->_isTplObj()) {
@@ -281,7 +283,7 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
                 $config_vars[ $key ][ 'scope' ] = 'Smarty object';
             }
         }
-        $tpl_vars = array();
+        $tpl_vars = [];
         foreach ($obj->tpl_vars as $key => $var) {
             foreach ($var as $varkey => $varvalue) {
                 if ($varkey === 'value') {
@@ -342,7 +344,7 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
                 }
             }
         }
-        return (object)array('tpl_vars' => $tpl_vars, 'config_vars' => $config_vars);
+        return (object)['tpl_vars' => $tpl_vars, 'config_vars' => $config_vars];
     }
 
     /**
@@ -354,7 +356,7 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
      */
     private function get_key(Smarty_Internal_Template $template)
     {
-        static $_is_stringy = array('string' => true, 'eval' => true);
+        static $_is_stringy = ['string' => true, 'eval' => true];
         // calculate Uid if not already done
         if ($template->source->uid === '') {
             $template->source->filepath;

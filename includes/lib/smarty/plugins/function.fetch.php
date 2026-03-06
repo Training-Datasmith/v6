@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -187,7 +189,7 @@ function smarty_function_fetch($params, $template)
                 }
             }
         } else {
-            trigger_error("[plugin fetch] unable to parse URL, check syntax", E_USER_NOTICE);
+            trigger_error('[plugin fetch] unable to parse URL, check syntax', E_USER_NOTICE);
             return;
         }
     } else {

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -11,10 +13,9 @@
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
 $GLOBALS['main']->addTabControl($lang['settings']['release_notes'], 'general');
-$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(array('node')), true);
-$features = array( 
-	'3570' => 'Security: Arbitrary File Upload Leads to RCE'
-);
-$security = array(3570);
+$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(['node']), true);
+$features = [
+    '3570' => 'Security: Arbitrary File Upload Leads to RCE',
+];
+$security = [3570];
 $page_content = $GLOBALS['main']->newFeatures($_GET['node'], $features, 24, '', $security);
-?>

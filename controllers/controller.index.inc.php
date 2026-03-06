@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -23,7 +25,7 @@ $GLOBALS['db'] = Database::getInstance($glob);
 // Initialise Config class
 $GLOBALS['config'] = Config::getInstance($glob);
 $time_zone = $GLOBALS['config']->get('config', 'time_zone');
-if(!empty($time_zone)) {
+if (!empty($time_zone)) {
     $debug = (bool)$GLOBALS['config']->get('config', 'debug');
     $GLOBALS['db']->misc("SET @@time_zone = '".$time_zone."'", false, $debug);
     date_default_timezone_set($time_zone);
@@ -36,7 +38,7 @@ $GLOBALS['debug'] = Debug::getInstance();
 //Initialize sessions
 $GLOBALS['session'] = Session::getInstance();
 //Check security token
-if ($GLOBALS['config']->get('config', 'csrf')=='1') {
+if ($GLOBALS['config']->get('config', 'csrf') == '1') {
     Sanitize::checkToken();
 }
 //Initialize Smarty
@@ -51,7 +53,7 @@ $GLOBALS['smarty']->debugging = false;
 if (!(bool)$GLOBALS['config']->get('config', 'debug')) {
     define('HTML_MINIFY_URL_ENABLED', false);
     include(CC_INCLUDES_DIR.'lib/smarty/filters/HTMLMinify.smarty.php');
-    $GLOBALS['smarty']->registerFilter("output", "minify_html");
+    $GLOBALS['smarty']->registerFilter('output', 'minify_html');
 }
 //Initialize language
 $GLOBALS['language'] = Language::getInstance();
@@ -91,8 +93,7 @@ $GLOBALS['language']->setTemplate();
 $GLOBALS['cubecart']->loadPage();
 $GLOBALS['gui']->displayCommon();
 
-$checkout_pages = array('confirm', 'basket', 'gateway', 'cart','checkout');
-
+$checkout_pages = ['confirm', 'basket', 'gateway', 'cart','checkout'];
 
 $global_template_file = (isset($_GET['_a']) && in_array($_GET['_a'], $checkout_pages) && file_exists(CC_ROOT_DIR.'/skins/'.$GLOBALS['gui']->getSkin().'/templates/main.checkout.php')) ? 'main.checkout.php' : 'main.php';
 

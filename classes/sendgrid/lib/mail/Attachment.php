@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Attachment object for a /mail/send API call
  */
@@ -68,7 +70,7 @@ class Attachment implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setContent($content)
+    public function setContent($content): void
     {
         Assert::minLength($content, 'content', 1);
 
@@ -96,7 +98,7 @@ class Attachment implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setType($type)
+    public function setType($type): void
     {
         Assert::minLength($type, 'type', 1);
 
@@ -120,7 +122,7 @@ class Attachment implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setFilename($filename)
+    public function setFilename($filename): void
     {
         Assert::string($filename, 'filename');
 
@@ -145,7 +147,7 @@ class Attachment implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setDisposition($disposition)
+    public function setDisposition($disposition): void
     {
         Assert::anyOf($disposition, 'disposition', ['inline', 'attachment']);
 
@@ -169,7 +171,7 @@ class Attachment implements \JsonSerializable
      *                           the file within the body of the email
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setContentID($content_id)
+    public function setContentID($content_id): void
     {
         Assert::string($content_id, 'content_id');
 
@@ -190,11 +192,10 @@ class Attachment implements \JsonSerializable
      *  Verifies whether or not the provided string is a valid base64 string
      *
      * @param $string string The string that has to be checked
-     * @return bool
      */
-    private function isBase64($string)
+    private function isBase64($string): bool
     {
-        $decoded_data = base64_decode($string, true);
+        $decoded_data = base64_decode((string) $string, true);
         $encoded_data = base64_encode($decoded_data);
         if ($encoded_data != $string) {
             return false;
@@ -216,11 +217,9 @@ class Attachment implements \JsonSerializable
                 'type' => $this->getType(),
                 'filename' => $this->getFilename(),
                 'disposition' => $this->getDisposition(),
-                'content_id' => $this->getContentID()
+                'content_id' => $this->getContentID(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (string $value) => $value !== null
         ) ?: null;
     }
 }

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -11,14 +13,14 @@
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
 $GLOBALS['main']->addTabControl($lang['settings']['release_notes'], 'general');
-$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(array('node')), true);
-$features = array( 
-	'3690' => 'GPSR (General Product Safety Regulation) tools',
+$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(['node']), true);
+$features = [
+    '3690' => 'GPSR (General Product Safety Regulation) tools',
     '3815' => 'US Tariffs Integration',
     '2851' => 'Improve print order form layout',
     '3839' => 'Automate dispatch date if not set',
     '3833' => 'Migrate wording from &quot;digital&quot; to &quot;downloadable products&quot;',
-    '3819' => 'Foundation *.js optimisations / refactoring'
-);
-$security = array();
+    '3819' => 'Foundation *.js optimisations / refactoring',
+];
+$security = [];
 $page_content = $GLOBALS['main']->newFeatures($_GET['node'], $features, 20, '', $security);

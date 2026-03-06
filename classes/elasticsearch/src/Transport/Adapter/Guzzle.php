@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -10,12 +11,12 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Elastic\Elasticsearch\Transport\Adapter;
 
 use Elastic\Elasticsearch\Transport\RequestOptions;
-use GuzzleHttp\RequestOptions As GuzzleOptions;
+use GuzzleHttp\RequestOptions as GuzzleOptions;
 use Psr\Http\Client\ClientInterface;
 
 class Guzzle implements AdapterInterface
@@ -38,7 +39,7 @@ class Guzzle implements AdapterInterface
                     $guzzleConfig[GuzzleOptions::VERIFY] = $value;
             }
         }
-        $class = get_class($client);
+        $class = $client::class;
         return new $class(array_merge($clientOptions, $guzzleConfig));
     }
 }

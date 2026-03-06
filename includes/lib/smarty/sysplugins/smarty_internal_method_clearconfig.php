@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Method ClearConfig
  *
@@ -34,7 +36,7 @@ class Smarty_Internal_Method_ClearConfig
         if (isset($name)) {
             unset($data->config_vars[ $name ]);
         } else {
-            $data->config_vars = array();
+            $data->config_vars = [];
         }
         return $data;
     }

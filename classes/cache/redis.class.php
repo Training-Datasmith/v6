@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -24,8 +26,7 @@ require CC_ROOT_DIR.'/classes/cache/cache.class.php';
  */
 class Cache extends Cache_Controler
 {
-
-    private $_redis;
+    private ?\Redis $_redis = null;
 
     ##############################################
 
@@ -43,7 +44,7 @@ class Cache extends Cache_Controler
     {
         global $glob;
 
-        $host = isset($glob['redis_host']) ? $glob['redis_host'] : '127.0.0.1';
+        $host = $glob['redis_host'] ?? '127.0.0.1';
         $port = isset($glob['redis_port']) ? (int)$glob['redis_port'] : 6379;
         $timeout = isset($glob['redis_timeout']) ? (float)$glob['redis_timeout'] : 2.0;
 
@@ -81,7 +82,7 @@ class Cache extends Cache_Controler
      *
      * @return instance
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -112,8 +113,8 @@ class Cache extends Cache_Controler
                 }
             }
             //Reset so subsequent getIDs() fetches fresh from Redis
-            $this->_ids = array();
-            $this->_dupes = array();
+            $this->_ids = [];
+            $this->_dupes = [];
         }
         $this->_clearFileCache();
         return $return;
@@ -123,11 +124,10 @@ class Cache extends Cache_Controler
      * Remove a single item of cache
      *
      * @param string $id Cache identifier
-     * @return bool
      */
-    public function delete($id)
+    public function delete($id): bool
     {
-        $id = shortHash($id, 8, array($this->_empties_id));
+        $id = shortHash($id, 8, [$this->_empties_id]);
         return (bool)$this->_redis->del($this->_makeName($id));
     }
 
@@ -142,7 +142,7 @@ class Cache extends Cache_Controler
         if (!$this->status && !$this->statusException($id)) {
             return false;
         }
-        $id = shortHash($id, 8, array($this->_empties_id));
+        $id = shortHash($id, 8, [$this->_empties_id]);
         return (bool)$this->_redis->exists($this->_makeName($id));
     }
 
@@ -158,8 +158,8 @@ class Cache extends Cache_Controler
             $len = strlen($this->_prefix);
             if (!empty($info) && is_array($info)) {
                 foreach ($info as $item) {
-                    if(substr($item, 0, $len) === $this->_prefix) {
-                        $this->_ids[] = str_replace(array($this->_prefix, $this->_suffix), '', $item);
+                    if (substr((string) $item, 0, $len) === $this->_prefix) {
+                        $this->_ids[] = str_replace([$this->_prefix, $this->_suffix], '', $item);
                     }
                 }
             }
@@ -181,13 +181,13 @@ class Cache extends Cache_Controler
             return false;
         }
 
-        $id = shortHash($id, 8, array($this->_empties_id));
+        $id = shortHash($id, 8, [$this->_empties_id]);
 
-        if ($this->_empties_id!==$id && isset($this->_empties[$id])) {
-            return array('empty' => true, 'data' => $this->_empties[$id]);
+        if ($this->_empties_id !== $id && isset($this->_empties[$id])) {
+            return ['empty' => true, 'data' => $this->_empties[$id]];
         }
 
-        if ($this->_empties_id!==$id && isset($this->_dupes[$id])) {
+        if ($this->_empties_id !== $id && isset($this->_dupes[$id])) {
             return $this->_dupes[$id];
         }
 
@@ -207,10 +207,8 @@ class Cache extends Cache_Controler
 
     /**
      * Calculates the cache usage
-     *
-     * @return string
      */
-    public function usage()
+    public function usage(): string
     {
         $info = $this->_redis->info();
 
@@ -227,21 +225,20 @@ class Cache extends Cache_Controler
         $hit_rate = $total_requests > 0 ? round($hits / $total_requests * 100, 1) : 0;
 
         $output .= "<table border='1' style='border-collapse: collapse;'>";
-        $output .= "<thead><tr><th colspan='2'>Redis Server: ".$info['redis_version']." (".$info['redis_mode'].")</th></tr></thead>";
-        $output .= "<tbody>";
-        $output .= "<tr><td>Uptime</td><td>".$uptime_str."</td></tr>";
-        $output .= "<tr><td>Connected clients</td><td>".$info['connected_clients']."</td></tr>";
-        $output .= "<tr><td>Memory used</td><td>".$info['used_memory_human']."</td></tr>";
-        $output .= "<tr><td>Memory peak</td><td>".$info['used_memory_peak_human']."</td></tr>";
-        $output .= "<tr><td>Total keys</td><td>".($this->_redis->dbSize())."</td></tr>";
-        $output .= "<tr><td>Cache hits</td><td>".$hits." (".$hit_rate."%)</td></tr>";
-        $output .= "<tr><td>Cache misses</td><td>".$misses." (".(100 - $hit_rate)."%)</td></tr>";
-        $output .= "<tr><td>Total commands processed</td><td>".number_format((float)$info['total_commands_processed'])."</td></tr>";
-        $output .= "<tr><td>Evicted keys</td><td>".$info['evicted_keys']."</td></tr>";
-        $output .= "<tr><td>Expired keys</td><td>".$info['expired_keys']."</td></tr>";
-        $output .= "</tbody></table>";
+        $output .= "<thead><tr><th colspan='2'>Redis Server: ".$info['redis_version'].' ('.$info['redis_mode'].')</th></tr></thead>';
+        $output .= '<tbody>';
+        $output .= '<tr><td>Uptime</td><td>'.$uptime_str.'</td></tr>';
+        $output .= '<tr><td>Connected clients</td><td>'.$info['connected_clients'].'</td></tr>';
+        $output .= '<tr><td>Memory used</td><td>'.$info['used_memory_human'].'</td></tr>';
+        $output .= '<tr><td>Memory peak</td><td>'.$info['used_memory_peak_human'].'</td></tr>';
+        $output .= '<tr><td>Total keys</td><td>'.($this->_redis->dbSize()).'</td></tr>';
+        $output .= '<tr><td>Cache hits</td><td>'.$hits.' ('.$hit_rate.'%)</td></tr>';
+        $output .= '<tr><td>Cache misses</td><td>'.$misses.' ('.(100 - $hit_rate).'%)</td></tr>';
+        $output .= '<tr><td>Total commands processed</td><td>'.number_format((float)$info['total_commands_processed']).'</td></tr>';
+        $output .= '<tr><td>Evicted keys</td><td>'.$info['evicted_keys'].'</td></tr>';
+        $output .= '<tr><td>Expired keys</td><td>'.$info['expired_keys'].'</td></tr>';
 
-        return $output;
+        return $output . '</tbody></table>';
     }
 
     /**
@@ -250,17 +247,16 @@ class Cache extends Cache_Controler
      * @param mixed $data Data to write to the file
      * @param string $id Cache identifier
      * @param int $expire Force a time to live
-     * @return bool
      */
-    public function write($data, $id, $expire = '')
+    public function write($data, $id, $expire = ''): bool
     {
         if (!$this->status && !$this->statusException($id)) {
             return false;
         }
 
-        $id = shortHash($id, 8, array($this->_empties_id));
+        $id = shortHash($id, 8, [$this->_empties_id]);
 
-        if ($this->_empties_id!==$id && empty($data)) {
+        if ($this->_empties_id !== $id && empty($data)) {
             if (!isset($this->_empties[$id])) {
                 $this->_empties[$id] = $data;
                 $this->_empties_added = true;
@@ -291,6 +287,6 @@ class Cache extends Cache_Controler
     protected function _getEmpties()
     {
         $this->_setPrefix();
-        $this->_empties = ($this->read($this->_empties_id))?:array();
+        $this->_empties = ($this->read($this->_empties_id)) ?: [];
     }
 }

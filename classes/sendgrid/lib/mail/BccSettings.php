@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the BccSettings object for a /mail/send API call
  */
@@ -44,7 +46,7 @@ class BccSettings implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable)
+    public function setEnable($enable): void
     {
         Assert::boolean($enable, 'enable');
 
@@ -69,7 +71,7 @@ class BccSettings implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEmail($email)
+    public function setEmail($email): void
     {
         Assert::email($email, 'email');
 
@@ -97,11 +99,9 @@ class BccSettings implements \JsonSerializable
         return array_filter(
             [
                 'enable' => $this->getEnable(),
-                'email' => $this->getEmail()
+                'email' => $this->getEmail(),
             ],
-            static function ($value) {
-                return $value !== null;
-            }
+            static fn (bool|string $value) => $value !== null
         ) ?: null;
     }
 }

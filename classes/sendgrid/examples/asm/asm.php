@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -50,7 +52,7 @@ $request_body = json_decode('{
   "id": 103,
   "name": "Item Suggestions"
 }');
-$group_id = "test_url_param";
+$group_id = 'test_url_param';
 
 try {
     $response = $sg->client->asm()->groups()->_($group_id)->patch($request_body);
@@ -65,7 +67,7 @@ try {
 // Get information on a single suppression group. #
 // GET /asm/groups/{group_id} #
 
-$group_id = "test_url_param";
+$group_id = 'test_url_param';
 
 try {
     $response = $sg->client->asm()->groups()->_($group_id)->get();
@@ -80,7 +82,7 @@ try {
 // Delete a suppression group. #
 // DELETE /asm/groups/{group_id} #
 
-$group_id = "test_url_param";
+$group_id = 'test_url_param';
 
 try {
     $response = $sg->client->asm()->groups()->_($group_id)->delete();
@@ -101,7 +103,7 @@ $request_body = json_decode('{
     "test2@example.com"
   ]
 }');
-$group_id = "test_url_param";
+$group_id = 'test_url_param';
 
 try {
     $response = $sg->client->asm()->groups()->_($group_id)->suppressions()->post($request_body);
@@ -116,7 +118,7 @@ try {
 // Retrieve all suppressions for a suppression group #
 // GET /asm/groups/{group_id}/suppressions #
 
-$group_id = "test_url_param";
+$group_id = 'test_url_param';
 
 try {
     $response = $sg->client->asm()->groups()->_($group_id)->suppressions()->get();
@@ -138,7 +140,7 @@ $request_body = json_decode('{
     "doesnotexists@example.com"
   ]
 }');
-$group_id = "test_url_param";
+$group_id = 'test_url_param';
 
 try {
     $response = $sg->client->asm()->groups()->_($group_id)->suppressions()->search()->post($request_body);
@@ -153,8 +155,8 @@ try {
 // Delete a suppression from a suppression group #
 // DELETE /asm/groups/{group_id}/suppressions/{email} #
 
-$group_id = "test_url_param";
-$email = "test_url_param";
+$group_id = 'test_url_param';
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->asm()->groups()->_($group_id)->suppressions()->_($email)->delete();
@@ -168,7 +170,6 @@ try {
 ////////////////////////////////////////////////////
 // Retrieve all suppressions #
 // GET /asm/suppressions #
-
 
 try {
     $response = $sg->client->asm()->suppressions()->get();
@@ -203,7 +204,7 @@ try {
 // Retrieve a Global Suppression #
 // GET /asm/suppressions/global/{email} #
 
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->asm()->suppressions()->global()->_($email)->get();
@@ -218,7 +219,7 @@ try {
 // Delete a Global Suppression #
 // DELETE /asm/suppressions/global/{email} #
 
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->asm()->suppressions()->global()->_($email)->delete();
@@ -233,7 +234,7 @@ try {
 // Retrieve all suppression groups for an email address #
 // GET /asm/suppressions/{email} #
 
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->asm()->suppressions()->_($email)->get();

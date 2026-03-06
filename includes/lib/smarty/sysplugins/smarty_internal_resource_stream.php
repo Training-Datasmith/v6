@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Resource Stream
  * Implements the streams as resource for Smarty template

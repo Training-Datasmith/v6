@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin
  *
@@ -20,7 +22,7 @@ abstract class Smarty_CacheResource
      *
      * @var array
      */
-    protected static $sysplugins = array('file' => 'smarty_internal_cacheresource_file.php',);
+    protected static $sysplugins = ['file' => 'smarty_internal_cacheresource_file.php',];
 
     /**
      * populate Cached Object with meta data from Resource

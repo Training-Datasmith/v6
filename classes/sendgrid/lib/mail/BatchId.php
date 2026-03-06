@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the BatchId object for a /mail/send API call
  */
@@ -39,7 +41,7 @@ class BatchId implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setBatchId($batch_id)
+    public function setBatchId($batch_id): void
     {
         Assert::string($batch_id, 'batch_id');
 

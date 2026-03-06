@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -18,16 +20,16 @@ $contact = $GLOBALS['config']->get('Contact_Form');
 if (isset($_POST['contact']) && is_array($_POST['contact'])) {
     $data = $_POST['contact'];
     if (isset($_POST['department']) && is_array($_POST['department'])) {
-        $i=0;
+        $i = 0;
         foreach ($_POST['department']['name'] as $key => $value) {
             if (empty($value)) {
                 continue;
             }
             ++$i;
-            $data['department'][$i] = array(
+            $data['department'][$i] = [
                 'name' => $value,
                 'email' => $_POST['department']['email'][$key],
-            );
+            ];
         }
     }
     $data['description'] = base64_encode(stripslashes($GLOBALS['RAW']['POST']['contact']['description']));

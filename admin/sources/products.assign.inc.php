@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -18,7 +20,7 @@ Admin::getInstance()->permissions('products', CC_PERM_READ, true);
 $GLOBALS['smarty']->assign('MODE', isset($_GET['prices']) ? 'prices' : 'assign_only');
 
 ### handle post and save
-if (Admin::getInstance()->permissions('products', CC_PERM_EDIT, true) && isset($_POST) && is_array($_POST) && count($_POST)>0) {
+if (Admin::getInstance()->permissions('products', CC_PERM_EDIT, true) && isset($_POST) && is_array($_POST) && count($_POST) > 0) {
 
     ## Assign products to categories
     $products_assigned = false;
@@ -28,23 +30,23 @@ if (Admin::getInstance()->permissions('products', CC_PERM_EDIT, true) && isset($
                 continue;
             }
             //Delete all the category related to comming product id  to fix bug 2840
-            $GLOBALS['db']->delete('CubeCart_category_index', array('product_id' => (int)$product_id));
+            $GLOBALS['db']->delete('CubeCart_category_index', ['product_id' => (int)$product_id]);
             foreach ($_POST['category'] as $category_id) {
                 if (!is_numeric($category_id)) {
                     continue;
                 }
-                if($GLOBALS['db']->insert('CubeCart_category_index', array('cat_id' => (int)$category_id, 'product_id' => (int)$product_id, 'primary' => 1))) {
-                    $GLOBALS['db']->update('CubeCart_inventory', array('cat_id' => (int)$category_id), array('product_id' => (int)$product_id));
+                if ($GLOBALS['db']->insert('CubeCart_category_index', ['cat_id' => (int)$category_id, 'product_id' => (int)$product_id, 'primary' => 1])) {
+                    $GLOBALS['db']->update('CubeCart_inventory', ['cat_id' => (int)$category_id], ['product_id' => (int)$product_id]);
                     $products_assigned = true;
                 }
             }
         }
     }
 
-    if ($_POST['price']['what']=='products') {
+    if ($_POST['price']['what'] == 'products') {
         $product_ids = $_POST['product'];
     } elseif (array_map('ctype_digit', $_POST['category'])) {
-        if ($category_products = $GLOBALS['db']->select('CubeCart_category_index', array('DISTINCT' => 'product_id'), array('cat_id' => $_POST['category']))) {
+        if ($category_products = $GLOBALS['db']->select('CubeCart_category_index', ['DISTINCT' => 'product_id'], ['cat_id' => $_POST['category']])) {
             foreach ($category_products as $category_product) {
                 $product_ids[] = $category_product['product_id'];
             }
@@ -60,12 +62,12 @@ if (Admin::getInstance()->permissions('products', CC_PERM_EDIT, true) && isset($
                     continue;
                 }
 
-                $fields = ($_POST['price']['field'] == 'all') ? array('price', 'sale_price', 'cost_price','quantity_discounts', 'product_options') : array($_POST['price']['field']);
+                $fields = ($_POST['price']['field'] == 'all') ? ['price', 'sale_price', 'cost_price','quantity_discounts', 'product_options'] : [$_POST['price']['field']];
 
                 $action	= $_POST['price']['action'];
                 $value	= $_POST['price']['value'];
                 $shift	= ($action) ? 1 : 0;
-                
+
                 foreach ($fields as $field) {
                     switch ($field) {
                         case 'quantity_discounts':
@@ -73,13 +75,13 @@ if (Admin::getInstance()->permissions('products', CC_PERM_EDIT, true) && isset($
                             $price_column = 'price';
                             $id_column = 'discount_id';
                             $product_id_column = 'product_id';
-                        break;
+                            break;
                         case 'product_options':
                             $table = 'CubeCart_option_assign';
                             $price_column = 'option_price';
                             $id_column = 'assign_id';
                             $product_id_column = 'product';
-                        break;
+                            break;
                         case 'price':
                         case 'sale_price':
                         case 'cost_price':
@@ -87,24 +89,24 @@ if (Admin::getInstance()->permissions('products', CC_PERM_EDIT, true) && isset($
                             $price_column = $field;
                             $id_column = 'product_id';
                             $product_id_column = 'product_id';
-                        break;
+                            break;
                     }
 
-                    if (($price_rows = $GLOBALS['db']->select($table, array($price_column,$id_column), array($product_id_column => (int)$product_id))) !== false) {
+                    if (($price_rows = $GLOBALS['db']->select($table, [$price_column,$id_column], [$product_id_column => (int)$product_id])) !== false) {
                         foreach ($price_rows as $price_row) {
                             $price	= $price_row[$price_column];
                             switch (strtolower($_POST['price']['method'])) {
                                 case 'percent':
-                                    $price	= $price_row[$price_column] * (($value/100)+(int)$shift);
+                                    $price	= $price_row[$price_column] * (($value / 100) + (int)$shift);
                                     break;
                                 default:
                                     if ($action === '2') {
                                         $price	= $value;
                                     } else {
-                                        $price	+= ($action) ? $value : $value-($value*2);
+                                        $price	+= ($action) ? $value : $value - ($value * 2);
                                     }
                             }
-                            if($GLOBALS['db']->update($table, array($price_column => $price), array($id_column => (int)$price_row[$id_column]))) {
+                            if ($GLOBALS['db']->update($table, [$price_column => $price], [$id_column => (int)$price_row[$id_column]])) {
                                 $prices_updated = true;
                             }
                         }
@@ -115,7 +117,7 @@ if (Admin::getInstance()->permissions('products', CC_PERM_EDIT, true) && isset($
     }
     if (isset($_GET['prices']) && $prices_updated) {
         $GLOBALS['main']->successMessage($lang['catalogue']['notify_prices_updates']);
-    } elseif($products_assigned) {
+    } elseif ($products_assigned) {
         $GLOBALS['main']->successMessage($lang['catalogue']['notify_assign_update']);
     } else {
         $GLOBALS['main']->errorMessage($lang['common']['error_no_changes']);
@@ -126,23 +128,22 @@ if (Admin::getInstance()->permissions('products', CC_PERM_EDIT, true) && isset($
 }
 
 if (!isset($_GET['prices'])) {
-    $GLOBALS['main']->addTabControl($lang['catalogue']['title_product_list'], null, currentPage(array('node')));
-    $GLOBALS['main']->addTabControl($lang['catalogue']['product_add'], null, currentPage(array('node'), array('action' => 'add')));
+    $GLOBALS['main']->addTabControl($lang['catalogue']['title_product_list'], null, currentPage(['node']));
+    $GLOBALS['main']->addTabControl($lang['catalogue']['product_add'], null, currentPage(['node'], ['action' => 'add']));
     $GLOBALS['main']->addTabControl($lang['catalogue']['title_category_assigned'], 'assign');
-    $GLOBALS['main']->addTabControl($lang['catalogue']['title_option_set_assign'], null, currentPage(null, array('node' => 'optionsets')));
+    $GLOBALS['main']->addTabControl($lang['catalogue']['title_option_set_assign'], null, currentPage(null, ['node' => 'optionsets']));
     $GLOBALS['gui']->addBreadcrumb($lang['catalogue']['title_category_assigned'], currentPage());
 } else {
     $GLOBALS['main']->addTabControl($lang['catalogue']['title_bulk_prices'], 'assign');
     $GLOBALS['gui']->addBreadcrumb($lang['catalogue']['title_bulk_prices'], currentPage());
 }
 
-
 ## Product list
-if (($products = $GLOBALS['db']->select('CubeCart_inventory', array('product_id', 'name', 'product_code'), false, array('name' => 'ASC'))) !== false) {
+if (($products = $GLOBALS['db']->select('CubeCart_inventory', ['product_id', 'name', 'product_code'], false, ['name' => 'ASC'])) !== false) {
     $GLOBALS['smarty']->assign('PRODUCTS', $products);
 }
 ## Category list
-if (($category_array = $GLOBALS['db']->select('CubeCart_category', array('cat_name', 'cat_parent_id', 'cat_id'))) !== false) {
+if (($category_array = $GLOBALS['db']->select('CubeCart_category', ['cat_name', 'cat_parent_id', 'cat_id'])) !== false) {
     $cat_list[] = '/';
     $seo  = SEO::getInstance();
     foreach ($category_array as $category) {
@@ -153,14 +154,14 @@ if (($category_array = $GLOBALS['db']->select('CubeCart_category', array('cat_na
     }
     natcasesort($cat_list);
     foreach ($cat_list as $cat_id => $cat_name) {
-        if (empty($cat_name) || $cat_id==0) {
+        if (empty($cat_name) || $cat_id == 0) {
             continue;
         }
-        $data = array(
+        $data = [
             'id'  => $cat_id,
             'name'  => $cat_name,
             'selected' => (isset($cats_selected) && in_array($cat_id, $cats_selected)) ? ' checked="checked"' : '',
-        );
+        ];
         $smarty_data['categories'][] = $data;
     }
     $GLOBALS['smarty']->assign('CATEGORIES', $smarty_data['categories']);

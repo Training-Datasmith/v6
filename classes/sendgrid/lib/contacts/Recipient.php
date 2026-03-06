@@ -1,9 +1,12 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds a recipient for a /mail/send API call
  */
 
 namespace SendGrid\Contacts;
+
 /**
  * This class is used to construct a recipient for the /mail/send API call
  *
@@ -11,13 +14,6 @@ namespace SendGrid\Contacts;
  */
 class Recipient implements \JsonSerializable
 {
-    /** @var $firstName string First name of the email recipient */
-    private $firstName;
-    /** @var $lastName string Last name of the email recipient */
-    private $lastName;
-    /** @var $email string Email address of the recipient */
-    private $email;
-
     /**
      * Create a recipient for the /mail/send API call
      *
@@ -25,11 +21,8 @@ class Recipient implements \JsonSerializable
      * @param string $lastName Last name of the email recipient
      * @param string $email Email address of the recipient
      */
-    public function __construct($firstName, $lastName, $email)
+    public function __construct(private $firstName, private $lastName, private $email)
     {
-        $this->firstName = $firstName;
-        $this->lastName = $lastName;
-        $this->email = $email;
     }
 
     /**
@@ -74,11 +67,9 @@ class Recipient implements \JsonSerializable
             [
                 'email' => $this->getEmail(),
                 'first_name' => $this->getFirstName(),
-                'last_name' => $this->getLastName()
+                'last_name' => $this->getLastName(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (string $value) => $value !== null
         ) ?: null;
     }
 }

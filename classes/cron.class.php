@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,13 +14,14 @@
  */
 class Cron
 {
-    public function updateExchangeRates($currency = '', $echo = true) {
+    public function updateExchangeRates($currency = '', $echo = true)
+    {
         ## European Central Bank
-        $output = array();
+        $output = [];
         if (($request = new Request('www.ecb.europa.eu', '/stats/eurofxref/eurofxref-daily.xml')) !== false) {
             $request->setMethod('get');
             $request->setSSL();
-            if(defined('CC_IN_SETUP')) {
+            if (defined('CC_IN_SETUP')) {
                 $request->skiplog(true);
             }
             $rates_xml = $request->send();
@@ -33,39 +36,41 @@ class Cron
                     $fx['EUR'] = 1;
                     $updated = strtotime((string)$xml->Cube->Cube->attributes()->time);
                     # Get the divisor
-                    if(empty($currency)) {
+                    if (empty($currency)) {
                         $currency = $GLOBALS['config']->get('config', 'default_currency');
                     }
-                    $currency = strtoupper($currency);
+                    $currency = strtoupper((string) $currency);
                     if (!isset($fx[$currency])) {
                         trigger_error('Default currency '.$currency.' is not available from the ECB exchange rate feed.', E_USER_WARNING);
                         throw new Exception('Default currency '.$currency.' not in ECB feed');
                     }
-                    $base  = (1/$fx[$currency]);
+                    $base  = (1 / $fx[$currency]);
                     foreach ($fx as $code => $rate) {
-                        $value = ($base/(1/$rate));
-                        $output[] = array(
+                        $value = ($base / (1 / $rate));
+                        $output[] = [
                             'currency' => $code,
                             'rate' => $value,
-                            'time' => $updated
-                        );
-                        $GLOBALS['db']->update('CubeCart_currency', array('value' => $value, 'updated' => $updated), array('code' => $code), true);
+                            'time' => $updated,
+                        ];
+                        $GLOBALS['db']->update('CubeCart_currency', ['value' => $value, 'updated' => $updated], ['code' => $code], true);
                     }
                 } catch (Exception $e) {
                     trigger_error($e->getMessage());
                 }
             }
         }
-        if($echo) {
+        if ($echo) {
             echo json_encode($output);
         } else {
             return $output;
         }
     }
-    public function clearCache() {
+    public function clearCache()
+    {
         return $GLOBALS['cache']->clear();
     }
-    public function runSnippets() {
+    public function runSnippets(): void
+    {
         foreach ($GLOBALS['hooks']->load('cron') as $hook) {
             include $hook;
         }
@@ -74,7 +79,8 @@ class Cron
     /**
      * Send cart abandonment notification emails
      */
-    public function sendAbandonmentEmails() {
+    public function sendAbandonmentEmails(): string
+    {
         if (!$GLOBALS['config']->get('config', 'abandoned_cart_enabled')) {
             return 'Disabled';
         }
@@ -106,7 +112,7 @@ class Cron
               AND c.status = 1
               AND NOT EXISTS (
                 SELECT 1 FROM `{$pfx}CubeCart_sessions` s
-                WHERE s.customer_id = sc.customer_id AND s.session_last >= ".(int)$cutoff."
+                WHERE s.customer_id = sc.customer_id AND s.session_last >= ".$cutoff."
               )
               AND NOT EXISTS (
                 SELECT 1 FROM `{$pfx}CubeCart_cart_abandonment` ca
@@ -114,9 +120,9 @@ class Cron
               )
               AND NOT EXISTS (
                 SELECT 1 FROM `{$pfx}CubeCart_order_summary` os
-                WHERE os.customer_id = sc.customer_id AND os.order_date > ".(int)$order_cutoff."
+                WHERE os.customer_id = sc.customer_id AND os.order_date > ".$order_cutoff.'
                   AND os.status IN (2, 3)
-              )";
+              )';
 
         $results = $GLOBALS['db']->query($query);
         if (!$results) {
@@ -132,7 +138,7 @@ class Cron
         $coupon_description = '';
         $coupon_id = (int)$GLOBALS['config']->get('config', 'abandoned_cart_coupon');
         if ($coupon_id > 0) {
-            $coupon_row = $GLOBALS['db']->select('CubeCart_coupons', array('code', 'discount_percent', 'discount_price'), "`coupon_id` = ".$coupon_id." AND `status` = 1 AND `archived` = 0 AND (`expires` = '0000-00-00' OR `expires` >= CURDATE())", false, 1, false, false);
+            $coupon_row = $GLOBALS['db']->select('CubeCart_coupons', ['code', 'discount_percent', 'discount_price'], '`coupon_id` = '.$coupon_id." AND `status` = 1 AND `archived` = 0 AND (`expires` = '0000-00-00' OR `expires` >= CURDATE())", false, 1, false, false);
             if ($coupon_row) {
                 $coupon_code = $coupon_row[0]['code'];
                 if ($coupon_row[0]['discount_percent'] > 0) {
@@ -145,18 +151,21 @@ class Cron
 
         foreach ($results as $row) {
             $contents = @unserialize($row['basket']);
-            if (empty($contents) || !is_array($contents)) {
+            if (empty($contents)) {
+                continue;
+            }
+            if (!is_array($contents)) {
                 continue;
             }
 
             // Build product list for email
-            $products = array();
+            $products = [];
             $item_count = 0;
-            foreach ($contents as $hash => $item) {
+            foreach ($contents as $item) {
                 if (!isset($item['id'])) {
                     continue;
                 }
-                $product = $GLOBALS['db']->select('CubeCart_inventory', array('name', 'price', 'sale_price', 'product_id'), array('product_id' => (int)$item['id']), false, 1, false, false);
+                $product = $GLOBALS['db']->select('CubeCart_inventory', ['name', 'price', 'sale_price', 'product_id'], ['product_id' => (int)$item['id']], false, 1, false, false);
                 if (!$product) {
                     continue;
                 }
@@ -168,9 +177,9 @@ class Cron
                 // Get product options text
                 $options_text = '';
                 if (!empty($item['options']) && is_array($item['options'])) {
-                    $opt_parts = array();
-                    foreach ($item['options'] as $opt_id => $opt_val) {
-                        $opt_data = $GLOBALS['db']->select('CubeCart_option_value', array('value_name'), array('value_id' => (int)$opt_val), false, 1, false, false);
+                    $opt_parts = [];
+                    foreach ($item['options'] as $opt_val) {
+                        $opt_data = $GLOBALS['db']->select('CubeCart_option_value', ['value_name'], ['value_id' => (int)$opt_val], false, 1, false, false);
                         if ($opt_data) {
                             $opt_parts[] = $opt_data[0]['value_name'];
                         }
@@ -180,22 +189,22 @@ class Cron
 
                 // Get product thumbnail
                 $image_url = '';
-                $img = $GLOBALS['db']->select('CubeCart_image_index', array('file_id'), array('product_id' => (int)$item['id']), array('main_img' => 'DESC'), 1, false, false);
+                $img = $GLOBALS['db']->select('CubeCart_image_index', ['file_id'], ['product_id' => (int)$item['id']], ['main_img' => 'DESC'], 1, false, false);
                 if ($img) {
-                    $file = $GLOBALS['db']->select('CubeCart_filemanager', array('filepath', 'filename'), array('file_id' => (int)$img[0]['file_id']), false, 1, false, false);
+                    $file = $GLOBALS['db']->select('CubeCart_filemanager', ['filepath', 'filename'], ['file_id' => (int)$img[0]['file_id']], false, 1, false, false);
                     if ($file) {
                         $image_url = $GLOBALS['storeURL'].'/images/source/'.$file[0]['filepath'].$file[0]['filename'];
                     }
                 }
 
-                $products[] = array(
+                $products[] = [
                     'name' => $p['name'],
                     'price' => Tax::getInstance()->priceFormat($price),
                     'raw_price' => $price,
                     'quantity' => $qty,
                     'options' => $options_text,
                     'image' => $image_url,
-                );
+                ];
             }
 
             if (empty($products)) {
@@ -206,12 +215,12 @@ class Cron
             $token = bin2hex(random_bytes(32));
             $expires = date('Y-m-d H:i:s', time() + 604800); // 7 days
 
-            $abandon_data = array(
+            $abandon_data = [
                 'customer_id' => (int)$row['customer_id'],
                 'token' => $token,
                 'notified_at' => date('Y-m-d H:i:s'),
                 'expires_at' => $expires,
-            );
+            ];
             if (!empty($coupon_code)) {
                 $abandon_data['coupon_code'] = $coupon_code;
             }
@@ -220,7 +229,7 @@ class Cron
             $recovery_link = $GLOBALS['storeURL'].'/index.php?_a=recover&token='.$token;
             $optout_link = $GLOBALS['storeURL'].'/index.php?_a=recover&action=optout&token='.$token;
 
-            $data = array(
+            $data = [
                 'first_name' => $row['first_name'],
                 'last_name' => $row['last_name'],
                 'store_name' => $store_name,
@@ -229,7 +238,7 @@ class Cron
                 'optout_link' => $optout_link,
                 'coupon_code' => $coupon_code,
                 'coupon_description' => $coupon_description,
-            );
+            ];
 
             $GLOBALS['smarty']->assign('PRODUCTS', $products);
 
@@ -248,15 +257,16 @@ class Cron
     /**
      * Ensure default cron tasks exist in the database
      */
-    public static function ensureDefaults() {
-        $defaults = array(
-            array('method' => 'updateExchangeRates', 'label' => 'Update Exchange Rates', 'enabled' => 1, 'frequency' => 86400),
-            array('method' => 'clearCache', 'label' => 'Clear Cache*', 'enabled' => 0, 'frequency' => 21600),
-            array('method' => 'runSnippets', 'label' => 'Run Code Snippets / Hooks**', 'enabled' => 0, 'frequency' => 3600),
-            array('method' => 'sendAbandonmentEmails', 'label' => 'Send Cart Abandonment Emails', 'enabled' => 0, 'frequency' => 3600),
-        );
+    public static function ensureDefaults(): void
+    {
+        $defaults = [
+            ['method' => 'updateExchangeRates', 'label' => 'Update Exchange Rates', 'enabled' => 1, 'frequency' => 86400],
+            ['method' => 'clearCache', 'label' => 'Clear Cache*', 'enabled' => 0, 'frequency' => 21600],
+            ['method' => 'runSnippets', 'label' => 'Run Code Snippets / Hooks**', 'enabled' => 0, 'frequency' => 3600],
+            ['method' => 'sendAbandonmentEmails', 'label' => 'Send Cart Abandonment Emails', 'enabled' => 0, 'frequency' => 3600],
+        ];
         foreach ($defaults as $task) {
-            $exists = $GLOBALS['db']->select('CubeCart_cron_tasks', 'id', array('method' => $task['method']), false, false, false, false);
+            $exists = $GLOBALS['db']->select('CubeCart_cron_tasks', 'id', ['method' => $task['method']], false, false, false, false);
             if (!$exists) {
                 $GLOBALS['db']->insert('CubeCart_cron_tasks', $task);
             }
@@ -266,9 +276,10 @@ class Cron
     /**
      * Unified cron entry point - runs all enabled tasks that are due
      */
-    public function run() {
-        $tasks = $GLOBALS['db']->select('CubeCart_cron_tasks', false, array('enabled' => 1), false, false, false, false);
-        $output = array();
+    public function run(): void
+    {
+        $tasks = $GLOBALS['db']->select('CubeCart_cron_tasks', false, ['enabled' => 1], false, false, false, false);
+        $output = [];
         if ($tasks) {
             foreach ($tasks as $task) {
                 $method = $task['method'];
@@ -279,7 +290,7 @@ class Cron
                 if (empty($task['last_run'])) {
                     $due = true;
                 } else {
-                    $elapsed = time() - strtotime($task['last_run']);
+                    $elapsed = time() - strtotime((string) $task['last_run']);
                     if ($elapsed >= (int)$task['frequency']) {
                         $due = true;
                     }
@@ -295,7 +306,7 @@ class Cron
                     } catch (Exception $e) {
                         $result = substr($e->getMessage(), 0, 255);
                     }
-                    $GLOBALS['db']->update('CubeCart_cron_tasks', array('last_run' => date('Y-m-d H:i:s'), 'last_result' => $result), array('id' => $task['id']));
+                    $GLOBALS['db']->update('CubeCart_cron_tasks', ['last_run' => date('Y-m-d H:i:s'), 'last_result' => $result], ['id' => $task['id']]);
                     $output[] = $task['label'] . ': ' . $result;
                 } else {
                     $output[] = $task['label'] . ': skipped (not due)';

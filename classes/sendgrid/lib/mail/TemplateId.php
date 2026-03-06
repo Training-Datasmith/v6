@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the TemplateId object for a /mail/send API call
  */
@@ -49,7 +51,7 @@ class TemplateId implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setTemplateId($template_id)
+    public function setTemplateId($template_id): void
     {
         Assert::string($template_id, 'template_id');
 

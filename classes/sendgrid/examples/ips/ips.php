@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -72,7 +74,7 @@ try {
 $request_body = json_decode('{
   "name": "new_pool_name"
 }');
-$pool_name = "test_url_param";
+$pool_name = 'test_url_param';
 
 try {
     $response = $sg->client->ips()->pools()->_($pool_name)->put($request_body);
@@ -87,7 +89,7 @@ try {
 // Retrieve all IPs in a specified pool. #
 // GET /ips/pools/{pool_name} #
 
-$pool_name = "test_url_param";
+$pool_name = 'test_url_param';
 
 try {
     $response = $sg->client->ips()->pools()->_($pool_name)->get();
@@ -102,7 +104,7 @@ try {
 // Delete an IP pool. #
 // DELETE /ips/pools/{pool_name} #
 
-$pool_name = "test_url_param";
+$pool_name = 'test_url_param';
 
 try {
     $response = $sg->client->ips()->pools()->_($pool_name)->delete();
@@ -120,7 +122,7 @@ try {
 $request_body = json_decode('{
   "ip": "0.0.0.0"
 }');
-$pool_name = "test_url_param";
+$pool_name = 'test_url_param';
 
 try {
     $response = $sg->client->ips()->pools()->_($pool_name)->ips()->post($request_body);
@@ -135,8 +137,8 @@ try {
 // Remove an IP address from a pool. #
 // DELETE /ips/pools/{pool_name}/ips/{ip} #
 
-$pool_name = "test_url_param";
-$ip = "test_url_param";
+$pool_name = 'test_url_param';
+$ip = 'test_url_param';
 
 try {
     $response = $sg->client->ips()->pools()->_($pool_name)->ips()->_($ip)->delete();
@@ -181,7 +183,7 @@ try {
 // Retrieve warmup status for a specific IP address #
 // GET /ips/warmup/{ip_address} #
 
-$ip_address = "test_url_param";
+$ip_address = 'test_url_param';
 
 try {
     $response = $sg->client->ips()->warmup()->_($ip_address)->get();
@@ -196,7 +198,7 @@ try {
 // Remove an IP from warmup #
 // DELETE /ips/warmup/{ip_address} #
 
-$ip_address = "test_url_param";
+$ip_address = 'test_url_param';
 
 try {
     $response = $sg->client->ips()->warmup()->_($ip_address)->delete();
@@ -211,7 +213,7 @@ try {
 // Retrieve all IP pools an IP address belongs to #
 // GET /ips/{ip_address} #
 
-$ip_address = "test_url_param";
+$ip_address = 'test_url_param';
 
 try {
     $response = $sg->client->ips()->_($ip_address)->get();

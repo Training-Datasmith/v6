@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -20,13 +22,10 @@
  */
 class Password
 {
-
     /**
      * Class instance
-     *
-     * @var instance
      */
-    private static $_instance;
+    private static ?\Password $_instance = null;
 
     ##############################################
 
@@ -36,10 +35,8 @@ class Password
 
     /**
      * Setup the instance (singleton)
-     *
-     * @return Password
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -49,13 +46,11 @@ class Password
     }
 
     //=====[ Public ]=======================================
-
     /**
      * Create salt for passwords
      * @author http://www.richardlord.net/blog/php-password-security
-     * @return string
      */
-    public function createSalt()
+    public function createSalt(): string
     {
         return substr(str_pad(dechex(mt_rand()), 8, '0', STR_PAD_LEFT), -8);
     }
@@ -63,11 +58,9 @@ class Password
     /**
      * Create a salted password
      *
-     * @param string $value
      * @param string $salt
-     * @return string
      */
-    public function getSalted($value, $salt = '')
+    public function getSalted(string $value, $salt = ''): string
     {
         //If there is no salt get some
         if (empty($salt)) {
@@ -82,9 +75,8 @@ class Password
      *
      * @param string $value
      * @param string $salt
-     * @return string
      */
-    public function getSaltedOld($value, $salt)
+    public function getSaltedOld($value, $salt): string
     {
         return md5(md5($salt).md5($value));
     }
@@ -94,9 +86,8 @@ class Password
      *
      * @param md5 string $md5
      * @param string $salt
-     * @return string
      */
-    public function updateOld($md5, $salt)
+    public function updateOld(string $md5, $salt): string
     {
         return md5(md5($salt).$md5);
     }

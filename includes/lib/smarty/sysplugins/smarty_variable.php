@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * class for the Smarty variable object
  * This class defines the Smarty variable object

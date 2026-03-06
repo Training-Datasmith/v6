@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -14,7 +16,6 @@ if (!defined('CC_INI_SET')) {
     die('Access Denied');
 }
 Admin::getInstance()->permissions('statistics', CC_PERM_READ, true);
-
 
 $add_headers = true;
 
@@ -35,10 +36,10 @@ if (!empty($report_filter['date']['to']) && !preg_match($date_pattern, $report_f
 }
 
 if (!isset($_POST['report']['status']) && !isset($_GET['report']['status'])) {
-    $report_filter['status'] = array(0 => 2, 1 => 3);
+    $report_filter['status'] = [0 => 2, 1 => 3];
 }
 
-$default_date = array('from' => date('Y-m-01'), 'to' => date('Y-m-d'));
+$default_date = ['from' => date('Y-m-01'), 'to' => date('Y-m-d')];
 $date_range  = (isset($report_filter['date']) && is_array($report_filter['date'])) ? $report_filter['date'] : $default_date;
 
 // Moved below so suppress/updated/inserted can be affected
@@ -69,20 +70,20 @@ if (isset($report_filter['status']) && is_array($report_filter['status'])) {
 }
 
 $date['from']  = $human_date[0];
-if (isset($human_date[1]) && $human_date[0]!==$human_date[1]) {
+if (isset($human_date[1]) && $human_date[0] !== $human_date[1]) {
     $date['to']  = $human_date[1];
     $report_title  = sprintf($lang['reports']['title_reports_from_to'], $date['from'], $date['to']);
-    $download_range = "(".$date['from']." - ".$date['to'].")";
+    $download_range = '('.$date['from'].' - '.$date['to'].')';
 } else {
     $report_title = sprintf($lang['reports']['title_reports_from'], $date['from']);
-    $download_range = "(".$date['from'].")";
+    $download_range = '('.$date['from'].')';
 }
 $GLOBALS['smarty']->assign('REPORT_TITLE', $report_title);
 
 $GLOBALS['main']->addTabControl($lang['reports']['tab_results'], 'results');
 ## Fetch data, and display, and/or provide download
-$oid_col = $GLOBALS['config']->get('config', 'oid_mode') =='i' ?  $GLOBALS['config']->get('config', 'oid_col') : 'cart_order_id';
-$fields = array(
+$oid_col = $GLOBALS['config']->get('config', 'oid_mode') == 'i' ? $GLOBALS['config']->get('config', 'oid_col') : 'cart_order_id';
+$fields = [
     'order_date',
     $oid_col,
     'cart_order_id',
@@ -114,8 +115,8 @@ $fields = array(
     'phone',
     'mobile',
     'email',
-    'gateway'
-);
+    'gateway',
+];
 
 foreach ($GLOBALS['hooks']->load('admin.reports.order.pre') as $hook) {
     include $hook;
@@ -139,12 +140,12 @@ if ($orders) {
     }
 
     ## Tally up totals
-    $tally = array();
+    $tally = [];
     $i   = 0;
     foreach ($orders as $order_summary) {
         $order_summary['status'] = $lang['order_state']['name_'.(int)$order_summary['status']];
         foreach ($order_summary as $field => $value) {
-            if (in_array($field, array('subtotal', 'discount', 'shipping', 'total_tax', 'total'))) {
+            if (in_array($field, ['subtotal', 'discount', 'shipping', 'total_tax', 'total'])) {
                 if (!isset($tally[$field])) {
                     $tally[$field] = 0;
                 }
@@ -192,21 +193,20 @@ if ($orders) {
     ## Show table footer
     $tally['orders'] = count($orders);
     foreach ($tally as $key => $value) {
-        $tallyformatted[$key] = ($key=='orders') ? $value : sprintf('%.2F', $value);
+        $tallyformatted[$key] = ($key == 'orders') ? $value : sprintf('%.2F', $value);
     }
     $smarty_data['tally']  = $tallyformatted;
     $GLOBALS['smarty']->assign('DOWNLOAD', true);
 
-
     ## Get external module export code
-    $where  = array('module' => 'external', 'status' => '1');
+    $where  = ['module' => 'external', 'status' => '1'];
     ## Start classes for external reports
     if (($module = $GLOBALS['db']->select('CubeCart_modules', 'folder', $where)) !== false) {
         foreach ($module as $module_data) {
             $export_folder = CC_ROOT_DIR.'/modules/external/'.$module_data['folder'];
             $name = '';
             if (file_exists($export_folder)) {
-                if(file_exists($export_folder.'/config.xml')) {
+                if (file_exists($export_folder.'/config.xml')) {
                     $xml = simplexml_load_file($export_folder.'/config.xml');
                     $name = (string)$xml->info->name;
                 }
@@ -220,7 +220,7 @@ if ($orders) {
     if (isset($_POST['download'])) {
         httpredir(currentPage());
     }
-    $smarty_data['tally'] = array('orders' => 0);
+    $smarty_data['tally'] = ['orders' => 0];
 }
 $GLOBALS['smarty']->assign('TALLY', $smarty_data['tally']);
 $GLOBALS['smarty']->assign('POST', $report_filter);
@@ -234,11 +234,11 @@ foreach ($GLOBALS['hooks']->load('admin.reports.order.filter') as $hook) {
 $GLOBALS['main']->addTabControl($lang['common']['filter'], 'search');
 
 for ($i = 1; $i <= 6; ++$i) {
-    $status = array(
+    $status = [
         'value'  => $i,
         'selected' => (!is_array($report_filter['status']) || (isset($select_status[$i]) && $select_status[$i])) ? ' selected="selected"' : '',
         'name'  => $lang['order_state']['name_'.$i],
-    );
+    ];
     $smarty_data['status'][] = $status;
 }
 $GLOBALS['smarty']->assign('STATUS', $smarty_data['status']);

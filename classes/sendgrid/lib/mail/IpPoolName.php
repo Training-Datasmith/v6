@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the IpPoolName object for a /mail/send API call
  */
@@ -45,7 +47,7 @@ class IpPoolName implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setIpPoolName($ip_pool_name)
+    public function setIpPoolName($ip_pool_name): void
     {
         Assert::minLength($ip_pool_name, 'ip_pool_name', 2);
         Assert::maxLength($ip_pool_name, 'ip_pool_name', 64);

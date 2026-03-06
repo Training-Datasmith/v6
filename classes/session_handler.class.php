@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -28,12 +30,10 @@ if (!defined('CC_INI_SET')) {
 class Session_Handler implements SessionHandlerInterface
 {
     private $_db;
-    private $_ttl;
 
-    public function __construct($ttl = 86400)
+    public function __construct()
     {
         $this->_db = Database::getInstance();
-        $this->_ttl = $ttl;
     }
 
     public function open(string $path, string $name): bool
@@ -48,7 +48,7 @@ class Session_Handler implements SessionHandlerInterface
 
     public function read(string $session_id): string|false
     {
-        $result = $this->_db->select('CubeCart_sessions', array('session_data'), array('session_id' => $session_id), false, 1, false, false);
+        $result = $this->_db->select('CubeCart_sessions', ['session_data'], ['session_id' => $session_id], false, 1, false, false);
         if ($result && isset($result[0]['session_data'])) {
             return $result[0]['session_data'];
         }
@@ -57,26 +57,26 @@ class Session_Handler implements SessionHandlerInterface
 
     public function write(string $session_id, string $data): bool
     {
-        $this->_db->update('CubeCart_sessions', array('session_data' => $data, 'session_last' => time()), array('session_id' => $session_id), false);
+        $this->_db->update('CubeCart_sessions', ['session_data' => $data, 'session_last' => time()], ['session_id' => $session_id], false);
         return true;
     }
 
     public function destroy(string $session_id): bool
     {
-        $this->_db->delete('CubeCart_sessions', array('session_id' => $session_id));
+        $this->_db->delete('CubeCart_sessions', ['session_id' => $session_id]);
         return true;
     }
 
     public function gc(int $max_lifetime): int|false
     {
-        $this->_db->delete('CubeCart_sessions', array('session_last' => '<=' . (time() - $max_lifetime)), 500);
+        $this->_db->delete('CubeCart_sessions', ['session_last' => '<=' . (time() - $max_lifetime)], 500);
         return 0;
     }
 
     /**
      * Register this handler with PHP
      */
-    public function register()
+    public function register(): void
     {
         session_set_save_handler($this, true);
     }

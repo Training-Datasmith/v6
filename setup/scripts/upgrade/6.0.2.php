@@ -1,8 +1,10 @@
 <?php
+
+declare(strict_types=1);
 ## Delete "unordered" js files to prevent duplication
 $js_path = CC_ROOT_DIR.'/skins/foundation/js/';
 
-$files = array('foundation.min.js', 'cubecart.js', 'cubecart.validate.js');
+$files = ['foundation.min.js', 'cubecart.js', 'cubecart.validate.js'];
 foreach ($files as $file) {
     @unlink($js_path.$file);
 }

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -11,7 +13,7 @@
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
 $GLOBALS['main']->addTabControl($lang['settings']['release_notes'], 'general');
-$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(array('node')), true);
+$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(['node']), true);
 
 $elastic = <<<END
     <p><img src="./{$GLOBALS['config']->get('config', 'adminFolder')}/skins/{$GLOBALS['config']->get('config', 'admin_skin')}/images/logo.elasticsearch.png" alt="Elasticsearch" /></p>
@@ -23,12 +25,11 @@ $elastic = <<<END
 	</video>
 END;
 
-$features = array(
-	'2600' => $elastic,
-	'3218' => 'Release notes added to CubeCart to showcase new features',
-	'3213' => 'Tumblr & Reddit socials icons added',
-	'3105' => 'Debug output to modal window to prevent page output interruption',
-	'3186' => 'Large page breaks added to product, customer and order pages to compensate for removed &quot;View All&quot;'
-);
+$features = [
+    '2600' => $elastic,
+    '3218' => 'Release notes added to CubeCart to showcase new features',
+    '3213' => 'Tumblr & Reddit socials icons added',
+    '3105' => 'Debug output to modal window to prevent page output interruption',
+    '3186' => 'Large page breaks added to product, customer and order pages to compensate for removed &quot;View All&quot;',
+];
 $page_content = $GLOBALS['main']->newFeatures($_GET['node'], $features, 38);
-?>

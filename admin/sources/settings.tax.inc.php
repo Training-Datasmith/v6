@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -26,9 +28,9 @@ $updated  = false;
 $redirect  = false;
 $anchor  = false;
 
-if(isset($_POST['edittariff']) && is_array($_POST['edittariff'])) {
-    foreach($_POST['edittariff'] as $id => $data) {
-        if($GLOBALS['db']->update('CubeCart_tariff', $data, array('id' => (int)$id))) {
+if (isset($_POST['edittariff']) && is_array($_POST['edittariff'])) {
+    foreach ($_POST['edittariff'] as $id => $data) {
+        if ($GLOBALS['db']->update('CubeCart_tariff', $data, ['id' => (int)$id])) {
             $updated = true;
         }
     }
@@ -37,13 +39,13 @@ if(isset($_POST['edittariff']) && is_array($_POST['edittariff'])) {
     $GLOBALS['main']->successMessage($lang['settings']['notify_tax_tariff_edited']);
 }
 
-if (isset($_GET['delete_tariff']) && $_GET['delete_tariff']>0) {
-    $GLOBALS['db']->delete('CubeCart_tariff', array('id' => (int)$_GET['delete_tariff']));
+if (isset($_GET['delete_tariff']) && $_GET['delete_tariff'] > 0) {
+    $GLOBALS['db']->delete('CubeCart_tariff', ['id' => (int)$_GET['delete_tariff']]);
     $GLOBALS['main']->successMessage($lang['settings']['tariff_deleted']);
     $anchor = 'tariff';
 }
-if (isset($_POST['addtariff']) && $_POST['addtariff']['percent']>0) {
-    $exists = $GLOBALS['db']->select('CubeCart_tariff', false, array('source' => $_POST['addtariff']['source'], 'destination' => $_POST['addtariff']['destination'], 'tariff' => $_POST['addtariff']['tariff']));
+if (isset($_POST['addtariff']) && $_POST['addtariff']['percent'] > 0) {
+    $exists = $GLOBALS['db']->select('CubeCart_tariff', false, ['source' => $_POST['addtariff']['source'], 'destination' => $_POST['addtariff']['destination'], 'tariff' => $_POST['addtariff']['tariff']]);
     if (!$exists && $GLOBALS['db']->insert('CubeCart_tariff', $_POST['addtariff'])) {
         $GLOBALS['main']->successMessage($lang['settings']['notify_tax_tariff_add']);
     } else {
@@ -52,10 +54,10 @@ if (isset($_POST['addtariff']) && $_POST['addtariff']['percent']>0) {
     $anchor = 'tariff';
 }
 
-if (isset($_GET['assign_class']) && $_GET['assign_class']>0) {
-    if ($GLOBALS['db']->update('CubeCart_inventory', array('tax_type' => (int)$_GET['assign_class']))) {
+if (isset($_GET['assign_class']) && $_GET['assign_class'] > 0) {
+    if ($GLOBALS['db']->update('CubeCart_inventory', ['tax_type' => (int)$_GET['assign_class']])) {
         $no_assigned = $GLOBALS['db']->affected();
-        $GLOBALS['db']->update('CubeCart_pricing_group', array('tax_type' => (int)$_GET['assign_class']));
+        $GLOBALS['db']->update('CubeCart_pricing_group', ['tax_type' => (int)$_GET['assign_class']]);
         $GLOBALS['main']->successMessage(sprintf($lang['settings']['notify_tax_class_assigned'], $no_assigned));
     } else {
         $GLOBALS['main']->errorMessage($lang['settings']['notify_tax_class_not_assigned']);
@@ -67,7 +69,7 @@ if (isset($_GET['assign_class']) && $_GET['assign_class']>0) {
 ## Update Tax Classes
 if (isset($_POST['class']) && is_array($_POST['class']) && Admin::getInstance()->permissions('settings', CC_PERM_EDIT)) {
     foreach ($_POST['class'] as $key => $data) {
-        if ($GLOBALS['db']->update('CubeCart_tax_class', $data, array('id' => $key), true)) {
+        if ($GLOBALS['db']->update('CubeCart_tax_class', $data, ['id' => $key], true)) {
             $updated = true;
         }
     }
@@ -85,8 +87,8 @@ if (isset($_POST['addclass']) && is_array($_POST['addclass']) && !empty($_POST['
 ## Delete Tax Class
 if (isset($_GET['delete_class']) && !empty($_GET['delete_class']) && Admin::getInstance()->permissions('settings', CC_PERM_DELETE)) {
     ## Remove dependancies
-    $GLOBALS['db']->delete('CubeCart_tax_rates', array('type_id' => $_GET['delete_class']));
-    if ($GLOBALS['db']->delete('CubeCart_tax_class', array('id' => (int)$_GET['delete_class']))) {
+    $GLOBALS['db']->delete('CubeCart_tax_rates', ['type_id' => $_GET['delete_class']]);
+    if ($GLOBALS['db']->delete('CubeCart_tax_class', ['id' => (int)$_GET['delete_class']])) {
         $GLOBALS['main']->successMessage($lang['settings']['notify_tax_class_delete']);
     } else {
         $GLOBALS['main']->errorMessage($lang['settings']['error_tax_class_delete']);
@@ -99,7 +101,7 @@ if (isset($_GET['delete_class']) && !empty($_GET['delete_class']) && Admin::getI
 ## Update Tax Details
 if (isset($_POST['detail']) && is_array($_POST['detail']) && Admin::getInstance()->permissions('settings', CC_PERM_EDIT)) {
     foreach ($_POST['detail'] as $key => $data) {
-        if ($GLOBALS['db']->update('CubeCart_tax_details', $data, array('id' => $key), true)) {
+        if ($GLOBALS['db']->update('CubeCart_tax_details', $data, ['id' => $key], true)) {
             $updated = true;
         }
     }
@@ -117,8 +119,8 @@ if (isset($_POST['adddetail']) && is_array($_POST['adddetail']) && !empty($_POST
 ## Delete Tax Detail
 if (isset($_GET['delete_detail']) && !empty($_GET['delete_detail']) && Admin::getInstance()->permissions('settings', CC_PERM_DELETE)) {
     ## Delete dependancies
-    $GLOBALS['db']->delete('CubeCart_tax_rates', array('details_id' => $_GET['delete_detail']));
-    if ($GLOBALS['db']->delete('CubeCart_tax_details', array('id' => (int)$_GET['delete_detail']))) {
+    $GLOBALS['db']->delete('CubeCart_tax_rates', ['details_id' => $_GET['delete_detail']]);
+    if ($GLOBALS['db']->delete('CubeCart_tax_details', ['id' => (int)$_GET['delete_detail']])) {
         $GLOBALS['main']->successMessage($lang['settings']['notify_tax_detail_delete']);
     } else {
         $GLOBALS['main']->errorMessage($lang['settings']['error_tax_detail_delete']);
@@ -131,7 +133,7 @@ if (isset($_GET['delete_detail']) && !empty($_GET['delete_detail']) && Admin::ge
 ## Update Tax Rules
 if (isset($_POST['rule']) && is_array($_POST['rule']) && Admin::getInstance()->permissions('settings', CC_PERM_EDIT)) {
     foreach ($_POST['rule'] as $key => $data) {
-        if ($GLOBALS['db']->update('CubeCart_tax_rates', $data, array('id' => $key), true)) {
+        if ($GLOBALS['db']->update('CubeCart_tax_rates', $data, ['id' => $key], true)) {
             $updated = true;
         }
     }
@@ -139,8 +141,8 @@ if (isset($_POST['rule']) && is_array($_POST['rule']) && Admin::getInstance()->p
 }
 ## Add Tax Rule
 if (isset($_POST['addrule']) && is_array($_POST['addrule']) && is_numeric($_POST['addrule']['tax_percent']) && Admin::getInstance()->permissions('settings', CC_PERM_EDIT)) {
-    if ($_POST['addrule']['eu']==1) {
-        $eu_countries = $GLOBALS['db']->select('CubeCart_geo_country', 'numcode', array('eu' => 1));
+    if ($_POST['addrule']['eu'] == 1) {
+        $eu_countries = $GLOBALS['db']->select('CubeCart_geo_country', 'numcode', ['eu' => 1]);
         foreach ($eu_countries as $country) {
             $_POST['addrule']['country_id'] = $country['numcode'];
             $_POST['addrule']['county_id'] = 0;
@@ -148,7 +150,7 @@ if (isset($_POST['addrule']) && is_array($_POST['addrule']) && is_numeric($_POST
             $GLOBALS['main']->successMessage($lang['settings']['notify_tax_rule_add']);
         }
     } else {
-        if($_POST['addrule']['rest']==1) {
+        if ($_POST['addrule']['rest'] == 1) {
             $_POST['addrule']['country_id'] = '999';
         }
         if ($GLOBALS['db']->insert('CubeCart_tax_rates', $_POST['addrule'])) {
@@ -161,7 +163,7 @@ if (isset($_POST['addrule']) && is_array($_POST['addrule']) && is_numeric($_POST
 }
 ## Delete Tax Rule
 if (isset($_GET['delete_rule']) && !empty($_GET['delete_rule']) && Admin::getInstance()->permissions('settings', CC_PERM_DELETE)) {
-    if ($GLOBALS['db']->delete('CubeCart_tax_rates', array('id' => (int)$_GET['delete_rule']))) {
+    if ($GLOBALS['db']->delete('CubeCart_tax_rates', ['id' => (int)$_GET['delete_rule']])) {
         $GLOBALS['main']->successMessage($lang['settings']['notify_tax_rule_delete']);
     } else {
         $GLOBALS['main']->errorMessage($lang['settings']['error_tax_rule_delete']);
@@ -174,12 +176,12 @@ if ($updated) {
     $GLOBALS['main']->successMessage($lang['settings']['notify_tax_updated']);
 }
 if ($redirect) {
-    httpredir(currentPage(array('delete_class', 'delete_detail', 'delete_rule', 'assign_class')), $anchor);
+    httpredir(currentPage(['delete_class', 'delete_detail', 'delete_rule', 'assign_class']), $anchor);
 }
 
 ###############################################################
 ## Get countries
-if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', array('numcode', 'name', 'iso'), '`status` > 0', array('name' => 'ASC'))) !== false) {
+if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', ['numcode', 'name', 'iso'], '`status` > 0', ['name' => 'ASC'])) !== false) {
     $GLOBALS['smarty']->assign('COUNTRIES', $countries);
     ## Get counties
     $GLOBALS['smarty']->assign('VAL_JSON_COUNTY', state_json());
@@ -221,20 +223,20 @@ if (($tax_rules = $GLOBALS['db']->select('CubeCart_tax_rates')) !== false) {
     $GLOBALS['smarty']->assign('TAX_RULES', $smarty_data['tax_rules']);
 }
 foreach ($GLOBALS['hooks']->load('admin.settings.tax.pre_smarty') as $hook) {
-	include $hook;
+    include $hook;
 }
 
 ## Get Tariffs
 if (($tariffs = $GLOBALS['db']->select('CubeCart_tariff')) !== false) {
     foreach ($tariffs as $tariff) {
-        $smarty_data['tariffs'][] = array(
+        $smarty_data['tariffs'][] = [
             'id'            => $tariff['id'],
             'source'        => $tariff['source'],
             'destination'   => $tariff['destination'],
             'display'       => $tariff['display'],
-            'tariff'        => $tariff['tariff']=='M' ? $lang['settings']['country_of_manufacture'] : $lang['settings']['country_of_dispatch'],
-            'percent'       => $tariff['percent']
-        );
+            'tariff'        => $tariff['tariff'] == 'M' ? $lang['settings']['country_of_manufacture'] : $lang['settings']['country_of_dispatch'],
+            'percent'       => $tariff['percent'],
+        ];
     }
     $GLOBALS['smarty']->assign('TARIFFS', $smarty_data['tariffs']);
 }

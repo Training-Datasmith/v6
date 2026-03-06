@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -17,61 +19,61 @@ Admin::getInstance()->permissions('settings', CC_PERM_READ, true);
 
 if (Admin::getInstance()->permissions('settings', CC_PERM_EDIT)) {
 
-    if(isset($_GET['ignore']) && !empty($_GET['ignore'])) {
-        $GLOBALS['db']->update('CubeCart_404_log', array('ignore' => 1, 'done' => 0, 'warn' => 0), array('id' => (int)$_GET['ignore']));
-        httpredir('?_g=settings&node=redirects','missing_uris');
+    if (isset($_GET['ignore']) && !empty($_GET['ignore'])) {
+        $GLOBALS['db']->update('CubeCart_404_log', ['ignore' => 1, 'done' => 0, 'warn' => 0], ['id' => (int)$_GET['ignore']]);
+        httpredir('?_g=settings&node=redirects', 'missing_uris');
     }
-    if(isset($_GET['remove_ignore']) && !empty($_GET['remove_ignore'])) {
-        $GLOBALS['db']->update('CubeCart_404_log', array('ignore' => 0, 'done' => 0, 'warn' => 0), array('id' => (int)$_GET['remove_ignore']));
-        httpredir('?_g=settings&node=redirects','ignored_uris');
+    if (isset($_GET['remove_ignore']) && !empty($_GET['remove_ignore'])) {
+        $GLOBALS['db']->update('CubeCart_404_log', ['ignore' => 0, 'done' => 0, 'warn' => 0], ['id' => (int)$_GET['remove_ignore']]);
+        httpredir('?_g=settings&node=redirects', 'ignored_uris');
     }
 
-    if(isset($_POST['path']) && !empty($_POST['path'])) {
+    if (isset($_POST['path']) && !empty($_POST['path'])) {
         // Check product, category, doc exists
         $exists = false;
-        switch($_POST['type']) {
+        switch ($_POST['type']) {
             case 'prod':
-                $exists = $GLOBALS['db']->select('CubeCart_inventory', false, array('product_id' => (int)$_POST['item_id']));
-            break;
+                $exists = $GLOBALS['db']->select('CubeCart_inventory', false, ['product_id' => (int)$_POST['item_id']]);
+                break;
             case 'cat':
-                $exists = $GLOBALS['db']->select('CubeCart_category', false, array('cat_id' => (int)$_POST['item_id']));
-            break;
+                $exists = $GLOBALS['db']->select('CubeCart_category', false, ['cat_id' => (int)$_POST['item_id']]);
+                break;
             case 'doc':
-                $exists = $GLOBALS['db']->select('CubeCart_documents', false, array('doc_id' => (int)$_POST['item_id']));
-            break;
+                $exists = $GLOBALS['db']->select('CubeCart_documents', false, ['doc_id' => (int)$_POST['item_id']]);
+                break;
             default: // Catch static sections
                 $exists = true;
                 $_POST['item_id'] = 0;
         }
-        if($exists) {
-            if($GLOBALS['seo']->setdbPath($_POST['type'], (int)$_POST['item_id'], $_POST['path'], true, false, $_POST['redirect'])) {
+        if ($exists) {
+            if ($GLOBALS['seo']->setdbPath($_POST['type'], (int)$_POST['item_id'], $_POST['path'], true, false, $_POST['redirect'])) {
                 $GLOBALS['main']->successMessage($lang['notification']['notify_success_add_redirect']);
-                if($missing = $GLOBALS['db']->select('CubeCart_404_log', false, array('uri' => $_POST['path']))) {
-                    $GLOBALS['db']->update('CubeCart_404_log', array('done' => 1, 'warn' => 0), array('id' => $missing[0]['id']));
+                if ($missing = $GLOBALS['db']->select('CubeCart_404_log', false, ['uri' => $_POST['path']])) {
+                    $GLOBALS['db']->update('CubeCart_404_log', ['done' => 1, 'warn' => 0], ['id' => $missing[0]['id']]);
                 }
             } else {
-                $existing = $GLOBALS['db']->select('CubeCart_seo_urls', false, array('path' => $_POST['path']));
+                $existing = $GLOBALS['db']->select('CubeCart_seo_urls', false, ['path' => $_POST['path']]);
                 $a = '';
-                switch($existing[0]['type']) {
+                switch ($existing[0]['type']) {
                     case 'prod':
                         $a = '?_g=products&node=index&action=edit&product_id='.$existing[0]['item_id'].'#seo';
                         $type = 'Product';
-                    break;
+                        break;
                     case 'cat':
                         $a = '?_g=categories&action=edit&cat_id='.$existing[0]['item_id'].'#seo';
                         $type = 'Category';
-                    break;
+                        break;
                     case 'doc':
                         $a = '?_g=documents&action=edit&doc_id='.$existing[0]['item_id'].'#seo';
                         $type = 'Document';
-                    break;
+                        break;
                 }
                 $item = '('.$type;
-                if($existing[0]['item_id']>0) {
+                if ($existing[0]['item_id'] > 0) {
                     $item .= ': '.$existing[0]['item_id'];
                 }
                 $item .= ')';
-                if(!empty($a)) {
+                if (!empty($a)) {
                     $item .= ' <a href="'.$a.'">'.$lang['common']['view'].'</a>';
                 }
                 $GLOBALS['main']->errorMessage($lang['notification']['notify_fail_add_redirect'].' '.$item);
@@ -84,45 +86,45 @@ if (Admin::getInstance()->permissions('settings', CC_PERM_EDIT)) {
 }
 
 if (isset($_GET['delete']) && ctype_digit($_GET['delete']) && Admin::getInstance()->permissions('settings', CC_PERM_DELETE)) {
-    if($GLOBALS['db']->delete('CubeCart_seo_urls', array('id' => $_GET['delete']))) {
+    if ($GLOBALS['db']->delete('CubeCart_seo_urls', ['id' => $_GET['delete']])) {
         $GLOBALS['main']->successMessage($lang['notification']['notify_seo_url_deleted']);
     } else {
         $GLOBALS['main']->errorMessage($lang['notification']['notify_seo_url_not_deleted']);
     }
-    $redirect = currentPage(array('delete'));
-    if(isset($_GET['item_id']) && isset($_GET['type'])) {
-        switch($_GET['type']) {
-            case "prod":
+    $redirect = currentPage(['delete']);
+    if (isset($_GET['item_id']) && isset($_GET['type'])) {
+        switch ($_GET['type']) {
+            case 'prod':
                 $redirect = '?_g=products&node=index&action=edit&product_id='.$_GET['item_id'];
-            break;
-            case "cat":
+                break;
+            case 'cat':
                 $redirect = '?_g=categories&action=edit&cat_id='.$_GET['item_id'];
-            break;
-            case "doc":
+                break;
+            case 'doc':
                 $redirect = '?_g=documents&action=edit&doc_id='.$_GET['item_id'];
-            break;
+                break;
         }
         httpredir($redirect, 'seo');
     } else {
         httpredir($redirect);
-    } 
+    }
 }
 
-$redirect_types = array(
-    'static' => array(
+$redirect_types = [
+    'static' => [
         'certificates' => $lang['catalogue']['gift_certificates'],
         'contact' => $lang['documents']['document_contact'],
         'login' => $lang['account']['login'],
         'register' => $lang['account']['register'],
         'saleitems' => $lang['navigation']['saleitems'],
-        'search' => $lang['common']['search']
-    ),
-    'dynamic' => array(
+        'search' => $lang['common']['search'],
+    ],
+    'dynamic' => [
         'cat' => $lang['common']['category'],
         'doc' => $lang['common']['document'],
-        'prod' => $lang['common']['product']
-    )
-);
+        'prod' => $lang['common']['product'],
+    ],
+];
 
 foreach ($GLOBALS['hooks']->load('admin.settings.redirect.types') as $hook) {
     include $hook;
@@ -132,12 +134,12 @@ $GLOBALS['smarty']->assign('REDIRECT_TYPES', $redirect_types);
 
 $page  = (isset($_GET['page'])) ? $_GET['page'] : 1;
 $per_page = 100;
-$redirect_dataset = array();
+$redirect_dataset = [];
 $total = 0;
-if($redirects =  $GLOBALS['db']->select('CubeCart_seo_urls', false, "`redirect` IN ('301', '302')", false, $per_page, $page)) {
+if ($redirects =  $GLOBALS['db']->select('CubeCart_seo_urls', false, "`redirect` IN ('301', '302')", false, $per_page, $page)) {
     $total = $GLOBALS['db']->count('CubeCart_seo_urls', false, "`redirect` IN ('301', '302')");
     $GLOBALS['smarty']->assign('PAGINATION', $GLOBALS['db']->pagination($total, $per_page, $page));
-    foreach($redirects as $redirect) {
+    foreach ($redirects as $redirect) {
         $redirect['destination'] = $GLOBALS['seo']->getdbPath($redirect['type'], $redirect['item_id']);
         $redirect_dataset[] = $redirect;
     }
@@ -147,12 +149,12 @@ $GLOBALS['smarty']->assign('REDIRECTS', $redirect_dataset);
 
 $page  = (isset($_GET['404_page'])) ? $_GET['404_page'] : 1;
 $per_page = 100;
-$missing_dataset = array();
+$missing_dataset = [];
 $total = 0;
-if($missing =  $GLOBALS['db']->select('CubeCart_404_log', false, array('ignore' => 0), array('created' => 'DESC'), $per_page, $page)) {
-    $total = $GLOBALS['db']->count('CubeCart_404_log', false, array('ignore' => 0));
+if ($missing =  $GLOBALS['db']->select('CubeCart_404_log', false, ['ignore' => 0], ['created' => 'DESC'], $per_page, $page)) {
+    $total = $GLOBALS['db']->count('CubeCart_404_log', false, ['ignore' => 0]);
     $GLOBALS['smarty']->assign('PAGINATION_404', $GLOBALS['db']->pagination($total, $per_page, $page, 5, '404_page', 'missing_uris'));
-    foreach($missing as $m) {
+    foreach ($missing as $m) {
         $m['updated'] = formatTime(strtotime($m['updated']));
         $missing_dataset[] = $m;
     }
@@ -162,12 +164,12 @@ $GLOBALS['smarty']->assign('MISSING', $missing_dataset);
 
 $page  = (isset($_GET['404_ignored'])) ? $_GET['404_ignored'] : 1;
 $per_page = 10;
-$ignored_dataset = array();
+$ignored_dataset = [];
 $total = 0;
-if($ignored =  $GLOBALS['db']->select('CubeCart_404_log', false, array('ignore' => 1), array('created' => 'DESC'), $per_page, $page)) {
-    $total = $GLOBALS['db']->count('CubeCart_404_log', false, array('ignore' => 1));
+if ($ignored =  $GLOBALS['db']->select('CubeCart_404_log', false, ['ignore' => 1], ['created' => 'DESC'], $per_page, $page)) {
+    $total = $GLOBALS['db']->count('CubeCart_404_log', false, ['ignore' => 1]);
     $GLOBALS['smarty']->assign('PAGINATION_IGNORED', $GLOBALS['db']->pagination($total, $per_page, $page, 5, '404_ignored', 'missing_uris'));
-    foreach($ignored as $m) {
+    foreach ($ignored as $m) {
         $ignored_dataset[] = $m;
     }
 }

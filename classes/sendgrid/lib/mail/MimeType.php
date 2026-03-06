@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper defines the content mime types for a /mail/send API call
  */
@@ -12,6 +14,6 @@ namespace SendGrid\Mail;
  */
 final class MimeType
 {
-    const HTML = "text/html";
-    const TEXT = "text/plain";
+    public const HTML = 'text/html';
+    public const TEXT = 'text/plain';
 }

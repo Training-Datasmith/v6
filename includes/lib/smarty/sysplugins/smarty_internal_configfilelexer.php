@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Configfilelexer
  *
@@ -21,12 +23,12 @@
  */
 class Smarty_Internal_Configfilelexer
 {
-    const START              = 1;
-    const VALUE              = 2;
-    const NAKED_STRING_VALUE = 3;
-    const COMMENT            = 4;
-    const SECTION            = 5;
-    const TRIPPLE            = 6;
+    public const START              = 1;
+    public const VALUE              = 2;
+    public const NAKED_STRING_VALUE = 3;
+    public const COMMENT            = 4;
+    public const SECTION            = 5;
+    public const TRIPPLE            = 6;
 
     /**
      * Source
@@ -103,17 +105,17 @@ class Smarty_Internal_Configfilelexer
      *
      * @var array
      */
-    public $state_name = array(
-        1 => 'START', 2 => 'VALUE', 3 => 'NAKED_STRING_VALUE', 4 => 'COMMENT', 5 => 'SECTION', 6 => 'TRIPPLE'
-    );
+    public $state_name = [
+        1 => 'START', 2 => 'VALUE', 3 => 'NAKED_STRING_VALUE', 4 => 'COMMENT', 5 => 'SECTION', 6 => 'TRIPPLE',
+    ];
 
     /**
      * token names
      *
      * @var array
      */
-    public $smarty_token_names = array(        // Text for parser error messages
-    );
+    public $smarty_token_names = [        // Text for parser error messages
+    ];
 
     /**
      * compiler object
@@ -148,7 +150,7 @@ class Smarty_Internal_Configfilelexer
 
     private $_yy_state          = 1;
 
-    private $_yy_stack          = array();
+    private $_yy_stack          = [];
 
     /**
      * constructor
@@ -437,7 +439,7 @@ class Smarty_Internal_Configfilelexer
     public function yy_r2_7()
     {
         if (!$this->configBooleanize ||
-            !in_array(strtolower($this->value), array('true', 'false', 'on', 'off', 'yes', 'no'))) {
+            !in_array(strtolower($this->value), ['true', 'false', 'on', 'off', 'yes', 'no'])) {
             $this->yypopstate();
             $this->yypushstate(self::NAKED_STRING_VALUE);
             return true; //reprocess in new state

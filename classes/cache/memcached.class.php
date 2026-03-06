@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -25,9 +27,8 @@ require CC_ROOT_DIR.'/classes/cache/cache.class.php';
  */
 class Cache extends Cache_Controler
 {
-
-    private $_memcache_servers = array('127.0.0.1',11211);
-    private $_memcached;
+    private array $_memcache_servers = ['127.0.0.1',11211];
+    private readonly \memcached $_memcached;
 
     ##############################################
 
@@ -46,9 +47,9 @@ class Cache extends Cache_Controler
         global $glob;
 
         $this->_mode = 'Memcached';
-        $this->_memcached = new memcached;
-    
-        $this->_memcache_servers = isset($glob['memcached_servers']) ? array($glob['memcached_servers']) : array($this->_memcache_servers);
+        $this->_memcached = new memcached();
+
+        $this->_memcache_servers = isset($glob['memcached_servers']) ? [$glob['memcached_servers']] : [$this->_memcache_servers];
 
         $this->_memcached->setOption(Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
         if (!count($this->_memcached->getServerList())) {
@@ -58,7 +59,7 @@ class Cache extends Cache_Controler
         //Run the parent constructor
         parent::__construct();
     }
-    
+
     public function __destruct()
     {
         if ($this->_empties_added) {
@@ -71,7 +72,7 @@ class Cache extends Cache_Controler
      *
      * @return instance
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -81,14 +82,12 @@ class Cache extends Cache_Controler
     }
 
     //=====[ Public ]=======================================
-
     /**
      * Clear the cache
      *
      * @param string $type Cache type prefix
-     * @return bool
      */
-    public function clear($type = '')
+    public function clear($type = ''): bool
     {
         $this->_memcached->flush();
         $this->_clearFileCache();
@@ -99,11 +98,10 @@ class Cache extends Cache_Controler
      * Remove a single item of cache
      *
      * @param string $id Cache identifier
-     * @return bool
      */
-    public function delete($id)
+    public function delete($id): bool
     {
-        $id = shortHash($id, 8, array($this->_empties_id));
+        $id = shortHash($id, 8, [$this->_empties_id]);
         return $this->_memcached->delete($this->_makeName($id));
     }
 
@@ -118,11 +116,11 @@ class Cache extends Cache_Controler
         if (!$this->status && !$this->statusException($id)) {
             return false;
         }
-        $id = shortHash($id, 8, array($this->_empties_id));
-        
+        $id = shortHash($id, 8, [$this->_empties_id]);
+
         return (bool)$this->_memcached->get($this->_makeName($id));
     }
-    
+
     /**
      * Get the cached data
      *
@@ -135,13 +133,13 @@ class Cache extends Cache_Controler
             return false;
         }
 
-        $id = shortHash($id, 8, array($this->_empties_id));
-        
-        if ($this->_empties_id!==$id && isset($this->_empties[$id])) {
-            return array('empty' => true, 'data' => $this->_empties[$id]);
+        $id = shortHash($id, 8, [$this->_empties_id]);
+
+        if ($this->_empties_id !== $id && isset($this->_empties[$id])) {
+            return ['empty' => true, 'data' => $this->_empties[$id]];
         }
 
-        if ($this->_empties_id!==$id && isset($this->_dupes[$id])) {
+        if ($this->_empties_id !== $id && isset($this->_dupes[$id])) {
             return $this->_dupes[$id];
         }
 
@@ -161,14 +159,12 @@ class Cache extends Cache_Controler
 
     /**
      * Calculates the cache usage
-     *
-     * @return string
      */
-    public function usage()
+    public function usage(): string
     {
         $stats = $this->_memcached->getStats();
         if (!is_array($stats)) {
-            return "No stats available for memcached.";
+            return 'No stats available for memcached.';
         }
 
         $output = '';
@@ -189,18 +185,18 @@ class Cache extends Cache_Controler
             $limit = (float)$data['limit_maxbytes'] / (1024 * 1024);
 
             $output .= "<table border='1' style='border-collapse: collapse;'>";
-            $output .= "<thead><tr><th colspan='2'>Memcached Server: ".$server." (v".$data['version'].")</th></tr></thead>";
-            $output .= "<tbody>";
-            $output .= "<tr><td>Uptime</td><td>".$uptime_str."</td></tr>";
-            $output .= "<tr><td>Connected clients</td><td>".$data['curr_connections']."</td></tr>";
-            $output .= "<tr><td>Memory used</td><td>".round($used, 2)." MiB</td></tr>";
-            $output .= "<tr><td>Memory limit</td><td>".round($limit, 0)." MiB</td></tr>";
-            $output .= "<tr><td>Total items stored</td><td>".number_format((float)$data['total_items'])."</td></tr>";
-            $output .= "<tr><td>Current items</td><td>".number_format((float)$data['curr_items'])."</td></tr>";
-            $output .= "<tr><td>Cache hits</td><td>".$hits." (".$hit_rate."%)</td></tr>";
-            $output .= "<tr><td>Cache misses</td><td>".$misses." (".(100 - $hit_rate)."%)</td></tr>";
-            $output .= "<tr><td>Evicted keys</td><td>".$data['evictions']."</td></tr>";
-            $output .= "</tbody></table>";
+            $output .= "<thead><tr><th colspan='2'>Memcached Server: ".$server.' (v'.$data['version'].')</th></tr></thead>';
+            $output .= '<tbody>';
+            $output .= '<tr><td>Uptime</td><td>'.$uptime_str.'</td></tr>';
+            $output .= '<tr><td>Connected clients</td><td>'.$data['curr_connections'].'</td></tr>';
+            $output .= '<tr><td>Memory used</td><td>'.round($used, 2).' MiB</td></tr>';
+            $output .= '<tr><td>Memory limit</td><td>'.round($limit, 0).' MiB</td></tr>';
+            $output .= '<tr><td>Total items stored</td><td>'.number_format((float)$data['total_items']).'</td></tr>';
+            $output .= '<tr><td>Current items</td><td>'.number_format((float)$data['curr_items']).'</td></tr>';
+            $output .= '<tr><td>Cache hits</td><td>'.$hits.' ('.$hit_rate.'%)</td></tr>';
+            $output .= '<tr><td>Cache misses</td><td>'.$misses.' ('.(100 - $hit_rate).'%)</td></tr>';
+            $output .= '<tr><td>Evicted keys</td><td>'.$data['evictions'].'</td></tr>';
+            $output .= '</tbody></table>';
         }
 
         return $output;
@@ -212,17 +208,16 @@ class Cache extends Cache_Controler
      * @param mixed $data Data to write to the file
      * @param string $id Cache identifier
      * @param int $expire Force a time to live
-     * @return bool
      */
-    public function write($data, $id, $expire = '')
+    public function write($data, $id, $expire = ''): bool
     {
         if (!$this->status && !$this->statusException($id)) {
             return false;
         }
 
-        $id = shortHash($id, 8, array($this->_empties_id));
-        
-        if ($this->_empties_id!==$id && empty($data)) {
+        $id = shortHash($id, 8, [$this->_empties_id]);
+
+        if ($this->_empties_id !== $id && empty($data)) {
             if (!isset($this->_empties[$id])) {
                 $this->_empties[$id] = $data;
                 $this->_empties_added = true;
@@ -249,6 +244,6 @@ class Cache extends Cache_Controler
     protected function _getEmpties()
     {
         $this->_setPrefix();
-        $this->_empties = ($this->read($this->_empties_id))?:array();
+        $this->_empties = ($this->read($this->_empties_id)) ?: [];
     }
 }

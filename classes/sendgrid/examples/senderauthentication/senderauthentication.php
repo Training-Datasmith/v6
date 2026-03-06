@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -95,7 +97,7 @@ $request_body = json_decode('{
   "custom_spf": true,
   "default": false
 }');
-$domain_id = "test_url_param";
+$domain_id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->domains()->_($domain_id)->patch($request_body);
@@ -110,7 +112,7 @@ try {
 // Retrieve a domain authentication. #
 // GET /whitelabel/domains/{domain_id} #
 
-$domain_id = "test_url_param";
+$domain_id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->domains()->_($domain_id)->get();
@@ -125,7 +127,7 @@ try {
 // Delete a domain authentication. #
 // DELETE /whitelabel/domains/{domain_id} #
 
-$domain_id = "test_url_param";
+$domain_id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->domains()->_($domain_id)->delete();
@@ -143,7 +145,7 @@ try {
 $request_body = json_decode('{
   "username": "jane@example.com"
 }');
-$domain_id = "test_url_param";
+$domain_id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->domains()->_($domain_id)->subuser()->post($request_body);
@@ -161,7 +163,7 @@ try {
 $request_body = json_decode('{
   "ip": "192.168.0.1"
 }');
-$id = "test_url_param";
+$id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->domains()->_($id)->ips()->post($request_body);
@@ -176,8 +178,8 @@ try {
 // Remove an IP from a domain authentication. #
 // DELETE /whitelabel/domains/{id}/ips/{ip} #
 
-$id = "test_url_param";
-$ip = "test_url_param";
+$id = 'test_url_param';
+$ip = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->domains()->_($id)->ips()->_($ip)->delete();
@@ -192,7 +194,7 @@ try {
 // Validate a domain authentication. #
 // POST /whitelabel/domains/{id}/validate #
 
-$id = "test_url_param";
+$id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->domains()->_($id)->validate()->post();
@@ -241,7 +243,7 @@ try {
 // Retrieve a reverse DNS record #
 // GET /whitelabel/ips/{id} #
 
-$id = "test_url_param";
+$id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->ips()->_($id)->get();
@@ -256,7 +258,7 @@ try {
 // Delete a reverse DNS record #
 // DELETE /whitelabel/ips/{id} #
 
-$id = "test_url_param";
+$id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->ips()->_($id)->delete();
@@ -271,7 +273,7 @@ try {
 // Validate a reverse DNS record #
 // POST /whitelabel/ips/{id}/validate #
 
-$id = "test_url_param";
+$id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->ips()->_($id)->validate()->post();
@@ -369,7 +371,7 @@ try {
 $request_body = json_decode('{
   "default": true
 }');
-$id = "test_url_param";
+$id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->links()->_($id)->patch($request_body);
@@ -384,7 +386,7 @@ try {
 // Retrieve a Link Branding #
 // GET /whitelabel/links/{id} #
 
-$id = "test_url_param";
+$id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->links()->_($id)->get();
@@ -399,7 +401,7 @@ try {
 // Delete a Link Branding #
 // DELETE /whitelabel/links/{id} #
 
-$id = "test_url_param";
+$id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->links()->_($id)->delete();
@@ -414,7 +416,7 @@ try {
 // Validate a Link Branding #
 // POST /whitelabel/links/{id}/validate #
 
-$id = "test_url_param";
+$id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->links()->_($id)->validate()->post();
@@ -432,7 +434,7 @@ try {
 $request_body = json_decode('{
   "username": "jane@example.com"
 }');
-$link_id = "test_url_param";
+$link_id = 'test_url_param';
 
 try {
     $response = $sg->client->whitelabel()->links()->_($link_id)->subuser()->post($request_body);

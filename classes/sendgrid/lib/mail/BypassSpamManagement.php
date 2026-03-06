@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the BypassSpamManagement object for a /mail/send API call
  */
@@ -44,7 +46,7 @@ class BypassSpamManagement implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable)
+    public function setEnable($enable): void
     {
         Assert::boolean($enable, 'enable');
 
@@ -72,11 +74,9 @@ class BypassSpamManagement implements \JsonSerializable
     {
         return array_filter(
             [
-                'enable' => $this->getEnable()
+                'enable' => $this->getEnable(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (bool $value) => $value !== null
         ) ?: null;
     }
 }

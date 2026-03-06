@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Config File Compiler
  * This is the config file compiler class. It calls the lexer and parser to
@@ -64,7 +66,7 @@ class Smarty_Internal_Config_File_Compiler
      *
      * @var array
      */
-    public $config_data = array();
+    public $config_data = [];
 
     /**
      * compiled config data must always be written
@@ -87,8 +89,8 @@ class Smarty_Internal_Config_File_Compiler
         $this->lexer_class = $lexer_class;
         $this->parser_class = $parser_class;
         $this->smarty = $smarty;
-        $this->config_data[ 'sections' ] = array();
-        $this->config_data[ 'vars' ] = array();
+        $this->config_data[ 'sections' ] = [];
+        $this->config_data[ 'vars' ] = [];
     }
 
     /**
@@ -103,11 +105,11 @@ class Smarty_Internal_Config_File_Compiler
     {
         $this->template = $template;
         $this->template->compiled->file_dependency[ $this->template->source->uid ] =
-            array(
+            [
                 $this->template->source->filepath,
                 $this->template->source->getTimeStamp(),
-                $this->template->source->type
-            );
+                $this->template->source->type,
+            ];
         if ($this->smarty->debugging) {
             if (!isset($this->smarty->_debug)) {
                 $this->smarty->_debug = new Smarty_Internal_Debug();
@@ -118,10 +120,10 @@ class Smarty_Internal_Config_File_Compiler
         /* @var Smarty_Internal_ConfigFileLexer $this->lex */
         $this->lex = new $this->lexer_class(
             str_replace(
-                array(
+                [
                     "\r\n",
-                    "\r"
-                ),
+                    "\r",
+                ],
                 "\n",
                 $template->source->getContent()
             ) . "\n",
@@ -160,8 +162,8 @@ class Smarty_Internal_Config_File_Compiler
         $template_header = sprintf(
             "<?php /* Smarty version %s, created on %s\n         compiled from '%s' */ ?>\n",
             Smarty::SMARTY_VERSION,
-            date("Y-m-d H:i:s"),
-            str_replace('*/', '* /' , $this->template->source->filepath)
+            date('Y-m-d H:i:s'),
+            str_replace('*/', '* /', $this->template->source->filepath)
         );
         $code = '<?php $_smarty_tpl->smarty->ext->configLoad->_loadConfigVars($_smarty_tpl, ' .
                 var_export($this->config_data, true) . '); ?>';

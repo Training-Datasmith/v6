@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -15,22 +17,22 @@ if (!defined('CC_INI_SET')) {
 }
 Admin::getInstance()->permissions('documents', CC_PERM_EDIT, true);
 
-$invoice_types = array();
+$invoice_types = [];
 
 ## Add hook
 foreach ($GLOBALS['hooks']->load('admin.documents.invoice.macros') as $hook) {
     include $hook;
 }
 
-$current = $GLOBALS['db']->select('CubeCart_invoice_template', array('hash', 'content'), false, 'id DESC', 1);
+$current = $GLOBALS['db']->select('CubeCart_invoice_template', ['hash', 'content'], false, 'id DESC', 1);
 $filename = CC_ROOT_DIR.'/'.$GLOBALS['config']->get('config', 'adminFolder').'/skins/'.$GLOBALS['config']->get('config', 'admin_skin').'/templates/orders.print.php';
-$handle = fopen($filename, "rb");
+$handle = fopen($filename, 'rb');
 $default = fread($handle, filesize($filename));
 
 $updated = false;
 
-if (isset($_GET['restore']) && $_GET['restore']==1) {
-    if ($GLOBALS['db']->insert('CubeCart_invoice_template', array('content' => $default, 'hash' => md5($default)))) {
+if (isset($_GET['restore']) && $_GET['restore'] == 1) {
+    if ($GLOBALS['db']->insert('CubeCart_invoice_template', ['content' => $default, 'hash' => md5($default)])) {
         $GLOBALS['main']->successMessage($lang['settings']['notify_default_restore']);
     }
     $updated = true;
@@ -45,8 +47,8 @@ if (isset($_GET['restore']) && $_GET['restore']==1) {
 
     if (!$syntax_error) {
         $hash = md5($GLOBALS['RAW']['POST']['content']);
-        if (!$current || $current[0]['hash']!==$hash) {
-            $GLOBALS['db']->insert('CubeCart_invoice_template', array('content' => $GLOBALS['RAW']['POST']['content'], 'hash' => $hash));
+        if (!$current || $current[0]['hash'] !== $hash) {
+            $GLOBALS['db']->insert('CubeCart_invoice_template', ['content' => $GLOBALS['RAW']['POST']['content'], 'hash' => $hash]);
             $current[0]['content'] = $GLOBALS['RAW']['POST']['content'];
         }
         $GLOBALS['main']->successMessage($lang['settings']['notify_invoice_updated']);

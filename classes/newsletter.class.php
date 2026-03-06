@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -20,9 +22,9 @@
  */
 class Newsletter
 {
-    private $_mailer;
+    private readonly \Mailer $_mailer;
 
-    private $_validated_domain = array();
+    private array $_validated_domain = [];
 
     public $_newsletter_id;
 
@@ -37,10 +39,8 @@ class Newsletter
 
     /**
      * Setup the instance (singleton)
-     *
-     * @return Newsletter
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -54,18 +54,19 @@ class Newsletter
      *
      * @return array('deleted' => int, 'unsubscribed' => int);
      */
-    public function cleanList() {
-        $rows = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', array('subscriber_id','email'));
-        $return = array('deleted' => 0, 'unsubscribed' => 0);
-        if($rows) {
-            foreach($rows as $row) {
-                if($this->validateEmail($row['email'])==2) {
-                    if($GLOBALS['db']->delete('CubeCart_newsletter_subscriber', array('subscriber_id' => $row['subscriber_id']))) {
+    public function cleanList(): array
+    {
+        $rows = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', ['subscriber_id','email']);
+        $return = ['deleted' => 0, 'unsubscribed' => 0];
+        if ($rows) {
+            foreach ($rows as $row) {
+                if ($this->validateEmail($row['email']) == 2) {
+                    if ($GLOBALS['db']->delete('CubeCart_newsletter_subscriber', ['subscriber_id' => $row['subscriber_id']])) {
                         $this->_subscriberLog($row['email'], 'Invalid email address deleted from mailing list.');
                         $return['deleted']++;
                     }
-                } else if($this->validateEmail($row['email'])==0) {
-                    if($GLOBALS['db']->update('CubeCart_newsletter_subscriber', array('status' => 0), array('subscriber_id' => $row['subscriber_id']))) {
+                } elseif ($this->validateEmail($row['email']) == 0) {
+                    if ($GLOBALS['db']->update('CubeCart_newsletter_subscriber', ['status' => 0], ['subscriber_id' => $row['subscriber_id']])) {
                         $this->_subscriberLog($row['email'], 'No valid MX record found. Status set to disabled.');
                         $return['unsubscribed']++;
                     }
@@ -76,21 +77,18 @@ class Newsletter
     }
 
     //=====[ Public ]=======================================
-
     /**
      * Delete newsletter
      *
      * @param int $newsletter_id
-     * @return bool
      */
-    public function deleteNewsletter($newsletter_id = false)
+    public function deleteNewsletter($newsletter_id = false): bool
     {
         if ($newsletter_id && is_numeric($newsletter_id)) {
-            $GLOBALS['db']->delete('CubeCart_newsletter', array('newsletter_id' => (int)$newsletter_id));
+            $GLOBALS['db']->delete('CubeCart_newsletter', ['newsletter_id' => (int)$newsletter_id]);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -98,7 +96,8 @@ class Newsletter
      *
      * @return bool
      */
-    public function emptyList() {
+    public function emptyList()
+    {
         return $GLOBALS['db']->misc('TRUNCATE TABLE `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_newsletter_subscriber`;');
     }
 
@@ -106,12 +105,11 @@ class Newsletter
      * Generate validaton key for email verification
      *
      * @param string $key
-     * @return string
      */
-    private function generateValidation($email)
+    private function generateValidation($email): string
     {
         // Generate a validation key for the specified email address
-        $string = sprintf('%s@%s', crypt($email, (string)time()), date('U.u'));
+        $string = sprintf('%s@%s', crypt((string) $email, (string)time()), date('U.u'));
         return md5($string);
     }
 
@@ -126,7 +124,7 @@ class Newsletter
         $result = false;
         if (!empty($newsletter) && is_array($newsletter)) {
             if (!empty($newsletter['newsletter_id']) && is_numeric($newsletter['newsletter_id'])) {
-                $result = $GLOBALS['db']->update('CubeCart_newsletter', $newsletter, array('newsletter_id' => $newsletter['newsletter_id']));
+                $result = $GLOBALS['db']->update('CubeCart_newsletter', $newsletter, ['newsletter_id' => $newsletter['newsletter_id']]);
                 $this->_newsletter_id = $newsletter['newsletter_id'];
             } else {
                 $this->_newsletter_id = $result = $GLOBALS['db']->insert('CubeCart_newsletter', $newsletter);
@@ -143,11 +141,11 @@ class Newsletter
      * @param bool $test
      * @return bool
      */
-    public function sendNewsletter($newsletter_id = false, $cycle = 1, $test = false)
+    public function sendNewsletter($newsletter_id = false, $cycle = 1, $test = false): array|bool
     {
         // Load newsletter from database, and send
         if ($newsletter_id && is_numeric($newsletter_id)) {
-            if (($contents = $GLOBALS['db']->select('CubeCart_newsletter', false, array('newsletter_id' => (int)$newsletter_id))) !== false) {
+            if (($contents = $GLOBALS['db']->select('CubeCart_newsletter', false, ['newsletter_id' => (int)$newsletter_id])) !== false) {
                 $content = $contents[0];
 
                 if (!empty($content['sender_name'])) {
@@ -160,7 +158,7 @@ class Newsletter
                     // Send test email only
                     if (filter_var($test, FILTER_VALIDATE_EMAIL)) {
                         $this->unsubscribeHeader($test);
-                        if($this->_mailer->sendEmail($test, $content, $contents[0]['template_id'])) {
+                        if ($this->_mailer->sendEmail($test, $content, $contents[0]['template_id'])) {
                             $log = sprintf($GLOBALS['language']->newsletter['test_subscriber_log'], $contents[0]['subject'], $this->_mailer->getTemplateTitle());
                             $this->_subscriberLog($test, $log);
                         }
@@ -170,49 +168,46 @@ class Newsletter
                     ini_set('ignore_user_abort', true);
                     // Send to all subscribers
                     $limit = 20;
-                    $where = array('status' => '1');
-                    if ($content['dbl_opt']==1) {
+                    $where = ['status' => '1'];
+                    if ($content['dbl_opt'] == 1) {
                         $where['dbl_opt'] = 1;
                     }
                     $total = (int)$GLOBALS['db']->count('CubeCart_newsletter_subscriber', 'status', $where);
-                    if($total==0 && $cycle==1) {
+                    if ($total == 0 && $cycle == 1) {
                         $GLOBALS['gui']->setError($GLOBALS['language']->newsletter['no_subscribers']);
                     }
-                    if (($subscribers = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', array('email'), $where, false, $limit, $cycle)) !== false) {
+                    if (($subscribers = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', ['email'], $where, false, $limit, $cycle)) !== false) {
                         foreach ($subscribers as $subscriber) {
                             if (filter_var($subscriber['email'], FILTER_VALIDATE_EMAIL)) {
-                                $content = array(
+                                $content = [
                                     'subject'  => $content['subject'],
                                     'content_html' => $content['content_html'],
-                                );
+                                ];
                                 $this->unsubscribeHeader($subscriber['email']);
-                                if($this->_mailer->sendEmail($subscriber['email'], $content, $contents[0]['template_id'])) {
+                                if ($this->_mailer->sendEmail($subscriber['email'], $content, $contents[0]['template_id'])) {
                                     $log = sprintf($GLOBALS['language']->newsletter['subscriber_log'], $contents[0]['subject'], $this->_mailer->getTemplateTitle());
                                     $this->_subscriberLog($subscriber['email'], $log);
                                 }
                             } else {
                                 // Flag for deletion
-                                $GLOBALS['db']->update('CubeCart_newsletter_subscriber', array('status' => '9'), array('email' => $subscriber['email']));
+                                $GLOBALS['db']->update('CubeCart_newsletter_subscriber', ['status' => '9'], ['email' => $subscriber['email']]);
                             }
                         }
                         $sent_to = $limit * $cycle;
                         if ($total > $sent_to) {
-                            $data = array(
+                            return [
                                 'count'  => $sent_to,
                                 'total'  => $total,
-                                'percent' => ($sent_to/$total)*100,
-                            );
-                            return $data;
-                        } else {
-                            // Delete flagged subscribers
-                            $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', array('status' => '9'));
-                            // Update newsletter record
-                            $GLOBALS['db']->update('CubeCart_newsletter', array('date_sent' => 'CURRENT_TIMESTAMP', 'status' => 1), array('newsletter_id' => (int)$newsletter_id));
-                            return true;
+                                'percent' => ($sent_to / $total) * 100,
+                            ];
                         }
-                    } else {
-                        return false;
+                        // Delete flagged subscribers
+                        $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', ['status' => '9']);
+                        // Update newsletter record
+                        $GLOBALS['db']->update('CubeCart_newsletter', ['date_sent' => 'CURRENT_TIMESTAMP', 'status' => 1], ['newsletter_id' => (int)$newsletter_id]);
+                        return true;
                     }
+                    return false;
                 }
             }
         }
@@ -223,15 +218,14 @@ class Newsletter
      * Subscribe to newsletter
      *
      * @param string $email
-     * @return bool
      */
-    public function subscribe($email = false, $customer_id = null)
+    public function subscribe($email = false, $customer_id = null): bool
     {
-        if($GLOBALS['config']->get('config', 'newsletter_status')==='0') {
+        if ($GLOBALS['config']->get('config', 'newsletter_status') === '0') {
             return false;
         }
-        $checkout = in_array($_GET['_a'], array('confirm','checkout','basket')) ? true : false;
-        if ($checkout && $GLOBALS['config']->get('config', 'dbl_opt')=='1' && $GLOBALS['session']->has('dbl_opted') && $GLOBALS['session']->get('dbl_opted')==$email) {
+        $checkout = in_array($_GET['_a'], ['confirm','checkout','basket']) ? true : false;
+        if ($checkout && $GLOBALS['config']->get('config', 'dbl_opt') == '1' && $GLOBALS['session']->has('dbl_opted') && $GLOBALS['session']->get('dbl_opted') == $email) {
             return false;
         }
         $skin_data = GUI::getInstance()->getSkinData();
@@ -259,22 +253,22 @@ class Newsletter
             httpredir(currentPage());
         } else {
             $email = strtolower($email);
-            $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', array('email' => $email));
+            $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', ['email' => $email]);
 
-            $record = array(
+            $record = [
                 'status'  => true,
                 'email'   => $email,
                 'customer_id'   => $customer_id,
                 'validation' => $this->generateValidation($email),
                 'ip_address' => get_ip_address(),
-                'date' => date('c')
-            );
+                'date' => date('c'),
+            ];
             $GLOBALS['db']->insert('CubeCart_newsletter_subscriber', $record);
-        
+
             if ((bool)$GLOBALS['config']->get('config', 'dbl_opt')) {
                 $mailer = new Mailer();
                 if (($content = $mailer->loadContent('newsletter.verify_email', $GLOBALS['language']->current())) !== false) {
-                    $GLOBALS['smarty']->assign('DATA', array('email' => $email, 'link' => CC_STORE_URL.'?_a=newsletter&do='.$record['validation']));
+                    $GLOBALS['smarty']->assign('DATA', ['email' => $email, 'link' => CC_STORE_URL.'?_a=newsletter&do='.$record['validation']]);
                     $mailer->sendEmail($email, $content);
                     $GLOBALS['session']->set('dbl_opted', $email);
                 }
@@ -305,32 +299,32 @@ class Newsletter
      */
     public function unsubscribe($email = false, $customer_id = false)
     {
-        if($GLOBALS['config']->get('config', 'newsletter_status')==='0') {
+        if ($GLOBALS['config']->get('config', 'newsletter_status') === '0') {
             return false;
         }
         // Unsubscribe the user
         $removed = false;
         $remove_token = null;
-        if (ctype_digit($customer_id) && $customer_id > 0) {
-            $removed = $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', array('customer_id' => $customer_id));
-        } else if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            if(defined('ADMIN_CP') && ADMIN_CP === true || isset($_GET['rt']) && !empty($_GET['rt'])) {
-                $where = isset($_GET['rt']) ? array('remove_token' => $_GET['rt']) : array('email' => $email);
+        if (ctype_digit((string) $customer_id) && $customer_id > 0) {
+            $removed = $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', ['customer_id' => $customer_id]);
+        } elseif (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            if (defined('ADMIN_CP') && ADMIN_CP === true || isset($_GET['rt']) && !empty($_GET['rt'])) {
+                $where = isset($_GET['rt']) ? ['remove_token' => $_GET['rt']] : ['email' => $email];
                 $removed = $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', $where);
             } else {
                 $remove_token = md5(uniqid((string)time(), true));
-                $remove_possible = $GLOBALS['db']->update('CubeCart_newsletter_subscriber', array('remove_token' => $remove_token), array('email' => $email));
+                $remove_possible = $GLOBALS['db']->update('CubeCart_newsletter_subscriber', ['remove_token' => $remove_token], ['email' => $email]);
             }
             foreach ($GLOBALS['hooks']->load('class.newsletter.unsubscribe') as $hook) {
                 include $hook;
             }
         }
-        if(!empty($remove_token)) {
+        if (!empty($remove_token)) {
             $this->_subscriberLog($email, 'Removal requested. Pending confirmation.');
             $mailer = new Mailer();
             if ($remove_possible && ($content = $mailer->loadContent('newsletter.remove_request', $GLOBALS['language']->current())) !== false) {
-                $GLOBALS['smarty']->assign('DATA', array('email' => $email, 'link' => CC_STORE_URL."/index.php?_a=unsubscribe&unsubscribe=".urlencode($email)."&rt=".$remove_token));
-                $mailer->sendEmail($email, $content); 
+                $GLOBALS['smarty']->assign('DATA', ['email' => $email, 'link' => CC_STORE_URL.'/index.php?_a=unsubscribe&unsubscribe='.urlencode($email).'&rt='.$remove_token]);
+                $mailer->sendEmail($email, $content);
                 $this->_subscriberLog($email, 'Removal requested email sent.');
             }
             $GLOBALS['gui']->setNotify($GLOBALS['language']->newsletter['notify_remove_request']);
@@ -350,27 +344,26 @@ class Newsletter
      *
      * @param string $email
      */
-    public function unsubscribeHeader($email)
+    public function unsubscribeHeader($email): void
     {
         $this->_mailer->clearCustomHeaders();
-        $this->_mailer->addCustomHeader("List-Unsubscribe","<".$GLOBALS['storeURL']."/index.php?_a=unsubscribe&unsubscribe=".urlencode($email).">");
-        $this->_mailer->addCustomHeader("List-Unsubscribe-Post","List-Unsubscribe=One-Click");
+        $this->_mailer->addCustomHeader('List-Unsubscribe', '<'.$GLOBALS['storeURL'].'/index.php?_a=unsubscribe&unsubscribe='.urlencode($email).'>');
+        $this->_mailer->addCustomHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
     }
 
     /**
      * Double opt in newsletter subscription
      *
      * @param string $validation
-     * @return bool
      */
-    public function doubleOptIn($validation = false)
+    public function doubleOptIn($validation = false): bool
     {
         // Verify the validation email
         if (!empty($validation)) {
-            $validate = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', array('subscriber_id', 'email'), array('validation' => $validation), false, 1, false, false);
+            $validate = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', ['subscriber_id', 'email'], ['validation' => $validation], false, 1, false, false);
             if ($validate) {
                 $this->_subscriberLog($validate[0]['email'], 'Double opt-in verified');
-                $GLOBALS['db']->update('CubeCart_newsletter_subscriber', array('dbl_opt' => '1', 'date' => date('c'), 'ip_address' => get_ip_address()), array('subscriber_id' => $validate[0]['subscriber_id']));
+                $GLOBALS['db']->update('CubeCart_newsletter_subscriber', ['dbl_opt' => '1', 'date' => date('c'), 'ip_address' => get_ip_address()], ['subscriber_id' => $validate[0]['subscriber_id']]);
                 foreach ($GLOBALS['hooks']->load('class.newsletter.validated') as $hook) {
                     include $hook;
                 }
@@ -380,16 +373,17 @@ class Newsletter
         return false;
     }
 
-    /** 
+    /**
      * Validate email address and MX record
      *
      * @param string $email
      * @return 0, 1, 2
      */
-    public function validateEmail($email) {
-        if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            list($user, $domain) = explode('@', $email);
-            if(!isset($this->_validated_domain[$domain])) {
+    public function validateEmail($email)
+    {
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            [$user, $domain] = explode('@', $email);
+            if (!isset($this->_validated_domain[$domain])) {
                 return $this->_validated_domain[$domain] = (int)checkdnsrr($domain, 'MX');
             }
             return $this->_validated_domain[$domain];
@@ -401,13 +395,12 @@ class Newsletter
      * Log subscription status
      *
      * @param string $email
-     * @param string $log
      * @return bool
      */
-    private function _subscriberLog($email, $log)
+    private function _subscriberLog($email, string $log)
     {
         if (!empty($email) && !empty($log)) {
-            return $GLOBALS['db']->insert('CubeCart_newsletter_subscriber_log', array('email' => htmlentities((string)$email, ENT_QUOTES, 'UTF-8'), 'log' => $log, 'ip_address' => get_ip_address()));
+            return $GLOBALS['db']->insert('CubeCart_newsletter_subscriber_log', ['email' => htmlentities((string)$email, ENT_QUOTES, 'UTF-8'), 'log' => $log, 'ip_address' => get_ip_address()]);
         }
         return false;
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Method ClearAllAssign
  *
@@ -30,7 +32,7 @@ class Smarty_Internal_Method_ClearAllAssign
      */
     public function clearAllAssign(Smarty_Internal_Data $data)
     {
-        $data->tpl_vars = array();
+        $data->tpl_vars = [];
         return $data;
     }
 }

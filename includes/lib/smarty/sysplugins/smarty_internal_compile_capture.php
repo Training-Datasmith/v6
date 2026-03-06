@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Compile Capture
  * Compiles the {capture} tag
@@ -22,7 +24,7 @@ class Smarty_Internal_Compile_Capture extends Smarty_Internal_CompileBase
      * @var array
      * @see Smarty_Internal_CompileBase
      */
-    public $shorttag_order = array('name');
+    public $shorttag_order = ['name'];
 
     /**
      * Attribute definition: Overwrites base class.
@@ -30,7 +32,7 @@ class Smarty_Internal_Compile_Capture extends Smarty_Internal_CompileBase
      * @var array
      * @see Smarty_Internal_CompileBase
      */
-    public $optional_attributes = array('name', 'assign', 'append');
+    public $optional_attributes = ['name', 'assign', 'append'];
 
     /**
      * Compiles code for the {$smarty.capture.xxx}
@@ -66,7 +68,7 @@ class Smarty_Internal_Compile_Capture extends Smarty_Internal_CompileBase
         $buffer = isset($_attr[ 'name' ]) ? $_attr[ 'name' ] : "'default'";
         $assign = isset($_attr[ 'assign' ]) ? $_attr[ 'assign' ] : 'null';
         $append = isset($_attr[ 'append' ]) ? $_attr[ 'append' ] : 'null';
-        $compiler->_cache[ 'capture_stack' ][] = array($compiler->nocache);
+        $compiler->_cache[ 'capture_stack' ][] = [$compiler->nocache];
         // maybe nocache because of nocache variables
         $compiler->nocache = $compiler->nocache | $compiler->tag_nocache;
         $_output = "<?php \$_smarty_tpl->smarty->ext->_capture->open(\$_smarty_tpl, $buffer, $assign, $append);?>";
@@ -100,6 +102,6 @@ class Smarty_Internal_Compile_CaptureClose extends Smarty_Internal_CompileBase
             $compiler->tag_nocache = true;
         }
         list($compiler->nocache) = array_pop($compiler->_cache[ 'capture_stack' ]);
-        return "<?php \$_smarty_tpl->smarty->ext->_capture->close(\$_smarty_tpl);?>";
+        return '<?php $_smarty_tpl->smarty->ext->_capture->close($_smarty_tpl);?>';
     }
 }

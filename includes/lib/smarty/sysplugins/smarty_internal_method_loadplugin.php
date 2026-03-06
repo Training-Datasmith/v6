@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Extension Loadplugin
  *
@@ -16,7 +18,7 @@ class Smarty_Internal_Method_LoadPlugin
      *
      * @var array
      */
-    public $plugin_files = array();
+    public $plugin_files = [];
 
     /**
      * Takes unknown classes and loads plugin files for them
@@ -75,7 +77,7 @@ class Smarty_Internal_Method_LoadPlugin
                 }
             }
         }
-        $_file_names = array($_plugin_filename);
+        $_file_names = [$_plugin_filename];
         if ($_lower_filename !== $_plugin_filename) {
             $_file_names[] = $_lower_filename;
         }

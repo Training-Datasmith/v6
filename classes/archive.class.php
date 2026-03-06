@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -28,16 +30,12 @@ class Archive
     private $_archive = false;
     /**
      * Archive contents
-     *
-     * @var string
      */
-    private $_contents = null;
+    private ?array $_contents = null;
     /**
      * Enabled?
-     *
-     * @var bool
      */
-    private $_enabled = false;
+    private bool $_enabled;
     /**
      * Zip class class
      *
@@ -51,10 +49,10 @@ class Archive
     {
         $this->_enabled = (extension_loaded('zip')) ? true : false;
         if ($this->_enabled && !empty($archive)) {
-            $this->_zip = new ZipArchive;
-            return $this->open($archive, $create);
+            $this->_zip = new ZipArchive();
+            $this->open($archive, $create);
+            return;
         }
-        return false;
     }
 
     public function __destruct()
@@ -84,9 +82,8 @@ class Archive
             } else {
                 if (!empty($string) && is_string($string)) {
                     return $this->_zip->addFromString($files, $string);
-                } else {
-                    return $this->_addFile($files);
                 }
+                return $this->_addFile($files);
             }
         }
         return false;
@@ -100,7 +97,7 @@ class Archive
     public function contents()
     {
         if ($this->_enabled) {
-            for ($i = 0; $i< $this->_zip->numFiles; ++$i) {
+            for ($i = 0; $i < $this->_zip->numFiles; ++$i) {
                 $this->_contents[$i] = $this->_zip->statIndex($i);
                 $comment = $this->_zip->getCommentIndex($i);
                 if ($comment) {
@@ -131,51 +128,48 @@ class Archive
     }
 
     //=====[ Private ]=======================================
-
     /**
      * Get error
-     *
-     * @return string
      */
-    private function error()
+    private function error(): string
     {
         if ($this->_enabled) {
             switch ($this->_archive) {
-            case ZIPARCHIVE::ER_CRC:
-                $message = 'ZIP CRC error';
-                break;
-            case ZIPARCHIVE::ER_EXISTS:
-                $message = 'ZIP archive already exists';
-                break;
-            case ZIPARCHIVE::ER_INCONS:
-                $message = 'ZIP archive inconsistency';
-                break;
-            case ZIPARCHIVE::ER_INVAL:
-                $message = 'Invalid arguments';
-                break;
-            case ZIPARCHIVE::ER_MEMORY:
-                $message = 'Memory allocation failure';
-                break;
-            case ZIPARCHIVE::ER_MULTIDISK:
-                $message = 'Multi-disk archives are not supported';
-                break;
-            case ZIPARCHIVE::ER_NOENT:
-                $message = 'File does not exist';
-                break;
-            case ZIPARCHIVE::ER_NOZIP:
-                $message = 'Not a valid ZIP archive';
-                break;
-            case ZIPARCHIVE::ER_OPEN:
-                $message = 'Unable to open archive';
-                break;
-            case ZIPARCHIVE::ER_READ:
-                $message = 'ZIP file read error';
-                break;
-            case ZIPARCHIVE::ER_SEEK:
-                $message = 'ZIP file seek error';
-                break;
-            default:
-                $message = 'Unknown error: '.$this->_archive;
+                case ZIPARCHIVE::ER_CRC:
+                    $message = 'ZIP CRC error';
+                    break;
+                case ZIPARCHIVE::ER_EXISTS:
+                    $message = 'ZIP archive already exists';
+                    break;
+                case ZIPARCHIVE::ER_INCONS:
+                    $message = 'ZIP archive inconsistency';
+                    break;
+                case ZIPARCHIVE::ER_INVAL:
+                    $message = 'Invalid arguments';
+                    break;
+                case ZIPARCHIVE::ER_MEMORY:
+                    $message = 'Memory allocation failure';
+                    break;
+                case ZIPARCHIVE::ER_MULTIDISK:
+                    $message = 'Multi-disk archives are not supported';
+                    break;
+                case ZIPARCHIVE::ER_NOENT:
+                    $message = 'File does not exist';
+                    break;
+                case ZIPARCHIVE::ER_NOZIP:
+                    $message = 'Not a valid ZIP archive';
+                    break;
+                case ZIPARCHIVE::ER_OPEN:
+                    $message = 'Unable to open archive';
+                    break;
+                case ZIPARCHIVE::ER_READ:
+                    $message = 'ZIP file read error';
+                    break;
+                case ZIPARCHIVE::ER_SEEK:
+                    $message = 'ZIP file seek error';
+                    break;
+                default:
+                    $message = 'Unknown error: '.$this->_archive;
             }
         } else {
             $message = 'ZIP library was not detected in your PHP installation';
@@ -205,9 +199,8 @@ class Archive
      *
      * @param string $archive
      * @param bool $create
-     * @return bool
      */
-    private function open($archive, $create = false)
+    private function open($archive, $create = false): bool
     {
         if ($this->_enabled) {
             $archive = str_replace('/', '/', $archive);
@@ -220,10 +213,9 @@ class Archive
             if ($this->_archive === true) {
                 $this->contents();
                 return true;
-            } else {
-                $this->error();
-                return false;
             }
+            $this->error();
+            return false;
         }
 
         return false;
@@ -251,9 +243,8 @@ class Archive
      *
      * @param string $filename
      * @param string $new_name
-     * @return bool
      */
-    public function rename($filename, $new_name)
+    public function rename($filename, $new_name): bool
     {
         if ($this->_enabled) {
             ## not done yet
@@ -280,16 +271,16 @@ class Archive
      */
     private function _addFile($filename)
     {
-        if ($this->_enabled) {
-            if (file_exists($filename)) {
-                if (is_dir($filename)) {
-                    return $this->_zip->addEmptyDir($filename);
-                } else {
-                    return $this->_zip->addFile($filename);
-                }
-            }
+        if (!$this->_enabled) {
+            return false;
         }
-        return false;
+        if (!file_exists($filename)) {
+            return false;
+        }
+        if (is_dir($filename)) {
+            return $this->_zip->addEmptyDir($filename);
+        }
+        return $this->_zip->addFile($filename);
     }
 
     /**

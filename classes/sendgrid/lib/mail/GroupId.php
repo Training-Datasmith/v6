@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the GroupId object for a /mail/send API call
  */
@@ -37,7 +39,7 @@ class GroupId implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setGroupId($group_id)
+    public function setGroupId($group_id): void
     {
         Assert::integer($group_id, 'group_id');
 

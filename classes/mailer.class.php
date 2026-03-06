@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -32,7 +34,7 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
     private $_template_title;
     private $_email_content_id;
     private $_content_type = '';
-    private $_import_new = false;
+    private bool $_import_new = false;
     private $_sendgrid = false;
     private $_sendgrid_key = '';
     private $_method = '';
@@ -45,7 +47,7 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
     {
         // Configure PHPMailer variables
         $this->From   = $GLOBALS['config']->get('config', 'email_address');
-        $this->FromName  = html_entity_decode($GLOBALS['config']->get('config', 'email_name'), ENT_QUOTES);
+        $this->FromName  = html_entity_decode((string) $GLOBALS['config']->get('config', 'email_name'), ENT_QUOTES);
         $this->CharSet   = 'UTF-8';
         $this->_method = $GLOBALS['config']->get('config', 'email_method');
         switch ($this->_method) {
@@ -53,16 +55,16 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
                 require_once CC_ROOT_DIR.'/classes/sendgrid/sendgrid-php.php';
                 $this->_sendgrid_key = $GLOBALS['config']->get('config', 'sendgrid_key');
                 $this->_sendgrid = new \SendGrid\Mail\Mail();
-            break;
+                break;
             case 'smtp':
             case 'smtp_ssl':
             case 'smtp_tls':
-                $this->IsSMTP(true);
+                $this->IsSMTP();
                 $this->Host = $GLOBALS['config']->get('config', 'email_smtp_host');
                 $this->Port = $GLOBALS['config']->get('config', 'email_smtp_port');
-                if ($GLOBALS['config']->get('config', 'email_method')=='smtp_ssl') {
+                if ($GLOBALS['config']->get('config', 'email_method') == 'smtp_ssl') {
                     $this->SMTPSecure = 'ssl';
-                } elseif ($GLOBALS['config']->get('config', 'email_method')=='smtp_tls') {
+                } elseif ($GLOBALS['config']->get('config', 'email_method') == 'smtp_tls') {
                     $this->SMTPSecure = 'tls';
                 }
                 if ($GLOBALS['config']->get('config', 'email_smtp')) {
@@ -70,19 +72,17 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
                     $this->Username = $GLOBALS['config']->get('config', 'email_smtp_user');
                     $this->Password = $GLOBALS['config']->get('config', 'email_smtp_password');
                 }
-            break;
+                break;
             case 'mail':
             default:
-                $this->IsMail(true);
+                $this->IsMail();
         }
     }
 
     /**
      * Setup the instance (singleton)
-     *
-     * @return Mailer
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -92,7 +92,7 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
     }
 
     //=====[ Public ]=======================================
-    
+
     /**
      * Setup the instance (singleton)
      *
@@ -110,23 +110,23 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
      * @param bool $data
      * @return array/false
      */
-    public function loadContent($content_type, $language = '', $data = false, $default = false, $panic = false)
+    public function loadContent(?string $content_type, $language = '', $data = false, $default = false, $panic = false)
     {
         $language = preg_match(Language::LANG_REGEX, $language) ? $language : $GLOBALS['language']->current();
         $language = ($language == 'en') ? 'en-GB' : $language;
 
         if (!empty($content_type)) {
-            $where = array('content_type' => (string)$content_type, 'language' => $language);
+            $where = ['content_type' => $content_type, 'language' => $language];
             if ($panic) { // Default language doesn't have this content type!
                 unset($where['language']);
             }
             if (($contents =  $GLOBALS['db']->select('CubeCart_email_content', false, $where, false, 1)) !== false) {
                 $this->_email_content_id = $contents[0]['content_id'];
                 $this->_content_type = $content_type;
-                $elements = array(
+                $elements = [
                     'subject'  => $contents[0]['subject'],
                     'content_html' => $contents[0]['content_html'],
-                );
+                ];
                 if ($data) {
                     $GLOBALS['smarty']->assign('DATA', $data);
                 }
@@ -134,10 +134,12 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
                     return $elements;
                 }
             } else {
-                if ($panic) { // Content type doesn't exist for any language
+                if ($panic) {
+                    // Content type doesn't exist for any language
                     trigger_error('Email content for '.$content_type.' doesn\'t exist in any language.');
                     return false;
-                } elseif ($default) {
+                }
+                if ($default) {
                     // Self-heal: try importing this content type from the default language's XML
                     $GLOBALS['language']->importEmail('email_'.$language.'.xml', CC_LANGUAGE_DIR, $content_type);
                     if (($contents = $GLOBALS['db']->select('CubeCart_email_content', false, $where, false, 1, false, false)) !== false) {
@@ -147,10 +149,10 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
                             $GLOBALS['smarty']->assign('DATA', $data);
                         }
                         if (!empty($contents[0]['content_html'])) {
-                            return array(
+                            return [
                                 'subject'  => $contents[0]['subject'],
                                 'content_html' => $contents[0]['content_html'],
-                            );
+                            ];
                         }
                     }
                     trigger_error('Email content for '.$content_type.' doesn\'t exist in default language.');
@@ -164,7 +166,7 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
 
                     ## Loop existing languages and remove to leave missing languages array with the ones we need to import
                     if ($existing_languages) {
-                        foreach ($existing_languages as $key => $value) {
+                        foreach ($existing_languages as $value) {
                             unset($missing_languages[$value['language']]);
                         }
                     }
@@ -176,25 +178,24 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
                     }
                     $this->_import_new = true;
                     return $this->loadContent($content_type, $language, $data);
-                } else {
-                    ## Self-heal: language exists but specific content type is missing - try importing from XML
-                    $GLOBALS['language']->importEmail('email_'.$language.'.xml', CC_LANGUAGE_DIR, $content_type);
-                    if (($contents = $GLOBALS['db']->select('CubeCart_email_content', false, $where, false, 1, false, false)) !== false) {
-                        $this->_email_content_id = $contents[0]['content_id'];
-                        $this->_content_type = $content_type;
-                        if ($data) {
-                            $GLOBALS['smarty']->assign('DATA', $data);
-                        }
-                        if (!empty($contents[0]['content_html'])) {
-                            return array(
-                                'subject'  => $contents[0]['subject'],
-                                'content_html' => $contents[0]['content_html'],
-                            );
-                        }
-                    }
-                    // Try loading the default language content
-                    return $this->loadContent($content_type, $GLOBALS['config']->get('config', 'default_language'), $data, true);
                 }
+                ## Self-heal: language exists but specific content type is missing - try importing from XML
+                $GLOBALS['language']->importEmail('email_'.$language.'.xml', CC_LANGUAGE_DIR, $content_type);
+                if (($contents = $GLOBALS['db']->select('CubeCart_email_content', false, $where, false, 1, false, false)) !== false) {
+                    $this->_email_content_id = $contents[0]['content_id'];
+                    $this->_content_type = $content_type;
+                    if ($data) {
+                        $GLOBALS['smarty']->assign('DATA', $data);
+                    }
+                    if (!empty($contents[0]['content_html'])) {
+                        return [
+                            'subject'  => $contents[0]['subject'],
+                            'content_html' => $contents[0]['content_html'],
+                        ];
+                    }
+                }
+                // Try loading the default language content
+                return $this->loadContent($content_type, $GLOBALS['config']->get('config', 'default_language'), $data, true);
             }
         }
         return false;
@@ -208,13 +209,13 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
      * @param int $template_id
      * @return bool
      */
-    public function sendEmail($email = false, $contents = array(), $template_id = false)
+    public function sendEmail($email = false, $contents = [], $template_id = false)
     {
         foreach ($GLOBALS['hooks']->load('class.mailer.send') as $hook) {
             include $hook;
         }
         $this->ClearAddresses();
-        $send_grid_to = array();
+        $send_grid_to = [];
         if (strstr($email, ',')) {
             $emails = explode(',', $email);
             foreach ($emails as $mail) {
@@ -226,7 +227,7 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
             $email_param = '';
         } elseif (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $send_grid_to[] = $email;
-            $this->AddAddress($email, (isset($contents['to'])) ? $contents['to'] : '');
+            $this->AddAddress($email, $contents['to'] ?? '');
             $email_param = '&amp;unsubscribe='.urlencode($email);
         } else {
             return false;
@@ -234,14 +235,15 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
         $contents = $this->_parseContents($contents);
         if (is_array($contents)) {
             // Load template from specified id or default if not set
-            $where = (!$template_id) ? array('template_default' => 1) : array('template_id' => (int)$template_id);
-            if (($templates = $GLOBALS['db']->select('CubeCart_email_template', array('title', 'content_html'), $where)) !== false) {
+            $where = (!$template_id) ? ['template_default' => 1] : ['template_id' => (int)$template_id];
+            if (($templates = $GLOBALS['db']->select('CubeCart_email_template', ['title', 'content_html'], $where)) !== false) {
                 $this->_template_title = $templates[0]['title'];
                 foreach ($contents as $key => $string) {
                     if (strtolower($key) == 'subject') {
                         $this->Subject = strip_tags($string);
                         continue;
-                    } elseif ($key === 'content_html') {
+                    }
+                    if ($key === 'content_html') {
                         // define macros
                         $data['logoURL']  = $GLOBALS['gui']->getLogo(true, 'emails');
                         $data['store_name'] = $GLOBALS['config']->get('config', 'store_name');
@@ -249,7 +251,6 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
                         $data['storeURL']  = $GLOBALS['storeURL'];
                         $data['unsubscribeURL'] = $GLOBALS['storeURL'].'/index.php?_a=unsubscribe'.$email_param;
                         $data['jsonLd'] = $this->_buildJsonLd();
-
                         $template = $this->_parseTemplate($templates[0], $data, $string);
                         $this->_html = $template['content_html'];
                         $this->_text = $this->_htmlToText($this->_html);
@@ -266,7 +267,7 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
             $this->AltBodyEncoding = 'quoted-printable';
 
             if (isset($contents['email'])) {
-                $this->addReplyTo($contents['email'], (isset($contents['from'])) ? $contents['from'] : '');
+                $this->addReplyTo($contents['email'], $contents['from'] ?? '');
                 $from = $contents['email'];
             } else {
                 $from = $GLOBALS['config']->get('config', 'email_address');
@@ -278,19 +279,19 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
             }
 
             // Send email
-            if(!isset($disable_send) || !$disable_send) {
-                if($this->_method=='sendgrid') {
+            if (!isset($disable_send) || !$disable_send) {
+                if ($this->_method == 'sendgrid') {
                     $this->_sendgrid->setFrom($this->From, $this->FromName);
                     $this->_sendgrid->setSubject($this->Subject);
-                    foreach($send_grid_to as $t) {
+                    foreach ($send_grid_to as $t) {
                         $this->_sendgrid->addTo($t);
                     }
-                    $this->_sendgrid->addContent("text/plain", $this->_text);
-                    $this->_sendgrid->addContent("text/html", $this->_html);
+                    $this->_sendgrid->addContent('text/plain', $this->_text);
+                    $this->_sendgrid->addContent('text/html', $this->_html);
                     $sendgrid = new \SendGrid($this->_sendgrid_key);
                     try {
                         $response = $sendgrid->send($this->_sendgrid);
-                        $result =  in_array($response->statusCode(), array(200, 202)) ? true : false;
+                        $result =  in_array($response->statusCode(), [200, 202]) ? true : false;
                     } catch (Exception $e) {
                         $this->ErrorInfo = $e->getMessage();
                     }
@@ -298,9 +299,9 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
                     $result = $this->Send();
                 }
             }
-            
+
             // Log email
-            $email_data = array(
+            $email_data = [
                 'subject' => $this->Subject,
                 'content_html' => $this->_html,
                 'content_text' => $this->_text,
@@ -308,8 +309,8 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
                 'from' => $from,
                 'result' => $result,
                 'email_content_id' => $this->_email_content_id,
-                'fail_reason' => !empty($this->ErrorInfo) ? htmlentities($this->ErrorInfo, ENT_QUOTES) : ''
-            );
+                'fail_reason' => !empty($this->ErrorInfo) ? htmlentities($this->ErrorInfo, ENT_QUOTES) : '',
+            ];
             $log_days = $GLOBALS['config']->get('config', 'r_email');
             if (ctype_digit((string)$log_days) &&  $log_days > 0) {
                 $GLOBALS['db']->insert('CubeCart_email_log', $email_data);
@@ -337,8 +338,9 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
     {
         if (is_string($contents)) {
             return $this->_cleanseContents($GLOBALS['smarty']->fetch('string:'.$contents));
-        } elseif (is_array($contents)) {
-            $out = array();
+        }
+        if (is_array($contents)) {
+            $out = [];
             foreach ($contents as $key => $content) {
                 $out[$key] = $this->_cleanseContents($GLOBALS['smarty']->fetch('string:'.$content));
             }
@@ -355,7 +357,7 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
      * @param string $email_content
      * @return string
      */
-    private function _parseTemplate($templates, $data, $email_content = '')
+    private function _parseTemplate($templates, array $data, $email_content = '')
     {
         $GLOBALS['smarty']->assign('DATA', $data);
         $GLOBALS['smarty']->assign('EMAIL_CONTENT', $email_content);
@@ -373,7 +375,8 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
      * @param string $string
      * @return string
      */
-    private function _cleanseContents($string) {
+    private function _cleanseContents($string): ?string
+    {
         return preg_replace('#<script(.*?)>(.*?)</script>#is', '', $string);
     }
 
@@ -381,38 +384,38 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
      * Convert HTML to plain text
      *
      * @param string $html
-     * @return string
      */
-    private function _htmlToText($html) {
+    private function _htmlToText($html): string
+    {
         // Remove head/script/style sections entirely
         $html = preg_replace('#<head[^>]*>.*?</head>#is', '', $html);
-        $html = preg_replace('#<script[^>]*>.*?</script>#is', '', $html);
-        $html = preg_replace('#<style[^>]*>.*?</style>#is', '', $html);
+        $html = preg_replace('#<script[^>]*>.*?</script>#is', '', (string) $html);
+        $html = preg_replace('#<style[^>]*>.*?</style>#is', '', (string) $html);
         // Convert anchors: preserve URL when it differs from link text
         $html = preg_replace_callback(
             '#<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>#is',
-            function ($m) {
-                $text = trim(strip_tags($m[2]));
+            function (array $m): string {
+                $text = trim(strip_tags((string) $m[2]));
                 $url  = $m[1];
                 return ($text && $text !== $url) ? $text.' ('.$url.')' : $url;
             },
-            $html
+            (string) $html
         );
         // Block-level elements → line breaks
-        $html = preg_replace('#<br\s*/?>#i', "\n", $html);
-        $html = preg_replace('#</?(p|div|tr|h[1-6]|blockquote|table|tbody|thead)[^>]*>#i', "\n\n", $html);
-        $html = preg_replace('#<li[^>]*>#i', "\n• ", $html);
-        $html = preg_replace('#</?(td|th)[^>]*>#i', "\t", $html);
+        $html = preg_replace('#<br\s*/?>#i', "\n", (string) $html);
+        $html = preg_replace('#</?(p|div|tr|h[1-6]|blockquote|table|tbody|thead)[^>]*>#i', "\n\n", (string) $html);
+        $html = preg_replace('#<li[^>]*>#i', "\n• ", (string) $html);
+        $html = preg_replace('#</?(td|th)[^>]*>#i', "\t", (string) $html);
         // Strip remaining tags
-        $html = strip_tags($html);
+        $html = strip_tags((string) $html);
         // Decode HTML entities
         $html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         // Normalise whitespace
         $html = preg_replace('/[ \t]+/', ' ', $html);
-        $html = preg_replace('/\n[ \t]+/', "\n", $html);
-        $html = preg_replace('/[ \t]+\n/', "\n", $html);
-        $html = preg_replace('/\n{3,}/', "\n\n", $html);
-        return trim($html);
+        $html = preg_replace('/\n[ \t]+/', "\n", (string) $html);
+        $html = preg_replace('/[ \t]+\n/', "\n", (string) $html);
+        $html = preg_replace('/\n{3,}/', "\n\n", (string) $html);
+        return trim((string) $html);
     }
 
     /**
@@ -420,44 +423,42 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
      *
      * @return string Script tag with JSON-LD or empty string
      */
-    private function _buildJsonLd()
+    private function _buildJsonLd(): string
     {
         $data = $GLOBALS['smarty']->getTemplateVars('DATA');
         $products = $GLOBALS['smarty']->getTemplateVars('PRODUCTS');
         $billing = $GLOBALS['smarty']->getTemplateVars('BILLING');
-        $shipping = $GLOBALS['smarty']->getTemplateVars('SHIPPING');
+        $GLOBALS['smarty']->getTemplateVars('SHIPPING');
 
         $schema = null;
 
         switch ($this->_content_type) {
             case 'cart.order_confirmation':
-                $schema = $this->_buildOrderSchema($data, $products, $billing, $shipping, 'https://schema.org/OrderProcessing');
+            case 'cart.payment_received':
+                $schema = $this->_buildOrderSchema($data, $products, $billing, 'https://schema.org/OrderProcessing');
                 break;
             case 'cart.order_complete':
-                $schema = $this->_buildOrderSchema($data, $products, $billing, $shipping, 'https://schema.org/OrderDelivered');
+                $schema = $this->_buildOrderSchema($data, $products, $billing, 'https://schema.org/OrderDelivered');
                 break;
             case 'cart.order_cancelled':
-                $schema = $this->_buildOrderSchema($data, $products, $billing, $shipping, 'https://schema.org/OrderCancelled');
-                break;
-            case 'cart.payment_received':
-                $schema = $this->_buildOrderSchema($data, $products, $billing, $shipping, 'https://schema.org/OrderProcessing');
+                $schema = $this->_buildOrderSchema($data, $products, $billing, 'https://schema.org/OrderCancelled');
                 break;
             case 'cart.payment_fraud':
-                $schema = $this->_buildOrderSchema($data, $products, $billing, $shipping, 'https://schema.org/OrderProblem');
+                $schema = $this->_buildOrderSchema($data, $products, $billing, 'https://schema.org/OrderProblem');
                 break;
             case 'cart.digital_download':
-                $schema = $this->_buildOrderSchema($data, $products, $billing, $shipping, 'https://schema.org/OrderInTransit');
+                $schema = $this->_buildOrderSchema($data, $products, $billing, 'https://schema.org/OrderInTransit');
                 break;
             case 'account.password_recovery':
-                $link = isset($data['reset_link']) ? $data['reset_link'] : '';
+                $link = $data['reset_link'] ?? '';
                 $schema = $this->_buildViewActionSchema('Reset Password', $link);
                 break;
             case 'newsletter.verify_email':
-                $link = isset($data['link']) ? $data['link'] : '';
+                $link = $data['link'] ?? '';
                 $schema = $this->_buildViewActionSchema('Confirm Subscription', $link);
                 break;
             case 'newsletter.remove_request':
-                $link = isset($data['link']) ? $data['link'] : '';
+                $link = $data['link'] ?? '';
                 $schema = $this->_buildViewActionSchema('Confirm Unsubscribe', $link);
                 break;
             case 'cart.abandoned':
@@ -477,7 +478,7 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
     /**
      * Build Order schema for transactional emails
      */
-    private function _buildOrderSchema($data, $products, $billing, $shipping, $orderStatus)
+    private function _buildOrderSchema($data, $products, $billing, string $orderStatus): ?array
     {
         if (empty($data) || empty($data['cart_order_id'])) {
             return null;
@@ -489,18 +490,18 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
         $total = isset($data['raw_total']) ? sprintf('%.2f', $data['raw_total']) : '0.00';
         $displayOrderId = !empty($data['custom_oid']) ? $data['custom_oid'] : $data['cart_order_id'];
 
-        $schema = array(
+        $schema = [
             '@context' => 'https://schema.org',
             '@type' => 'Order',
             'orderNumber' => $displayOrderId,
             'orderStatus' => $orderStatus,
-            'merchant' => array(
+            'merchant' => [
                 '@type' => 'Organization',
-                'name' => $storeName
-            ),
+                'name' => $storeName,
+            ],
             'priceCurrency' => $currency,
-            'price' => $total
-        );
+            'price' => $total,
+        ];
 
         if (!empty($orderDate)) {
             $schema['orderDate'] = $orderDate;
@@ -508,21 +509,21 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
 
         // Line items
         if (!empty($products) && is_array($products)) {
-            $offers = array();
+            $offers = [];
             foreach ($products as $product) {
-                $offer = array(
+                $offer = [
                     '@type' => 'Offer',
-                    'itemOffered' => array(
+                    'itemOffered' => [
                         '@type' => 'Product',
-                        'name' => $product['name']
-                    ),
+                        'name' => $product['name'],
+                    ],
                     'priceCurrency' => $currency,
                     'price' => isset($product['raw_price']) ? sprintf('%.2f', $product['raw_price']) : '0.00',
-                    'eligibleQuantity' => array(
+                    'eligibleQuantity' => [
                         '@type' => 'QuantitativeValue',
-                        'value' => (int)$product['quantity']
-                    )
-                );
+                        'value' => (int)$product['quantity'],
+                    ],
+                ];
                 if (!empty($product['product_code'])) {
                     $offer['itemOffered']['sku'] = $product['product_code'];
                 }
@@ -537,11 +538,11 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
         }
 
         // View order action
-        $schema['potentialAction'] = array(
+        $schema['potentialAction'] = [
             '@type' => 'ViewAction',
             'target' => $GLOBALS['storeURL'] . '/index.php?_a=vieworder&cart_order_id=' . $displayOrderId,
-            'name' => 'View Order'
-        );
+            'name' => 'View Order',
+        ];
 
         return $schema;
     }
@@ -549,27 +550,27 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
     /**
      * Build ViewAction schema for non-order emails
      */
-    private function _buildViewActionSchema($name, $url)
+    private function _buildViewActionSchema(string $name, $url): ?array
     {
         if (empty($url)) {
             return null;
         }
 
-        return array(
+        return [
             '@context' => 'https://schema.org',
             '@type' => 'EmailMessage',
-            'potentialAction' => array(
+            'potentialAction' => [
                 '@type' => 'ViewAction',
                 'name' => $name,
-                'target' => $url
-            )
-        );
+                'target' => $url,
+            ],
+        ];
     }
 
     /**
      * Build abandoned cart schema with product list and recovery action
      */
-    private function _buildAbandonedCartSchema($data, $products)
+    private function _buildAbandonedCartSchema(array $data, $products): ?array
     {
         if (empty($data['recovery_link'])) {
             return null;
@@ -578,33 +579,33 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
         $storeName = $GLOBALS['config']->get('config', 'store_name');
         $currency = $GLOBALS['config']->get('config', 'default_currency');
 
-        $schema = array(
+        $schema = [
             '@context' => 'https://schema.org',
             '@type' => 'EmailMessage',
             'description' => 'You left items in your cart at ' . $storeName,
-            'potentialAction' => array(
+            'potentialAction' => [
                 '@type' => 'ViewAction',
                 'name' => 'Complete Your Order',
-                'target' => $data['recovery_link']
-            )
-        );
+                'target' => $data['recovery_link'],
+            ],
+        ];
 
         if (!empty($products) && is_array($products)) {
-            $items = array();
+            $items = [];
             foreach ($products as $product) {
-                $item = array(
+                $item = [
                     '@type' => 'Product',
-                    'name' => $product['name']
-                );
+                    'name' => $product['name'],
+                ];
                 if (!empty($product['image'])) {
                     $item['image'] = $product['image'];
                 }
                 if (!empty($product['raw_price'])) {
-                    $item['offers'] = array(
+                    $item['offers'] = [
                         '@type' => 'Offer',
                         'priceCurrency' => $currency,
-                        'price' => sprintf('%.2f', $product['raw_price'])
-                    );
+                        'price' => sprintf('%.2f', $product['raw_price']),
+                    ];
                 }
                 $items[] = $item;
             }
@@ -617,9 +618,9 @@ class Mailer extends PHPMailer\PHPMailer\PHPMailer
     /**
      * Build PostalAddress schema from address array
      */
-    private function _buildPostalAddress($address)
+    private function _buildPostalAddress(array $address): array
     {
-        $postal = array('@type' => 'PostalAddress');
+        $postal = ['@type' => 'PostalAddress'];
         if (!empty($address['line1'])) {
             $postal['streetAddress'] = $address['line1'] . (!empty($address['line2']) ? ', ' . $address['line2'] : '');
         }

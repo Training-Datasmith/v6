@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Header object for a /mail/send API call
  */
@@ -47,7 +49,7 @@ class Header implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setKey($key)
+    public function setKey($key): void
     {
         Assert::string($key, 'key');
 
@@ -71,7 +73,7 @@ class Header implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setValue($value)
+    public function setValue($value): void
     {
         Assert::string($value, 'value');
 
@@ -99,11 +101,9 @@ class Header implements \JsonSerializable
         return array_filter(
             [
                 'key' => $this->getKey(),
-                'value' => $this->getValue()
+                'value' => $this->getValue(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (string $value) => $value !== null
         ) ?: null;
     }
 }

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -11,10 +13,10 @@
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
 $GLOBALS['main']->addTabControl($lang['settings']['release_notes'], 'general');
-$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(array('node')), true);
-$features = array( 
+$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(['node']), true);
+$features = [
     '3678' => 'Cache Optimisation - Shorter Keys',
-	'3702' => 'Cloudflare Turnstile - A new captcha alternative.',
+    '3702' => 'Cloudflare Turnstile - A new captcha alternative.',
     '3699' => 'Bluesky social link support.',
     '3685' => 'Optimisation of cookie consent logging. Saves up to 56% disk space.',
     '3681 ' => 'Back office copy to clipboard functionality to quickly copy email address etc...',
@@ -24,8 +26,7 @@ $features = array(
     '3652' => 'Mobile column added to sales reporting.',
     '3643' => 'Sort added to Elasticsearch results.',
     '3632' => 'Enable/Disable newsletter signup.',
-    '3629' => 'muteUndefinedOrNullWarnings alias added for backward compatibility of older 3rd party extensions.'
-);
-$security = array();
+    '3629' => 'muteUndefinedOrNullWarnings alias added for backward compatibility of older 3rd party extensions.',
+];
+$security = [];
 $page_content = $GLOBALS['main']->newFeatures($_GET['node'], $features, 60, '', $security);
-?>

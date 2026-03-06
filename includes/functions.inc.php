@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -16,7 +18,7 @@ if (!defined('CC_INI_SET')) {
 
 ## AutoLoader - automatically load classes if not already included
 include CC_ROOT_DIR.'/classes/autoloader.class.php';
-Autoloader::autoload_register(array('Autoloader', 'autoload'));
+Autoloader::autoload_register(['Autoloader', 'autoload']);
 
 /**
  * Append DS to a path string (ie \ or /)
@@ -47,7 +49,7 @@ function appendDS($path)
  */
 function arrayRecursiveDiff($aArray1, $aArray2)
 {
-    $aReturn = array();
+    $aReturn = [];
 
     foreach ($aArray1 as $mKey => $mValue) {
         if (array_key_exists($mKey, $aArray2)) {
@@ -147,7 +149,7 @@ function chmod_writable()
             //Same user
             if (fileowner(__FILE__) === posix_getuid()) {
                 $mode = 755;
-            //Same group
+                //Same group
             } elseif (filegroup(__FILE__) === posix_getgid()) {
                 $mode = 775;
             }
@@ -173,16 +175,19 @@ function chmod_writable()
 }
 
 /**
- * Count 
+ * Count
  *
  * @param string $value
  * @return int
  */
-function countPlaceholders($value){
-    $pattern = "/(?<!%)%{1}(?!%)/";
+function countPlaceholders($value)
+{
+    $pattern = '/(?<!%)%{1}(?!%)/';
     preg_match_all($pattern, $value, $matches);
-    if(is_array($matches)) return count($matches[0]);
-  }
+    if (is_array($matches)) {
+        return count($matches[0]);
+    }
+}
 
 /**
  * Custom product optionsarray sorting
@@ -197,7 +202,7 @@ function cmpmc($a, $b)
         $b = $b['priority'];
         $a = $a['priority'];
 
-        return $a<$b ? -1 : ($a>$b ? 1 : 0);
+        return $a < $b ? -1 : ($a > $b ? 1 : 0);
     }
 }
 
@@ -212,8 +217,8 @@ function cmpmc($a, $b)
 function currentPage($excluded = null, $included = null, $remove_excluded = true)
 {
     $url_path = '';
-    $params = array();
-    $one_time = array('added', 'completed', 'deleted', 'edited', 'failed', 'removed', 'subscribed', 'submitted', 'unsubscribed', 'updated', session_name());
+    $params = [];
+    $one_time = ['added', 'completed', 'deleted', 'edited', 'failed', 'removed', 'subscribed', 'submitted', 'unsubscribed', 'updated', session_name()];
     // Always remove session token
     $get = $_GET;
     if (isset($get['token'])) {
@@ -236,8 +241,8 @@ function currentPage($excluded = null, $included = null, $remove_excluded = true
 
     if ($excluded === true) {
         // Drop *all* $get vars, except $protected
-        $protected	= array('_a');
-        $excluded	= array();
+        $protected	= ['_a'];
+        $excluded	= [];
         if (count($params) > 0) {
             foreach ($params as $key => $val) {
                 if (!in_array($key, $protected)) {
@@ -246,7 +251,7 @@ function currentPage($excluded = null, $included = null, $remove_excluded = true
             }
         }
     } else {
-        $excluded	= (is_array($excluded) && !empty($excluded)) ? $excluded : array();
+        $excluded	= (is_array($excluded) && !empty($excluded)) ? $excluded : [];
     }
 
     // Delete unwanted keys
@@ -266,14 +271,14 @@ function currentPage($excluded = null, $included = null, $remove_excluded = true
             $url_path .= '?'.http_build_query($params, '', '&');
         }
     }
-    
+
     if (!isset($GLOBALS['seo']) || !is_object($GLOBALS['seo'])) {
         return $url_path;
     }
     // $get['seo_path'] should never be set... but if it is this will fix it
     if (isset($get['seo_path']) && !empty($get['seo_path'])) {
         $url_path = SEO::getInstance()->getItem($get['seo_path'], true);
-    } else if(isset($get['seo_path'])) {
+    } elseif (isset($get['seo_path'])) {
         unset($get['seo_path']);
     }
     return SEO::getInstance()->SEOable($url_path);
@@ -289,7 +294,9 @@ function currentPage($excluded = null, $included = null, $remove_excluded = true
  */
 function custom_urlencode($item, $key, $one_time_keys)
 {
-    if (!is_null($item)) $item = urlencode(html_entity_decode(stripslashes($item)));
+    if (!is_null($item)) {
+        $item = urlencode(html_entity_decode(stripslashes($item)));
+    }
     return $item;
 }
 
@@ -327,10 +334,10 @@ function deliverFile($path, $localFile = true, $data = null, $fileName = null)
     header('Cache-Control: no-store, no-cache, must-revalidate');
     header('Cache-Control: post-check=0, pre-check=0', false);
     header('Pragma: no-cache');
-    header('Expires: '.gmdate('D, d M Y H:i:s', mktime(date('H')+2, date('i'), date('s'), date('m'), date('d'), date('Y'))).' GMT');
+    header('Expires: '.gmdate('D, d M Y H:i:s', mktime(date('H') + 2, date('i'), date('s'), date('m'), date('d'), date('Y'))).' GMT');
     header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
     header('Content-Type: application/octet-stream');
-    header("Content-type: application/force-download");
+    header('Content-type: application/force-download');
     header('Content-Length: '.(string)$fileLength);
     header('Content-Disposition: inline; filename='.(string)$fileName);
     header('Content-Transfer-Encoding: binary');
@@ -339,8 +346,8 @@ function deliverFile($path, $localFile = true, $data = null, $fileName = null)
 
     if ($localFile) {
         if (($file = fopen($path, 'rb')) !== false) {
-            while (!feof($file) && (connection_status()==0)) {
-                print(fread($file, 1024*8));
+            while (!feof($file) && (connection_status() == 0)) {
+                print(fread($file, 1024 * 8));
                 flush();
             }
             fclose($file);
@@ -356,7 +363,8 @@ function deliverFile($path, $localFile = true, $data = null, $fileName = null)
  *
  * @return bool
  */
-function detectEol($value) {
+function detectEol($value)
+{
     $value = nl2br($value, false);
     return strstr($value, '<br>');
 }
@@ -418,10 +426,11 @@ function findFiles(&$list, $path = false, $recursive = true)
     }
 }
 
-function fmSearchList($dir, $term, &$output = array()) {
+function fmSearchList($dir, $term, &$output = [])
+{
     $tree = glob(rtrim($dir, '/') . '/*');
     if (is_array($tree)) {
-        foreach($tree as $file) {
+        foreach ($tree as $file) {
             if (is_dir($file)) {
                 fmSearchList($file, $term, $output);
             } elseif (is_file($file)) {
@@ -444,7 +453,7 @@ function fmSearchList($dir, $term, &$output = array()) {
  */
 function formatBytes($size = 0, $implode = false, $precision = 2)
 {
-    $units = array('B','kB','MB','GB','TB','PB','EB','ZB','YB');
+    $units = ['B','kB','MB','GB','TB','PB','EB','ZB','YB'];
     $step = 1024;
     $i = 0;
     while (($size / $step) > 0.9) {
@@ -456,7 +465,7 @@ function formatBytes($size = 0, $implode = false, $precision = 2)
         return $size.''.$units[$i];
     }
 
-    return array('size' => $size, 'suffix' => $units[$i]);
+    return ['size' => $size, 'suffix' => $units[$i]];
 }
 
 /**
@@ -500,9 +509,9 @@ function formatTime($timestamp, $format = false, $static = false)
     $sign	= substr($GLOBALS['config']->get('config', 'time_offset'), 0, 1);
     $value	= substr($GLOBALS['config']->get('config', 'time_offset'), 1);
     if ($sign == '+') {
-        $seconds = $timestamp+$value;
+        $seconds = $timestamp + $value;
     } elseif ($sign == '-') {
-        $seconds = $timestamp-$value;
+        $seconds = $timestamp - $value;
     } else {
         $seconds = $timestamp;
     }
@@ -517,9 +526,9 @@ function formatTime($timestamp, $format = false, $static = false)
     }
     $time = date($fuzzy_time, $seconds);
     if ($fuzzy && !$static && $date_today == $date) { ## Today
-        return $GLOBALS['language']->common['today'].", ".$time;
+        return $GLOBALS['language']->common['today'].', '.$time;
     } elseif ($fuzzy && !$static && date('d-m-Y', strtotime('yesterday')) == $date) { ## Yesterday
-        return $GLOBALS['language']->common['yesterday'].", ".$time;
+        return $GLOBALS['language']->common['yesterday'].', '.$time;
     } else {
         return date($format, $seconds);
     }
@@ -531,7 +540,8 @@ function formatTime($timestamp, $format = false, $static = false)
  * @param int|float $percent 0–100 (e.g. 5 means 5% chance)
  * @return bool
  */
-function executionChance($percent) {
+function executionChance($percent)
+{
     // Clamp percent to valid range
     $percent = max(0, min(100, $percent));
 
@@ -551,11 +561,11 @@ function executionChance($percent) {
  */
 function generate_product_code($product_name, $cat_id = false)
 {
-    $chars = array(
+    $chars = [
         'A','B','C','D','E','F','G','H','I','J','K','L','M',
         'O','N','P','Q','R','S','T','U','V','W','X','Y','Z',
-        '0','1','2','3','4','5','6','7','8','9'
-    );
+        '0','1','2','3','4','5','6','7','8','9',
+    ];
     $max_chars = count($chars) - 1;
     for ($i = 0; $i < 5; ++$i) {
         $randChars = ($i == 0) ? $chars[mt_rand(0, $max_chars)] : $randChars . $chars[mt_rand(0, $max_chars)];
@@ -565,7 +575,7 @@ function generate_product_code($product_name, $cat_id = false)
     }
     $product_code = strtoupper(substr($product_name, 0, 3)).$randChars.(int)$cat_id;
     // Check it's not already in use
-    if (($query	= $GLOBALS['db']->select('CubeCart_inventory', 'product_id', array('product_code' => $product_code))) !== false) {
+    if (($query	= $GLOBALS['db']->select('CubeCart_inventory', 'product_id', ['product_code' => $product_code])) !== false) {
         //If it is make it again
         $product_code = generate_product_code($product_name, $cat_id);
     }
@@ -583,13 +593,13 @@ function generate_product_code($product_name, $cat_id = false)
  */
 function getCountryFormat($input, $match = 'numcode', $fetch = 'name')
 {
-    if($input == 999 && $match == 'numcode') {
+    if ($input == 999 && $match == 'numcode') {
         return $GLOBALS['language']->country['rest_of_world'];
     }
     if (($match == 'id' || $match == 'numcode') && !ctype_digit((string)$input)) {
         return $input;
     }
-    $country = $GLOBALS['db']->select('CubeCart_geo_country', array($fetch), array($match => $input));
+    $country = $GLOBALS['db']->select('CubeCart_geo_country', [$fetch], [$match => $input]);
     return ($country) ? $country[0][$fetch] : false;
 }
 
@@ -600,16 +610,15 @@ function getCountryFormat($input, $match = 'numcode', $fetch = 'name')
  */
 function get_ip_address()
 {
-    $ip = getenv('HTTP_CLIENT_IP')?:
-    getenv('HTTP_X_FORWARDED_FOR')?:
-    getenv('HTTP_X_FORWARDED')?:
-    getenv('HTTP_FORWARDED_FOR')?:
-    getenv('HTTP_FORWARDED')?:
+    $ip = getenv('HTTP_CLIENT_IP') ?:
+    getenv('HTTP_X_FORWARDED_FOR') ?:
+    getenv('HTTP_X_FORWARDED') ?:
+    getenv('HTTP_FORWARDED_FOR') ?:
+    getenv('HTTP_FORWARDED') ?:
     getenv('REMOTE_ADDR');
 
     //Try to validate the IP
-    if ((filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) === false && (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) === false)
-    {
+    if ((filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) === false && (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) === false) {
         return false;
     }
 
@@ -629,7 +638,7 @@ function getStateFormat($input, $match = 'id', $fetch = 'name')
     if ($match == 'id' && !ctype_digit((string)$input)) {
         return $input;
     }
-    if (($county = $GLOBALS['db']->select('CubeCart_geo_zone', false, array($match => $input, 'status' => 1))) !== false) {
+    if (($county = $GLOBALS['db']->select('CubeCart_geo_zone', false, [$match => $input, 'status' => 1])) !== false) {
         return ($fetch == 'abbrev' && empty($county[0][$fetch])) ? $county[0]['name'] : $county[0][$fetch];
     }
     return $input;
@@ -645,7 +654,7 @@ function getStateFormat($input, $match = 'id', $fetch = 'name')
 function glob_recursive($pattern, $flags = 0)
 {
     $files = glob($pattern, $flags);
-    foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+    foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
         $files = array_merge($files, glob_recursive($dir.'/'.basename($pattern), $flags));
     }
     return $files;
@@ -660,10 +669,10 @@ function glob_recursive($pattern, $flags = 0)
 if (!function_exists('hex2bin')) {
     function hex2bin($str)
     {
-        $sbin = "";
+        $sbin = '';
         $len = strlen($str);
         for ($i = 0; $i < $len; $i += 2) {
-            $sbin .= pack("H*", substr($str, $i, 2));
+            $sbin .= pack('H*', substr($str, $i, 2));
         }
         return $sbin;
     }
@@ -675,14 +684,15 @@ if (!function_exists('hex2bin')) {
  * @param string $html
  * @return string
  */
-function htmlMinify($html, $preserve = ['pre','textarea','script','style']) {
+function htmlMinify($html, $preserve = ['pre','textarea','script','style'])
+{
     $stash = [];
     // 1) Stash preserved blocks
     foreach ($preserve as $tag) {
         $html = preg_replace_callback(
             "#<{$tag}\b[^>]*>.*?</{$tag}>#si",
-            function($m) use (&$stash, $tag) {
-                $k = "%%MINIFY-{$tag}-".count($stash)."%%";
+            function ($m) use (&$stash, $tag) {
+                $k = "%%MINIFY-{$tag}-".count($stash).'%%';
                 $stash[$k] = $m[0];
                 return $k;
             },
@@ -710,12 +720,13 @@ function htmlMinify($html, $preserve = ['pre','textarea','script','style']) {
  * @param string $html
  * @return string
  */
-function htmlToPlainText($html) {
+function htmlToPlainText($html)
+{
     return trim(
         strip_tags(
             html_entity_decode(
-                strip_tags($html ?? ''), 
-                ENT_QUOTES | ENT_HTML5, 
+                strip_tags($html ?? ''),
+                ENT_QUOTES | ENT_HTML5,
                 'UTF-8'
             )
         )
@@ -737,10 +748,10 @@ function httpredir($destination = '', $anchor = '', $meta_refresh = false, $stat
     if (empty($destination)) {
         $destination = currentPage();
     }
-    
-    if(substr($destination, 0, 1) === '?') {
+
+    if (substr($destination, 0, 1) === '?') {
         $b = basename($_SERVER['PHP_SELF']);
-        $destination = (substr($b,-4)==='.php') ? CC_ROOT_REL.$b.$destination : CC_ROOT_REL.'index.php'.$destination;
+        $destination = (substr($b, -4) === '.php') ? CC_ROOT_REL.$b.$destination : CC_ROOT_REL.'index.php'.$destination;
     }
 
     ## We could have just used header('Location: *'), but then we wouldn't be able to sanitize the requests
@@ -908,7 +919,7 @@ function price_sort($x, $y)
  */
 function randomString($length = 30)
 {
-    $str = "";
+    $str = '';
     $characters = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
     $max = count($characters) - 1;
     for ($i = 0; $i < $length; $i++) {
@@ -927,7 +938,7 @@ function randomString($length = 30)
 function recursiveDelete($path)
 {
     if (is_dir($path)) {
-        $files	= glob($path.'/{,.}[!.,!..]*', GLOB_MARK|GLOB_BRACE);
+        $files	= glob($path.'/{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE);
         foreach ($files as $file) {
             if (is_dir($file)) {
                 recursiveDelete($file);
@@ -971,7 +982,7 @@ function recursive_implode($glue, $pieces)
  */
 function rootHomePath()
 {
-    return str_replace(array('public_html', 'htdocs'), '', str_replace(substr($GLOBALS['rootRel'], 0, -1), '', CC_ROOT_DIR));
+    return str_replace(['public_html', 'htdocs'], '', str_replace(substr($GLOBALS['rootRel'], 0, -1), '', CC_ROOT_DIR));
 }
 
 /**
@@ -990,7 +1001,7 @@ function sanitizeSEOPath($url)
     $url = trim($url);
     $url = str_replace(' ', '-', html_entity_decode($url, ENT_QUOTES));
     $url = preg_replace('#[^\w\-_/]#iuU', '-', str_replace('/', '/', $url));
-    return preg_replace(array('#/{2,}#iu', '#-{2,}#'), array('/', '-'), $url);
+    return preg_replace(['#/{2,}#iu', '#-{2,}#'], ['/', '-'], $url);
 }
 
 /**
@@ -1028,15 +1039,15 @@ function state_json()
     ## Generate a JSON string for state selector
     if (($json = $GLOBALS['cache']->read('json.states')) === false) {
         $counties = $GLOBALS['db']->query('SELECT `gc`.`numcode`, `gz`.`id`, `gz`.`name` FROM `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_geo_zone` AS `gz` LEFT JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_geo_country` AS `gc` ON `gc`.`id`=`gz`.`country_id` WHERE `gc`.`status` IN(1,2) ORDER BY `gc`.`name`, `gz`.`name` ASC');
-        $json_array = array();
+        $json_array = [];
         if ($counties) {
             $current = '';
             foreach ($counties as $state) {
                 if ($current != $state['numcode']) {
-                    $json_array[$state['numcode']][] = array('id' => '', 'name' => '-- '.(CC_IN_ADMIN ? $GLOBALS['language']->common['none'] : $GLOBALS['language']->common['please_select']).' --');
+                    $json_array[$state['numcode']][] = ['id' => '', 'name' => '-- '.(CC_IN_ADMIN ? $GLOBALS['language']->common['none'] : $GLOBALS['language']->common['please_select']).' --'];
                     $current = $state['numcode'];
                 }
-                $json_array[$state['numcode']][] = array('id' => $state['id'], 'name' => html_entity_decode($state['name'], ENT_QUOTES)); // Fixes GitHub #1893
+                $json_array[$state['numcode']][] = ['id' => $state['id'], 'name' => html_entity_decode($state['name'], ENT_QUOTES)]; // Fixes GitHub #1893
             }
 
             $json = json_encode($json_array);
@@ -1057,7 +1068,7 @@ function validHTML($var)
     ## Create W3C compliant output
     $var = html_entity_decode($var, ENT_QUOTES, 'UTF-8');
     $var = htmlspecialchars($var);
-    return str_ireplace("&amp;#39;", "&#39;", $var);
+    return str_ireplace('&amp;#39;', '&#39;', $var);
 }
 
 /**
@@ -1081,11 +1092,11 @@ function version_clean($version)
  */
 function parseUrlToLink($text = '', $target = '_blank')
 {
-    if(empty($text)) {
+    if (empty($text)) {
         return '';
     }
-	$regex = '<https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)>';
-	return preg_replace($regex, '<a href="$0" target="$target">$0</a>', $text);
+    $regex = '<https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)>';
+    return preg_replace($regex, '<a href="$0" target="$target">$0</a>', $text);
 }
 
 /**
@@ -1097,15 +1108,15 @@ function parseUrlToLink($text = '', $target = '_blank')
  *
  * @return string
  */
-function shortHash($input, $length = 8, $exception = array())
+function shortHash($input, $length = 8, $exception = [])
 {
 
     if (in_array($input, $exception)) {
         return $input;
     }
     // Generate a short SHA-256 hash of the input
-	$hash_base64 = base64_encode(hash('sha256', $input.CC_STORE_URL, true));
-	$hash_urlsafe = strtr($hash_base64, '+/', '-_');
-	$hash_urlsafe = rtrim($hash_urlsafe, '=');
-	return substr($hash_urlsafe, 0, $length);
+    $hash_base64 = base64_encode(hash('sha256', $input.CC_STORE_URL, true));
+    $hash_urlsafe = strtr($hash_base64, '+/', '-_');
+    $hash_urlsafe = rtrim($hash_urlsafe, '=');
+    return substr($hash_urlsafe, 0, $length);
 }

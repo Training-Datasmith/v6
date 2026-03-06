@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -69,7 +71,7 @@ $request_body = json_decode('{
   "subject": "New Products for Summer!",
   "title": "May Newsletter"
 }');
-$campaign_id = "test_url_param";
+$campaign_id = 'test_url_param';
 
 try {
     $response = $sg->client->campaigns()->_($campaign_id)->patch($request_body);
@@ -84,7 +86,7 @@ try {
 // Retrieve a single campaign #
 // GET /campaigns/{campaign_id} #
 
-$campaign_id = "test_url_param";
+$campaign_id = 'test_url_param';
 
 try {
     $response = $sg->client->campaigns()->_($campaign_id)->get();
@@ -99,7 +101,7 @@ try {
 // Delete a Campaign #
 // DELETE /campaigns/{campaign_id} #
 
-$campaign_id = "test_url_param";
+$campaign_id = 'test_url_param';
 
 try {
     $response = $sg->client->campaigns()->_($campaign_id)->delete();
@@ -117,7 +119,7 @@ try {
 $request_body = json_decode('{
   "send_at": 1489451436
 }');
-$campaign_id = "test_url_param";
+$campaign_id = 'test_url_param';
 
 try {
     $response = $sg->client->campaigns()->_($campaign_id)->schedules()->patch($request_body);
@@ -135,7 +137,7 @@ try {
 $request_body = json_decode('{
   "send_at": 1489771528
 }');
-$campaign_id = "test_url_param";
+$campaign_id = 'test_url_param';
 
 try {
     $response = $sg->client->campaigns()->_($campaign_id)->schedules()->post($request_body);
@@ -150,7 +152,7 @@ try {
 // View Scheduled Time of a Campaign #
 // GET /campaigns/{campaign_id}/schedules #
 
-$campaign_id = "test_url_param";
+$campaign_id = 'test_url_param';
 
 try {
     $response = $sg->client->campaigns()->_($campaign_id)->schedules()->get();
@@ -165,7 +167,7 @@ try {
 // Unschedule a Scheduled Campaign #
 // DELETE /campaigns/{campaign_id}/schedules #
 
-$campaign_id = "test_url_param";
+$campaign_id = 'test_url_param';
 
 try {
     $response = $sg->client->campaigns()->_($campaign_id)->schedules()->delete();
@@ -180,7 +182,7 @@ try {
 // Send a Campaign #
 // POST /campaigns/{campaign_id}/schedules/now #
 
-$campaign_id = "test_url_param";
+$campaign_id = 'test_url_param';
 
 try {
     $response = $sg->client->campaigns()->_($campaign_id)->schedules()->now()->post();
@@ -198,7 +200,7 @@ try {
 $request_body = json_decode('{
   "to": "your.email@example.com"
 }');
-$campaign_id = "test_url_param";
+$campaign_id = 'test_url_param';
 
 try {
     $response = $sg->client->campaigns()->_($campaign_id)->schedules()->test()->post($request_body);

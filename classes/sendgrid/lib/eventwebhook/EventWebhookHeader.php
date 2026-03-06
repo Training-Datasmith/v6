@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SendGrid\EventWebhook;
 
 /**
@@ -10,6 +12,6 @@ namespace SendGrid\EventWebhook;
  */
 final class EventWebhookHeader
 {
-    const SIGNATURE = "X-Twilio-Email-Event-Webhook-Signature";
-    const TIMESTAMP = "X-Twilio-Email-Event-Webhook-Timestamp";
+    public const SIGNATURE = 'X-Twilio-Email-Event-Webhook-Signature';
+    public const TIMESTAMP = 'X-Twilio-Email-Event-Webhook-Timestamp';
 }

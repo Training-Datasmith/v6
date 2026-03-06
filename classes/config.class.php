@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -20,37 +22,26 @@
  */
 class Config
 {
-
     /**
      * Current config
      *
      * @var array
      */
-    private $_config = array();
+    private $_config = [];
     /**
      * Session config
      *
      * @var array
      */
-    private $_session_config = array();
+    private $_session_config = [];
     /**
      * Temp configs that should not be written to the db
-     *
-     * @var array
      */
-    private $_temp  = array();
+    private array $_temp  = [];
     /**
      * Write the config to the DB
-     *
-     * @var bool
      */
-    private $_write_db = false;
-    /**
-     * Array of variables before config is written used for validation
-     *
-     * @var array
-     */
-    private $_pre_enc_config = array();
+    private bool $_write_db = false;
 
     /**
      * Class instance
@@ -61,7 +52,7 @@ class Config
 
     ##############################################
 
-    final protected function __construct($glob)
+    final protected function __construct(array $glob)
     {
         //Get the main config because it will be used
         if (isset($GLOBALS['db'])) {
@@ -89,8 +80,8 @@ class Config
         foreach ($glob as $key => $value) {
             $this->_temp['config'][$key] = $value;
         }
-        if(isset($GLOBALS['cache']) && is_object($GLOBALS['cache'])) {
-            $GLOBALS['cache']->enable(isset($this->_config['config']['cache']) ? (bool)$this->_config['config']['cache'] : false);
+        if (isset($GLOBALS['cache']) && is_object($GLOBALS['cache'])) {
+            $GLOBALS['cache']->enable(isset($this->_config['config']['cache']) && (bool)$this->_config['config']['cache']);
         }
     }
 
@@ -106,10 +97,8 @@ class Config
      * Setup the instance (singleton)
      *
      * @param $glob array Current globals
-     *
-     * @return Config
      */
-    public static function getInstance($glob = array())
+    public static function getInstance($glob = []): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self($glob);
@@ -119,16 +108,13 @@ class Config
     }
 
     //=====[ Public ]=======================================
-
     /**
      * Is there a config element
      *
      * @param string $config_name
      * @param string $element
-     *
-     * @return bool
      */
-    public function has($config_name, $element)
+    public function has($config_name, $element): bool
     {
         return ($this->get($config_name, $element, true)) !== false;
     }
@@ -149,7 +135,7 @@ class Config
      */
     public function get($config_name, $element = '', $isset = false)
     {
-        if(!empty($element) && isset($this->_session_config[$config_name][$element])) {
+        if (!empty($element) && isset($this->_session_config[$config_name][$element])) {
             return $this->_session_config[$config_name][$element];
         }
 
@@ -158,7 +144,9 @@ class Config
             //If there is not an element the entire array
             if (empty($element)) {
                 return ($isset) ? true : $this->_config[$config_name];
-            } elseif (isset($this->_config[$config_name][$element])) {
+            }
+            //If there is not an element the entire array
+            if (isset($this->_config[$config_name][$element])) {
                 return ($isset) ? true : $this->_config[$config_name][$element];
             }
 
@@ -200,7 +188,7 @@ class Config
      * @param string $element
      * @param string $data
      */
-    public function merge($config_name, $element, $data)
+    public function merge($config_name, $element, $data): void
     {
         if (!empty($element)) {
             $this->_temp[$config_name][$element] = $data;
@@ -217,7 +205,8 @@ class Config
         }
     }
 
-    public function setSessionConfig($config_name, $data) {
+    public function setSessionConfig($config_name, $data): void
+    {
         if (isset($this->_session_config[$config_name])) {
             $this->_session_config[$config_name] = merge_array($this->_session_config[$config_name], $data);
         } else {
@@ -235,14 +224,12 @@ class Config
      * @param string $element
      * @param string $data
      * @param bool $force_write
-     *
-     * @return bool
      */
-    public function set($config_name, $element, $data, $force_write = false)
+    public function set($config_name, $element, $data, $force_write = false): bool
     {
         //Clean up the config array
         if (is_array($data)) {
-            array_walk_recursive($data, function (&$s, $k) {
+            array_walk_recursive($data, function (&$s, $k): void {
                 $s = $this->_stripslashes($s);
             });
         } else {
@@ -285,9 +272,7 @@ class Config
      */
     private function _clean($array)
     {
-        array_walk_recursive($array, function (&$s, $k) {
-            return $this->_stripslashes($s);
-        });
+        array_walk_recursive($array, fn (&$s, $k) => $this->_stripslashes($s));
         return $array;
     }
 
@@ -336,16 +321,16 @@ class Config
      * @param string $name
      * @return array|false
      */
-    private function _fetchRows($name)
+    private function _fetchRows($name): false|array
     {
         if (!isset($GLOBALS['db'])) {
             return false;
         }
-        $result = $GLOBALS['db']->select('CubeCart_config', array('config_key', 'config_value'), array('name' => $name));
+        $result = $GLOBALS['db']->select('CubeCart_config', ['config_key', 'config_value'], ['name' => $name]);
         if ($result === false) {
             return false;
         }
-        $array_out = array();
+        $array_out = [];
         foreach ($result as $row) {
             $array_out[$row['config_key']] = $this->_decodeValue($row['config_value']);
         }
@@ -357,14 +342,14 @@ class Config
      *
      * @param string $name
      */
-    private function _fetchConfig($name)
+    private function _fetchConfig($name): void
     {
         //Clean up the entire config array
-        $this->_config[$name] = array();
+        $this->_config[$name] = [];
 
         $array_out = $this->_fetchRows($name);
 
-        if (isset($GLOBALS['db']) && ($module = $GLOBALS['db']->select('CubeCart_modules', array('status', 'countries'), array('folder' => $name), false, 1, false)) !== false) {
+        if (isset($GLOBALS['db']) && ($module = $GLOBALS['db']->select('CubeCart_modules', ['status', 'countries'], ['folder' => $name], false, 1, false)) !== false) {
             $array_out = is_array($array_out) ? array_merge($module[0], $array_out) : $module[0];
         }
 
@@ -392,10 +377,8 @@ class Config
                 //Remove data that was merged in
                 if (!empty($this->_temp) && isset($this->_temp[$config])) {
                     $match = array_intersect_key($this->_temp[$config], $this->_config[$config]);
-                    if (!empty($match)) {
-                        foreach ($match as $k => $v) {
-                            unset($data[$k]);
-                        }
+                    foreach ($match as $k => $v) {
+                        unset($data[$k]);
                     }
                 }
                 //If there is a problem abort
@@ -406,19 +389,18 @@ class Config
                 if ($config == 'config' && !isset($data['store_name'])) {
                     return false;
                 }
-                if (strlen($config) > 100) {
+                if (strlen((string) $config) > 100) {
                     trigger_error('Config write size error: '.$config, E_USER_ERROR);
                     continue;
                 }
-                $this->_pre_enc_config = $data;
                 // Delete existing rows for this section then insert new ones
-                $db->delete('CubeCart_config', array('name' => $config));
+                $db->delete('CubeCart_config', ['name' => $config]);
                 foreach ($data as $key => $value) {
-                    $db->insert('CubeCart_config', array(
+                    $db->insert('CubeCart_config', [
                         'name'         => $config,
                         'config_key'   => $key,
-                        'config_value' => $this->_encodeValue($value)
-                    ));
+                        'config_value' => $this->_encodeValue($value),
+                    ]);
                 }
             }
         }

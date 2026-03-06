@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -15,15 +17,14 @@ if (!defined('CC_INI_SET')) {
 }
 Admin::getInstance()->permissions('maintenance', CC_PERM_READ, true);
 
-
-$GLOBALS['gui']->addBreadcrumb($lang['hooks']['title_hook'], currentPage(array('action', 'hook_id', 'plugin')));
+$GLOBALS['gui']->addBreadcrumb($lang['hooks']['title_hook'], currentPage(['action', 'hook_id', 'plugin']));
 
 if (Admin::getInstance()->permissions('maintenance', CC_PERM_EDIT)) {
     $snippet_redirect = false;
 
     if (isset($_POST['snippet_status']) && is_array($_POST['snippet_status'])) {
         foreach ($_POST['snippet_status'] as $key => $value) {
-            if ($GLOBALS['db']->update('CubeCart_code_snippet', array('enabled' => $value), array('snippet_id' => $key))) {
+            if ($GLOBALS['db']->update('CubeCart_code_snippet', ['enabled' => $value], ['snippet_id' => $key])) {
                 $snippet_redirect = true;
             }
         }
@@ -41,14 +42,14 @@ if (Admin::getInstance()->permissions('maintenance', CC_PERM_EDIT)) {
             $GLOBALS['hooks']->delete_snippet_file($_POST['snippet']['unique_id']);
 
             if (isset($_POST['snippet']['snippet_id']) && is_numeric($_POST['snippet']['snippet_id'])) {
-                if ($GLOBALS['db']->update('CubeCart_code_snippet', $_POST['snippet'], array('snippet_id' => (int)$_POST['snippet']['snippet_id']))) {
+                if ($GLOBALS['db']->update('CubeCart_code_snippet', $_POST['snippet'], ['snippet_id' => (int)$_POST['snippet']['snippet_id']])) {
                     $GLOBALS['main']->successMessage($lang['hooks']['notify_snippet_updated']);
                 }
             } else {
-                if ($GLOBALS['db']->select('CubeCart_code_snippet', array('snippet_id'), array('unique_id' => $_POST['snippet']['unique_id']))) {
+                if ($GLOBALS['db']->select('CubeCart_code_snippet', ['snippet_id'], ['unique_id' => $_POST['snippet']['unique_id']])) {
                     $GLOBALS['main']->errorMessage($lang['hooks']['notify_snippet_not_added']);
                 } else {
-                    if ($GLOBALS['db']->insert('CubeCart_code_snippet', $_POST['snippet'])==true) {
+                    if ($GLOBALS['db']->insert('CubeCart_code_snippet', $_POST['snippet']) == true) {
                         $GLOBALS['main']->successMessage($lang['hooks']['notify_snippet_added']);
                         $snippet_redirect = true;
                     } else {
@@ -60,7 +61,7 @@ if (Admin::getInstance()->permissions('maintenance', CC_PERM_EDIT)) {
     }
 
     if (isset($_GET['delete_snippet']) && is_numeric($_GET['delete_snippet'])) {
-        if ($GLOBALS['db']->delete('CubeCart_code_snippet', array('snippet_id' => (int)$_GET['delete_snippet']))) {
+        if ($GLOBALS['db']->delete('CubeCart_code_snippet', ['snippet_id' => (int)$_GET['delete_snippet']])) {
             $GLOBALS['hooks']->delete_snippet_file($_GET['delete_snippet']);
             $GLOBALS['main']->successMessage($lang['hooks']['notify_snippet_deleted']);
             $snippet_redirect = true;
@@ -68,15 +69,14 @@ if (Admin::getInstance()->permissions('maintenance', CC_PERM_EDIT)) {
     }
 
     if ($snippet_redirect) {
-        httpredir(currentPage(array('snippet', 'delete_snippet', 'add_snippet')), 'snippets');
+        httpredir(currentPage(['snippet', 'delete_snippet', 'add_snippet']), 'snippets');
     }
-
 
     if (isset($_POST['hook']) && is_array($_POST['hook'])) {
         // Validation
-        $error = array();
-        $required = array('trigger', 'hook_name', 'plugin');
-        $_POST['hook']['priority'] = ctype_digit($_POST['hook']['priority']) ?  $_POST['hook']['priority'] : 0;
+        $error = [];
+        $required = ['trigger', 'hook_name', 'plugin'];
+        $_POST['hook']['priority'] = ctype_digit($_POST['hook']['priority']) ? $_POST['hook']['priority'] : 0;
         foreach ($_POST['hook'] as $key => $value) {
             if (in_array($key, $required)) {
                 if (empty($value)) {
@@ -87,16 +87,16 @@ if (Admin::getInstance()->permissions('maintenance', CC_PERM_EDIT)) {
 
         if (empty($error)) {
             if (isset($_POST['hook']['hook_id']) && is_numeric($_POST['hook']['hook_id'])) {
-                if ($GLOBALS['db']->update('CubeCart_hooks', $_POST['hook'], array('hook_id' => $_POST['hook']['hook_id']))) {
+                if ($GLOBALS['db']->update('CubeCart_hooks', $_POST['hook'], ['hook_id' => $_POST['hook']['hook_id']])) {
                     $GLOBALS['main']->successMessage($lang['hooks']['notify_hook_update']);
-                    httpredir(currentPage(array('action', 'hook_id')));
+                    httpredir(currentPage(['action', 'hook_id']));
                 } else {
                     $GLOBALS['main']->errorMessage($lang['hooks']['error_hook_update']);
                 }
             } else {
                 if ($GLOBALS['db']->insert('CubeCart_hooks', $_POST['hook'])) {
                     $GLOBALS['main']->successMessage($lang['hooks']['notify_hook_create']);
-                    httpredir(currentPage(array('action', 'hook_id')));
+                    httpredir(currentPage(['action', 'hook_id']));
                 } else {
                     $GLOBALS['main']->errorMessage($lang['hooks']['error_hook_create']);
                     $GLOBALS['smarty']->assign('HOOK', $_POST['hook']);
@@ -111,7 +111,7 @@ if (Admin::getInstance()->permissions('maintenance', CC_PERM_EDIT)) {
         // Enable/Disable individual hooks
         $updated = false;
         foreach ($_POST['status'] as $hook_id => $status) {
-            if ($GLOBALS['db']->update('CubeCart_hooks', array('enabled' => (int)$status), array('hook_id' => $hook_id))) {
+            if ($GLOBALS['db']->update('CubeCart_hooks', ['enabled' => (int)$status], ['hook_id' => $hook_id])) {
                 $updated = true;
             }
         }
@@ -125,10 +125,10 @@ if (Admin::getInstance()->permissions('maintenance', CC_PERM_EDIT)) {
 }
 // Create list of enabled plugin folders
 $plugins = $GLOBALS['hooks']->scan_all_plugins('plugins', true);
-$smarty_data = array();
+$smarty_data = [];
 
 if (isset($_GET['plugin']) && isset($plugins[(string)$_GET['plugin']]) && !is_numeric($_GET['plugin'])) {
-    $GLOBALS['gui']->addBreadcrumb(ucwords($plugins[$_GET['plugin']]['name']), currentPage(array('hook_id', 'action')));
+    $GLOBALS['gui']->addBreadcrumb(ucwords($plugins[$_GET['plugin']]['name']), currentPage(['hook_id', 'action']));
 
     // Load config.xml if it exists
     $config_file = CC_ROOT_DIR.'/modules/plugins/'.$_GET['plugin'].'/config.xml';
@@ -145,12 +145,12 @@ if (isset($_GET['plugin']) && isset($plugins[(string)$_GET['plugin']]) && !is_nu
         $GLOBALS['main']->AddTabControl($lang['hooks']['title_hook'], 'hook_edit');
         if (isset($_GET['hook_id'])) {
             // Edit hook
-            if (($hook = $GLOBALS['db']->select('CubeCart_hooks', false, array('hook_id' => (int)$_GET['hook_id']))) !== false) {
+            if (($hook = $GLOBALS['db']->select('CubeCart_hooks', false, ['hook_id' => (int)$_GET['hook_id']])) !== false) {
                 $hook_data = $hook[0];
                 $GLOBALS['smarty']->assign('HOOK', $hook_data);
                 $GLOBALS['gui']->addBreadcrumb($hook_data['trigger']);
             } else {
-                httpredir(currentPage(array('hook_id')));
+                httpredir(currentPage(['hook_id']));
             }
         } else {
             // Create hook
@@ -168,8 +168,8 @@ if (isset($_GET['plugin']) && isset($plugins[(string)$_GET['plugin']]) && !is_nu
         foreach ($plugin_list as $plugin_path) {
             if (is_dir($plugin_path)) {
                 $hook_name = 'admin.'.basename($plugin_path);
-                $selected = (isset($hook_data) && $hook_name==$hook_data['trigger']) ? ' selected="selected"' : '';
-                $smarty_data['triggers'][] = array('trigger' => $hook_name, 'deprecated' => 0, 'selected' => $selected);
+                $selected = (isset($hook_data) && $hook_name == $hook_data['trigger']) ? ' selected="selected"' : '';
+                $smarty_data['triggers'][] = ['trigger' => $hook_name, 'deprecated' => 0, 'selected' => $selected];
             }
         }
 
@@ -194,32 +194,32 @@ if (isset($_GET['plugin']) && isset($plugins[(string)$_GET['plugin']]) && !is_nu
                 $GLOBALS['main']->errorMessage($lang['hooks']['error_plugin_config']);
             }
         }
-        $add_hook = (isset($_GET['action']) && $_GET['action']=='add') ? true : false;
+        $add_hook = (isset($_GET['action']) && $_GET['action'] == 'add') ? true : false;
         $GLOBALS['smarty']->assign('ADD_HOOK', $add_hook);
         $GLOBALS['smarty']->assign('DISPLAY_FORM', true);
     } else {
         $GLOBALS['main']->AddTabControl($lang['hooks']['title_hook'], 'hooks');
-        $GLOBALS['main']->AddTabControl($lang['hooks']['title_hook_add'], null, currentPage(null, array('action' => 'add')));
+        $GLOBALS['main']->AddTabControl($lang['hooks']['title_hook_add'], null, currentPage(null, ['action' => 'add']));
 
         // Update hooks and add more if we need to...
-        if(isset($_GET['revert'])) {
-            if($hooks->install($this_plugin)) {
+        if (isset($_GET['revert'])) {
+            if ($hooks->install($this_plugin)) {
                 $GLOBALS['main']->successMessage($lang['module']['success_install']);
-                httpredir(currentPage(array('revert')));
+                httpredir(currentPage(['revert']));
             } else {
                 $GLOBALS['main']->errorMessage($lang['module']['failed_install']);
-                httpredir(currentPage(array('revert')));
+                httpredir(currentPage(['revert']));
             }
         }
 
         // Display all hooks for the selected plugin
-        if (($hook_list = $GLOBALS['db']->select('CubeCart_hooks', false, array('plugin' => $this_plugin))) !== false) {
+        if (($hook_list = $GLOBALS['db']->select('CubeCart_hooks', false, ['plugin' => $this_plugin])) !== false) {
             foreach ($hook_list as $hook) {
                 // Edit link
                 if (empty($hook['hook_name'])) {
                     $hook['hook_name'] = $hook['trigger'];
                 }
-                $hook['edit'] = currentPage(null, array('hook_id' => $hook['hook_id']));
+                $hook['edit'] = currentPage(null, ['hook_id' => $hook['hook_id']]);
                 $smarty_data['hooks'][] = $hook;
             }
             $GLOBALS['smarty']->assign('HOOKS', $smarty_data['hooks']);
@@ -234,19 +234,19 @@ if (isset($_GET['plugin']) && isset($plugins[(string)$_GET['plugin']]) && !is_nu
     ## List all plugins using hooks
     if (isset($plugins) && is_array($plugins)) {
         foreach ($plugins as $plugin) {
-            $plugin['edit'] = currentPage(null, array('plugin' => $plugin['plugin']));
+            $plugin['edit'] = currentPage(null, ['plugin' => $plugin['plugin']]);
             $smarty_data['plugins'][] = $plugin;
         }
-        $GLOBALS['smarty']->assign('PLUGINS', isset($smarty_data['plugins']) ? $smarty_data['plugins'] : array());
+        $GLOBALS['smarty']->assign('PLUGINS', isset($smarty_data['plugins']) ? $smarty_data['plugins'] : []);
     }
     $GLOBALS['smarty']->assign('DISPLAY_PLUGINS', true);
 
-    if ($smarty_data['snippets'] = $GLOBALS['db']->select('CubeCart_code_snippet', '*', array(), array('priority' => 'ASC'))) {
+    if ($smarty_data['snippets'] = $GLOBALS['db']->select('CubeCart_code_snippet', '*', [], ['priority' => 'ASC'])) {
         $GLOBALS['smarty']->assign('SNIPPETS', $smarty_data['snippets']);
     }
 
     if (isset($_GET['snippet']) && is_numeric($_GET['snippet'])) {
-        $snippet = $GLOBALS['db']->select('CubeCart_code_snippet', '*', array('snippet_id' => (int)$_GET['snippet']));
+        $snippet = $GLOBALS['db']->select('CubeCart_code_snippet', '*', ['snippet_id' => (int)$_GET['snippet']]);
         $GLOBALS['smarty']->assign('DISPLAY_SNIPPET_FORM', true);
     } elseif (isset($_POST['snippet'])) {
         $snippet[0] = $_POST['snippet'];

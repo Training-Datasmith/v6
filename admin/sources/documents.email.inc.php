@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -15,32 +17,32 @@ if (!defined('CC_INI_SET')) {
 }
 Admin::getInstance()->permissions('documents', CC_PERM_READ, true);
 
-$email_types = array(
-    'account.password_recovery' => array(
+$email_types = [
+    'account.password_recovery' => [
         'description' => $lang['email']['title_macro_user_password'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.first_name}' => $lang['email']['macro_first_name'],
             '{$DATA.last_name}'  => $lang['email']['macro_last_name'],
             '{$DATA.reset_link}'  => $lang['email']['macro_link_password'],
-        ),
-    ),
-    'newsletter.verify_email' => array(
+        ],
+    ],
+    'newsletter.verify_email' => [
         'description' => $lang['email']['title_macro_user_newsletter'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.email}' => $lang['common']['email'],
-            '{$DATA.link}'  => $lang['email']['macro_link_verify']
-        ),
-    ),
-    'newsletter.remove_request' => array(
+            '{$DATA.link}'  => $lang['email']['macro_link_verify'],
+        ],
+    ],
+    'newsletter.remove_request' => [
         'description' => $lang['email']['title_macro_user_newsletter_remove'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.email}' => $lang['common']['email'],
-            '{$DATA.link}'  => $lang['email']['macro_link_verify']
-        ),
-    ),
-    'admin.order_received' => array(
+            '{$DATA.link}'  => $lang['email']['macro_link_verify'],
+        ],
+    ],
+    'admin.order_received' => [
         'description' => $lang['email']['title_macro_admin_order'],
-        'macros' => array(
+        'macros' => [
             '{$SHIPPING.first_name}'  => $lang['email']['macro_first_name_d'],
             '{$SHIPPING.last_name}'  => $lang['email']['macro_last_name_d'],
             '{$SHIPPING.company_name}'  => $lang['email']['macro_company_name_d'],
@@ -83,77 +85,77 @@ $email_types = array(
             '{$product.product_options}' => $lang['email']['macro_product_options'],
             '{$tax.tax_name}'   => $lang['email']['macro_tax_name'],
             '{$tax.tax_percent}'  => $lang['email']['macro_tax_rate'],
-            '{$tax.tax_amount}'   => $lang['email']['macro_tax_amount']
+            '{$tax.tax_amount}'   => $lang['email']['macro_tax_amount'],
 
-        ),
-    ),
-    'admin.password_recovery' => array(
+        ],
+    ],
+    'admin.password_recovery' => [
         'description' => $lang['email']['title_macro_admin_password'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.name}' => $lang['email']['macro_admin_name'],
             '{$DATA.link}' => $lang['email']['macro_link_password'],
-        ),
-    ),
-    'admin.review_added' => array(
+        ],
+    ],
+    'admin.review_added' => [
         'description' => $lang['email']['title_macro_admin_review'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.name}' => $lang['email']['macro_review_name'],
             '{$DATA.product_name}' => $lang['email']['macro_product_name'],
             '{$DATA.link}' => $lang['email']['macro_link_review'],
             '{$DATA.review}' => $lang['email']['macro_review_copy'],
-        ),
-    ),
-    'admin.two_factor_code' => array(
+        ],
+    ],
+    'admin.two_factor_code' => [
         'description' => $lang['email']['title_macro_admin_two_factor_code'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.name}' => $lang['email']['macro_admin_name'],
             '{$DATA.code}' => $lang['email']['macro_twofa_code'],
-        ),
-    ),
-    'admin.new_device_login' => array(
+        ],
+    ],
+    'admin.new_device_login' => [
         'description' => $lang['email']['title_macro_admin_new_device_login'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.name}' => $lang['email']['macro_admin_name'],
             '{$DATA.new_ip}' => $lang['email']['macro_new_ip'],
             '{$DATA.previous_ip}' => $lang['email']['macro_previous_ip'],
             '{$DATA.new_browser}' => $lang['email']['macro_new_browser'],
             '{$DATA.login_time}' => $lang['email']['macro_login_time'],
-        ),
-    ),
-    'cart.digital_download' => array(
+        ],
+    ],
+    'cart.digital_download' => [
         'description' => $lang['email']['title_macro_cart_digital'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.first_name}' => $lang['email']['macro_first_name'],
             '{$DATA.last_name}' => $lang['email']['macro_last_name'],
             '{$download.name}' => $lang['email']['macro_product_name'],
             '{$download.expire}' => $lang['email']['macro_download_expire'],
             '{$download.url}'  => $lang['email']['macro_link_download'],
-            '{$download.stream}'  => $lang['email']['macro_stream']
-        ),
-    ),
-    'cart.gift_certificate' => array(
+            '{$download.stream}'  => $lang['email']['macro_stream'],
+        ],
+    ],
+    'cart.gift_certificate' => [
         'description' => $lang['email']['title_macro_cart_certificate'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.name}'  => $lang['email']['macro_cert_recipient'],
             '{$DATA.first_name}' => $lang['email']['macro_sender_name_first'],
             '{$DATA.last_name}'  => $lang['email']['macro_sender_name_last'],
             '{$DATA.value}'  => $lang['email']['macro_cert_value'],
             '{$DATA.code}'  => $lang['email']['macro_cert_code'],
             '{$DATA.message}' => $lang['email']['macro_sender_message'],
-        ),
-    ),
-    'cart.order_cancelled' => array(
+        ],
+    ],
+    'cart.order_cancelled' => [
         'description' => $lang['email']['title_macro_order_cancelled'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.first_name}' => $lang['email']['macro_first_name'],
             '{$DATA.last_name}' => $lang['email']['macro_last_name'],
             '{$DATA.cart_order_id}'  => $lang['email']['macro_order_number_t'],
-            '{$DATA.custom_oid}'  => $lang['email']['macro_order_number_i']
-        ),
-    ),
-    'cart.order_confirmation' => array(
+            '{$DATA.custom_oid}'  => $lang['email']['macro_order_number_i'],
+        ],
+    ],
+    'cart.order_confirmation' => [
         'description' => $lang['email']['title_macro_order_confirmed'],
-        'macros' => array(
+        'macros' => [
             '{$SHIPPING.first_name}' => $lang['email']['macro_first_name_d'],
             '{$SHIPPING.last_name}' => $lang['email']['macro_last_name_d'],
             '{$SHIPPING.company_name}' => $lang['email']['macro_company_name_d'],
@@ -179,7 +181,7 @@ $email_types = array(
             '{$DATA.cart_order_id}'  => $lang['email']['macro_order_number_t'],
             '{$DATA.custom_oid}'  => $lang['email']['macro_order_number_i'],
             '{$DATA.order_date}' => $lang['email']['macro_order_date'],
-            '{$DATA.ship_method}'=> $lang['email']['macro_order_shipping_method'],
+            '{$DATA.ship_method}' => $lang['email']['macro_order_shipping_method'],
             '{$DATA.ship_product'  => $lang['email']['macro_order_shipping_product'],
             '{$DATA.shipping}' => $lang['email']['macro_order_shipping'],
             '{$DATA.discount}' => $lang['email']['macro_order_discount'],
@@ -196,12 +198,12 @@ $email_types = array(
             '{$product.product_options}' => $lang['email']['macro_product_options'],
             '{$tax.tax_name}' => $lang['email']['macro_tax_name'],
             '{$tax.tax_percent}' => $lang['email']['macro_tax_rate'],
-            '{$tax.tax_amount}' => $lang['email']['macro_tax_amount']
-        ),
-    ),
-    'cart.order_complete' => array(
+            '{$tax.tax_amount}' => $lang['email']['macro_tax_amount'],
+        ],
+    ],
+    'cart.order_complete' => [
         'description' => $lang['email']['title_macro_order_dispatched'],
-        'macros' => array(
+        'macros' => [
             '{$SHIPPING.first_name}' => $lang['email']['macro_first_name_d'],
             '{$SHIPPING.last_name}' => $lang['email']['macro_last_name_d'],
             '{$SHIPPING.company_name}' => $lang['email']['macro_company_name_d'],
@@ -227,7 +229,7 @@ $email_types = array(
             '{$DATA.cart_order_id}'  => $lang['email']['macro_order_number_t'],
             '{$DATA.custom_oid}'  => $lang['email']['macro_order_number_i'],
             '{$DATA.order_date}' => $lang['email']['macro_order_date'],
-            '{$DATA.ship_method}'=> $lang['email']['macro_order_shipping_method'],
+            '{$DATA.ship_method}' => $lang['email']['macro_order_shipping_method'],
             '{$DATA.ship_product'  => $lang['email']['macro_order_shipping_product'],
             '{$DATA.shipping}' => $lang['email']['macro_order_shipping'],
             '{$DATA.discount}' => $lang['email']['macro_order_discount'],
@@ -248,31 +250,31 @@ $email_types = array(
             '{$product.product_options}' => $lang['email']['macro_product_options'],
             '{$tax.tax_name}' => $lang['email']['macro_tax_name'],
             '{$tax.tax_percent}' => $lang['email']['macro_tax_rate'],
-            '{$tax.tax_amount}' => $lang['email']['macro_tax_amount']
-        ),
-    ),
-    'cart.payment_fraud' => array(
+            '{$tax.tax_amount}' => $lang['email']['macro_tax_amount'],
+        ],
+    ],
+    'cart.payment_fraud' => [
         'description' => $lang['email']['title_macro_order_fraud'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.first_name}' => $lang['email']['macro_first_name'],
             '{$DATA.last_name}' => $lang['email']['macro_last_name'],
             '{$DATA.cart_order_id}'  => $lang['email']['macro_order_number_t'],
-            '{$DATA.custom_oid}'  => $lang['email']['macro_order_number_i']
-        ),
-    ),
-    'cart.payment_received' => array(
+            '{$DATA.custom_oid}'  => $lang['email']['macro_order_number_i'],
+        ],
+    ],
+    'cart.payment_received' => [
         'description' => $lang['email']['title_macro_order_payment'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.first_name}'  => $lang['email']['macro_first_name'],
             '{$DATA.last_name}'  => $lang['email']['macro_last_name'],
             '{$DATA.cart_order_id}'  => $lang['email']['macro_order_number_t'],
             '{$DATA.custom_oid}'  => $lang['email']['macro_order_number_i'],
             '{$DATA.total}'   => $lang['email']['macro_payment_amount'],
-        ),
-    ),
-    'cart.abandoned' => array(
+        ],
+    ],
+    'cart.abandoned' => [
         'description' => $lang['email']['title_macro_cart_abandoned'],
-        'macros' => array(
+        'macros' => [
             '{$DATA.first_name}' => $lang['email']['macro_first_name'],
             '{$DATA.last_name}' => $lang['email']['macro_last_name'],
             '{$DATA.store_name}' => $lang['email']['macro_store_name'],
@@ -283,29 +285,29 @@ $email_types = array(
             '{$product.price}' => $lang['email']['macro_product_price'],
             '{$product.options}' => $lang['email']['macro_product_options'],
             '{$product.image}' => $lang['email']['macro_product_image'],
-        ),
-    ),
-    'catalogue.tell_friend' => array(
+        ],
+    ],
+    'catalogue.tell_friend' => [
         'description' => $lang['email']['title_macro_tell_friend'],
-        'macros'  => array(
+        'macros'  => [
             '{$DATA.to}'  => $lang['email']['macro_tell_friend'],
             '{$DATA.from}' => $lang['email']['macro_sender_name'],
             '{$DATA.name}' => $lang['email']['macro_product_name'],
             '{$DATA.link}' => $lang['email']['macro_link_product'],
-            '{$DATA.message}'=> $lang['email']['macro_tell_message'],
-        ),
-    ),
-);
+            '{$DATA.message}' => $lang['email']['macro_tell_message'],
+        ],
+    ],
+];
 ## Add hook
 foreach ($GLOBALS['hooks']->load('admin.documents.email.macros') as $hook) {
     include $hook;
 }
 
-$GLOBALS['gui']->addBreadcrumb($lang['email']['title_email'], currentPage(array('action', 'content_id', 'content_type', 'template_id')));
+$GLOBALS['gui']->addBreadcrumb($lang['email']['title_email'], currentPage(['action', 'content_id', 'content_type', 'template_id']));
 
 if (isset($_POST['template_default']) && ctype_digit($_POST['template_default']) && Admin::getInstance()->permissions('documents', CC_PERM_EDIT)) {
-    $GLOBALS['db']->update('CubeCart_email_template', array('template_default' => '0'));
-    $GLOBALS['db']->update('CubeCart_email_template', array('template_default' => '1'), array('template_id' => (int)$_POST['template_default']));
+    $GLOBALS['db']->update('CubeCart_email_template', ['template_default' => '0']);
+    $GLOBALS['db']->update('CubeCart_email_template', ['template_default' => '1'], ['template_id' => (int)$_POST['template_default']]);
 
     ## Update default template
     $GLOBALS['main']->successMessage($lang['email']['notify_template_default']);
@@ -338,10 +340,10 @@ if (isset($_POST['template'])) {
         $GLOBALS['main']->errorMessage($lang['email']['error_macro_content']);
         $proceed = false;
     }
-    
+
     if ($proceed && Admin::getInstance()->permissions('documents', CC_PERM_EDIT)) {
         if (isset($_POST['template']['template_id']) && is_numeric($_POST['template']['template_id'])) {
-            $GLOBALS['db']->update('CubeCart_email_template', $_POST['template'], array('template_id' => (int)$_POST['template']['template_id']));
+            $GLOBALS['db']->update('CubeCart_email_template', $_POST['template'], ['template_id' => (int)$_POST['template']['template_id']]);
             $GLOBALS['main']->successMessage($lang['email']['notify_template_update']);
         } else {
             $template_id  = $GLOBALS['db']->insert('CubeCart_email_template', $_POST['template']);
@@ -378,7 +380,7 @@ if (isset($_POST['content']) && Admin::getInstance()->permissions('documents', C
         ## Save/Update Content
         if (isset($_POST['content']['content_id']) && !empty($_POST['content']['content_id'])) {
             ## remove double encoding in repeat regions required to show them in FCK
-            if ($GLOBALS['db']->update('CubeCart_email_content', $_POST['content'], array('content_id' => (int)$_POST['content']['content_id']))) {
+            if ($GLOBALS['db']->update('CubeCart_email_content', $_POST['content'], ['content_id' => (int)$_POST['content']['content_id']])) {
                 $GLOBALS['main']->successMessage($lang['email']['notify_content_update']);
                 if ($redirect) {
                     httpredir('?_g=documents&node=email&type=content');
@@ -388,7 +390,7 @@ if (isset($_POST['content']) && Admin::getInstance()->permissions('documents', C
             }
         } else {
             if (!empty($_POST['content']['content_type']) && !empty($_POST['content']['language'])) {
-                $check = $GLOBALS['db']->select('CubeCart_email_content', array('content_id'), array('content_type' => $_POST['content']['content_type'], 'language' => $_POST['content']['language']));
+                $check = $GLOBALS['db']->select('CubeCart_email_content', ['content_id'], ['content_type' => $_POST['content']['content_type'], 'language' => $_POST['content']['language']]);
                 if ($check) {
                     $GLOBALS['main']->errorMessage($lang['email']['error_content_create_exists']);
                     httpredir('?_g=documents&node=email&type=content&action=edit&content_id='.$check[0]['content_id']);
@@ -415,155 +417,155 @@ if (isset($_POST['content']) && Admin::getInstance()->permissions('documents', C
 }
 
 ###########################################################
-$smarty_data = array();
+$smarty_data = [];
 if (isset($_GET['action']) && isset($_GET['type'])) {
     switch (strtolower($_GET['type'])) {
-    case 'content':
-        ## EMAIL CONTENTS
-        switch (strtolower($_GET['action'])) {
-        case 'delete':
-            ## Delete content
-            if (isset($_GET['content_id']) && is_numeric($_GET['content_id']) && Admin::getInstance()->permissions('documents', CC_PERM_DELETE)) {
-                ## ONLY allow delete if there is more than one translation in the system
-                $content_type = $GLOBALS['db']->select('CubeCart_email_content', array('content_type'), array('content_id' => (int)$_GET['content_id']));
-                $count = $GLOBALS['db']->numrows('SELECT * FROM `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_email_content` WHERE `content_type` = \''.(string)$content_type[0]['content_type'].'\'');
+        case 'content':
+            ## EMAIL CONTENTS
+            switch (strtolower($_GET['action'])) {
+                case 'delete':
+                    ## Delete content
+                    if (isset($_GET['content_id']) && is_numeric($_GET['content_id']) && Admin::getInstance()->permissions('documents', CC_PERM_DELETE)) {
+                        ## ONLY allow delete if there is more than one translation in the system
+                        $content_type = $GLOBALS['db']->select('CubeCart_email_content', ['content_type'], ['content_id' => (int)$_GET['content_id']]);
+                        $count = $GLOBALS['db']->numrows('SELECT * FROM `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_email_content` WHERE `content_type` = \''.(string)$content_type[0]['content_type'].'\'');
 
-                if ($count>1) {
-                    if ($GLOBALS['db']->delete('CubeCart_email_content', array('content_id' => (int)$_GET['content_id']))) {
-                        $GLOBALS['main']->successMessage($lang['email']['notify_content_delete']);
-                        httpredir(currentPage(array('action', 'content_id', 'type')));
-                    } else {
-                        $GLOBALS['main']->errorMessage($lang['email']['error_content_delete']);
-                    }
-                } else {
-                    $GLOBALS['main']->errorMessage($lang['email']['error_content_single']);
-                    httpredir('?_g=documents&node=email&type=content');
-                }
-            }
-            break;
-        default:
-            if (strtolower($_GET['action']) == 'edit' && isset($_GET['content_id'])) {
-                ## Edit content
-                $content = $GLOBALS['db']->select('CubeCart_email_content', false, array('content_id' => (int)$_GET['content_id']));
-                if ($content) {
-                    $data = $content[0];
-                    $breadcrumb = $data['subject'];
-                    $delete = (bool)$GLOBALS['smarty']->assign('LINK_DELETE', currentPage(null, array('action' => 'delete')));
-                } else {
-                    ## redirect
-                    httpredir(currentPage(array('action', 'content_id', 'type')));
-                }
-            } elseif (isset($_GET['content_type']) && array_key_exists($_GET['content_type'], $email_types)) {
-                ## Create Content
-                # $data  = (isset($_POST['content'])) ? $_POST['content'] : array('content_type' => $_GET['content_type']);
-                ## Content to translate content
-                $content = $GLOBALS['db']->select('CubeCart_email_content', array('content_type', 'language', 'subject', 'content_html'), array('content_type' => (string)$_GET['content_type'], 'language' => $GLOBALS['config']->get('config', 'default_language')));
-                $data  = $content[0];
-                $existing = $GLOBALS['db']->select('CubeCart_email_content', array('DISTINCT' => 'language'), array('content_type' => $_GET['content_type']));
-                $breadcrumb = $lang['common']['create'].': '.$_GET['content_type'];
-            } else {
-                ## Back to main list
-                httpredir(currentPage(array('action', 'content_id', 'content_type', 'type')), 'email_contents');
-            }
-            $lang_list = $GLOBALS['language']->listLanguages();
-            if (is_array($lang_list)) {
-                $lang_skip = array();
-                if (!empty($existing)) {
-                    foreach($existing as $l) {
-                        array_push($lang_skip, $l['language']);
-                    }
-                }
-                foreach ($lang_list as $langs) {
-                    ## If we are adding a translation don't show if it exists alreadt
-                    if (($_GET['action']=='add' && !in_array($langs['code'], $lang_skip)) || $_GET['action']=='edit') {
-                        if($langs['code'] == $data['language']) {
-                            $GLOBALS['smarty']->assign('LANGUAGES', $langs['title']);
-                            $GLOBALS['smarty']->assign('ASSIGNED_LANG', array('name' => $langs['title'], 'code' => $langs['code']));
-                            $langs['selected'] = ' selected="selected"';
+                        if ($count > 1) {
+                            if ($GLOBALS['db']->delete('CubeCart_email_content', ['content_id' => (int)$_GET['content_id']])) {
+                                $GLOBALS['main']->successMessage($lang['email']['notify_content_delete']);
+                                httpredir(currentPage(['action', 'content_id', 'type']));
+                            } else {
+                                $GLOBALS['main']->errorMessage($lang['email']['error_content_delete']);
+                            }
                         } else {
-                            $langs['selected'] = '';
+                            $GLOBALS['main']->errorMessage($lang['email']['error_content_single']);
+                            httpredir('?_g=documents&node=email&type=content');
                         }
-                        $smarty_data['languages'][] = $langs;
                     }
-                }
-                $GLOBALS['smarty']->assign('LANGUAGES', $smarty_data['languages']);
-            }
-            if ($_GET['content_id'] > 0) {
-                $page_title = $lang['email']['title_content_update'];
-            } else {
-                $page_title = $lang['email']['title_content_create'];
-            }
-            $GLOBALS['smarty']->assign('ADD_EDIT_CONTENT', $page_title);
-            // See GitHub #1511
-            $data['content_html'] = str_replace(array('empty({$','})}'), array('empty($',')}'), $data['content_html']);
-            $GLOBALS['smarty']->assign('CONTENT', $data);
+                    break;
+                default:
+                    if (strtolower($_GET['action']) == 'edit' && isset($_GET['content_id'])) {
+                        ## Edit content
+                        $content = $GLOBALS['db']->select('CubeCart_email_content', false, ['content_id' => (int)$_GET['content_id']]);
+                        if ($content) {
+                            $data = $content[0];
+                            $breadcrumb = $data['subject'];
+                            $delete = (bool)$GLOBALS['smarty']->assign('LINK_DELETE', currentPage(null, ['action' => 'delete']));
+                        } else {
+                            ## redirect
+                            httpredir(currentPage(['action', 'content_id', 'type']));
+                        }
+                    } elseif (isset($_GET['content_type']) && array_key_exists($_GET['content_type'], $email_types)) {
+                        ## Create Content
+                        # $data  = (isset($_POST['content'])) ? $_POST['content'] : array('content_type' => $_GET['content_type']);
+                        ## Content to translate content
+                        $content = $GLOBALS['db']->select('CubeCart_email_content', ['content_type', 'language', 'subject', 'content_html'], ['content_type' => (string)$_GET['content_type'], 'language' => $GLOBALS['config']->get('config', 'default_language')]);
+                        $data  = $content[0];
+                        $existing = $GLOBALS['db']->select('CubeCart_email_content', ['DISTINCT' => 'language'], ['content_type' => $_GET['content_type']]);
+                        $breadcrumb = $lang['common']['create'].': '.$_GET['content_type'];
+                    } else {
+                        ## Back to main list
+                        httpredir(currentPage(['action', 'content_id', 'content_type', 'type']), 'email_contents');
+                    }
+                    $lang_list = $GLOBALS['language']->listLanguages();
+                    if (is_array($lang_list)) {
+                        $lang_skip = [];
+                        if (!empty($existing)) {
+                            foreach ($existing as $l) {
+                                array_push($lang_skip, $l['language']);
+                            }
+                        }
+                        foreach ($lang_list as $langs) {
+                            ## If we are adding a translation don't show if it exists alreadt
+                            if (($_GET['action'] == 'add' && !in_array($langs['code'], $lang_skip)) || $_GET['action'] == 'edit') {
+                                if ($langs['code'] == $data['language']) {
+                                    $GLOBALS['smarty']->assign('LANGUAGES', $langs['title']);
+                                    $GLOBALS['smarty']->assign('ASSIGNED_LANG', ['name' => $langs['title'], 'code' => $langs['code']]);
+                                    $langs['selected'] = ' selected="selected"';
+                                } else {
+                                    $langs['selected'] = '';
+                                }
+                                $smarty_data['languages'][] = $langs;
+                            }
+                        }
+                        $GLOBALS['smarty']->assign('LANGUAGES', $smarty_data['languages']);
+                    }
+                    if ($_GET['content_id'] > 0) {
+                        $page_title = $lang['email']['title_content_update'];
+                    } else {
+                        $page_title = $lang['email']['title_content_create'];
+                    }
+                    $GLOBALS['smarty']->assign('ADD_EDIT_CONTENT', $page_title);
+                    // See GitHub #1511
+                    $data['content_html'] = str_replace(['empty({$','})}'], ['empty($',')}'], $data['content_html']);
+                    $GLOBALS['smarty']->assign('CONTENT', $data);
 
-            if (is_array($email_types[$data['content_type']]['macros'])) {
-                foreach ($email_types[$data['content_type']]['macros'] as $macro => $desc) {
-                    $macro_data['name'] = htmlspecialchars($macro);
-                    $macro_data['description'] = $desc;
+                    if (is_array($email_types[$data['content_type']]['macros'])) {
+                        foreach ($email_types[$data['content_type']]['macros'] as $macro => $desc) {
+                            $macro_data['name'] = htmlspecialchars($macro);
+                            $macro_data['description'] = $desc;
 
-                    $smarty_data['macros'][] = $macro_data;
-                }
-                $GLOBALS['smarty']->assign('CONTENT_MACROS', $smarty_data['macros']);
+                            $smarty_data['macros'][] = $macro_data;
+                        }
+                        $GLOBALS['smarty']->assign('CONTENT_MACROS', $smarty_data['macros']);
+                    }
+                    $GLOBALS['smarty']->assign('DISPLAY_CONTENT_FORM', true);
             }
-            $GLOBALS['smarty']->assign('DISPLAY_CONTENT_FORM', true);
-        }
-        break;
-    case 'template':
-        ## EMAIL TEMPLATES
-        switch (strtolower($_GET['action'])) {
-        case 'delete':
-            if (isset($_GET['template_id']) && is_numeric($_GET['template_id']) && Admin::getInstance()->permissions('documents', CC_PERM_DELETE)) {
-                if ($GLOBALS['db']->delete('CubeCart_email_template', array('template_id' => (int)$_GET['template_id']))) {
-                    httpredir(currentPage(array('action', 'type', 'template_id')), 'email_templates');
-                }
+            break;
+        case 'template':
+            ## EMAIL TEMPLATES
+            switch (strtolower($_GET['action'])) {
+                case 'delete':
+                    if (isset($_GET['template_id']) && is_numeric($_GET['template_id']) && Admin::getInstance()->permissions('documents', CC_PERM_DELETE)) {
+                        if ($GLOBALS['db']->delete('CubeCart_email_template', ['template_id' => (int)$_GET['template_id']])) {
+                            httpredir(currentPage(['action', 'type', 'template_id']), 'email_templates');
+                        }
+                    }
+                    break;
+                default:
+                    if (in_array(strtolower($_GET['action']), ['clone', 'edit']) && isset($_GET['template_id']) && is_numeric($_GET['template_id'])) {
+                        ## Edit Template
+                        $template = $GLOBALS['db']->select('CubeCart_email_template', false, ['template_id' => (int)$_GET['template_id']]);
+                        if ($template) {
+                            $data = $template[0];
+                            if (strtolower($_GET['action']) == 'clone') {
+                                unset($data['template_id']);
+                            } else {
+                                $breadcrumb = $data['title'];
+                                $delete = (bool)$GLOBALS['smarty']->assign('LINK_DELETE', currentPage(null, ['action' => 'delete']));
+                            }
+                            if (isset($_POST['template'])) {
+                                $data = array_merge($data, $_POST['template']);
+                            }
+                        }
+                    } else {
+                        ## Create Template
+                        $breadcrumb = $lang['common']['create'].': '.$lang['email']['email_template'];
+                        $data  = (isset($_POST['template'])) ? $_POST['template'] : [];
+                    }
+                    if ($_GET['action'] == 'edit') {
+                        $page_title = $lang['email']['title_template_update'];
+                    } elseif ($_GET['action'] == 'clone') {
+                        $page_title = $lang['email']['title_template_clone'];
+                    } else {
+                        $page_title = $lang['email']['title_template_create'];
+                    }
+                    $GLOBALS['smarty']->assign('ADD_EDIT_TEMPLATE', $page_title);
+                    $GLOBALS['smarty']->assign('TEMPLATE', $data);
+
+                    $macros = [
+                        ['name' => '{$EMAIL_CONTENT}', 'description' => $lang['email']['macro_template_content'], 'required' => 'Yes'],
+                        ['name' => '{$DATA.logoURL}', 'description' => $lang['email']['macro_template_store_logo'], 'required' => 'No'],
+                        ['name' => '{$DATA.store_name}', 'description' => $lang['email']['macro_template_store_name'], 'required' => 'No'],
+                        ['name' => '{$DATA.storeURL}', 'description' => $lang['email']['macro_template_store_url'], 'required' => 'No'],
+                        ['name' => '{$DATA.unsubscribeURL}', 'description' => $lang['email']['macro_template_unsubscribe'], 'required' => 'No'],
+                    ];
+                    $GLOBALS['smarty']->assign('TEMPLATE_MACROS', $macros);
+                    $GLOBALS['smarty']->assign('DISPLAY_TEMPLATE_FORM', true);
             }
             break;
         default:
-            if (in_array(strtolower($_GET['action']), array('clone', 'edit')) && isset($_GET['template_id']) && is_numeric($_GET['template_id'])) {
-                ## Edit Template
-                $template = $GLOBALS['db']->select('CubeCart_email_template', false, array('template_id' => (int)$_GET['template_id']));
-                if ($template) {
-                    $data = $template[0];
-                    if (strtolower($_GET['action']) == 'clone') {
-                        unset($data['template_id']);
-                    } else {
-                        $breadcrumb = $data['title'];
-                        $delete = (bool)$GLOBALS['smarty']->assign('LINK_DELETE', currentPage(null, array('action' => 'delete')));
-                    }
-                    if (isset($_POST['template'])) {
-                        $data = array_merge($data, $_POST['template']);
-                    }
-                }
-            } else {
-                ## Create Template
-                $breadcrumb = $lang['common']['create'].': '.$lang['email']['email_template'];
-                $data  = (isset($_POST['template'])) ? $_POST['template'] : array();
-            }
-            if ($_GET['action'] == 'edit') {
-                $page_title = $lang['email']['title_template_update'];
-            } elseif ($_GET['action'] == 'clone') {
-                $page_title = $lang['email']['title_template_clone'];
-            } else {
-                $page_title = $lang['email']['title_template_create'];
-            }
-            $GLOBALS['smarty']->assign('ADD_EDIT_TEMPLATE', $page_title);
-            $GLOBALS['smarty']->assign('TEMPLATE', $data);
-
-            $macros = array(
-                array('name' => '{$EMAIL_CONTENT}', 'description' => $lang['email']['macro_template_content'], 'required' => 'Yes'),
-                array('name' => '{$DATA.logoURL}', 'description' => $lang['email']['macro_template_store_logo'], 'required' => 'No'),
-                array('name' => '{$DATA.store_name}', 'description' => $lang['email']['macro_template_store_name'], 'required' => 'No'),
-                array('name' => '{$DATA.storeURL}', 'description' => $lang['email']['macro_template_store_url'], 'required' => 'No'),
-                array('name' => '{$DATA.unsubscribeURL}', 'description' => $lang['email']['macro_template_unsubscribe'], 'required' => 'No'),
-            );
-            $GLOBALS['smarty']->assign('TEMPLATE_MACROS', $macros);
-            $GLOBALS['smarty']->assign('DISPLAY_TEMPLATE_FORM', true);
-        }
-        break;
-    default:
-        httpredir(currentPage(array('action', 'type')));
+            httpredir(currentPage(['action', 'type']));
     }
     ## Tabs
     $GLOBALS['main']->addTabControl($lang['common']['general'], 'general');
@@ -583,7 +585,7 @@ if (isset($_GET['action']) && isset($_GET['type'])) {
         $max_translations = is_array($lang_list) ? count($lang_list) : 0;
         $can_translate = false;
         foreach ($email_types as $key => $values) {
-            $translations = $GLOBALS['db']->select('CubeCart_email_content', array('description','content_id', 'language'), array('content_type' => $key), array('language' => 'ASC'));
+            $translations = $GLOBALS['db']->select('CubeCart_email_content', ['description','content_id', 'language'], ['content_type' => $key], ['language' => 'ASC']);
             if ($translations) {
                 // check language is installed
                 $enabled_translations = 0;
@@ -591,18 +593,18 @@ if (isset($_GET['action']) && isset($_GET['type'])) {
                     // Check the translation exists otherwise it's redundant
                     if (file_exists(CC_ROOT_DIR.'/language/'.$translation['language'].'.xml')) {
                         $enabled_translations++;
-                        $translation['edit'] = currentPage(null, array('type' => 'content', 'action' => 'edit', 'content_id' => $translation['content_id']));
+                        $translation['edit'] = currentPage(null, ['type' => 'content', 'action' => 'edit', 'content_id' => $translation['content_id']]);
                         $content['translations'][] = $translation;
                     }
-                    if(empty($translation['description']) || $translation['description']!==$key) {
-                        $GLOBALS['db']->update('CubeCart_email_content', array('description' => $values['description']), array('content_type' => $key));
+                    if (empty($translation['description']) || $translation['description'] !== $key) {
+                        $GLOBALS['db']->update('CubeCart_email_content', ['description' => $values['description']], ['content_type' => $key]);
                     }
                 }
             }
-            if($enabled_translations == $max_translations) {
+            if ($enabled_translations == $max_translations) {
                 $content['translate'] = false;
             } else {
-                $content['translate'] = currentPage(null, array('type' => 'content', 'action' => 'add', 'content_type' => $key));
+                $content['translate'] = currentPage(null, ['type' => 'content', 'action' => 'add', 'content_type' => $key]);
                 $can_translate = true;
             }
             $content['type']  = $values['description'];
@@ -615,14 +617,14 @@ if (isset($_GET['action']) && isset($_GET['type'])) {
     // List Templates
     if (($templates = $GLOBALS['db']->select('CubeCart_email_template')) !== false) {
         foreach ($templates as $template) {
-            $template['clone'] = currentPage(null, array('action' => 'clone', 'type' => 'template', 'template_id' => $template['template_id']));
-            $template['delete'] = currentPage(null, array('action' => 'delete', 'type' => 'template', 'template_id' => $template['template_id'], 'token' => SESSION_TOKEN));
-            $template['edit'] = currentPage(null, array('action' => 'edit', 'type' => 'template', 'template_id' => $template['template_id']));
+            $template['clone'] = currentPage(null, ['action' => 'clone', 'type' => 'template', 'template_id' => $template['template_id']]);
+            $template['delete'] = currentPage(null, ['action' => 'delete', 'type' => 'template', 'template_id' => $template['template_id'], 'token' => SESSION_TOKEN]);
+            $template['edit'] = currentPage(null, ['action' => 'edit', 'type' => 'template', 'template_id' => $template['template_id']]);
             $smarty_data['e_templates'][] = $template;
         }
         $GLOBALS['smarty']->assign('EMAIL_TEMPLATES', $smarty_data['e_templates']);
     }
-    $GLOBALS['smarty']->assign('TEMPLATE_CREATE', currentPage(null, array('action' => 'create', 'type' => 'template')));
+    $GLOBALS['smarty']->assign('TEMPLATE_CREATE', currentPage(null, ['action' => 'create', 'type' => 'template']));
     $GLOBALS['smarty']->assign('DISPLAY_EMAIL_LIST', true);
 }
 $page_content = $GLOBALS['smarty']->fetch('templates/documents.email.php');

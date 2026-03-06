@@ -1,7 +1,10 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper retrieves stats from a /mail/send API call
  */
+
 namespace SendGrid\Stats;
 
 use DateTime;
@@ -15,11 +18,11 @@ use Exception;
 class Stats
 {
     /** @var string Expected date format */
-    const DATE_FORMAT = 'Y-m-d';
+    public const DATE_FORMAT = 'Y-m-d';
     /** @var string[] Available sort options */
-    const OPTIONS_SORT_DIRECTION = ['asc', 'desc'];
+    public const OPTIONS_SORT_DIRECTION = ['asc', 'desc'];
     /** @var string[] Available aggregate options */
-    const OPTIONS_AGGREGATED_BY = ['day', 'week', 'month'];
+    public const OPTIONS_AGGREGATED_BY = ['day', 'week', 'month'];
 
     /** @var string Starting date */
     private $startDate;
@@ -59,15 +62,13 @@ class Stats
     /**
      * Retrieve global stats parameters, start date, end date and
      * aggregated by
-     *
-     * @return array
      */
-    public function getGlobal()
+    public function getGlobal(): array
     {
         return [
             'start_date' => $this->startDate,
             'end_date' => $this->endDate,
-            'aggregated_by' => $this->aggregatedBy
+            'aggregated_by' => $this->aggregatedBy,
         ];
     }
 
@@ -161,7 +162,6 @@ class Stats
      * @param integer $offset          The point in the list to begin
      *                                 retrieving results
      *
-     * @return array
      * @throws Exception
      */
     public function getSubuserMonthly(
@@ -170,7 +170,7 @@ class Stats
         $sortByDirection = 'desc',
         $limit = 5,
         $offset = 0
-    ) {
+    ): array {
         $this->validateOptions(
             'sortByDirection',
             $sortByDirection,
@@ -184,7 +184,7 @@ class Stats
             'sort_by_metric' => $sortByMetric,
             'sort_by_direction' => $sortByDirection,
             'limit' => $limit,
-            'offset' => $offset
+            'offset' => $offset,
         ];
     }
 
@@ -211,7 +211,7 @@ class Stats
      *
      * @throws Exception
      */
-    protected function validateOptions($name, $value, $options)
+    protected function validateOptions(string $name, $value, $options)
     {
         if (!in_array($value, $options)) {
             throw new Exception(
@@ -228,7 +228,7 @@ class Stats
      *
      * @throws Exception
      */
-    protected function validateInteger($name, $value)
+    protected function validateInteger(string $name, $value)
     {
         if (!is_integer($value)) {
             throw new Exception($name . ' must be an integer.');
@@ -243,7 +243,7 @@ class Stats
      *
      * @throws Exception
      */
-    protected function validateNumericArray($name, $value)
+    protected function validateNumericArray(string $name, $value)
     {
         if (!\is_array($value) || empty($value) || !$this->isNumeric($value)) {
             throw new Exception($name . ' must be a non-empty numeric array.');
@@ -254,10 +254,8 @@ class Stats
      * Determine if the array is numeric
      *
      * @param array $array Array of values
-     *
-     * @return bool
      */
-    protected function isNumeric(array $array)
+    protected function isNumeric(array $array): bool
     {
         return \array_keys($array) === range(0, \count($array) - 1);
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Method GetTags
  *
@@ -50,7 +52,7 @@ class Smarty_Internal_Method_GetTags
         if (isset($tpl)) {
             $tpl->smarty = clone $tpl->smarty;
             $tpl->smarty->_cache[ 'get_used_tags' ] = true;
-            $tpl->_cache[ 'used_tags' ] = array();
+            $tpl->_cache[ 'used_tags' ] = [];
             $tpl->smarty->merge_compiled_includes = false;
             $tpl->smarty->disableSecurity();
             $tpl->caching = Smarty::CACHING_OFF;

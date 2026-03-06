@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -45,19 +47,19 @@
 function smarty_function_html_select_date($params, Smarty_Internal_Template $template)
 {
     $template->_checkPlugins(
-        array(
-            array(
+        [
+            [
                 'function' => 'smarty_function_escape_special_chars',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
-            )
-        )
+                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php',
+            ],
+        ]
     );
     // generate timestamps used for month names only
     static $_month_timestamps = null;
     static $_current_year = null;
     if ($_month_timestamps === null) {
         $_current_year = date('Y');
-        $_month_timestamps = array();
+        $_month_timestamps = [];
         for ($i = 1; $i <= 12; $i++) {
             $_month_timestamps[ $i ] = mktime(0, 0, 0, $i, 1, 2000);
         }
@@ -176,7 +178,7 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
             foreach ([
                          'Y' => 'Year',
                          'm' => 'Month',
-                         'd' => 'Day'
+                         'd' => 'Day',
                      ] as $_elementKey => $_elementName) {
                 $_variableName = '_' . strtolower($_elementName);
                 $$_variableName =
@@ -188,7 +190,7 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
             foreach ([
                          'Y' => 'Year',
                          'm' => 'Month',
-                         'd' => 'Day'
+                         'd' => 'Day',
                      ] as $_elementKey => $_elementName) {
                 $_variableName = '_' . strtolower($_elementName);
                 $$_variableName = isset($time[$field_array][$prefix . $_elementName]) ?
@@ -200,9 +202,15 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
         }
     } elseif (isset($time) && preg_match("/(\d*)-(\d*)-(\d*)/", $time, $matches)) {
         $_year = $_month = $_day = null;
-        if ($matches[1] > '') $_year = (int) $matches[1];
-        if ($matches[2] > '') $_month = (int) $matches[2];
-        if ($matches[3] > '') $_day = (int) $matches[3];
+        if ($matches[1] > '') {
+            $_year = (int) $matches[1];
+        }
+        if ($matches[2] > '') {
+            $_month = (int) $matches[2];
+        }
+        if ($matches[3] > '') {
+            $_day = (int) $matches[3];
+        }
     } elseif ($time === null) {
         if (array_key_exists('time', $params)) {
             $_year = $_month = $_day = null;
@@ -211,12 +219,12 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
         }
     } else {
         $template->_checkPlugins(
-            array(
-                array(
+            [
+                [
                     'function' => 'smarty_make_timestamp',
-                    'file'     => SMARTY_PLUGINS_DIR . 'shared.make_timestamp.php'
-                )
-            )
+                    'file'     => SMARTY_PLUGINS_DIR . 'shared.make_timestamp.php',
+                ],
+            ]
         );
         $time = smarty_make_timestamp($time);
         [$_year, $_month, $_day] = explode('-', date('Y-m-d', $time));
@@ -224,10 +232,10 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
 
     // make syntax "+N" or "-N" work with $start_year and $end_year
     // Note preg_match('!^(\+|\-)\s*(\d+)$!', $end_year, $match) is slower than trim+substr
-    foreach (array(
+    foreach ([
         'start',
-        'end'
-    ) as $key) {
+        'end',
+    ] as $key) {
         $key .= '_year';
         $t = $$key;
         if ($t === null) {
@@ -264,11 +272,11 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
             $_html_years = '<select name="' . $_name . '"';
             if ($year_id !== null || $all_id !== null) {
                 $_html_years .= ' id="' . smarty_function_escape_special_chars(
-                        $year_id !== null ?
+                    $year_id !== null ?
                             ($year_id ? $year_id : $_name) :
                             ($all_id ? ($all_id . $_name) :
                                 $_name)
-                    ) . '"';
+                ) . '"';
             }
             if ($year_size) {
                 $_html_years .= ' size="' . $year_size . '"';
@@ -299,11 +307,11 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
         $_html_months = '<select name="' . $_name . '"';
         if ($month_id !== null || $all_id !== null) {
             $_html_months .= ' id="' . smarty_function_escape_special_chars(
-                    $month_id !== null ?
+                $month_id !== null ?
                         ($month_id ? $month_id : $_name) :
                         ($all_id ? ($all_id . $_name) :
                             $_name)
-                ) . '"';
+            ) . '"';
         }
         if ($month_size) {
             $_html_months .= ' size="' . $month_size . '"';

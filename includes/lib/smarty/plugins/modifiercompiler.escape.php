@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -23,12 +25,12 @@
 function smarty_modifiercompiler_escape($params, Smarty_Internal_TemplateCompilerBase $compiler)
 {
     $compiler->template->_checkPlugins(
-        array(
-            array(
+        [
+            [
                 'function' => 'smarty_literal_compiler_param',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.literal_compiler_param.php'
-            )
-        )
+                'file'     => SMARTY_PLUGINS_DIR . 'shared.literal_compiler_param.php',
+            ],
+        ]
     );
     try {
         $esc_type = smarty_literal_compiler_param($params, 1, 'html');
@@ -41,7 +43,6 @@ function smarty_modifiercompiler_escape($params, Smarty_Internal_TemplateCompile
             case 'html':
                 return 'htmlspecialchars((string)' . $params[ 0 ] . ', ENT_QUOTES, ' . var_export($char_set, true) . ', ' .
                     var_export($double_encode, true) . ')';
-            // no break
             case 'htmlall':
                 if (Smarty::$_MBSTRING) {
                     return 'htmlentities(mb_convert_encoding((string)' . $params[ 0 ] . ', \'UTF-8\', ' .
@@ -51,7 +52,6 @@ function smarty_modifiercompiler_escape($params, Smarty_Internal_TemplateCompile
                 // no MBString fallback
                 return 'htmlentities((string)' . $params[ 0 ] . ', ENT_QUOTES, ' . var_export($char_set, true) . ', ' .
                     var_export($double_encode, true) . ')';
-            // no break
             case 'url':
                 return 'rawurlencode((string)' . $params[ 0 ] . ')';
             case 'urlpathinfo':

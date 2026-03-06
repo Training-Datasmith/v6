@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * This library allows you to quickly and easily send emails through Twilio
  * SendGrid using PHP.
@@ -16,7 +18,7 @@ class SendGrid extends BaseSendGridClientInterface
      *                       "version", "verify_ssl", and "impersonateSubuser",
      *                       are implemented.
      */
-    public function __construct($apiKey, $options = array())
+    public function __construct($apiKey, $options = [])
     {
         $auth = 'Authorization: Bearer ' . $apiKey;
         $host = 'https://api.sendgrid.com';

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -34,7 +36,6 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = null, $
     switch ($esc_type) {
         case 'html':
             return htmlspecialchars($string, ENT_QUOTES, $char_set, $double_encode);
-        // no break
         case 'htmlall':
             if (Smarty::$_MBSTRING) {
                 $string = mb_convert_encoding($string, 'UTF-8', $char_set);
@@ -42,7 +43,6 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = null, $
             }
             // no MBString fallback
             return htmlentities($string, ENT_QUOTES, $char_set, $double_encode);
-        // no break
         case 'url':
             return rawurlencode($string);
         case 'urlpathinfo':
@@ -105,7 +105,7 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = null, $
             // escape quotes and backslashes, newlines, etc.
             return strtr(
                 $string,
-                array(
+                [
                     '\\' => '\\\\',
                     "'"  => "\\'",
                     '"'  => '\\"',
@@ -115,8 +115,8 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = null, $
                     // see https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements
                     '<!--' => '<\!--',
                     '<s'   => '<\s',
-                    '<S'   => '<\S'
-                )
+                    '<S'   => '<\S',
+                ]
             );
         case 'mail':
             if (Smarty::$_MBSTRING) {
@@ -127,27 +127,27 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = null, $
                     $is_loaded_2 = true;
                 }
                 return smarty_mb_str_replace(
-                    array(
+                    [
                         '@',
-                        '.'
-                    ),
-                    array(
+                        '.',
+                    ],
+                    [
                         ' [AT] ',
-                        ' [DOT] '
-                    ),
+                        ' [DOT] ',
+                    ],
                     $string
                 );
             }
             // no MBString fallback
             return str_replace(
-                array(
+                [
                     '@',
-                    '.'
-                ),
-                array(
+                    '.',
+                ],
+                [
                     ' [AT] ',
-                    ' [DOT] '
-                ),
+                    ' [DOT] ',
+                ],
                 $string
             );
         case 'nonstd':

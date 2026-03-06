@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Method GetTemplateVars
  *
@@ -45,7 +47,7 @@ class Smarty_Internal_Method_GetTemplateVars
                 return null;
             }
         } else {
-            $_result = array();
+            $_result = [];
             if ($_ptr === null) {
                 $_ptr = $data;
             }
@@ -114,6 +116,6 @@ class Smarty_Internal_Method_GetTemplateVars
             // force a notice
             $x = $$varName;
         }
-        return new Smarty_Undefined_Variable;
+        return new Smarty_Undefined_Variable();
     }
 }

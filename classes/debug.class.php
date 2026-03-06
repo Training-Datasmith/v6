@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -10,7 +12,6 @@
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 
 /**
  * Debug controller
@@ -26,7 +27,7 @@ class Debug
      *
      * @var array of strings
      */
-    private $_custom  = array();
+    private array $_custom  = [];
     /**
      * Debug timer used to calc page load time
      *
@@ -35,46 +36,40 @@ class Debug
     private $_debug_timer = 0;
     /**
      * Display debug message
-     *
-     * @var bool
      */
-    private $_display  = true;
+    private bool $_display  = true;
     /**
      * Enabled/disabled
-     *
-     * @var bool
      */
-    private $_enabled  = false;
+    private bool $_enabled  = false;
     /**
      * Error messages
      *
      * @var array of strings
      */
-    private $_errors  = array();
+    private array $_errors  = [];
     /**
      * Messages
      *
      * @var array of strings
      */
-    private $_messages  = array();
+    private $_messages  = [];
     /**
      * SQL messages
      *
      * @var array of strings
      */
-    private $_sql   = array();
+    private array $_sql   = [];
     /**
      * Custom timers
      *
      * @var array of floats
      */
-    private $_timers  = array();
+    private array $_timers  = [];
     /**
      * XDebug enabled
-     *
-     * @var bool
      */
-    private $_xdebug  = false;
+    private bool $_xdebug  = false;
     /**
      * Debug collect sections flag
      *
@@ -106,8 +101,8 @@ class Debug
         ini_set('docref_ext', '.php');
 
         // Define the Error & Exception handlers
-        set_error_handler(array(&$this, 'errorLogger'), ini_get('error_reporting'));
-        set_exception_handler(array(&$this, 'exceptionHandler'));
+        set_error_handler($this->errorLogger(...), ini_get('error_reporting'));
+        set_exception_handler($this->exceptionHandler(...));
 
         // Enable debugger
         if (isset($GLOBALS['config']) && is_object($GLOBALS['config'])) {
@@ -124,7 +119,7 @@ class Debug
                         $this->_enabled = false;
                     }
                 } else {
-                    if ($ip_string!==get_ip_address()) {
+                    if ($ip_string !== get_ip_address()) {
                         $this->_enabled = false;
                     }
                 }
@@ -136,7 +131,7 @@ class Debug
             $this->stream_into_session = false;
             $GLOBALS['cache']->clear();
             $GLOBALS['cache']->tidy();
-            httpredir(currentPage(array('debug-cache-clear')));
+            httpredir(currentPage(['debug-cache-clear']));
         }
 
         //Check for xdebug
@@ -159,7 +154,7 @@ class Debug
             // Read the existing spool, filter out any empty entries, then append
             // this request's output. Write back with overwrite=true to avoid
             // merge_array() clobbering earlier entries when the key already exists.
-            $debug_spool = array_filter((array)Session::getInstance()->get('debug_spool', 'system', array()));
+            $debug_spool = array_filter((array)Session::getInstance()->get('debug_spool', 'system', []));
             $debug_spool[] = $this->display(true);
             Session::getInstance()->set('debug_spool', $debug_spool, 'system', true);
         } else {
@@ -174,7 +169,7 @@ class Debug
      *
      * @return This instance
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -190,7 +185,7 @@ class Debug
      *
      * @param string $message
      */
-    public function debugMessage($message)
+    public function debugMessage($message): void
     {
         $this->_messages[] = $message;
     }
@@ -200,9 +195,8 @@ class Debug
      *
      * @param string $type
      * @param string $message
-     * @return bool
      */
-    public function debugSQL($type, $message, $cache, $source)
+    public function debugSQL($type, $message, $cache, $source): bool
     {
         if (!$this->_enabled) {
             return false;
@@ -210,7 +204,7 @@ class Debug
 
         if (!is_null($type) && !is_null($message) && !empty($message)) {
             $tag = '';
-            settype($message,'array');
+            settype($message, 'array');
 
             if ($cache && $source) { // Request from cache and taken from cache
                 $tag = 'CACHE READ';
@@ -226,11 +220,11 @@ class Debug
                 $colour = '000';
             }
 
-            if ($type=='error' || preg_match('/^INSERT .*CubeCart_system_error_log/', $message[0])) {
+            if ($type == 'error' || preg_match('/^INSERT .*CubeCart_system_error_log/', $message[0])) {
                 $tag = empty($tag) ? 'ERROR' : 'ERROR - '.$tag;
                 $colour = 'FF0000';
             }
-            $this->_sql[$type][] = '<span style="color:#'.$colour.'">Hack: '.str_pad($this->_getTime(),16,'0').(isset($message[1])?' --- Duration: '.$message[1]:'').' ['.$tag.']'.((!$cache&&!$source)?'':' --- Key: sql.'.md5($message[0])).'<br />'.htmlentities($message[0], ENT_COMPAT, 'UTF-8').'</span>';
+            $this->_sql[$type][] = '<span style="color:#'.$colour.'">Hack: '.str_pad((string) $this->_getTime(), 16, '0').(isset($message[1]) ? ' --- Duration: '.$message[1] : '').' ['.$tag.']'.((!$cache && !$source) ? '' : ' --- Key: sql.'.md5($message[0])).'<br />'.htmlentities($message[0], ENT_COMPAT, 'UTF-8').'</span>';
             return true;
         }
 
@@ -248,13 +242,11 @@ class Debug
     {
         $name = (empty($name)) ? count($this->_custom) : $name;
         if (!isset($this->_custom[$name])) {
-            $this->_custom[$name] =& $data;
+            $this->_custom[$name] = & $data;
             return true;
-        } else {
-            return $this->debugTail($data);
         }
 
-        return false;
+        return $this->debugTail($data);
     }
 
     /**
@@ -266,23 +258,23 @@ class Debug
      */
     public function display($return = false, $glue = "\n")
     {
-        
+
         // Cheeky hack for the w3c validator - we don't want it seeing the debug output
-        if (strstr($_SERVER['HTTP_USER_AGENT'], 'W3C_Validator')) {
+        if (strstr((string) $_SERVER['HTTP_USER_AGENT'], 'W3C_Validator')) {
             $this->_enabled = false;
         }
 
         if ($this->_display && $this->_enabled) {
             $output[] = "<div style='font-family: \"Courier New\",Courier,monospace;font-size: 10px;border-bottom: 5px dashed silver;border-top: 5px dashed silver;margin: 0 0 50px 0;color: #000;background-color: #E7E7E7; clear: both; padding: 5px;'>";
-            $output[] = "<h2>Debug Output - ".$_SERVER['REQUEST_URI']."</h2>";
-            $output[] = "<div>This can be disabled via &quot;Store Settings&quot; &raquo; &quot;Advanced&quot; (Tab) &raquo; &quot;Enable Debugging&quot;.</div>";
-            $output[] = "<hr/>";
+            $output[] = '<h2>Debug Output - '.$_SERVER['REQUEST_URI'].'</h2>';
+            $output[] = '<div>This can be disabled via &quot;Store Settings&quot; &raquo; &quot;Advanced&quot; (Tab) &raquo; &quot;Enable Debugging&quot;.</div>';
+            $output[] = '<hr/>';
 
             // Display the PHP errors
             $output[] = '<strong>PHP</strong>:<br />'.htmlspecialchars(strip_tags($this->_errorDisplay())).'<hr size="1" />';
 
             //Get the super globals
-            if (($ret = $this->_makeExportString('GET', merge_array(array('Before Sanitise:' => $GLOBALS['RAW']['GET']), array('After Sanitise:' => $_GET)))) !== false) {
+            if (($ret = $this->_makeExportString('GET', merge_array(['Before Sanitise:' => $GLOBALS['RAW']['GET']], ['After Sanitise:' => $_GET]))) !== false) {
                 $output[] = $ret;
             }
             if (($ret = $this->_makeExportString('POST', $_POST)) !== false) {
@@ -291,7 +283,7 @@ class Debug
             if (isset($_SESSION) && !empty($_SESSION) && ($ret = $this->_makeExportString('SESSION', $_SESSION)) !== false) {
                 $output[] = $ret;
             }
-            if (($ret = $this->_makeExportString('COOKIE', merge_array(array('Received:' => $_COOKIE), array('Sent:' => $GLOBALS['SENT_COOKIES'])))) !== false) {
+            if (($ret = $this->_makeExportString('COOKIE', merge_array(['Received:' => $_COOKIE], ['Sent:' => $GLOBALS['SENT_COOKIES']]))) !== false) {
                 $output[] = $ret;
             }
             if (($ret = $this->_makeExportString('FILES', $_FILES)) !== false) {
@@ -326,7 +318,7 @@ class Debug
                     foreach ($this->_sql['error'] as $index => $error) {
                         if (!empty($error)) {
                             $sql_error = true;
-                            $output[] = '<span style="color: #ff0000">[<strong>'.($index + 1).'</strong>] '.strip_tags($error).'</span><br />';
+                            $output[] = '<span style="color: #ff0000">[<strong>'.($index + 1).'</strong>] '.strip_tags((string) $error).'</span><br />';
                         }
                     }
                     if (!isset($sql_error)) {
@@ -345,20 +337,18 @@ class Debug
             }
 
             // Display logged variables
-            if (!empty($this->_custom)) {
-                foreach ($this->_custom as $name => $data) {
-                    if (empty($data)) {
-                        $data = 'No data';
-                    }
-                    if (is_numeric($name)) {
-                        $name = "customLog[$name]";
-                    }
-                    if (is_array($data)) {
-                        ksort($data);
-                        $data = '<pre>'.print_r($data, true).'</pre>';
-                    }
-                    $output[] = '<strong>'.htmlentities($name, ENT_QUOTES, 'UTF-8').'</strong>:<br />'.$data.'<hr size="1" />';
+            foreach ($this->_custom as $name => $data) {
+                if (empty($data)) {
+                    $data = 'No data';
                 }
+                if (is_numeric($name)) {
+                    $name = "customLog[$name]";
+                }
+                if (is_array($data)) {
+                    ksort($data);
+                    $data = '<pre>'.print_r($data, true).'</pre>';
+                }
+                $output[] = '<strong>'.htmlentities($name, ENT_QUOTES, 'UTF-8').'</strong>:<br />'.$data.'<hr size="1" />';
             }
 
             // Show some performance data
@@ -368,14 +358,14 @@ class Debug
             $cache = Cache::getInstance();
             $cache->status();
             $cacheState = $cache->status ? '<span style="color: #008000">'.$cache->status_desc.'</span>' : '<span style="color: #ff0000">'.$cache->status_desc.'</span>';
-            $clear_cache_url = currentPage(null, array('debug-cache-clear' => 'true'));
+            $clear_cache_url = currentPage(null, ['debug-cache-clear' => 'true']);
             $clear_cache = CC_IN_ADMIN ? '' : '[<a href="javascript: void(0)" onclick="javascript:window.opener.document.location.href=\''.$clear_cache_url.'\'">Clear Cache</a>]';
             $output[] = '<strong>Cache ('.$cache->getCacheSystem().'): '.$cacheState.'</strong><br />'.$cache->usage().' '.$clear_cache.'<hr size="1" />';
 
             // Page render timer
             $output[] = '<strong>Page Load Time</strong>:<br />'.($this->_getTime() - $this->_debug_timer).' seconds';
             if ($this->_xdebug && ini_get('xdebug.profiler_enable_trigger') == 1) {
-                $output[] = ' [<a href="'.currentPage(null, array('XDEBUG_PROFILE' => 'true')).'">CacheGrind</a>]';
+                $output[] = ' [<a href="'.currentPage(null, ['XDEBUG_PROFILE' => 'true']).'">CacheGrind</a>]';
             }
 
             $output[] = '</div>';
@@ -384,20 +374,21 @@ class Debug
 
             if ($return) {
                 return $content;
-            } else {
-                $has_debug_spool = (is_object($GLOBALS['session']) && $GLOBALS['session']->has('debug_spool'));
-                $debug_html = implode(($has_debug_spool) ? $GLOBALS['session']->get('debug_spool') : array()).$content;
-                echo '<script type="text/javascript">
+            }
+            $has_debug_spool = (is_object($GLOBALS['session']) && $GLOBALS['session']->has('debug_spool'));
+            $debug_html = implode('', ($has_debug_spool) ? $GLOBALS['session']->get('debug_spool') : []).$content;
+            echo '<script type="text/javascript">
                 function debugConsole(content) {
                     _cubecart_console = window.open("", "console:cubecart_debug", "width=1024,height=600,left=50,top=50,resizable,scrollbars=yes");
                     _cubecart_console.document.write(`<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head><title>CubeCart Debug Console</title><style>body{margin:0}</style></head><body>`+content+`</body></html>`);
                     _cubecart_console.blur();
                     window.focus();
                 }
-                const debug_data = `'.str_replace('`','\`',implode(($has_debug_spool) ? $GLOBALS['session']->get('debug_spool') : array()).$content).'`;
+                const debug_data = `'.str_replace('`', '\`', implode('', ($has_debug_spool) ? $GLOBALS['session']->get('debug_spool') : []).$content).'`;
                 debugConsole(debug_data);
                 </script>';
-                if ($has_debug_spool) $GLOBALS['session']->set('debug_spool',null);
+            if ($has_debug_spool) {
+                $GLOBALS['session']->set('debug_spool', null);
             }
         }
     }
@@ -407,10 +398,9 @@ class Debug
      *
      * The timer will be displayed on the debug display as well
      *
-     * @param string $name
      * @return float
      */
-    public function endTimer($name)
+    public function endTimer(string $name): int|float
     {
         if (isset($this->_timers[$name])) {
             $this->_timers[$name]['end'] = $this->_getTime();
@@ -428,70 +418,70 @@ class Debug
      * Error logger
      *
      * @param int $error_no
-     * @param string $error_string
-     * @param string $error_file
-     * @param string $error_line
      * @param string $error_context
-     * @return bool
      */
-    public function errorLogger($error_no, $error_string, $error_file, $error_line, $error_context = null)
+    public function errorLogger($error_no, string $error_string, string $error_file, string $error_line, $error_context = null): bool
     {
         $log = true;
-        $can_log = (isset($GLOBALS['config']) && is_object($GLOBALS['config']) && method_exists($GLOBALS['config'], 'get')) ? (bool)$GLOBALS['config']->get('config', 'debug') : false;
+        $can_log = isset($GLOBALS['config']) && is_object($GLOBALS['config']) && method_exists($GLOBALS['config'], 'get') && (bool)$GLOBALS['config']->get('config', 'debug');
 
         switch ($error_no) {
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
                 $type = 'Deprecated';
                 $log = $can_log;
-            break;
+                break;
             case E_CORE_ERROR:
                 $type = 'Core Error';
-            break;
+                break;
             case E_CORE_WARNING:
                 $type = 'Core Warning';
                 $log = $can_log;
-            break;
+                break;
             case E_COMPILE_ERROR:
                 $type = 'Compile Error';
-            break;
+                break;
             case E_COMPILE_WARNING:
                 $type = 'Compile Warning';
-            break;
+                break;
             case E_ERROR:
             case E_USER_ERROR:
                 $type = 'Error';
-            break;
+                break;
             case E_NOTICE:
             case E_USER_NOTICE:
                 $type = 'Notice';
                 $log = $can_log;
-            break;
+                break;
             case E_PARSE:
                 $type = 'Parse Error';
-            break;
+                break;
             case E_RECOVERABLE_ERROR:
                 $type = 'Recoverable';
-            break;
+                break;
             case E_WARNING:
             case E_USER_WARNING:
                 $type = 'Warning';
                 $log = $can_log;
-            break;
+                break;
             case 'EXCEPTION':
                 $type = 'Exception';
-            break;
+                break;
             default:
                 $type = 'Unknown ('.$error_no.')';
         }
-        $error = "[<strong>".$type."</strong>] \t".$error_file.":".$error_line." - ".$error_string;
+        $error = '[<strong>'.$type."</strong>] \t".$error_file.':'.$error_line.' - '.$error_string;
         $this->_errors[] = $error;
 
         if ($log) {
             $backtrace = debug_backtrace();
             array_shift($backtrace);
             ob_start();
-            array_walk($backtrace, function($a){ if(!empty($a['line'])) {print $a['function']."() (".basename($a['file']).":".$a['line'].")\n";}});
+            array_walk($backtrace, function (array $a): void {
+                if (!empty($a['line'])) {
+                    print $a['function'].'() ('.basename((string) $a['file']).':'.$a['line'].")\n";
+                }
+            });
             $backtrace = ob_get_contents();
             ob_end_clean();
             $this->_writeErrorLog($error, $type, $backtrace);
@@ -505,16 +495,22 @@ class Debug
      *
      * @param object $e
      */
-    public function exceptionHandler($e)
+    public function exceptionHandler($e): void
     {
-        $message = "[<strong>Exception</strong>] \t".$e->getFile().":".$e->getLine()." - ".$e->getMessage();
+        $message = "[<strong>Exception</strong>] \t".$e->getFile().':'.$e->getLine().' - '.$e->getMessage();
         $this->_errors[] = $message;
         $backtrace = $e->getTrace();
         ob_start();
-        array_walk($backtrace, function($a){ if(!empty($a['line'])) {print $a['function']."() (".basename($a['file']).":".$a['line'].")\n";}});
+        array_walk($backtrace, function (array $a): void {
+            if (!empty($a['line'])) {
+                print $a['function'].'() ('.basename((string) $a['file']).':'.$a['line'].")\n";
+            }
+        });
         $backtrace = ob_get_contents();
-        ob_end_clean(); 
-        if (empty($backtrace)) $backtrace = 'No Backtrace.';
+        ob_end_clean();
+        if (empty($backtrace)) {
+            $backtrace = 'No Backtrace.';
+        }
         $this->_writeErrorLog($message, 'Exception', $backtrace);
     }
 
@@ -523,7 +519,7 @@ class Debug
      *
      * @param string $name
      */
-    public function startTimer($name)
+    public function startTimer($name): void
     {
         $this->_timers[$name]['start'] = $this->_getTime();
     }
@@ -545,44 +541,31 @@ class Debug
     /**
      * Supress display
      */
-    public function supress()
+    public function supress(): void
     {
         $this->_display = false;
     }
 
     //=====[ Private ]=======================================
-
     /**
      * Get the byte size
      *
-     * @param float $input
      * @return string
      */
-    private static function _debugGetBytes($input)
+    private static function _debugGetBytes(string|bool $input)
     {
-        switch (substr($input, -1, 1)) {
-        case 'G':
-            $bytes = ((substr($input, 0, strlen($input)-1) * 1024) * 1024) * 1024;
-            break;
-        case 'M':
-            $bytes = (substr($input, 0, strlen($input)-1) * 1024) * 1024;
-            break;
-        case 'K':
-            $bytes = substr($input, 0, strlen($input)-1) * 1024;
-            break;
-        default:
-            $bytes = $input;
-        }
-        return $bytes;
+        return match (substr($input, -1, 1)) {
+            'G' => ((substr($input, 0, strlen($input) - 1) * 1024) * 1024) * 1024,
+            'M' => (substr($input, 0, strlen($input) - 1) * 1024) * 1024,
+            'K' => substr($input, 0, strlen($input) - 1) * 1024,
+            default => $input,
+        };
     }
 
     /**
      * Get memory usage
-     *
-     * @param bool $peak
-     * @return string
      */
-    private function _debugMemoryUsage($peak = false)
+    private function _debugMemoryUsage(bool $peak = false): string
     {
         $memAvail = ini_get('memory_limit');
         if ($this->_xdebug) {
@@ -590,7 +573,7 @@ class Debug
         } else {
             $memUsed = ($peak) ? memory_get_peak_usage() : memory_get_usage();
         }
-        $memPercent = round(($memUsed/$this->_debugGetBytes($memAvail))*100, 2);
+        $memPercent = round(($memUsed / self::_debugGetBytes($memAvail)) * 100, 2);
         $memUsedHR = implode('', formatBytes($memUsed));
 
         return $memUsedHR.' / '.$memAvail.' ('.$memPercent.'%)';
@@ -600,21 +583,19 @@ class Debug
      * Make error message
      *
      * @param string $glue
-     * @return string
      */
-    private function _errorDisplay($glue = '<br />')
+    private function _errorDisplay($glue = '<br />'): string
     {
         if (!empty($this->_errors) && is_array($this->_errors)) {
             return implode($glue, $this->_errors);
-        } else {
-            return 'No Errors or Warnings';
         }
+        return 'No Errors or Warnings';
     }
 
     /**
      * Get time using microtime or xdebug
      */
-    private function _getTime()
+    private function _getTime(): float
     {
         if ($this->_xdebug) {
             return xdebug_time_index();
@@ -628,13 +609,14 @@ class Debug
      *
      * @param string $variable
      * @param int $left
-     * @return string
      */
-    private function _makeExport($variable, $left = 8)
+    private function _makeExport($variable, int|float $left = 8): string
     {
         $output = '';
         foreach ($variable as $key => $value) {
-            if ((string)$key == 'debug_spool') continue;
+            if ((string)$key == 'debug_spool') {
+                continue;
+            }
             if (is_array($value)) {
                 $output .= '<div style="margin-left: '.$left.'px;">\''.$key.'\' => '.$this->_makeExport($value, ($left + 8)).'</div>';
             } else {
@@ -648,47 +630,37 @@ class Debug
     /**
      * Makes an export string for debug
      *
-     * @param string $name
      * @param array $variable
      * @return string/false
      */
-    private function _makeExportString($name, $variable)
+    private function _makeExportString(string $name, $variable): string|false
     {
-        $output = '';
         $output = '<strong>'.$name.'</strong>:<br />';
 
         $values = $this->_makeExport($variable);
-        if(empty($values)) {
+        if (empty($values)) {
             $output .= 'Empty';
         } else {
             $output .= $this->_makeExport($variable);
         }
-        $output .= '<hr size="1" />';
-
-        if (!empty($output)) {
-            return $output;
-        } else {
-            return false;
-        }
+        return $output . '<hr size="1" />';
     }
 
     /**
      * Write message to the error log in the DB
-     *
-     * @param string $message
      */
-    private function _writeErrorLog($message, $type, $backtrace = '')
+    private function _writeErrorLog(string $message, string $type, string|bool $backtrace = ''): void
     {
         $url = "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
         if (isset($GLOBALS['db']) && $GLOBALS['db']->connected) {
             $log_days = (is_object($GLOBALS['config']) && method_exists($GLOBALS['config'], 'get')) ? $GLOBALS['config']->get('config', 'r_system_error') : 7;
             if (ctype_digit((string)$log_days) &&  $log_days > 0) {
-                $GLOBALS['db']->insert('CubeCart_system_error_log', array('message' => $message, 'url' => $url, 'backtrace' => $backtrace, 'time' => time()));
+                $GLOBALS['db']->insert('CubeCart_system_error_log', ['message' => $message, 'url' => $url, 'backtrace' => $backtrace, 'time' => time()]);
                 if (executionChance(2)) { // 2% probability
                     $GLOBALS['db']->delete('CubeCart_system_error_log', 'time < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL '.$log_days.' DAY))', 500);
                 }
             } elseif (empty($log_days) || !$log_days) {
-                $GLOBALS['db']->insert('CubeCart_system_error_log', array('message' => $message, 'url' => $url, 'backtrace' => $backtrace, 'time' => time()));
+                $GLOBALS['db']->insert('CubeCart_system_error_log', ['message' => $message, 'url' => $url, 'backtrace' => $backtrace, 'time' => time()]);
             }
         } elseif ($type == 'Exception' || $type == E_PARSE) {
             echo $message;

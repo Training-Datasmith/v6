@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Content object for a /mail/send API call
  */
@@ -24,7 +26,7 @@ class Content implements \JsonSerializable
      * @var string
      * The actual content of the specified mime type that you are including in your email
      */
-    private $value;
+    private ?string $value = null;
 
     /**
      * Optional constructor
@@ -56,7 +58,7 @@ class Content implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setType($type)
+    public function setType($type): void
     {
         Assert::string($type, 'type');
 
@@ -81,7 +83,7 @@ class Content implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setValue($value)
+    public function setValue($value): void
     {
         Assert::minLength($value, 'value', 1);
 
@@ -109,11 +111,9 @@ class Content implements \JsonSerializable
         return array_filter(
             [
                 'type' => $this->getType(),
-                'value' => $this->getValue()
+                'value' => $this->getValue(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (?string $value) => $value !== null
         ) ?: null;
     }
 }

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the TrackingSettings object for a /mail/send API call
  */
@@ -14,13 +16,13 @@ namespace SendGrid\Mail;
 class TrackingSettings implements \JsonSerializable
 {
     /** @var $click_tracking ClickTracking object */
-    private $click_tracking;
+    private ?\SendGrid\Mail\ClickTracking $click_tracking = null;
     /** @var $open_tracking OpenTracking object */
-    private $open_tracking;
+    private ?\SendGrid\Mail\OpenTracking $open_tracking = null;
     /** @var $subscription_tracking SubscriptionTracking object */
-    private $subscription_tracking;
+    private ?\SendGrid\Mail\SubscriptionTracking $subscription_tracking = null;
     /** @var $ganalytics Ganalytics object */
-    private $ganalytics;
+    private ?\SendGrid\Mail\Ganalytics $ganalytics = null;
 
     /**
      * Optional constructor
@@ -64,7 +66,7 @@ class TrackingSettings implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setClickTracking($enable, $enable_text = null)
+    public function setClickTracking($enable, $enable_text = null): void
     {
         if ($enable instanceof ClickTracking) {
             $click_tracking = $enable;
@@ -99,7 +101,7 @@ class TrackingSettings implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setOpenTracking($enable, $substitution_tag = null)
+    public function setOpenTracking($enable, $substitution_tag = null): void
     {
         if ($enable instanceof OpenTracking) {
             $open_tracking = $enable;
@@ -157,7 +159,7 @@ class TrackingSettings implements \JsonSerializable
         $text = null,
         $html = null,
         $substitution_tag = null
-    ) {
+    ): void {
         if ($enable instanceof SubscriptionTracking) {
             $subscription_tracking = $enable;
             $this->subscription_tracking = $subscription_tracking;
@@ -200,7 +202,7 @@ class TrackingSettings implements \JsonSerializable
         $utm_term = null,
         $utm_content = null,
         $utm_campaign = null
-    ) {
+    ): void {
         if ($enable instanceof Ganalytics) {
             $ganalytics = $enable;
             $this->ganalytics = $ganalytics;
@@ -239,11 +241,9 @@ class TrackingSettings implements \JsonSerializable
                 'click_tracking' => $this->getClickTracking(),
                 'open_tracking' => $this->getOpenTracking(),
                 'subscription_tracking' => $this->getSubscriptionTracking(),
-                'ganalytics' => $this->getGanalytics()
+                'ganalytics' => $this->getGanalytics(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (\SendGrid\Mail\ClickTracking|\SendGrid\Mail\OpenTracking|\SendGrid\Mail\SubscriptionTracking|\SendGrid\Mail\Ganalytics $value) => $value !== null
         ) ?: null;
     }
 }

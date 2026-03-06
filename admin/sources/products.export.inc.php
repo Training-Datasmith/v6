@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -17,7 +19,6 @@ if (!defined('CC_INI_SET')) {
 if (Admin::getInstance()->is()) {
     Admin::getInstance()->permissions('products', CC_PERM_READ, true);
 }
-
 
 $seo  = SEO::getInstance();
 $catalogue = Catalogue::getInstance();
@@ -51,8 +52,8 @@ if (isset($_GET['format']) && !empty($_GET['format'])) {
     }
 
     if ($results = $GLOBALS['db']->query($query, $per_page, $page)) {
-        $header_fields = array('Product Name', 'Status', 'Include in featured products', 'Include in latest products', 'Product Code', 'Weight', 'Description', 'Short Description', 'Price', 'Sale Price', 'Cost Price', 'Tax Class', 'Tax Inclusive', 'Images', 'Stock Level', 'Use Stock Level', 'Stock Level Warning', 'Master Category ID', 'Manufacturer', 'UPC Code', 'EAN Code', 'JAN Code', 'ISBN Code', 'Brand', 'MPN Code', 'GTIN Code', 'Meta Title', 'Meta Description', 'Condition', 'Digital', 'Digital Path (Legacy)', 'Product Width', 'Product Height', 'Product Depth', 'Dimension Unit');
-        $fields  = array('name', 'status', 'featured', 'latest', 'product_code', 'product_weight', 'description', 'description_short', 'price', 'sale_price', 'cost_price', 'tax_type', 'tax_inclusive', 'image', 'stock_level', 'use_stock_level', 'stock_warning', 'cat_id', 'manufacturer', 'upc', 'ean', 'jan', 'isbn', 'brand', 'mpn', 'gtin', 'seo_meta_title', 'seo_meta_description', 'condition', 'digital', 'digital_path', 'product_width', 'product_height', 'product_depth', 'dimension_unit');
+        $header_fields = ['Product Name', 'Status', 'Include in featured products', 'Include in latest products', 'Product Code', 'Weight', 'Description', 'Short Description', 'Price', 'Sale Price', 'Cost Price', 'Tax Class', 'Tax Inclusive', 'Images', 'Stock Level', 'Use Stock Level', 'Stock Level Warning', 'Master Category ID', 'Manufacturer', 'UPC Code', 'EAN Code', 'JAN Code', 'ISBN Code', 'Brand', 'MPN Code', 'GTIN Code', 'Meta Title', 'Meta Description', 'Condition', 'Digital', 'Digital Path (Legacy)', 'Product Width', 'Product Height', 'Product Depth', 'Dimension Unit'];
+        $fields  = ['name', 'status', 'featured', 'latest', 'product_code', 'product_weight', 'description', 'description_short', 'price', 'sale_price', 'cost_price', 'tax_type', 'tax_inclusive', 'image', 'stock_level', 'use_stock_level', 'stock_warning', 'cat_id', 'manufacturer', 'upc', 'ean', 'jan', 'isbn', 'brand', 'mpn', 'gtin', 'seo_meta_title', 'seo_meta_description', 'condition', 'digital', 'digital_path', 'product_width', 'product_height', 'product_depth', 'dimension_unit'];
         $delimiter = ',';
         $extension = 'csv';
         $glue  = "\n";
@@ -81,8 +82,8 @@ if (isset($_GET['format']) && !empty($_GET['format'])) {
                 $result['name']   = str_replace('"', '""', $result['name']);
                 $result['description'] = str_replace('"', '""', $result['description']);
             } else {
-                $result['name']   = preg_replace('#[\s]{2,}#', ' ', str_replace(array("&nbsp;", "\t", "\r", "\n", "\0", "\x0B"), '', strip_tags($result['name'])));
-                $result['description'] = preg_replace('#[\s]{2,}#', ' ', str_replace(array("&nbsp;", "\t", "\r", "\n", "\0", "\x0B"), '', strip_tags($result['description'])));
+                $result['name']   = preg_replace('#[\s]{2,}#', ' ', str_replace(['&nbsp;', "\t", "\r", "\n", "\0", "\x0B"], '', strip_tags($result['name'])));
+                $result['description'] = preg_replace('#[\s]{2,}#', ' ', str_replace(['&nbsp;', "\t", "\r", "\n", "\0", "\x0B"], '', strip_tags($result['description'])));
             }
 
             $result['store_category'] = $GLOBALS['seo']->getDirectory($result['cat_id'], false, ' > ');
@@ -95,17 +96,17 @@ if (isset($_GET['format']) && !empty($_GET['format'])) {
 
             $result['condition'] = (empty($result['condition'])) ? 'new' : $result['condition'];
 
-            if($cats = $GLOBALS['db']->select('CubeCart_category_index', array('cat_id'), array('product_id' => $result['product_id']), array('primary' => 'DESC'))) {
-                $cat_ids = array();
-                foreach($cats as $cat) {
+            if ($cats = $GLOBALS['db']->select('CubeCart_category_index', ['cat_id'], ['product_id' => $result['product_id']], ['primary' => 'DESC'])) {
+                $cat_ids = [];
+                foreach ($cats as $cat) {
                     array_push($cat_ids, $cat['cat_id']);
                 }
-                $result['cat_id'] = implode(',',$cat_ids);
+                $result['cat_id'] = implode(',', $cat_ids);
             }
-            
+
             # Manufacturer
             if (!empty($result['manufacturer'])) {
-                $result['manufacturer'] = ($manuf = $GLOBALS['db']->select('CubeCart_manufacturers', array('name'), array('id' => (int)$result['manufacturer']))) ? $manuf[0]['name'] : '';
+                $result['manufacturer'] = ($manuf = $GLOBALS['db']->select('CubeCart_manufacturers', ['name'], ['id' => (int)$result['manufacturer']])) ? $manuf[0]['name'] : '';
             } else {
                 $result['manufacturer'] = '';
             }
@@ -121,12 +122,12 @@ if (isset($_GET['format']) && !empty($_GET['format'])) {
             $result['url'] = $seo->fullURL($url, true);
 
             ## Generate Image URL
-            if (($images = $GLOBALS['db']->select('CubeCart_image_index', array('file_id'), array('product_id' => $result['product_id']), array('main_img' => 'DESC'))) !== false) {
-                $image_array = array();
-                foreach($images as $image) {
+            if (($images = $GLOBALS['db']->select('CubeCart_image_index', ['file_id'], ['product_id' => $result['product_id']], ['main_img' => 'DESC'])) !== false) {
+                $image_array = [];
+                foreach ($images as $image) {
                     array_push($image_array, $catalogue->imagePath($image['file_id'], $image_mode, $image_path, false));
                 }
-                $result['image'] = implode(',',$image_array);
+                $result['image'] = implode(',', $image_array);
             } else {
                 $result['image'] = '';
             }
@@ -135,7 +136,7 @@ if (isset($_GET['format']) && !empty($_GET['format'])) {
             //CSV must have double quotes around strings. This is the standard and most spreasheets will behave best this way
             foreach ($fields as $field) {
                 // format specialist fields e.g. 'price currency' to '9.99 USD'
-                if (stristr($field, " ")) {
+                if (stristr($field, ' ')) {
                     $exploded_fields = explode(' ', $field);
                     foreach ($exploded_fields as $part_field) {
                         $formatted_field[] = $result[$part_field];
@@ -162,14 +163,16 @@ if (isset($_GET['format']) && !empty($_GET['format'])) {
                 deliverFile(false, false, $output, $filename);
             } else {
                 $method = $path = '';
-				foreach ($GLOBALS['hooks']->load('admin.product.export.method') as $hook) include $hook;
-				if($method == 'write' && !empty($path)) {
-					$fp = fopen($path, 'w');
-					fwrite($fp, $output);
-					fclose($fp);	
-				} else {
-					echo $output;
-				}
+                foreach ($GLOBALS['hooks']->load('admin.product.export.method') as $hook) {
+                    include $hook;
+                }
+                if ($method == 'write' && !empty($path)) {
+                    $fp = fopen($path, 'w');
+                    fwrite($fp, $output);
+                    fclose($fp);
+                } else {
+                    echo $output;
+                }
             }
             exit;
         }
@@ -180,18 +183,18 @@ if (isset($_GET['format']) && !empty($_GET['format'])) {
 
 $GLOBALS['main']->addTabControl($lang['common']['export'], 'export');
 
-$formats = array('cubecart'  => 'CubeCart');
+$formats = ['cubecart'  => 'CubeCart'];
 
 foreach ($GLOBALS['hooks']->load('admin.product.import.list') as $hook) {
     include $hook;
 }
 
-$page_limits = array(
-    50, 100, 250, 500, 1000, 5000, 10000, 25000
-);
+$page_limits = [
+    50, 100, 250, 500, 1000, 5000, 10000, 25000,
+];
 
 foreach ($page_limits as $limit_value) {
-    $limit['selected'] = ($limit_value==$per_page) ? 'selected="selected"' : null;
+    $limit['selected'] = ($limit_value == $per_page) ? 'selected="selected"' : null;
     $limit['per_page'] = $limit_value;
     $smarty_data['limits'][] = $limit;
 }

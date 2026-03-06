@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -11,7 +13,7 @@
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
 $GLOBALS['main']->addTabControl($lang['settings']['release_notes'], 'general');
-$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(array('node')), true);
-$features = array();
-$security = array();
+$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(['node']), true);
+$features = [];
+$security = [];
 $page_content = $GLOBALS['main']->newFeatures($_GET['node'], $features, 32, '', $security);

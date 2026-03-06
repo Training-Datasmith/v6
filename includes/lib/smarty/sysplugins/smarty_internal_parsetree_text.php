@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Internal Plugin Templateparser Parse Tree
  * These are classes to build parse tree in the template parser
@@ -16,7 +18,6 @@
  */
 class Smarty_Internal_ParseTree_Text extends Smarty_Internal_ParseTree
 {
-
     /**
      * Wether this section should be stripped on output to smarty php
      * @var bool
@@ -39,7 +40,8 @@ class Smarty_Internal_ParseTree_Text extends Smarty_Internal_ParseTree
      * Wether this section should be stripped on output to smarty php
      * @return bool
      */
-    public function isToBeStripped() {
+    public function isToBeStripped()
+    {
         return $this->toBeStripped;
     }
 

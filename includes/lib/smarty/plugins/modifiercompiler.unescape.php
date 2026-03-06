@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -21,12 +23,12 @@
 function smarty_modifiercompiler_unescape($params, Smarty_Internal_TemplateCompilerBase $compiler)
 {
     $compiler->template->_checkPlugins(
-        array(
-            array(
+        [
+            [
                 'function' => 'smarty_literal_compiler_param',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.literal_compiler_param.php'
-            )
-        )
+                'file'     => SMARTY_PLUGINS_DIR . 'shared.literal_compiler_param.php',
+            ],
+        ]
     );
 
     $esc_type = smarty_literal_compiler_param($params, 1, 'html');

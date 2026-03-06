@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -20,8 +22,8 @@ if (isset($_GET['reset']) && !empty($_GET['reset'])) {
     httpredir('?_g=statistics&node=emaillog');
 }
 
-if (isset($_GET['resend']) && $_GET['resend']>0) {
-    $email_data = $GLOBALS['db']->select('CubeCart_email_log', false, array('id' => (int)$_GET['resend']));
+if (isset($_GET['resend']) && $_GET['resend'] > 0) {
+    $email_data = $GLOBALS['db']->select('CubeCart_email_log', false, ['id' => (int)$_GET['resend']]);
 
     if ($email_data) {
         $mailer = new Mailer();
@@ -41,10 +43,10 @@ if (isset($_GET['resend']) && $_GET['resend']>0) {
             $recipient = User::getEmailAddressParts($recipient);
             $mailer->AddAddress($recipient['email']);
         }
-    
+
         $from = User::getEmailAddressParts($email_data[0]['from']);
         $mailer->Sender = $from['email'];
-        
+
         $email_data[0]['result'] = $mailer->Send();
         unset($email_data[0]['date'], $email_data[0]['id']);
 
@@ -55,7 +57,7 @@ if (isset($_GET['resend']) && $_GET['resend']>0) {
         }
         $email_data[0]['fail_reason'] = !empty($mailer->ErrorInfo) ? htmlentities($mailer->ErrorInfo, ENT_QUOTES) : '';
         $GLOBALS['db']->insert('CubeCart_email_log', $email_data[0]);
-        httpredir(currentPage(array('resend')));
+        httpredir(currentPage(['resend']));
     }
 }
 
@@ -73,7 +75,7 @@ $GLOBALS['gui']->addBreadcrumb($lang['settings']['title_email_log'], currentPage
 if ($GLOBALS['session']->has('email_filter') && $email_filter = $GLOBALS['session']->get('email_filter')) {
     $GLOBALS['smarty']->assign('EMAIL_FILTER', $email_filter);
     if (filter_var($email_filter, FILTER_VALIDATE_EMAIL)) {
-        $where = array('to' => $email_filter);
+        $where = ['to' => $email_filter];
     } else {
         $where = "`to` LIKE '%$email_filter%'";
     }
@@ -83,37 +85,37 @@ if ($GLOBALS['session']->has('email_filter') && $email_filter = $GLOBALS['sessio
 
 $per_page = 25;
 $page = (isset($_GET['page'])) ? $_GET['page'] : 1;
-$email_logs = $GLOBALS['db']->select('CubeCart_email_log', false, $where, array('date' => 'DESC'), $per_page, $page, false);
-$email_log = array();
+$email_logs = $GLOBALS['db']->select('CubeCart_email_log', false, $where, ['date' => 'DESC'], $per_page, $page, false);
+$email_log = [];
 $count = $GLOBALS['db']->getFoundRows();
-if ($email_logs!==false) {
-    $row['to_email'] = array();
+if ($email_logs !== false) {
+    $row['to_email'] = [];
     foreach ($email_logs as $row) {
         $row['to'] = explode(',', $row['to']);
-        foreach($row['to'] as $value) {
-            if($to = User::getEmailAddressParts($value)) {
-                $row['to_email'][] = array(
+        foreach ($row['to'] as $value) {
+            if ($to = User::getEmailAddressParts($value)) {
+                $row['to_email'][] = [
                     'email' => $to['email'],
-                    'name' => $to['name']
-                );
+                    'name' => $to['name'],
+                ];
             }
         }
         $attachments = json_decode($row['attachment'] ?? '', true);
-        if(is_array($attachments) && !empty($attachments)) {
-            $row['attachment'] = array();
+        if (is_array($attachments) && !empty($attachments)) {
+            $row['attachment'] = [];
             foreach ($attachments as $file) {
                 if (file_exists(CC_FILES_DIR.'attachments/'.$file)) {
-                    $row['attachment'][] = array(
+                    $row['attachment'][] = [
                         'name' => $file,
-                        'download_file' => base64_encode('files/attachments/'.$file)
-                    );
+                        'download_file' => base64_encode('files/attachments/'.$file),
+                    ];
                 }
             }
         } else {
-            $row['attachment'] = array();
+            $row['attachment'] = [];
         }
 
-        if($from = User::getEmailAddressParts($row['from'])) {
+        if ($from = User::getEmailAddressParts($row['from'])) {
             $row['from_name'] = $from['name'];
             $row['from_email'] = $from['email'];
             $email_log[] = $row;

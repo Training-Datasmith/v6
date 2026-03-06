@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -21,7 +23,7 @@ $GLOBALS['db'] = Database::getInstance($glob);
 // Initialize Config class
 $GLOBALS['config'] = Config::getInstance($glob);
 $time_zone = $GLOBALS['config']->get('config', 'time_zone');
-if(!empty($time_zone)) {
+if (!empty($time_zone)) {
     $debug = (bool)$GLOBALS['config']->get('config', 'debug');
     $GLOBALS['db']->misc("SET @@time_zone = '".$time_zone."'", false, $debug);
     date_default_timezone_set($time_zone);
@@ -60,13 +62,12 @@ $lang = $GLOBALS['language']->getLanguageStrings();
 //Initialize Cart
 $GLOBALS['cart'] = Cart::getInstance();
 
-
 $global_template_file['session_true']  = 'main.php';
 $global_template_file['session_false']  = 'login.php';
 
 // hook_tab_content is a place where hooks can specify template includes that
 // define their admin tab content.
-$GLOBALS['hook_tab_content'] = array();
+$GLOBALS['hook_tab_content'] = [];
 
 foreach ($GLOBALS['hooks']->load('controller.admin') as $hook) {
     include $hook;

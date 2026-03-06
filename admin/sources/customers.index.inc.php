@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -16,13 +18,12 @@ if (!defined('CC_INI_SET')) {
 }
 Admin::getInstance()->permissions('customers', CC_PERM_READ, true);
 
-
 if (isset($_POST['search']) && !empty($_POST['search'])) {
     // Create search string
     if (isset($_POST['search']['customer_id']) && !empty($_POST['search']['customer_id']) && is_numeric($_POST['search']['customer_id'])) {
-        httpredir(currentPage(null, array('action' => 'edit', 'customer_id' => (int)$_POST['search']['customer_id'])));
+        httpredir(currentPage(null, ['action' => 'edit', 'customer_id' => (int)$_POST['search']['customer_id']]));
     } else {
-        httpredir(currentPage(null, array('q' => (string)$_POST['search']['keywords'])));
+        httpredir(currentPage(null, ['q' => (string)$_POST['search']['keywords']]));
     }
 }
 
@@ -34,29 +35,29 @@ if (isset($_POST['external_report']) && is_array($_POST['external_report'])) {
         include $external_class_path;
         $external_report = new External($GLOBALS['config']->get($module_name[0]));
     }
-    if(!isset($external_report) || !is_object($external_report)) {
+    if (!isset($external_report) || !is_object($external_report)) {
         $GLOBALS['main']->errorMessage(ucfirst($module_name[0]).': Failed to generate external report.');
         httpredir(currentPage());
     }
-    if (($customers_export = $GLOBALS['db']->select('CubeCart_customer', array('first_name', 'last_name', 'phone', 'mobile', 'customer_id', 'email'))) !== false) {
+    if (($customers_export = $GLOBALS['db']->select('CubeCart_customer', ['first_name', 'last_name', 'phone', 'mobile', 'customer_id', 'email'])) !== false) {
         // Get States Array
-        $zones = $GLOBALS['db']->select('CubeCart_geo_zone', array('id', 'name'), array('status' => '1'));
+        $zones = $GLOBALS['db']->select('CubeCart_geo_zone', ['id', 'name'], ['status' => '1']);
         if ($zones) {
-            $zone_name = array();
+            $zone_name = [];
             foreach ($zones as $zone) {
                 $zone_name[$zone['id']] = $zone['name'];
             }
         }
         foreach ($customers_export as $customer) {
             // Find default address
-            $address = $GLOBALS['db']->select('CubeCart_addressbook', array('company_name', 'line1', 'line2', 'town', 'state', 'postcode', 'country'), array('customer_id' => $customer['customer_id'], 'billing' => '1'));
+            $address = $GLOBALS['db']->select('CubeCart_addressbook', ['company_name', 'line1', 'line2', 'town', 'state', 'postcode', 'country'], ['customer_id' => $customer['customer_id'], 'billing' => '1']);
             // Get state name if it is numeric
             $address[0]['state'] = is_numeric($address[0]['state']) ? $zone_name[$address[0]['state']] : $address[0]['state'];
             $data = array_merge($address[0], $customer);
             $external_report->report_customer_data($data);
         }
     }
-    $file_name = ucfirst($module_name[0]).' '.$lang['customer']['customer_export'].' '.date("Ymd").'.csv';
+    $file_name = ucfirst($module_name[0]).' '.$lang['customer']['customer_export'].' '.date('Ymd').'.csv';
     $GLOBALS['debug']->supress(true);
     deliverFile(false, false, $external_report->_report_data, $file_name);
     exit;
@@ -91,24 +92,26 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
         foreach ($customer as $key => $value) {
             $customer[$key] = htmlspecialchars(html_entity_decode($value));
         }
-        $email_check = $GLOBALS['db']->select('CubeCart_customer', array('customer_id'), array('email' => $customer['email']));
-        if($email_check && $email_check[0]['customer_id']!==$_POST['customer_id']) {
+        $email_check = $GLOBALS['db']->select('CubeCart_customer', ['customer_id'], ['email' => $customer['email']]);
+        if ($email_check && $email_check[0]['customer_id'] !== $_POST['customer_id']) {
             $GLOBALS['main']->errorMessage($lang['account']['error_email_in_use']);
             $customer_updated = false;
-        } elseif (($GLOBALS['db']->update('CubeCart_customer', $customer, array('customer_id' => $_POST['customer_id']))) !== false) {
-            if((int)$customer['status']===0) $GLOBALS['db']->delete('CubeCart_sessions', array('customer_id' => (int)$_POST['customer_id']));
+        } elseif (($GLOBALS['db']->update('CubeCart_customer', $customer, ['customer_id' => $_POST['customer_id']])) !== false) {
+            if ((int)$customer['status'] === 0) {
+                $GLOBALS['db']->delete('CubeCart_sessions', ['customer_id' => (int)$_POST['customer_id']]);
+            }
             $customer_updated = true;
         }
         $customer_id = $_POST['customer_id'];
     } else {
         // Validate
-        $required = array('first_name', 'last_name', 'email');
+        $required = ['first_name', 'last_name', 'email'];
         $customer['registered'] = time();
         foreach ($customer as $field => $value) {
             if ($field == 'email' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                 $GLOBALS['main']->errorMessage($lang['common']['error_email_invalid']);
                 $customer_add_error = true;
-            } elseif($GLOBALS['db']->select('CubeCart_customer', array('customer_id'), array('email' => $customer['email']))) {
+            } elseif ($GLOBALS['db']->select('CubeCart_customer', ['customer_id'], ['email' => $customer['email']])) {
                 $GLOBALS['main']->errorMessage($lang['account']['error_email_in_use']);
                 $customer_add_error = true;
             }
@@ -138,7 +141,7 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
         // Update / Insert newsletter subscription
         $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', '`customer_id` = '.$customer_id.' OR `email` = \''.$customer['email'].'\'');
         if (isset($customer['subscription_status']) && $customer['subscription_status']) {
-            $GLOBALS['db']->insert('CubeCart_newsletter_subscriber', array('customer_id' => $customer_id, 'status' => 1, 'dbl_opt' => $customer['subscription_status']=='2' ? '1' : '0', 'email' => $customer['email']));
+            $GLOBALS['db']->insert('CubeCart_newsletter_subscriber', ['customer_id' => $customer_id, 'status' => 1, 'dbl_opt' => $customer['subscription_status'] == '2' ? '1' : '0', 'email' => $customer['email']]);
         }
 
         // Delete Group membership
@@ -150,7 +153,7 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
                 foreach ($GLOBALS['hooks']->load('admin.customer.group.delete') as $hook) {
                     include $hook;
                 }
-                if (($GLOBALS['db']->delete('CubeCart_customer_membership', array('membership_id' => (int)$membership_id))) !== false) {
+                if (($GLOBALS['db']->delete('CubeCart_customer_membership', ['membership_id' => (int)$membership_id])) !== false) {
                     $customer_updated = true;
                 }
             }
@@ -162,7 +165,7 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
                 if (empty($group_id)) {
                     continue;
                 }
-                $record = array('customer_id' => $customer_id, 'group_id' => (int)$group_id);
+                $record = ['customer_id' => $customer_id, 'group_id' => (int)$group_id];
                 foreach ($GLOBALS['hooks']->load('admin.customer.group.add') as $hook) {
                     include $hook;
                 }
@@ -187,7 +190,7 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
                 }
             }
 
-            $required_fields = array('first_name','last_name','line1','town','country','postcode');
+            $required_fields = ['first_name','last_name','line1','town','country','postcode'];
 
             foreach ($address as $offset => $record) {
                 foreach ($record as $record_key => $record_value) {
@@ -203,19 +206,19 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
                 $record['postcode']  = strtoupper($record['postcode']);
 
                 // set all to non-default first so this becomes default!
-                if ($record['default']=='1') {
-                    $GLOBALS['db']->update('CubeCart_addressbook', array('default' => '0'), array('customer_id' => $customer_id, 'billing' => (string)$record['billing']));
+                if ($record['default'] == '1') {
+                    $GLOBALS['db']->update('CubeCart_addressbook', ['default' => '0'], ['customer_id' => $customer_id, 'billing' => (string)$record['billing']]);
                 }
-                if ($record['billing']=='1') {
-                    $GLOBALS['db']->update('CubeCart_addressbook', array('billing' => '0'), array('customer_id' => $customer_id));
+                if ($record['billing'] == '1') {
+                    $GLOBALS['db']->update('CubeCart_addressbook', ['billing' => '0'], ['customer_id' => $customer_id]);
                 }
 
                 if (isset($record['address_id']) && !empty($record['address_id'])) {
-                    if ($GLOBALS['db']->update('CubeCart_addressbook', $record, array('customer_id' => $customer_id, 'address_id' => $record['address_id']))) {
+                    if ($GLOBALS['db']->update('CubeCart_addressbook', $record, ['customer_id' => $customer_id, 'address_id' => $record['address_id']])) {
                         $customer_updated = true;
                     }
                 } else {
-                    if ($GLOBALS['db']->insert('CubeCart_addressbook', array_merge($record, array('customer_id' => (int)$customer_id)))) {
+                    if ($GLOBALS['db']->insert('CubeCart_addressbook', array_merge($record, ['customer_id' => (int)$customer_id]))) {
                         $customer_updated = true;
                     }
                 }
@@ -229,18 +232,18 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
 
     if ($customer_added) {
         $GLOBALS['main']->successMessage($lang['customer']['notify_customer_create']);
-        $variable_rem_fields = array('action');
+        $variable_rem_fields = ['action'];
     } elseif ($customer_not_added) {
         $GLOBALS['main']->errorMessage($lang['customer']['error_customer_create']);
     } elseif ($customer_updated) {
         $GLOBALS['main']->successMessage($lang['customer']['notify_customer_update']);
         // Lose get vars to return to customer list
-        $variable_rem_fields = array();
+        $variable_rem_fields = [];
     } else {
         $GLOBALS['main']->errorMessage($lang['customer']['error_customer_update']);
     }
 
-    $fixed_rem_fields = array('address_id');
+    $fixed_rem_fields = ['address_id'];
     $rem_fields = is_array($variable_rem_fields) ? array_merge($fixed_rem_fields, $variable_rem_fields) : $fixed_rem_fields;
     httpredir(currentPage($rem_fields));
 } elseif (!isset($_POST['multi-action']) || empty($_POST['multi-action'])) {
@@ -257,7 +260,7 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
                     include $hook;
                 }
                 if (isset($record)) {
-                    $GLOBALS['db']->update('CubeCart_customer_group', $record, array('group_id' => (int)$group_id));
+                    $GLOBALS['db']->update('CubeCart_customer_group', $record, ['group_id' => (int)$group_id]);
                     $GLOBALS['main']->successMessage($lang['customer']['notify_customer_groups']);
                     unset($record);
                 }
@@ -281,10 +284,10 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
             foreach ($GLOBALS['hooks']->load('admin.customer.group_delete') as $hook) {
                 include $hook;
             }
-            if (($GLOBALS['db']->delete('CubeCart_customer_group', array('group_id' => (int)$group_id))) !== false) {
-                $GLOBALS['db']->delete('CubeCart_customer_membership', array('group_id' => (int)$group_id));
-                $GLOBALS['db']->delete('CubeCart_pricing_quantity', array('group_id' => (int)$group_id));
-                $GLOBALS['db']->delete('CubeCart_pricing_group', array('group_id' => (int)$group_id));
+            if (($GLOBALS['db']->delete('CubeCart_customer_group', ['group_id' => (int)$group_id])) !== false) {
+                $GLOBALS['db']->delete('CubeCart_customer_membership', ['group_id' => (int)$group_id]);
+                $GLOBALS['db']->delete('CubeCart_pricing_quantity', ['group_id' => (int)$group_id]);
+                $GLOBALS['db']->delete('CubeCart_pricing_group', ['group_id' => (int)$group_id]);
             }
         }
         $GLOBALS['main']->successMessage($lang['customer']['notify_groups_delete']);
@@ -293,8 +296,10 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
     if (isset($_POST['status']) && is_array($_POST['status']) && Admin::getInstance()->permissions('customers', CC_PERM_EDIT)) {
         foreach ($_POST['status'] as $customer_id => $status) {
             // Delete any active session
-            if((int)$status===0) $GLOBALS['db']->delete('CubeCart_sessions', array('customer_id' => (int)$customer_id));
-            $result = $GLOBALS['db']->update('CubeCart_customer', array('status' => (int)$status), array('customer_id' => (int)$customer_id));
+            if ((int)$status === 0) {
+                $GLOBALS['db']->delete('CubeCart_sessions', ['customer_id' => (int)$customer_id]);
+            }
+            $result = $GLOBALS['db']->update('CubeCart_customer', ['status' => (int)$status], ['customer_id' => (int)$customer_id]);
             if ($result) {
                 $GLOBALS['main']->successMessage($lang['customer']['notify_customer_status']);
             }
@@ -302,7 +307,7 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
         $send_redirect = true;
     }
     if (isset($_GET['delete_addr']) && isset($_GET['customer_id']) && is_numeric($_GET['delete_addr'])) {
-        if ($GLOBALS['db']->delete('CubeCart_addressbook', array('address_id' => (int)$_GET['delete_addr'], 'customer_id' => (int)$_GET['customer_id']))) {
+        if ($GLOBALS['db']->delete('CubeCart_addressbook', ['address_id' => (int)$_GET['delete_addr'], 'customer_id' => (int)$_GET['customer_id']])) {
             $GLOBALS['main']->successMessage($lang['customer']['notify_address_delete']);
         } else {
             $GLOBALS['main']->errorMessage($lang['customer']['error_address_delete']);
@@ -313,24 +318,24 @@ if (isset($_POST['customer']) && is_array($_POST['customer']) && Admin::getInsta
         include $hook;
     }
     if (isset($send_redirect) && $send_redirect) {
-        httpredir(currentPage(array('delete_addr')));
+        httpredir(currentPage(['delete_addr']));
     }
 }
 
 ######################################
 $per_page = $GLOBALS['main']->itemsPerPage('customers', $_GET['items'] ?? 0, 25);
-$GLOBALS['smarty']->assign('PAGE_BREAKS', array(25, 50, 100, 250, 500));
+$GLOBALS['smarty']->assign('PAGE_BREAKS', [25, 50, 100, 250, 500]);
 $GLOBALS['smarty']->assign('PAGE_BREAK', $per_page);
 
-if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::getInstance()->permissions('customers', CC_PERM_EDIT)) {
+if ((!empty($_GET['action'] ??= '') || isset($_POST['multi-action'])) && Admin::getInstance()->permissions('customers', CC_PERM_EDIT)) {
     if ($_GET['action'] == 'signinas' && isset($_GET['customer_id']) && $_GET['customer_id']) {
         $GLOBALS['session']->delete('', 'basket');
-        $GLOBALS['db']->update('CubeCart_sessions', array('customer_id' => $_GET['customer_id']), array('session_id' => $GLOBALS['session']->getId()));
+        $GLOBALS['db']->update('CubeCart_sessions', ['customer_id' => $_GET['customer_id']], ['session_id' => $GLOBALS['session']->getId()]);
         httpredir('index.php');
         exit;
     }
 
-    if ((($_GET['action'] == 'delete' && isset($_GET['customer_id']) ) || (isset($_POST['multi-action']) && $_POST['multi-action'] == 'delete' && isset($_POST['multi-customer']) && !empty($_POST['multi-customer']))) && Admin::getInstance()->permissions('customers', CC_PERM_DELETE)) {
+    if ((($_GET['action'] == 'delete' && isset($_GET['customer_id'])) || (isset($_POST['multi-action']) && $_POST['multi-action'] == 'delete' && isset($_POST['multi-customer']) && !empty($_POST['multi-customer']))) && Admin::getInstance()->permissions('customers', CC_PERM_DELETE)) {
         if (isset($_POST['multi-customer']) && !empty($_POST['multi-customer'])) {
             foreach ($_POST['multi-customer'] as $list_item) {
                 $customer_list[] = (int)$list_item;
@@ -341,29 +346,29 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
         $notify_deleted = false;
         $error_deleted = false;
         $error_deleted_orders = false;
-        if (isset($customer_list) && ($customer = $GLOBALS['db']->select('CubeCart_customer', array('customer_id'), array('customer_id' => $customer_list))) !== false) {
-            for ($i=0, $max=count($customer); $i < $max; ++$i) {
-                if (!$GLOBALS['db']->select('CubeCart_order_summary', array('cart_order_id'), array('customer_id' => $customer[$i]['customer_id']))) {
-                    if (($GLOBALS['db']->delete('CubeCart_customer', array('customer_id' => $customer[$i]['customer_id']))) !== false) {
-                        $GLOBALS['db']->delete('CubeCart_addressbook', array('customer_id' => $customer[$i]['customer_id']));
-                        $GLOBALS['db']->delete('CubeCart_customer_membership', array('customer_id' => $customer[$i]['customer_id']));
-                        $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', array('customer_id' => $customer[$i]['customer_id']));
+        if (isset($customer_list) && ($customer = $GLOBALS['db']->select('CubeCart_customer', ['customer_id'], ['customer_id' => $customer_list])) !== false) {
+            for ($i = 0, $max = count($customer); $i < $max; ++$i) {
+                if (!$GLOBALS['db']->select('CubeCart_order_summary', ['cart_order_id'], ['customer_id' => $customer[$i]['customer_id']])) {
+                    if (($GLOBALS['db']->delete('CubeCart_customer', ['customer_id' => $customer[$i]['customer_id']])) !== false) {
+                        $GLOBALS['db']->delete('CubeCart_addressbook', ['customer_id' => $customer[$i]['customer_id']]);
+                        $GLOBALS['db']->delete('CubeCart_customer_membership', ['customer_id' => $customer[$i]['customer_id']]);
+                        $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', ['customer_id' => $customer[$i]['customer_id']]);
                         foreach ($GLOBALS['hooks']->load('admin.customer.delete') as $hook) {
                             include $hook;
                         }
                         if (!$notify_deleted) {
-                            $GLOBALS['main']->setACPNotify("Some or all selected ".$lang['customer']['notify_customer_delete']);
+                            $GLOBALS['main']->setACPNotify('Some or all selected '.$lang['customer']['notify_customer_delete']);
                             $notify_deleted = true;
                         }
                     } else {
                         if (!$error_deleted) {
-                            $GLOBALS['main']->setACPWarning("Some or all selected ".$lang['customer']['error_customer_delete']);
+                            $GLOBALS['main']->setACPWarning('Some or all selected '.$lang['customer']['error_customer_delete']);
                             $error_deleted = true;
                         }
                     }
                 } else {
                     if (!$error_deleted_orders) {
-                        $GLOBALS['main']->setACPWarning("Some or all selected ".$lang['customer']['error_customer_delete_orders']);
+                        $GLOBALS['main']->setACPWarning('Some or all selected '.$lang['customer']['error_customer_delete_orders']);
                         $error_deleted_orders = true;
                     }
                 }
@@ -371,15 +376,15 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
         } else {
             $GLOBALS['main']->setACPWarning($lang['customer']['error_customer_found']);
         }
-        httpredir(currentPage(array('action', 'customer_id')));
+        httpredir(currentPage(['action', 'customer_id']));
     }
 
     $GLOBALS['main']->addTabControl($lang['common']['general'], 'general');
     $GLOBALS['main']->addTabControl($lang['customer']['title_address'], 'address');
 
     if ($_GET['action'] == 'edit' && isset($_GET['customer_id']) && is_numeric($_GET['customer_id'])) {
-        if (($customer = $GLOBALS['db']->select('CubeCart_customer', false, array('customer_id' => (int)$_GET['customer_id']))) !== false) {
-            $no_orders = $GLOBALS['db']->count('CubeCart_order_summary', false, array('customer_id' => (int)$_GET['customer_id']));
+        if (($customer = $GLOBALS['db']->select('CubeCart_customer', false, ['customer_id' => (int)$_GET['customer_id']])) !== false) {
+            $no_orders = $GLOBALS['db']->count('CubeCart_order_summary', false, ['customer_id' => (int)$_GET['customer_id']]);
             $GLOBALS['main']->addTabControl($lang['settings']['title_orders'], '', '?_g=orders&customer_id='.(int)$_GET['customer_id'], null, $no_orders);
             $GLOBALS['main']->addTabControl($lang['customer']['cookie_consent'], 'consent');
             $consent_table = '`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_cookie_consent` AS `L` INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_cookie_consent_text` AS `T` ON `L`.`dialogue_id` = `T`.`id`';
@@ -392,33 +397,33 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
             $GLOBALS['smarty']->assign('CONSENT_PAGINATION', $GLOBALS['db']->pagination($consent_count, $consent_per_page, $consent_page, 5, 'consent-page', 'consent'));
 
             $customer = $customer[0];
-            
-            $url = currentPage('', array('action' => 'signinas', 'customer_id' => $customer['customer_id']));
+
+            $url = currentPage('', ['action' => 'signinas', 'customer_id' => $customer['customer_id']]);
             $onclick = '';
 
-             $GLOBALS['main']->addTabControl('<i class="fa fa-sign-in"></i> '.sprintf($lang['customer']['signinas'], $customer['first_name'], $customer['last_name']), '', $url, null, false, '_blank',null, '');
+            $GLOBALS['main']->addTabControl('<i class="fa fa-sign-in"></i> '.sprintf($lang['customer']['signinas'], $customer['first_name'], $customer['last_name']), '', $url, null, false, '_blank', null, '');
 
             $customer_id = (int)$customer['customer_id'];
             $GLOBALS['smarty']->assign('ADD_EDIT_CUSTOMER', $lang['customer']['title_customer_edit']);
 
-            $GLOBALS['gui']->addBreadcrumb(sprintf('%s %s', $customer['first_name'], $customer['last_name']), currentPage(array('address_id')));
+            $GLOBALS['gui']->addBreadcrumb(sprintf('%s %s', $customer['first_name'], $customer['last_name']), currentPage(['address_id']));
 
             if (isset($_GET['address_id']) && $_GET['address_id'] === 'add') {
                 $store_country = $GLOBALS['config']->get('config', 'store_country');
-                $GLOBALS['smarty']->assign('ADDRESS', array(
+                $GLOBALS['smarty']->assign('ADDRESS', [
                     'address_id' => '', 'description' => '', 'first_name' => '', 'last_name' => '',
                     'company_name' => '', 'line1' => '', 'line2' => '', 'town' => '',
                     'state' => '', 'postcode' => '', 'w3w' => '',
-                    'billing' => 0, 'default' => 0, 'country' => ''
-                ));
-                if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', array('id', 'numcode', 'name'), false, array('name' => 'ASC'))) !== false) {
-                    $smarty_data = array();
+                    'billing' => 0, 'default' => 0, 'country' => '',
+                ]);
+                if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', ['id', 'numcode', 'name'], false, ['name' => 'ASC'])) !== false) {
+                    $smarty_data = [];
                     foreach ($countries as $country) {
-                        $smarty_data['countries'][] = array(
+                        $smarty_data['countries'][] = [
                             'selected' => ($country['numcode'] == $store_country) ? 'selected="selected"' : '',
                             'id'  => $country['numcode'],
                             'name'  => $country['name'],
-                        );
+                        ];
                     }
                     $GLOBALS['smarty']->assign('COUNTRIESL', $smarty_data['countries']);
                     $GLOBALS['smarty']->assign('JSON_STATE', state_json());
@@ -426,16 +431,16 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
                 $GLOBALS['smarty']->assign('DISPLAY_ADDRESS_EDIT', true);
                 $GLOBALS['smarty']->assign('ADDRESS_ADD_MODE', true);
             } elseif (isset($_GET['address_id']) && is_numeric($_GET['address_id'])) {
-                if (($address = $GLOBALS['db']->select('CubeCart_addressbook', false, array('customer_id' => $customer_id, 'address_id' => (int)$_GET['address_id']))) !== false) {
+                if (($address = $GLOBALS['db']->select('CubeCart_addressbook', false, ['customer_id' => $customer_id, 'address_id' => (int)$_GET['address_id']])) !== false) {
                     $GLOBALS['gui']->addBreadcrumb($address[0]['description'], currentPage());
-                    if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', array('id', 'numcode', 'name'), false, array('name' => 'ASC'))) !== false) {
-                        $smarty_data = array();
+                    if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', ['id', 'numcode', 'name'], false, ['name' => 'ASC'])) !== false) {
+                        $smarty_data = [];
                         foreach ($countries as $country) {
-                            $array = array(
+                            $array = [
                                 'selected' => ($country['numcode'] == $address[0]['country']) ? 'selected="selected"' : '',
                                 'id'  => $country['numcode'],
                                 'name'  => $country['name'],
-                            );
+                            ];
                             $smarty_data['countries'][] = $array;
                         }
                         $GLOBALS['smarty']->assign('COUNTRIESL', $smarty_data['countries']);
@@ -448,12 +453,12 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
                 $GLOBALS['smarty']->assign('DISPLAY_ADDRESS_EDIT', true);
             } else {
                 // Get Addresses
-                if (($addresses = $GLOBALS['db']->select('CubeCart_addressbook', false, array('customer_id' => $customer_id))) !== false) {
+                if (($addresses = $GLOBALS['db']->select('CubeCart_addressbook', false, ['customer_id' => $customer_id])) !== false) {
                     foreach ($addresses as $address) {
                         $address['country_name'] = getCountryFormat($address['country']);
                         $address['state_name']  = getStateFormat($address['state']);
-                        $address['edit']   = currentPage(null, array('address_id' => $address['address_id']));
-                        $address['delete']   = currentPage(null, array('delete_addr' => $address['address_id'],'token' => SESSION_TOKEN));
+                        $address['edit']   = currentPage(null, ['address_id' => $address['address_id']]);
+                        $address['delete']   = currentPage(null, ['delete_addr' => $address['address_id'],'token' => SESSION_TOKEN]);
                         $address['json']   = json_encode($address);
                         $smarty_data['list_address'][] = $address;
                     }
@@ -462,7 +467,7 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
                 $GLOBALS['smarty']->assign('DISPLAY_ADDRESS_LIST', true);
             }
             // Get group memberships
-            if (($memberships = $GLOBALS['db']->select('CubeCart_customer_membership', false, array('customer_id' => $customer_id))) !== false) {
+            if (($memberships = $GLOBALS['db']->select('CubeCart_customer_membership', false, ['customer_id' => $customer_id])) !== false) {
                 foreach ($GLOBALS['hooks']->load('admin.customer.group.get') as $hook) {
                     include $hook;
                 }
@@ -470,14 +475,14 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
                     $membership_list[$membership['membership_id']] = $membership;
                 }
             }
-            $customer['subscription_status'] = array('status' => '0', 'dbl_opt' => '0');
-            if(($cns = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', false, array('email' => $customer['email']))) !== false) {
+            $customer['subscription_status'] = ['status' => '0', 'dbl_opt' => '0'];
+            if (($cns = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', false, ['email' => $customer['email']])) !== false) {
                 $customer['subscription_status'] = $cns[0];
             }
         }
     } else {
         $GLOBALS['smarty']->assign('ADD_EDIT_CUSTOMER', $lang['customer']['title_customer_add']);
-        $customer = (isset($_POST['customer']) && is_array($_POST['customer'])) ? $_POST['customer'] : array('subscription_status' => array('status' => '0', 'dbl_opt' => '0'));
+        $customer = (isset($_POST['customer']) && is_array($_POST['customer'])) ? $_POST['customer'] : ['subscription_status' => ['status' => '0', 'dbl_opt' => '0']];
         // address interface
         $GLOBALS['smarty']->assign('DISPLAY_ADDRESS_LIST', true);
     }
@@ -485,7 +490,7 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
     ## Get Languages
     if (($languages = $GLOBALS['language']->listLanguages()) !== false) {
         foreach ($languages as $code => $option) {
-            if(isset($customer['language']) && !empty($customer['language'])) {
+            if (isset($customer['language']) && !empty($customer['language'])) {
                 $comparator = $customer['language'];
             } else {
                 $comparator = $GLOBALS['config']->get('config', 'default_language');
@@ -496,9 +501,9 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
         $GLOBALS['smarty']->assign('LANGUAGES', $smarty_data['languages']);
     }
     ## Get Currencies
-    if (($currencies = $GLOBALS['db']->select('CubeCart_currency', array('code'), array('active' => 1))) !== false) {
+    if (($currencies = $GLOBALS['db']->select('CubeCart_currency', ['code'], ['active' => 1])) !== false) {
         foreach ($currencies as $currency) {
-            if(isset($customer['currency']) && !empty($customer['currency'])) {
+            if (isset($customer['currency']) && !empty($customer['currency'])) {
                 $comparator = $customer['currency'];
             } else {
                 $comparator = $GLOBALS['config']->get('config', 'default_currency');
@@ -510,14 +515,14 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
         $GLOBALS['smarty']->assign('CURRENCIES', $smarty_data['currencies']);
     }
 
-    if (($groups = $GLOBALS['db']->select('CubeCart_customer_group', false, false, array('group_name' => 'ASC'))) !== false) {
+    if (($groups = $GLOBALS['db']->select('CubeCart_customer_group', false, false, ['group_name' => 'ASC'])) !== false) {
         $GLOBALS['smarty']->assign('ALL_CUSTOMER_GROUPS', $groups);
         foreach ($groups as $group) {
             $group_list[$group['group_id']] = $group;
         }
         if (isset($membership_list)) {
             foreach ($membership_list as $membership) {
-                $membership['delete'] = currentPage(array('page'), array('group_id' => $membership['group_id']));
+                $membership['delete'] = currentPage(['page'], ['group_id' => $membership['group_id']]);
                 $data = array_merge($membership, $group_list[$membership['group_id']]);
                 $smarty_data['list_groups'][] = $data;
             }
@@ -526,7 +531,7 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
         $GLOBALS['main']->addTabControl($lang['customer']['title_groups'], 'groups');
         $GLOBALS['smarty']->assign('DISPLAY_CUSTOMER_GROUPS', true);
     }
-    
+
     $GLOBALS['smarty']->assign('CUSTOMER', $customer);
     foreach ($GLOBALS['hooks']->load('admin.customer.tabs') as $hook) {
         include $hook;
@@ -536,28 +541,28 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
 } else {
     $GLOBALS['main']->addTabControl($lang['customer']['title_customer'], 'customer-list');
     $GLOBALS['main']->addTabControl($lang['customer']['title_groups'], 'customer-groups');
-    $GLOBALS['main']->addTabControl($lang['customer']['title_customer_add'], null, currentPage(null, array('action' => 'add')));
+    $GLOBALS['main']->addTabControl($lang['customer']['title_customer_add'], null, currentPage(null, ['action' => 'add']));
     $GLOBALS['main']->addTabControl($lang['search']['title_search_customers'], 'sidebar');
     $GLOBALS['main']->addTabControl($lang['search']['gdpr_tools'], null, '?_g=customers&node=gdpr');
 
-    $where = isset($_GET['q']) && !empty($_GET['q']) ? array('~'.(string)trim($_GET['q']) => array('email', "CONCAT(first_name ,' ',last_name)", "CONCAT(last_name ,' ',first_name)")) : false;
+    $where = isset($_GET['q']) && !empty($_GET['q']) ? ['~'.(string)trim($_GET['q']) => ['email', "CONCAT(first_name ,' ',last_name)", "CONCAT(last_name ,' ',first_name)"]] : false;
 
     $page = (isset($_GET['page'])) ? $_GET['page'] : 1;
 
     // Sorting
     if (!isset($_GET['sort']) || !is_array($_GET['sort'])) {
-        $_GET['sort'] = array('registered' => 'DESC');
+        $_GET['sort'] = ['registered' => 'DESC'];
     }
-    $current_page = currentPage(array('sort'));
-    $thead_sort = array(
+    $current_page = currentPage(['sort']);
+    $thead_sort = [
         'status'   => $GLOBALS['db']->column_sort('status', $lang['common']['status'], 'sort', $current_page, $_GET['sort']),
         'customer'   => $GLOBALS['db']->column_sort('customer', $lang['customer']['title_customer'], 'sort', $current_page, $_GET['sort']),
         'registered' => $GLOBALS['db']->column_sort('registered', $lang['customer']['date_registered'], 'sort', $current_page, $_GET['sort']),
         'type'   => $GLOBALS['db']->column_sort('type', $lang['customer']['customer_type'], 'sort', $current_page, $_GET['sort']),
         'email'   => $GLOBALS['db']->column_sort('email', $lang['common']['email'], 'sort', $current_page, $_GET['sort']),
         'no_orders'  => $GLOBALS['db']->column_sort('order_count', $lang['customer']['order_count'], 'sort', $current_page, $_GET['sort']),
-        'language'  => $GLOBALS['db']->column_sort('language', $lang['common']['language'], 'sort', $current_page, $_GET['sort'])
-    );
+        'language'  => $GLOBALS['db']->column_sort('language', $lang['common']['language'], 'sort', $current_page, $_GET['sort']),
+    ];
 
     foreach ($GLOBALS['hooks']->load('admin.customer.table_head_sort') as $hook) {
         include $hook;
@@ -567,7 +572,7 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
     $key = array_keys($_GET['sort']);
     $order_by = '`'.$key[0].'` '.$_GET['sort'][$key[0]];
 
-    if (($customer_count = $GLOBALS['db']->select('CubeCart_customer', array('customer_id'), $where)) !== false) {
+    if (($customer_count = $GLOBALS['db']->select('CubeCart_customer', ['customer_id'], $where)) !== false) {
         $count = count($customer_count);
         $GLOBALS['smarty']->assign('PAGINATION', $GLOBALS['db']->pagination($count, $per_page, $page));
     }
@@ -578,14 +583,14 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
         }
 
         foreach ($customers as $customer) {
-            $orders = $GLOBALS['db']->select('CubeCart_order_summary', array('cart_order_id'), array('customer_id' => $customer['customer_id']));
+            $orders = $GLOBALS['db']->select('CubeCart_order_summary', ['cart_order_id'], ['customer_id' => $customer['customer_id']]);
             $customer['language'] = file_exists(CC_ROOT_DIR.'/language/flags/'.$customer['language'].'.png') ? $customer['language'] : 'unknown';
             $customer['order_count'] = ($orders) ? count($orders) : 0;
             $customer['registered'] = formatTime($customer['registered']);
-            $customer['signinas_url'] = currentPage(array('page'), array('action' => 'signinas', 'customer_id' => $customer['customer_id']));
+            $customer['signinas_url'] = currentPage(['page'], ['action' => 'signinas', 'customer_id' => $customer['customer_id']]);
             $customer['signinas_name'] = sprintf($lang['customer']['signinas'], $customer['first_name'], $customer['last_name']);
-            $customer['edit'] = currentPage(array('page'), array('action' => 'edit', 'customer_id' => $customer['customer_id']));
-            $customer['delete'] = currentPage(false, array('action' => 'delete', 'customer_id' => $customer['customer_id'],'token' => SESSION_TOKEN));
+            $customer['edit'] = currentPage(['page'], ['action' => 'edit', 'customer_id' => $customer['customer_id']]);
+            $customer['delete'] = currentPage(false, ['action' => 'delete', 'customer_id' => $customer['customer_id'],'token' => SESSION_TOKEN]);
             $group_membership = $GLOBALS['db']->misc('SELECT `group_name` FROM `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_customer_membership` AS M INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_customer_group` AS G WHERE G.`group_id` = M.`group_id` AND M.`customer_id` = '.$customer['customer_id'].';');
             if (is_array($group_membership)) {
                 foreach ($group_membership as $membership) {
@@ -599,13 +604,13 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
             unset($group_membership, $member_groups);
             $customer_list[] = $customer;
         }
-        $customer_tasks[] = array(
-            'opt_group_name' => "", // Leave blank for no option grouping for this group
-            'selections' => array(
-                array('value' => "", 'string' => $lang['orders']['option_nothing'], 'style' => ""),
-                array('value' => "delete", 'string' => strtolower($lang['customer']['delete_customer']), 'style' => "color: red"),
-            )
-        );
+        $customer_tasks[] = [
+            'opt_group_name' => '', // Leave blank for no option grouping for this group
+            'selections' => [
+                ['value' => '', 'string' => $lang['orders']['option_nothing'], 'style' => ''],
+                ['value' => 'delete', 'string' => strtolower($lang['customer']['delete_customer']), 'style' => 'color: red'],
+            ],
+        ];
         foreach ($GLOBALS['hooks']->load('admin.customer.index.customer_tasks') as $hook) {
             include $hook;
         }
@@ -616,8 +621,8 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
     }
     // Get external module export code
     // Start classes for external reports
-    if (($module = $GLOBALS['db']->select('CubeCart_modules', 'folder', array('module' => 'external', 'status' => '1'))) !== false) {
-        $smarty_data = array();
+    if (($module = $GLOBALS['db']->select('CubeCart_modules', 'folder', ['module' => 'external', 'status' => '1'])) !== false) {
+        $smarty_data = [];
         foreach ($module as $module_data) {
             if (file_exists(CC_ROOT_DIR.'/modules/external/'.$module_data['folder'])) {
                 $module_data['description'] = ucfirst($module_data['folder']);
@@ -627,7 +632,7 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
         $GLOBALS['smarty']->assign('CUSTOMER_EXPORT_LIST', $smarty_data['customers_export_list']);
     }
     // Get list of Customer Groups
-    if (($groups = $GLOBALS['db']->select('CubeCart_customer_group', false, false, array('group_name' => 'ASC'))) !== false) {
+    if (($groups = $GLOBALS['db']->select('CubeCart_customer_group', false, false, ['group_name' => 'ASC'])) !== false) {
         foreach ($GLOBALS['hooks']->load('admin.customer.group_list') as $hook) {
             include $hook;
         }
@@ -638,14 +643,14 @@ if ((!empty($_GET['action'] ??= "") || isset($_POST['multi-action'])) && Admin::
 
 if (!isset($_GET['address_id'])): // avoid states double content by address edit
 
-    if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', array('id', 'numcode', 'name'), false, array('name' => 'ASC'))) !== false) {
+    if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', ['id', 'numcode', 'name'], false, ['name' => 'ASC'])) !== false) {
         $store_country = $GLOBALS['config']->get('config', 'store_country');
         foreach ($countries as $country) {
-            $smarty_data['countries'][] = array(
+            $smarty_data['countries'][] = [
                 'selected' => ($country['numcode'] == $store_country) ? 'selected="selected"' : '',
                 'id'  => $country['numcode'],
                 'name'  => $country['name'],
-            );
+            ];
         }
         $GLOBALS['smarty']->assign('COUNTRIES', $smarty_data['countries']);
         $GLOBALS['smarty']->assign('JSON_STATE', state_json());

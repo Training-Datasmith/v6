@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Template
  * This file contains the Smarty template engine
@@ -32,14 +34,14 @@ class Smarty_Internal_Template extends Smarty_Internal_TemplateBase
      *
      * @var Smarty_Internal_Template[]
      */
-    public static $tplObjCache = array();
+    public static $tplObjCache = [];
 
     /**
      * Template object cache for Smarty::isCached() === true
      *
      * @var Smarty_Internal_Template[]
      */
-    public static $isCacheTplObj = array();
+    public static $isCacheTplObj = [];
 
     /**
      * Sub template Info Cache
@@ -48,7 +50,7 @@ class Smarty_Internal_Template extends Smarty_Internal_TemplateBase
      *
      * @var int[]
      */
-    public static $subTplInfo = array();
+    public static $subTplInfo = [];
 
     /**
      * This object type (Smarty = 1, template = 2, data = 4)
@@ -118,14 +120,14 @@ class Smarty_Internal_Template extends Smarty_Internal_TemplateBase
      *
      * @var callback[]
      */
-    public $startRenderCallbacks = array();
+    public $startRenderCallbacks = [];
 
     /**
      * Callbacks called after rendering template
      *
      * @var callback[]
      */
-    public $endRenderCallbacks = array();
+    public $endRenderCallbacks = [];
 
     /**
      * Create template data object
@@ -365,7 +367,7 @@ class Smarty_Internal_Template extends Smarty_Internal_TemplateBase
                 $this->cached->hashes[ $tpl->compiled->nocache_hash ] = true;
             }
         }
-        $tpl->_cache = array();
+        $tpl->_cache = [];
         if (isset($uid)) {
             if ($smarty->debugging) {
                 if (!isset($smarty->_debug)) {
@@ -447,7 +449,7 @@ class Smarty_Internal_Template extends Smarty_Internal_TemplateBase
      */
     public function _checkPlugins($plugins)
     {
-        static $checked = array();
+        static $checked = [];
         foreach ($plugins as $plugin) {
             $name = join('::', (array)$plugin[ 'function' ]);
             if (!isset($checked[ $name ])) {
@@ -538,7 +540,7 @@ class Smarty_Internal_Template extends Smarty_Internal_TemplateBase
         } else {
             $tpl->mustCompile = !$is_valid;
             $resource = $tpl->compiled;
-            $resource->includes = isset($properties[ 'includes' ]) ? $properties[ 'includes' ] : array();
+            $resource->includes = isset($properties[ 'includes' ]) ? $properties[ 'includes' ] : [];
         }
         if ($is_valid) {
             $resource->unifunc = $properties[ 'unifunc' ];
@@ -633,8 +635,8 @@ class Smarty_Internal_Template extends Smarty_Internal_TemplateBase
      */
     public function _cleanUp()
     {
-        $this->startRenderCallbacks = array();
-        $this->endRenderCallbacks = array();
+        $this->startRenderCallbacks = [];
+        $this->endRenderCallbacks = [];
         $this->inheritance = null;
     }
 
@@ -668,7 +670,7 @@ class Smarty_Internal_Template extends Smarty_Internal_TemplateBase
     {
         // method of Smarty object?
         if (method_exists($this->smarty, $name)) {
-            return call_user_func_array(array($this->smarty, $name), $args);
+            return call_user_func_array([$this->smarty, $name], $args);
         }
         // parent
         return parent::__call($name, $args);

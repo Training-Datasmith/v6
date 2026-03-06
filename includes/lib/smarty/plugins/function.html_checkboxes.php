@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -45,17 +47,17 @@
 function smarty_function_html_checkboxes($params, Smarty_Internal_Template $template)
 {
     $template->_checkPlugins(
-        array(
-            array(
+        [
+            [
                 'function' => 'smarty_function_escape_special_chars',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
-            )
-        )
+                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php',
+            ],
+        ]
     );
     $name = 'checkbox';
     $values = null;
     $options = null;
-    $selected = array();
+    $selected = [];
     $separator = '';
     $escape = true;
     $labels = true;
@@ -83,7 +85,7 @@ function smarty_function_html_checkboxes($params, Smarty_Internal_Template $temp
             case 'checked':
             case 'selected':
                 if (is_array($_val)) {
-                    $selected = array();
+                    $selected = [];
                     foreach ($_val as $_sel) {
                         if (is_object($_sel)) {
                             if (method_exists($_sel, '__toString')) {
@@ -140,8 +142,8 @@ function smarty_function_html_checkboxes($params, Smarty_Internal_Template $temp
                     }
                     break;
                 }
-            // omit break; to fall through!
-            // no break
+                // omit break; to fall through!
+                // no break
             default:
                 if (!is_array($_val)) {
                     $extra .= ' ' . $_key . '="' . smarty_function_escape_special_chars($_val) . '"';
@@ -154,7 +156,7 @@ function smarty_function_html_checkboxes($params, Smarty_Internal_Template $temp
     if (!isset($options) && !isset($values)) {
         return '';
     } /* raise error here? */
-    $_html_result = array();
+    $_html_result = [];
     if (isset($options)) {
         foreach ($options as $_key => $_val) {
             $_html_result[] =

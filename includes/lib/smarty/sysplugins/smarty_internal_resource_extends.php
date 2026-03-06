@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Resource Extends
  *
@@ -35,7 +37,7 @@ class Smarty_Internal_Resource_Extends extends Smarty_Resource
     public function populate(Smarty_Template_Source $source, Smarty_Internal_Template $_template = null)
     {
         $uid = '';
-        $sources = array();
+        $sources = [];
         $components = explode('|', $source->name);
         $smarty = &$source->smarty;
         $exists = true;

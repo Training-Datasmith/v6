@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use SendGrid\Client;
 use SendGrid\Mail\Mail;
 use SendGrid\Response;
@@ -12,7 +14,7 @@ use SendGrid\Response;
 abstract class BaseSendGridClientInterface
 {
     /** @var string SendGrid API library version */
-    const VERSION = '8.1.2';
+    public const VERSION = '8.1.2';
 
     /** @var Client SendGrid HTTP Client library */
     public $client;
@@ -22,8 +24,8 @@ abstract class BaseSendGridClientInterface
 
     /** @var allowedRegionsHostMap regions specific hosts */
     public $allowedRegionsHostMap = [
-        "eu" => "https://api.eu.sendgrid.com",
-        "global" => "https://api.sendgrid.com",
+        'eu' => 'https://api.eu.sendgrid.com',
+        'global' => 'https://api.sendgrid.com',
     ];
 
     /**
@@ -35,7 +37,7 @@ abstract class BaseSendGridClientInterface
      *                       "version", "verify_ssl", and "impersonateSubuser",
      *                       are implemented.
      */
-    public function __construct($auth, $host, $options = array())
+    public function __construct($auth, $host, array $options = [])
     {
         $headers = [
             $auth,
@@ -43,9 +45,9 @@ abstract class BaseSendGridClientInterface
             'Accept: application/json',
         ];
 
-        $host = isset($options['host']) ? $options['host'] : $host;
+        $host = $options['host'] ?? $host;
 
-        $version = isset($options['version']) ? $options['version'] : '/v3';
+        $version = $options['version'] ?? '/v3';
 
         if (!empty($options['impersonateSubuser'])) {
             $headers[] = 'On-Behalf-Of: ' . $options['impersonateSubuser'];
@@ -53,8 +55,8 @@ abstract class BaseSendGridClientInterface
 
         $this->client = new Client($host, $headers, $version);
 
-        $this->client->setCurlOptions(isset($options['curl']) ? $options['curl'] : []);
-        $this->client->setVerifySSLCerts(isset($options['verify_ssl']) ? $options['verify_ssl'] : true);
+        $this->client->setCurlOptions($options['curl'] ?? []);
+        $this->client->setVerifySSLCerts($options['verify_ssl'] ?? true);
     }
 
     /**
@@ -80,10 +82,10 @@ abstract class BaseSendGridClientInterface
     */
     public function setDataResidency($region): void
     {
-        if (array_key_exists($region, $this->allowedRegionsHostMap)) {
+        if (property_exists($this->allowedRegionsHostMap, $region)) {
             $this->client->setHost($this->allowedRegionsHostMap[$region]);
         } else {
-            throw new InvalidArgumentException("region can only be \"eu\" or \"global\"");
+            throw new InvalidArgumentException('region can only be "eu" or "global"');
         }
     }
 

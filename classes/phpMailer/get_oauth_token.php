@@ -39,9 +39,9 @@ namespace PHPMailer\PHPMailer;
  * @see http://oauth2-client.thephpleague.com/providers/thirdparty/
  */
 //@see https://github.com/thephpleague/oauth2-google
-use League\OAuth2\Client\Provider\Google;
-//@see https://packagist.org/packages/hayageek/oauth2-yahoo
 use Hayageek\OAuth2\Client\Provider\Yahoo;
+//@see https://packagist.org/packages/hayageek/oauth2-yahoo
+use League\OAuth2\Client\Provider\Google;
 //@see https://github.com/stevenmaguire/oauth2-microsoft
 use Stevenmaguire\OAuth2\Client\Provider\Microsoft;
 
@@ -87,7 +87,7 @@ $params = [
     'clientId' => $clientId,
     'clientSecret' => $clientSecret,
     'redirectUri' => $redirectUri,
-    'accessType' => 'offline'
+    'accessType' => 'offline',
 ];
 
 $options = [];
@@ -98,8 +98,8 @@ switch ($providerName) {
         $provider = new Google($params);
         $options = [
             'scope' => [
-                'https://mail.google.com/'
-            ]
+                'https://mail.google.com/',
+            ],
         ];
         break;
     case 'Yahoo':
@@ -110,8 +110,8 @@ switch ($providerName) {
         $options = [
             'scope' => [
                 'wl.imap',
-                'wl.offline_access'
-            ]
+                'wl.offline_access',
+            ],
         ];
         break;
 }
@@ -137,7 +137,7 @@ if (!isset($_GET['code'])) {
     $token = $provider->getAccessToken(
         'authorization_code',
         [
-            'code' => $_GET['code']
+            'code' => $_GET['code'],
         ]
     );
     //Use this to interact with an API on the users behalf

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -18,16 +20,16 @@ $GLOBALS['main']->addTabControl($GLOBALS['language']->orders['title_transaction_
 $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->orders['title_transaction_logs']);
 
 if (isset($_POST['search'])) {
-    httpredir(currentPage(null, array('search' => $_POST['search'])));
+    httpredir(currentPage(null, ['search' => $_POST['search']]));
 }
 
 $per_page = 20;
 $page  = (isset($_GET['page'])) ? $_GET['page'] : 1;
-$oid_col = $GLOBALS['config']->get('config', 'oid_mode') =='i' ?  $GLOBALS['config']->get('config', 'oid_col') : 'order_id';
+$oid_col = $GLOBALS['config']->get('config', 'oid_mode') == 'i' ? $GLOBALS['config']->get('config', 'oid_col') : 'order_id';
 $table_join = '`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_transactions` AS `T` INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_summary` AS `S` ON `T`.`order_id` = `S`.`cart_order_id`';
 
 if (isset($_GET['order_id'])) {
-    $transactions = $GLOBALS['db']->select($table_join, '`T`.*, `S`.`id`, `S`.`custom_oid`', '`T`.`order_id` = "'.$_GET['order_id'].'"', array('time' => 'DESC'));
+    $transactions = $GLOBALS['db']->select($table_join, '`T`.*, `S`.`id`, `S`.`custom_oid`', '`T`.`order_id` = "'.$_GET['order_id'].'"', ['time' => 'DESC']);
     if ($transactions) {
         $oid = $transactions[0][$oid_col] ? $transactions[0][$oid_col] : $transactions[0]['order_id'];
         foreach ($transactions as $transaction) {
@@ -38,7 +40,7 @@ if (isset($_GET['order_id'])) {
         }
         $GLOBALS['smarty']->assign('ORDER_TRANSACTIONS', $smarty_data['transactions']);
     } else {
-        if ($oid = $GLOBALS['db']->select('CubeCart_order_summary', array('id','custom_oid','cart_order_id'), array('cart_order_id' => $_GET['order_id']))) {
+        if ($oid = $GLOBALS['db']->select('CubeCart_order_summary', ['id','custom_oid','cart_order_id'], ['cart_order_id' => $_GET['order_id']])) {
             $oid = $oid[0][$oid_col];
         } else {
             $oid = $_GET['order_id'];
@@ -56,7 +58,7 @@ if (isset($_GET['order_id'])) {
     } else {
         $where = false;
     }
-    if (($count_rows = $GLOBALS['db']->select('CubeCart_transactions', array('DISTINCT' => 'order_id'), $where)) !== false) {
+    if (($count_rows = $GLOBALS['db']->select('CubeCart_transactions', ['DISTINCT' => 'order_id'], $where)) !== false) {
         $count = count($count_rows);
         if ($count > $per_page) {
             $GLOBALS['smarty']->assign('PAGINATION', $GLOBALS['db']->pagination($count, $per_page, $page, 9));
@@ -64,15 +66,15 @@ if (isset($_GET['order_id'])) {
     }
 
     if (!isset($_GET['sort']) || !is_array($_GET['sort'])) {
-        $_GET['sort'] = array('time' => 'DESC');
+        $_GET['sort'] = ['time' => 'DESC'];
     }
-    $current_page = currentPage(array('sort'));
-    $thead_sort = array(
+    $current_page = currentPage(['sort']);
+    $thead_sort = [
         'cart_order_id' => $GLOBALS['db']->column_sort($oid_col, $GLOBALS['language']->orders['order_number'], 'sort', $current_page, $_GET['sort']),
         'amount'  => $GLOBALS['db']->column_sort('amount', $GLOBALS['language']->basket['total'], 'sort', $current_page, $_GET['sort']),
         'gateway'   => $GLOBALS['db']->column_sort('gateway', $GLOBALS['language']->orders['gateway_name'], 'sort', $current_page, $_GET['sort']),
-        'date'    => $GLOBALS['db']->column_sort('time', $GLOBALS['language']->common['date'], 'sort', $current_page, $_GET['sort'])
-    );
+        'date'    => $GLOBALS['db']->column_sort('time', $GLOBALS['language']->common['date'], 'sort', $current_page, $_GET['sort']),
+    ];
 
     foreach ($GLOBALS['hooks']->load('admin.order.transactions.table_head_sort') as $hook) {
         include $hook;
@@ -84,7 +86,7 @@ if (isset($_GET['order_id'])) {
         break;
     }
 
-    if (($transactions = $GLOBALS['db']->select($table_join, "DISTINCT `T`.`order_id`, `T`.`time`, `T`.`amount`, `T`.`gateway`, `T`.`trans_id`, `S`.`id`, `S`.`custom_oid`, `S`.`cart_order_id`", $where, $sort, $per_page, $page)) !== false) {
+    if (($transactions = $GLOBALS['db']->select($table_join, 'DISTINCT `T`.`order_id`, `T`.`time`, `T`.`amount`, `T`.`gateway`, `T`.`trans_id`, `S`.`id`, `S`.`custom_oid`, `S`.`cart_order_id`', $where, $sort, $per_page, $page)) !== false) {
         if (isset($_GET['search']) && !empty($_GET['search'])) {
             $GLOBALS['main']->successMessage(sprintf($GLOBALS['language']->orders['notify_search_logs'], $_GET['search']));
         }
@@ -92,7 +94,7 @@ if (isset($_GET['order_id'])) {
             if (!empty($transaction['order_id'])) {
                 $transaction['time'] = formatTime($transaction['time']);
                 $transaction['amount'] = Tax::getInstance()->priceFormat($transaction['amount']);
-                $transaction['link'] = currentPage(array('page', 'sort'), array('order_id' => $transaction['order_id']));
+                $transaction['link'] = currentPage(['page', 'sort'], ['order_id' => $transaction['order_id']]);
                 $smarty_data['transactions'][] = $transaction;
             }
         }

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -26,7 +28,7 @@ $page_content .= join(
     "\n",
     array_map(
         function ($i) {
-            return ".phpinfodisplay " . preg_replace("/,/", ",.phpinfodisplay ", $i);
+            return '.phpinfodisplay ' . preg_replace('/,/', ',.phpinfodisplay ', $i);
         },
         preg_split(
             '/\n/',

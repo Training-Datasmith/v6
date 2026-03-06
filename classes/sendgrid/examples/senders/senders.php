@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -72,7 +74,7 @@ $request_body = json_decode('{
   "state": "Colorado",
   "zip": "80202"
 }');
-$sender_id = "test_url_param";
+$sender_id = 'test_url_param';
 
 try {
     $response = $sg->client->senders()->_($sender_id)->patch($request_body);
@@ -87,7 +89,7 @@ try {
 // View a Sender Identity #
 // GET /senders/{sender_id} #
 
-$sender_id = "test_url_param";
+$sender_id = 'test_url_param';
 
 try {
     $response = $sg->client->senders()->_($sender_id)->get();
@@ -102,7 +104,7 @@ try {
 // Delete a Sender Identity #
 // DELETE /senders/{sender_id} #
 
-$sender_id = "test_url_param";
+$sender_id = 'test_url_param';
 
 try {
     $response = $sg->client->senders()->_($sender_id)->delete();
@@ -117,7 +119,7 @@ try {
 // Resend Sender Identity Verification #
 // POST /senders/{sender_id}/resend_verification #
 
-$sender_id = "test_url_param";
+$sender_id = 'test_url_param';
 
 try {
     $response = $sg->client->senders()->_($sender_id)->resend_verification()->post();

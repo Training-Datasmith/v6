@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin CompileBase
  *
@@ -20,7 +22,7 @@ abstract class Smarty_Internal_CompileBase
      *
      * @var array
      */
-    public $required_attributes = array();
+    public $required_attributes = [];
 
     /**
      * Array of names of optional attribute required by tag
@@ -28,35 +30,35 @@ abstract class Smarty_Internal_CompileBase
      *
      * @var array
      */
-    public $optional_attributes = array();
+    public $optional_attributes = [];
 
     /**
      * Shorttag attribute order defined by its names
      *
      * @var array
      */
-    public $shorttag_order = array();
+    public $shorttag_order = [];
 
     /**
      * Array of names of valid option flags
      *
      * @var array
      */
-    public $option_flags = array('nocache');
+    public $option_flags = ['nocache'];
 
     /**
      * Mapping array for boolean option value
      *
      * @var array
      */
-    public $optionMap = array(1 => true, 0 => false, 'true' => true, 'false' => false);
+    public $optionMap = [1 => true, 0 => false, 'true' => true, 'false' => false];
 
     /**
      * Mapping array with attributes as key
      *
      * @var array
      */
-    public $mapCache = array();
+    public $mapCache = [];
 
     /**
      * This function checks if the attributes passed are valid
@@ -72,7 +74,7 @@ abstract class Smarty_Internal_CompileBase
      */
     public function getAttributes($compiler, $attributes)
     {
-        $_indexed_attr = array();
+        $_indexed_attr = [];
         if (!isset($this->mapCache[ 'option' ])) {
             $this->mapCache[ 'option' ] = array_fill_keys($this->option_flags, true);
         }
@@ -125,7 +127,7 @@ abstract class Smarty_Internal_CompileBase
             }
         }
         // check for not allowed attributes
-        if ($this->optional_attributes !== array('_any')) {
+        if ($this->optional_attributes !== ['_any']) {
             if (!isset($this->mapCache[ 'all' ])) {
                 $this->mapCache[ 'all' ] =
                     array_fill_keys(
@@ -165,7 +167,7 @@ abstract class Smarty_Internal_CompileBase
      */
     public function openTag($compiler, $openTag, $data = null)
     {
-        array_push($compiler->_tag_stack, array($openTag, $data));
+        array_push($compiler->_tag_stack, [$openTag, $data]);
     }
 
     /**

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -11,7 +13,7 @@
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
 if (version_compare(PHP_VERSION, '7.4') == -1) {
-    die("PHP ".PHP_VERSION." detected. CubeCart requires PHP 7.4 or higher.");
+    die('PHP '.PHP_VERSION.' detected. CubeCart requires PHP 7.4 or higher.');
 }
 
 // Display important errors before debug class is initialised
@@ -34,13 +36,13 @@ ini_set('session.auto_start', false);  // We don't want to auto start session on
 // Windows/IIS can be a pain in CGI mode - these settings try to alleviate our suffering
 if (stristr(PHP_OS, 'WIN') && stristr($_SERVER['SERVER_SOFTWARE'], 'IIS')) {
     switch (strtolower(PHP_SAPI)) {
-    case 'cgi-fcgi':
-        ini_set('fastcgi.impersonate', true);
-        // no break
-    case 'cgi':
-        ini_set('cgi.rfc2616_headers', true); // Set RFC2616 compliant headers for Windows servers running in CGI mode
-        ini_set('cgi.force_redirect', false); // Disable force redirect
-        break;
+        case 'cgi-fcgi':
+            ini_set('fastcgi.impersonate', true);
+            // no break
+        case 'cgi':
+            ini_set('cgi.rfc2616_headers', true); // Set RFC2616 compliant headers for Windows servers running in CGI mode
+            ini_set('cgi.force_redirect', false); // Disable force redirect
+            break;
     }
 }
 
@@ -71,7 +73,7 @@ define('CC_LANGUAGE_DIR', CC_ROOT_DIR.'/language/');
 date_default_timezone_set('UTC');  // Set the default timezone for the scripts until the config gets loaded and overrides it
 
 // Automatically detect and assign the store url, and root relative path
-$server_name = (!empty($_SERVER['HTTP_HOST'])) ? strtolower($_SERVER['HTTP_HOST']) :  strtolower($_SERVER['SERVER_NAME']);
+$server_name = (!empty($_SERVER['HTTP_HOST'])) ? strtolower($_SERVER['HTTP_HOST']) : strtolower($_SERVER['SERVER_NAME']);
 $script_name = (isset($_SERVER['PHP_SELF']) && !empty($_SERVER['PHP_SELF'])) ? $_SERVER['PHP_SELF'] : $_SERVER['REQUEST_URI'];
 $script_name = preg_replace('/[^a-z0-9-_.~\/]/i', '', $script_name);
 $script_path = trim(dirname($script_name));
@@ -109,7 +111,7 @@ if (file_exists(CC_ROOT_DIR.'/ssl-custom.inc.php')) {
     }
 }
 
-if(!CC_SSL) {
+if (!CC_SSL) {
     header('Location: '.$url, true, 301); // $url will always have https protocol
     exit;
 }
@@ -142,10 +144,10 @@ $GLOBALS['storeURL'] = CC_STORE_URL;
 
 /************* DEFAULT CUBECART CONFIG *************/
 
-$config_default = array(
+$config_default = [
     'rootRel'  => CC_ROOT_REL,
-    'storeURL'  => CC_STORE_URL
-);
+    'storeURL'  => CC_STORE_URL,
+];
 
 // Include a custom ini file, if it exists
 if (file_exists(CC_ROOT_DIR.'/ini-custom.inc.php')) {

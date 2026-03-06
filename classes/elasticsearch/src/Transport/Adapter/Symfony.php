@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -10,7 +11,7 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Elastic\Elasticsearch\Transport\Adapter;
 
@@ -39,7 +40,7 @@ class Symfony implements AdapterInterface
                     $symfonyConfig['cafile'] = $value;
             }
         }
-        $class = get_class($client);
+        $class = $client::class;
         $httpClient = HttpClient::create(array_merge($clientOptions, $symfonyConfig));
         return new $class($httpClient);
     }

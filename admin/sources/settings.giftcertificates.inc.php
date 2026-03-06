@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -14,7 +16,6 @@ if (!defined('CC_INI_SET')) {
     die('Access Denied');
 }
 Admin::getInstance()->permissions('settings', CC_PERM_READ, true);
-
 
 $filemanager = new FileManager(FileManager::FM_FILETYPE_IMG);
 
@@ -40,7 +41,7 @@ if (isset($_POST['gc']) && is_array($_POST['gc']) && Admin::getInstance()->permi
         }
     }
 
-    if(is_numeric($_POST['gc']['product_code'])) {
+    if (is_numeric($_POST['gc']['product_code'])) {
         $_POST['gc']['product_code'] = 'GC'.$_POST['gc']['product_code'];
         $GLOBALS['main']->errorMessage(sprintf($lang['catalogue']['gc_not_numeric'], $_POST['gc']['product_code']));
     }
@@ -62,22 +63,22 @@ $gc = $GLOBALS['config']->get('gift_certs');
 if (isset($gc['image'])) {
     $master_image = $GLOBALS['catalogue']->imagePath((int)$gc['image'], 'small', 'url');
     $gc['master_image'] = !empty($master_image) ? $master_image : 'images/general/px.gif';
-    $GLOBALS['smarty']->assign('JSON_IMAGES', json_encode(array($gc['image'])));
+    $GLOBALS['smarty']->assign('JSON_IMAGES', json_encode([$gc['image']]));
 }
 
 $GLOBALS['smarty']->assign('GC', $gc);
-$select_options = array(
-    'delivery' => array(1 => $lang['settings']['gc_type_digital'], 2 => $lang['settings']['gc_type_physical'], 3 => $lang['settings']['gc_type_both']),
-    'status' => array(0 => $lang['common']['disabled'], 1 => $lang['settings']['enabled_for_all'], 2 => $lang['settings']['enabled_for_logged_in']),
-);
+$select_options = [
+    'delivery' => [1 => $lang['settings']['gc_type_digital'], 2 => $lang['settings']['gc_type_physical'], 3 => $lang['settings']['gc_type_both']],
+    'status' => [0 => $lang['common']['disabled'], 1 => $lang['settings']['enabled_for_all'], 2 => $lang['settings']['enabled_for_logged_in']],
+];
 if (isset($select_options)) {
     foreach ($select_options as $field => $options) {
         if (!is_array($options) || empty($options)) {
-            $options = array($lang['common']['no'], $lang['common']['yes']);
+            $options = [$lang['common']['no'], $lang['common']['yes']];
         }
         foreach ($options as $value => $title) {
             $selected = (isset($gc[$field]) && $gc[$field] == $value) ? ' selected="selected"' : '';
-            $smarty_data['options'][] = array('value' => $value, 'title' => $title, 'selected' => $selected);
+            $smarty_data['options'][] = ['value' => $value, 'title' => $title, 'selected' => $selected];
         }
         $GLOBALS['smarty']->assign('OPT_'.strtoupper($field), $smarty_data['options']);
         unset($smarty_data['options']);

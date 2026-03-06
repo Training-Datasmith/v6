@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty write file plugin
  *
@@ -48,7 +50,7 @@ class Smarty_Internal_Runtime_WriteFile
             }
         }
         // write to tmp file, then move to overt file lock race condition
-        $_tmp_file = $_dirpath . DIRECTORY_SEPARATOR . str_replace(array('.', ','), '_', uniqid('wrt', true));
+        $_tmp_file = $_dirpath . DIRECTORY_SEPARATOR . str_replace(['.', ','], '_', uniqid('wrt', true));
         if (!file_put_contents($_tmp_file, $_contents)) {
             error_reporting($_error_reporting);
             throw new SmartyException("unable to write file {$_tmp_file}");

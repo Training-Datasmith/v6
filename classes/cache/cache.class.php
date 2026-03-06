@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -55,7 +57,7 @@ class Cache_Controler
      *
      * @var array
      */
-    protected $_ids   = array();
+    protected $_ids   = [];
     /**
      * Cache mode/type
      *
@@ -75,7 +77,7 @@ class Cache_Controler
      */
     protected $_suffix  = '';
     protected $_empties_id = '___EMPTY';
-    protected $_empties = array();
+    protected $_empties = [];
     protected $_empties_added = false;
     /**
      * Class instance
@@ -83,8 +85,8 @@ class Cache_Controler
      * @var instance
      */
     protected static $_instance;
-    
-    protected $_dupes = array();
+
+    protected $_dupes = [];
 
     ##############################################
 
@@ -92,12 +94,11 @@ class Cache_Controler
     {
         $this->_setPrefix();
         if (!$this->setPath()) {
-            return;
         }
     }
 
     //=====[ Public ]=======================================
-    
+
     protected function _setPrefix()
     {
         $this->_prefix = '';
@@ -108,7 +109,7 @@ class Cache_Controler
      *
      * @param bool $enable
      */
-    public function enable($enable = true)
+    public function enable($enable = true): void
     {
         $this->status = $enable;
         $this->status();
@@ -142,9 +143,9 @@ class Cache_Controler
      *
      * @return string Cache expiry
      */
-    final public function getCacheExpire()
+    final public function getCacheExpire(): float|int
     {
-        return time()+$this->_expire;
+        return time() + $this->_expire;
     }
 
     /**
@@ -152,7 +153,7 @@ class Cache_Controler
      *
      * @param int $expire One day
      */
-    public function setExpire($expire = 86400)
+    public function setExpire($expire = 86400): void
     {
         if (is_numeric($expire)) {
             $this->_expire = $expire;
@@ -164,7 +165,7 @@ class Cache_Controler
      *
      * @param string $path
      */
-    public function setPath($path = '')
+    public function setPath($path = ''): bool
     {
         if (empty($path)) {
             $path = CC_CACHE_DIR;
@@ -202,28 +203,27 @@ class Cache_Controler
         }
         return $this->status;
     }
-    
+
     /**
      * Exception to status
      *
      * @param string $id
      */
-    public function statusException($id) {
+    public function statusException($id): bool
+    {
         return (CC_IN_ADMIN === true && preg_match('/^request\./', $id)) ? true : false;
     }
 
     /**
      * Tidy the cache folder
-     *
-     * @return bool
      */
-    public function tidy()
+    public function tidy(): bool
     {
         //Loop through the cache folder
         if (($files = glob($this->_cache_path.'*', GLOB_NOSORT)) !== false) {
             foreach ($files as $file) {
                 //Delete any file that is not a cache file
-                if (substr($file, -6) !== '.cache' && basename($file) !== 'index.php') {
+                if (!str_ends_with($file, '.cache') && basename($file) !== 'index.php') {
                     @unlink($file);
                 }
             }
@@ -253,7 +253,7 @@ class Cache_Controler
      * @param string $id
      * @return string
      */
-    protected function _clearFileCache($prefix ='*', $files = array())
+    protected function _clearFileCache(string $prefix = '*', $files = [])
     {
         $cache_files = glob($this->_cache_path.$this->_prefix.$prefix.$this->_suffix, GLOB_NOSORT);
         if (is_array($cache_files)) {
@@ -278,21 +278,18 @@ class Cache_Controler
         if (is_array($code_snippets)) {
             $files = array_merge($files, $code_snippets);
         }
-        
+
         if (is_array($files)) {
             foreach ($files as $file) {
                 @unlink($file);
             }
-        }   
+        }
     }
 
     /**
      * Make the cache name key
-     *
-     * @param string $id
-     * @return string
      */
-    protected function _makeName($id)
+    protected function _makeName(string $id): string
     {
         return $this->_prefix.$id.$this->_suffix;
     }

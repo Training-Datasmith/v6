@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -20,7 +22,6 @@
  */
 class XML extends XMLWriter
 {
-
     ##############################################
 
     public function __construct($xml_header = true, $indent_string = ' ')
@@ -34,14 +35,12 @@ class XML extends XMLWriter
     }
 
     //=====[ Public ]=======================================
-
     /**
      * Add an array to the element
      *
      * @param array $array
-     * @return bool
      */
-    public function addArray($array)
+    public function addArray($array): bool
     {
         if (is_array($array)) {
             foreach ($array as $index => $data) {
@@ -66,7 +65,7 @@ class XML extends XMLWriter
      * End element
      * @param bool $full_end
      */
-    public function endElement($full_end = true)
+    public function endElement($full_end = true): void
     {
         if ($full_end) {
             parent::fullEndElement();
@@ -79,9 +78,8 @@ class XML extends XMLWriter
      * Get current document
      *
      * @param bool $flush
-     * @return string
      */
-    public function getDocument($flush = true)
+    public function getDocument($flush = true): string
     {
         $this->endDocument();
         return $this->outputMemory($flush);
@@ -89,9 +87,8 @@ class XML extends XMLWriter
 
     /**
      * Display XML
-     * @return XML
      */
-    public function output()
+    public function output(): void
     {
         Debug::getInstance()->supress();
         header('Content-Type: text/xml');
@@ -106,7 +103,7 @@ class XML extends XMLWriter
      * @param string $attributes
      * @param mixed $cdata
      */
-    public function setElement($name, $value = null, $attributes = false, $cdata = true)
+    public function setElement($name, $value = null, $attributes = false, $cdata = true): void
     {
         $this->startElement($name, $attributes);
         if ($cdata) {
@@ -123,7 +120,7 @@ class XML extends XMLWriter
      * @param string $name
      * @param string $attributes
      */
-    public function startElement($name, $attributes = false)
+    public function startElement($name, $attributes = false): void
     {
         parent::startElement($name);
         if (is_array($attributes)) {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -18,5 +19,4 @@ use Throwable;
 
 interface ElasticsearchException extends Throwable
 {
-
 }

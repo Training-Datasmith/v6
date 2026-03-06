@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -22,52 +24,52 @@ class Catalogue
 {
     private $_category_count  = 0;
     private $_category_products  = 0;
-    private $_category_status_prod_id = array();
+    private array $_category_status_prod_id = [];
     private $_categoryData;
-    private $_productHash = array();
-    private $_pathElements;
-    private $_category_translations = array();
-    private $_category_access_cache = array();
-    private $_option_required = false;
-    private $_options_line_price = 0;
-    private $_sort_by_relevance = false;
-    private $_where_live_from = '';
-    private $_product_data = array();
+    private array $_productHash = [];
+    private ?array $_pathElements = null;
+    private array $_category_translations = [];
+    private array $_category_access_cache = [];
+    private bool $_option_required = false;
+    private int $_options_line_price = 0;
+    private bool $_sort_by_relevance = false;
+    private string $_where_live_from = '';
+    private array $_product_data = [];
 
-    public $image_tags = array();
+    public $image_tags = [];
     public $sale_on = false;
 
-    const OPTION_SELECT     = 0;
-    const OPTION_TEXTBOX    = 1;
-    const OPTION_TEXTAREA   = 2;
-    const OPTION_PASSWORD   = 3;
-    const OPTION_RADIO      = 4;
-    const OPTION_CHECKBOX   = 5;
-    const OPTION_DATEPICKER = 6;
-    const OPTION_HIDDEN     = 7;
-    const OPTION_FILE       = 8;
+    public const OPTION_SELECT     = 0;
+    public const OPTION_TEXTBOX    = 1;
+    public const OPTION_TEXTAREA   = 2;
+    public const OPTION_PASSWORD   = 3;
+    public const OPTION_RADIO      = 4;
+    public const OPTION_CHECKBOX   = 5;
+    public const OPTION_DATEPICKER = 6;
+    public const OPTION_HIDDEN     = 7;
+    public const OPTION_FILE       = 8;
 
-    private $_options_selectable = array( // fixed values
+    private array $_options_selectable = [ // fixed values
         self::OPTION_SELECT,
         self::OPTION_RADIO,
         self::OPTION_CHECKBOX,
-        self::OPTION_HIDDEN
-    );
-    
-    private $_options_textual = array(
+        self::OPTION_HIDDEN,
+    ];
+
+    private array $_options_textual = [
         self::OPTION_TEXTBOX,
         self::OPTION_TEXTAREA,
         self::OPTION_PASSWORD,
         self::OPTION_DATEPICKER,
-        self::OPTION_FILE
-    );
+        self::OPTION_FILE,
+    ];
 
-    private $_options_default = array(
+    private array $_options_default = [
         self::OPTION_SELECT,
         self::OPTION_RADIO,
         self::OPTION_TEXTBOX,
-        self::OPTION_TEXTAREA
-    );
+        self::OPTION_TEXTAREA,
+    ];
 
     /**
      * Class instance
@@ -76,23 +78,22 @@ class Catalogue
      */
     protected static $_instance;
 
-    final protected function __construct() {
+    final protected function __construct()
+    {
         $pre_release = $GLOBALS['db']->select('CubeCart_inventory', 'product_id', '`live_from` > UNIX_TIMESTAMP()', false, 1, false, false);
-        if($pre_release) {
+        if ($pre_release) {
             $this->_where_live_from = ' AND `live_from` < UNIX_TIMESTAMP() ';
         }
         $this->saleOn();
-        if(!CC_IN_ADMIN && !$this->sale_on) {
-            $GLOBALS['config']->setSessionConfig('config', array('catalogue_sale_mode' => '0'));
+        if (!CC_IN_ADMIN && !$this->sale_on) {
+            $GLOBALS['config']->setSessionConfig('config', ['catalogue_sale_mode' => '0']);
         }
     }
 
     /**
      * Setup the instance (singleton)
-     *
-     * @return Catalogue
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -102,19 +103,17 @@ class Catalogue
     }
 
     //=====[ Public ]=======================================
-
     /**
      * Build HTML select of categories
      *
      * @param int $parent_id
-     * @param string $breakout
      * @param int $spaces
      * @return array
      */
-    public function buildCategoriesDropDown($parent_id = 0, $breakout = '|', $spaces = 0, &$noLoops = array())
+    public function buildCategoriesDropDown($parent_id = 0, string $breakout = '|', $spaces = 0, &$noLoops = []): false|array
     {
-        $out = array();
-        if (($categories = $GLOBALS['db']->select('CubeCart_category', array('cat_parent_id', 'cat_id', 'cat_name'), array('cat_parent_id' => $parent_id), 'priority, cat_name ASC')) !== false) {
+        $out = [];
+        if (($categories = $GLOBALS['db']->select('CubeCart_category', ['cat_parent_id', 'cat_id', 'cat_name'], ['cat_parent_id' => $parent_id], 'priority, cat_name ASC')) !== false) {
             foreach ($categories as $category) {
                 // Prevent never-ending loops!
                 if (in_array($category['cat_id'], $noLoops)) {
@@ -122,11 +121,11 @@ class Catalogue
                     return false;
                 }
                 $noLoops[] = $category['cat_id'];
-                $out[] = array(
+                $out[] = [
                     'cat_id' => $category['cat_id'],
                     'name'  => ($spaces > 0) ? str_repeat('&nbsp;', $spaces).$breakout.' '.$category['cat_name'] : $category['cat_name'],
-                );
-                if (($children = $GLOBALS['db']->count('CubeCart_category', 'cat_id', array('cat_parent_id' => $category['cat_id']))) !== false) {
+                ];
+                if (($children = $GLOBALS['db']->count('CubeCart_category', 'cat_id', ['cat_parent_id' => $category['cat_id']])) !== false) {
                     $out = array_merge($out, $this->buildCategoriesDropDown($category['cat_id'], $breakout, $spaces + 2, $noLoops));
                 }
             }
@@ -139,18 +138,17 @@ class Catalogue
      * Paginate categories
      *
      * @param int $page
-     * @return nothing
      */
-    public function categoryPagination($page)
+    public function categoryPagination($page): void
     {
         if ($this->_category_count) {
             //Pagination
             $catalogue_products_per_page = $GLOBALS['gui']->itemsPerPage();
-            if(ctype_digit((string)$page)) {
+            if (ctype_digit((string)$page)) {
                 if (($page * $catalogue_products_per_page) > $this->_category_count) {
                     $new_page = (int)ceil($this->_category_count / $catalogue_products_per_page);
                     if ($new_page < $page) {
-                        httpredir(currentPage(null, array('page'=>$new_page)));
+                        httpredir(currentPage(null, ['page' => $new_page]));
                     }
                 }
             }
@@ -196,19 +194,20 @@ class Catalogue
      * Create unique option combination identifier
      *
      * @param array $optionsArray
-     * @return string
      */
-    public function defineOptionsIdentifier($optionsArray)
+    public function defineOptionsIdentifier($optionsArray): string
     {
         if (is_array($optionsArray)) {
-            $assign_ids = array();
+            $assign_ids = [];
             foreach ($optionsArray as $value) {
                 if (is_numeric($value)) {
                     $assign_ids[] = (int)$value;
                 }
                 if (is_array($value)) {
                     foreach ($value as $val) {
-                        if(!is_numeric($val)) continue;
+                        if (!is_numeric($val)) {
+                            continue;
+                        }
                         $assign_ids[] = (int)$val;
                     }
                 }
@@ -235,42 +234,38 @@ class Catalogue
     /**
      * Work our short description based on config length
      *
-     * @param array $product
      * @return string
      */
-    public function descriptionShort($product)
+    public function descriptionShort(array $product)
     {
         ## Short Description
         $product_precis = $GLOBALS['config']->get('config', 'product_precis');
         $product_precis = (is_numeric($product_precis) && $product_precis > 0) ? $product_precis : 0;
-        
+
         if (empty($product['description_short'])) {
-            $short_description = strip_tags($product['description']);
+            $short_description = strip_tags((string) $product['description']);
             $substr = true;
         } else {
             // Allow HTML if length without HTML is under the limit
-            $short_description = strip_tags($product['description_short']);
-            if ($product_precis>0 && strlen($short_description)<=$product_precis) {
+            $short_description = strip_tags((string) $product['description_short']);
+            if ($product_precis > 0 && strlen($short_description) <= $product_precis) {
                 $short_description = $product['description_short'];
                 $substr = false;
             } else {
                 $substr = true;
             }
         }
-        
-        if ($substr && $product_precis>0 && strlen($short_description)>$product_precis) {
-            return htmlentities(substr(html_entity_decode($short_description, ENT_QUOTES, 'UTF-8'), 0, $product_precis), ENT_QUOTES, 'UTF-8').'&hellip;';
-        } else {
-            return $short_description;
+
+        if ($substr && $product_precis > 0 && strlen((string) $short_description) > $product_precis) {
+            return htmlentities(substr(html_entity_decode((string) $short_description, ENT_QUOTES, 'UTF-8'), 0, $product_precis), ENT_QUOTES, 'UTF-8').'&hellip;';
         }
+        return $short_description;
     }
 
     /**
      * Display category list page
-     *
-     * @return bool
      */
-    public function displayCategory()
+    public function displayCategory(): bool
     {
 
         // Allow hooks to see/change what will be displayed
@@ -282,22 +277,22 @@ class Catalogue
         }
 
         if (isset($catData) && is_array($catData)) {
-            if(isset($catData['cat_parse']) && $catData['cat_parse']=='1') {
+            if (isset($catData['cat_parse']) && $catData['cat_parse'] == '1') {
                 $catData['cat_desc'] = $GLOBALS['smarty']->fetch('string:'.$catData['cat_desc']);
             }
             $vars['category'] = $catData;
 
             if (!empty($catData['cat_image'])) {
                 $vars['category']['image'] = $this->imagePath($catData['cat_image'], 'category', 'url');
-                $vars['category']['image_tags'] = $GLOBALS['catalogue']->image_tags[$vars['category']['image']] ?? array();
+                $vars['category']['image_tags'] = $GLOBALS['catalogue']->image_tags[$vars['category']['image']] ?? [];
             }
             $GLOBALS['smarty']->assign('category', $vars['category']);
-            $meta_data = array(
-                'name'   => (isset($catData['cat_name'])) ? $catData['cat_name'] : '',
+            $meta_data = [
+                'name'   => $catData['cat_name'] ?? '',
                 'path'   => null,
                 'description' => $catData['seo_meta_description'] ?? '',
-                'title'   => $catData['seo_meta_title'] ?? ''
-            );
+                'title'   => $catData['seo_meta_title'] ?? '',
+            ];
             $GLOBALS['seo']->set_meta_data($meta_data);
         } elseif ($_GET['_a'] !== 'saleitems') {
             $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_category_error']);
@@ -319,10 +314,10 @@ class Catalogue
         }
 
         if (!empty($catData)) {
-            $GLOBALS['smarty']->assign('SUBCATS', $this->displaySubCategory(isset($_GET['cat_id']) ? $_GET['cat_id'] : ''));
+            $GLOBALS['smarty']->assign('SUBCATS', $this->displaySubCategory($_GET['cat_id'] ?? ''));
             // Generate Breadcrumbs
-            $string = $GLOBALS['seo']->getDirectory((isset($catData['cat_id'])) ? $catData['cat_id'] : '', true, '|');
-            $cats = explode('|', $string);
+            $string = $GLOBALS['seo']->getDirectory($catData['cat_id'] ?? '', true, '|');
+            $cats = explode('|', (string) $string);
             if (is_array($cats)) {
                 foreach ($cats as $cat) {
                     if (preg_match('#^<a href="(.*)">(.*)</a>$#', $cat, $match)) {
@@ -334,9 +329,9 @@ class Catalogue
 
         // Sorting
         $GLOBALS['smarty']->assign('SORTING', $this->displaySort());
-                
+
         $GLOBALS['smarty']->assign('PAGE_SPLITS', $GLOBALS['gui']->perPageSplits());
-        
+
         foreach ($GLOBALS['hooks']->load('class.cubecart.display_category') as $hook) {
             include $hook;
         }
@@ -351,19 +346,18 @@ class Catalogue
      *
      * @param int $product
      * @param bool $popularity
-     * @return bool
      */
-    public function displayProduct($product = false, $popularity = false)
+    public function displayProduct($product = false, $popularity = false): bool
     {
         if (isset($product) && is_numeric($product)) {
             if (($product = $this->getProductData($product)) !== false) {
-                $product['condition'] = isset($GLOBALS['language']->common[$product['condition']]) ? $GLOBALS['language']->common[$product['condition']] : '-';
-                $meta_data = array(
+                $product['condition'] = $GLOBALS['language']->common[$product['condition']] ?? '-';
+                $meta_data = [
                     'name'   => $product['name'],
                     'path'   => null,
                     'description' => $product['seo_meta_description'] ?? '',
-                    'title'   => $product['seo_meta_title'] ?? ''
-                );
+                    'title'   => $product['seo_meta_title'] ?? '',
+                ];
                 $GLOBALS['seo']->set_meta_data($meta_data);
 
                 // Update popularity
@@ -372,13 +366,13 @@ class Catalogue
                 }
 
                 if (isset($_GET['error']) && !empty($_GET['error'])) {
-                    switch (strtolower($_GET['error'])) {
-                    case 'option':
-                        $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_option_required']);
-                        break;
-                    default:
-                        // No error defined
-                        break;
+                    switch (strtolower((string) $_GET['error'])) {
+                        case 'option':
+                            $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_option_required']);
+                            break;
+                        default:
+                            // No error defined
+                            break;
                     }
                 }
                 $this->productAssign($product);
@@ -390,7 +384,7 @@ class Catalogue
                 }
 
                 // Display gallery
-                $GLOBALS['smarty']->assign('GALLERY', ($this->_productGallery($product['product_id'])) ?: array());
+                $GLOBALS['smarty']->assign('GALLERY', ($this->_productGallery($product['product_id'])) ?: []);
                 $product_options = $this->displayProductOptions($product['product_id']);
                 $GLOBALS['smarty']->assign('OPTIONS', $product_options);
 
@@ -401,7 +395,7 @@ class Catalogue
                     // Get Stock Level
                     $stock_level = ($product_options) ? $this->getProductStock($product['product_id'], null, true) : $product['stock_level'];
 
-                    $product['stock_level'] = ($stock_level>0) ? $stock_level : 0;
+                    $product['stock_level'] = ($stock_level > 0) ? $stock_level : 0;
                     if ((int)$stock_level <= 0) {
                         // Out of Stock
                         if (!$GLOBALS['config']->get('config', 'basket_out_of_stock_purchase')) {
@@ -428,28 +422,28 @@ class Catalogue
                 // Display Reviews
                 $page  = (isset($_GET['page']) && !empty($_GET['page'])) ? $_GET['page'] : 1;
                 $per_page = 5;
-                if (($reviews = $GLOBALS['db']->select('CubeCart_reviews', false, array('approved' => 1, 'product_id' => $product['product_id']), 'time DESC', $per_page, $page)) !== false) {
-                    if (($paginate = $GLOBALS['db']->select('CubeCart_reviews', 'SUM(`rating`) AS Score, COUNT(`id`) as Count', array('approved' => 1, 'product_id' => $product['product_id']))) !== false) {
+                if (($reviews = $GLOBALS['db']->select('CubeCart_reviews', false, ['approved' => 1, 'product_id' => $product['product_id']], 'time DESC', $per_page, $page)) !== false) {
+                    if (($paginate = $GLOBALS['db']->select('CubeCart_reviews', 'SUM(`rating`) AS Score, COUNT(`id`) as Count', ['approved' => 1, 'product_id' => $product['product_id']])) !== false) {
                         $review_count = (int)$paginate[0]['Count'];
                         $review_score = $paginate[0]['Score'];
                         $GLOBALS['smarty']->assign('PAGINATION', $GLOBALS['db']->pagination($review_count, $per_page, $page));
                     }
                     $skin_data = GUI::getInstance()->getSkinData();
                     foreach ($reviews as $review) {
-                        if ($review['anon']=='1') {
+                        if ($review['anon'] == '1') {
                             $review['name'] = $GLOBALS['language']->catalogue['review_anon'];
                         }
                         $review['date']  = formatTime($review['time']);
                         $review['date_schema'] = formatTime($review['time'], 'o-m-d', true);
-                        if($GLOBALS['config']->get('config', 'enable_reviews')==='1') {
-                            $review['gravatar'] = md5(strtolower(trim($review['email'])));
-                            if($skin_data['info']['gravatar_ajax']) {
+                        if ($GLOBALS['config']->get('config', 'enable_reviews') === '1') {
+                            $review['gravatar'] = md5(strtolower(trim((string) $review['email'])));
+                            if ($skin_data['info']['gravatar_ajax']) {
                                 $review['gravatar_exists'] = true;
                             } else {
                                 $gravatar_url = 'gravatar.com';
                                 $gravatar_path = '/avatar/'.$review['gravatar'].'?d=404&r=g';
                                 $review['gravatar_src'] = 'https://'.$gravatar_url.$gravatar_path;
-                                
+
                                 $request = new Request($gravatar_url, $gravatar_path, 443, true, false, 3, true);
                                 $request->skiplog(true);
                                 $request->setMethod('get');
@@ -468,14 +462,14 @@ class Catalogue
                         $vars[] = $review;
                     }
                     $GLOBALS['smarty']->assign('REVIEWS', $vars);
-                    $GLOBALS['smarty']->assign('REVIEW_COUNT', (int)$review_count);
-                    $GLOBALS['smarty']->assign('REVIEW_AVERAGE', round($review_score/$review_count, 1));
+                    $GLOBALS['smarty']->assign('REVIEW_COUNT', $review_count);
+                    $GLOBALS['smarty']->assign('REVIEW_AVERAGE', round($review_score / $review_count, 1));
                 }
                 for ($i = 1; $i <= 5; ++$i) {
-                    $star = array(
+                    $star = [
                         'value'  => $i,
                         'checked' => (isset($_POST['rating']['rating']) && $_POST['rating']['rating'] == $i) ? 'checked="checked"' : '',
-                    );
+                    ];
                     $vars['rating_stars'][] = $star;
                     $GLOBALS['smarty']->assign('RATING_STARS', $vars['rating_stars']);
                 }
@@ -484,18 +478,18 @@ class Catalogue
                 $product['options'] = $GLOBALS['catalogue']->getProductOptions($product['product_id']);
 
                 // Get stock level variations for options
-                if ($product_options && $stock_variations = $GLOBALS['db']->select('CubeCart_option_matrix', 'MAX(stock_level) AS max_stock, MIN(stock_level) AS min_stock', array('product_id' => $product['product_id'], 'use_stock' => 1, 'status' => 1), false, 1, false, false)) {
+                if ($product_options && $stock_variations = $GLOBALS['db']->select('CubeCart_option_matrix', 'MAX(stock_level) AS max_stock, MIN(stock_level) AS min_stock', ['product_id' => $product['product_id'], 'use_stock' => 1, 'status' => 1], false, 1, false, false)) {
                     if (is_numeric($stock_variations[0]['min_stock']) && is_numeric($stock_variations[0]['max_stock'])) {
                         $product['stock_level'] =  ($stock_variations[0]['min_stock'] == $stock_variations[0]['max_stock']) ? $stock_variations[0]['max_stock'] : $stock_variations[0]['min_stock'].' - '.$stock_variations[0]['max_stock'];
                     }
                 }
-                $product['stock_level'] = ($GLOBALS['config']->get('config', 'stock_level')=='1') ? $product['stock_level'] : false;
+                $product['stock_level'] = ($GLOBALS['config']->get('config', 'stock_level') == '1') ? $product['stock_level'] : false;
                 $product['unsuppressed_stock_level'] = $product['stock_level'];
                 $GLOBALS['smarty']->assign('PRODUCT', $product);
             }
-            if (($category = $GLOBALS['db']->select('CubeCart_category_index', false, array('product_id' => (int)$product['product_id'], 'primary' => 1), array('priority' => 'DESC'), 1)) !== false) {
+            if (($category = $GLOBALS['db']->select('CubeCart_category_index', false, ['product_id' => (int)$product['product_id'], 'primary' => 1], ['priority' => 'DESC'], 1)) !== false) {
                 $string = $GLOBALS['seo']->getDirectory($category[0]['cat_id'], true, '|');
-                $cats = explode('|', $string);
+                $cats = explode('|', (string) $string);
                 if (is_array($cats)) {
                     foreach ($cats as $cat) {
                         if (preg_match('#^<a href="(.*)">(.*)</a>$#', $cat, $match)) {
@@ -503,7 +497,7 @@ class Catalogue
                         }
                     }
                 }
-                $GLOBALS['gui']->addBreadcrumb($product['name'], 'index.php?_a=product&product_id='.(string)$product['product_id']);
+                $GLOBALS['gui']->addBreadcrumb($product['name'], 'index.php?_a=product&product_id='.$product['product_id']);
             }
 
             // Output to main GUI
@@ -530,7 +524,7 @@ class Catalogue
      * @param array $selected_options_array
      * @return array/false
      */
-    public function displayProductOptions($product_id = null, $selected_options_array = null)
+    public function displayProductOptions($product_id = null, $selected_options_array = null): array|false
     {
         if (isset($product_id) && is_numeric($product_id)) {
             if (is_array($selected_options_array)) {
@@ -547,20 +541,20 @@ class Catalogue
 
             $optionArray = $this->getProductOptions($product_id);
             $this->_options_line_price = 0;
-            $option_list = array(); // FIX: initialise before use
-            
+            $option_list = []; // FIX: initialise before use
+
             if (is_array($optionArray)) {
-                if(!isset($this->_product_data[$product_id])) {
+                if (!isset($this->_product_data[$product_id])) {
                     $this->_product_data[$product_id] = $this->getProductData($product_id);
                 }
                 foreach ($optionArray as $type => $group) {
                     if (in_array($type, $this->_options_selectable)) {
-                        foreach ($group as $key => $option) {
+                        foreach ($group as $option) {
                             $group_priority = $option['priority'];
                             unset($option['priority']);
                             foreach ($option as $value) {
                                 if (!isset($option_list[$value['option_id']])) {
-                                    $option_list[$value['option_id']] = array(
+                                    $option_list[$value['option_id']] = [
                                         'type'               => $value['option_type'],
                                         'option_id'          => $value['option_id'],
                                         'option_name'        => $value['option_name'],
@@ -568,36 +562,36 @@ class Catalogue
                                         'option_description' => $value['option_description'],
                                         'option_default'     => (bool)($value['option_default'] ?? false),
                                         'required'           => (bool)($value['option_required'] ?? false),
-                                        'selected'           => isset($selected[$value['assign_id']]) ? true : false
-                                    );
+                                        'selected'           => isset($selected[$value['assign_id']]) ? true : false,
+                                    ];
                                 }
 
                                 $decimal_price_sign = $value['option_negative'] ? '-' : '';
-                                $symbol = (isset($value['option_price']) && $value['option_price']!=0 && $value['option_negative'] == 0) ? '+' : '-';
+                                $symbol = (isset($value['option_price']) && $value['option_price'] != 0 && $value['option_negative'] == 0) ? '+' : '-';
 
-                                $original_price = isset($value['option_price_original']) ? $value['option_price_original'] : $value['option_price'];
-                                $option_list[$value['option_id']]['values'][] = array(
+                                $original_price = $value['option_price_original'] ?? $value['option_price'];
+                                $option_list[$value['option_id']]['values'][] = [
                                     'assign_id'      => $value['assign_id'],
-                                    'decimal_price'  => ($value['option_price'] > 0 ? (string)$decimal_price_sign.$value['option_price'] : '0.00'),
-                                    'decimal_price_original' => ($original_price > 0 ? (string)$decimal_price_sign.$original_price : '0.00'),
-                                    'price'          => (isset($value['option_price']) && $value['option_price']!=0) ? Tax::getInstance()->priceFormat($value['option_price'], true) : false,
-                                    'symbol'         => ($value['absolute_price']=='1' && $symbol=='+') ? '' : $symbol,
+                                    'decimal_price'  => ($value['option_price'] > 0 ? $decimal_price_sign.$value['option_price'] : '0.00'),
+                                    'decimal_price_original' => ($original_price > 0 ? $decimal_price_sign.$original_price : '0.00'),
+                                    'price'          => (isset($value['option_price']) && $value['option_price'] != 0) ? Tax::getInstance()->priceFormat($value['option_price'], true) : false,
+                                    'symbol'         => ($value['absolute_price'] == '1' && $symbol == '+') ? '' : $symbol,
                                     'value_id'       => $value['value_id'],
                                     'value_name'     => $value['value_name'],
                                     'option_weight'  => $value['option_weight'],
                                     'option_default' => (bool)($value['option_default'] ?? false),
                                     'selected'       => isset($selected[$value['assign_id']]) ? true : false,
                                     'absolute_price' => $value['absolute_price'],
-                                    'image'          => (ctype_digit($value['image_id']) && $value['image_id']>0) ? $GLOBALS['catalogue']->imagePath($value['image_id']) : ''
-                                );
+                                    'image'          => (ctype_digit((string) $value['image_id']) && $value['image_id'] > 0) ? $GLOBALS['catalogue']->imagePath($value['image_id']) : '',
+                                ];
 
                                 if (isset($selected[$value['assign_id']]) && $selected[$value['assign_id']] > 0) {
-                                    if ($value['absolute_price']=='1') {
+                                    if ($value['absolute_price'] == '1') {
                                         $this->_options_line_price += $value['option_price'] - $this->_product_data[$product_id]['price_to_pay'];
                                     } else {
-                                        if ($value['option_price']>0 && $value['option_negative'] == 0) {
+                                        if ($value['option_price'] > 0 && $value['option_negative'] == 0) {
                                             $this->_options_line_price += $value['option_price'];
-                                        } elseif ($value['option_price']>0) {
+                                        } elseif ($value['option_price'] > 0) {
                                             $this->_options_line_price -= $value['option_price'];
                                         }
                                     }
@@ -607,21 +601,21 @@ class Catalogue
                                 $option_list[$value['option_id']]['priority'] = $group_priority;
                             }
                         }
-                    } else if (in_array($type, $this->_options_textual)) {
-                        
-                        foreach ($group as $key => $option) {
-                            $price = (isset($option[0]['option_price']) && $option[0]['option_price']>0) ? Tax::getInstance()->priceFormat($option[0]['option_price']) : false;
+                    } elseif (in_array($type, $this->_options_textual)) {
+
+                        foreach ($group as $option) {
+                            $price = (isset($option[0]['option_price']) && $option[0]['option_price'] > 0) ? Tax::getInstance()->priceFormat($option[0]['option_price']) : false;
                             $symbol = (isset($option[0]['option_price']) && $option[0]['option_negative'] == 0) ? '+' : '-';
-                            if(isset($selected[$option[0]['assign_id']]) && !empty($selected[$option[0]['assign_id']])) {
-                                $description = trim(str_replace(array($option[0]['option_name'].':','('.$symbol.$price.')'), '', $selected[$option[0]['assign_id']]));
+                            if (isset($selected[$option[0]['assign_id']]) && !empty($selected[$option[0]['assign_id']])) {
+                                $description = trim(str_replace([$option[0]['option_name'].':','('.$symbol.$price.')'], '', $selected[$option[0]['assign_id']]));
                             } else {
                                 $description = '';
                             }
 
                             $decimal_price_sign = $option[0]['option_negative'] ? '-' : '';
-                            $original_price = isset($option[0]['option_price_original']) ? $option[0]['option_price_original'] : $option[0]['option_price'];
+                            $original_price = $option[0]['option_price_original'] ?? $option[0]['option_price'];
 
-                            $option_list[$option[0]['option_id']] = array(
+                            $option_list[$option[0]['option_id']] = [
                                 'type'               => $option[0]['option_type'],
                                 'option_id'          => $option[0]['option_id'],
                                 'assign_id'          => $option[0]['assign_id'],
@@ -629,27 +623,27 @@ class Catalogue
                                 'option_description' => $option[0]['option_description'],
                                 'required'           => (bool)$option[0]['option_required'],
                                 'price'              => $price,
-                                'decimal_price'      => (string)$decimal_price_sign.$option[0]['option_price'],
-                                'decimal_price_original' => (string)$decimal_price_sign.$original_price,
-                                'symbol'             => ($option[0]['absolute_price']=='1' && $symbol=='+') ? '' : $symbol,
+                                'decimal_price'      => $decimal_price_sign.$option[0]['option_price'],
+                                'decimal_price_original' => $decimal_price_sign.$original_price,
+                                'symbol'             => ($option[0]['absolute_price'] == '1' && $symbol == '+') ? '' : $symbol,
                                 'priority'           => $option['priority'],
                                 'value'              => $description,
-                                'absolute_price'     => $option[0]['absolute_price']
-                            );
+                                'absolute_price'     => $option[0]['absolute_price'],
+                            ];
 
-                            if ($option[0]['absolute_price']=='1') {
+                            if ($option[0]['absolute_price'] == '1') {
                                 $this->_options_line_price += ($option[0]['option_price'] - $this->_product_data[$product_id]['price_to_pay']);
                             } else {
-                                if ($option[0]['option_price']>0 && $option[0]['option_negative'] == 0) {
+                                if ($option[0]['option_price'] > 0 && $option[0]['option_negative'] == 0) {
                                     $this->_options_line_price += $option[0]['option_price'];
-                                } elseif ($option[0]['option_price']>0) {
+                                } elseif ($option[0]['option_price'] > 0) {
                                     $this->_options_line_price -= $option[0]['option_price'];
                                 }
                             }
                         }
                     }
                 }
-                uasort($option_list, 'cmpmc');
+                uasort($option_list, cmpmc(...));
                 foreach ($GLOBALS['hooks']->load('class.catalogue.display_product_options') as $hook) {
                     include $hook;
                 }
@@ -668,7 +662,7 @@ class Catalogue
     public function displaySort($search = false)
     {
         // Default sort order
-        $default = array('field'=>$GLOBALS['config']->get('config', 'product_sort_column'), 'sort'=>$GLOBALS['config']->get('config', 'product_sort_direction'));
+        $default = ['field' => $GLOBALS['config']->get('config', 'product_sort_column'), 'sort' => $GLOBALS['config']->get('config', 'product_sort_direction')];
         // Sort
         if ($search || $this->_sort_by_relevance) {
             $sorters['Relevance'] = $GLOBALS['language']->common['relevance'];
@@ -683,21 +677,21 @@ class Catalogue
         if ($GLOBALS['config']->get('config', 'stock_level')) {
             $sorters['stock_level'] = $GLOBALS['language']->category['sort_stock'];
         }
-        
+
         foreach ($GLOBALS['hooks']->load('class.catalogue.product_sort') as $hook) {
             include $hook;
         }
 
-        $directions = array(
+        $directions = [
             'DESC' => $GLOBALS['language']->category['sort_high_low'],
             'ASC' => $GLOBALS['language']->category['sort_low_high'],
-        );
+        ];
         foreach ($sorters as $field => $name) {
             foreach ($directions as $order => $direction) {
-                $direction = (isset($GLOBALS['language']->category[strtolower('sort_'.$field.'_'.$order)])) ? $GLOBALS['language']->category[strtolower('sort_'.$field.'_'.$order)] : $direction;
-                $assign = array('name' => $name, 'field' => $field, 'order' => $order, 'direction' => $direction);
+                $direction = $GLOBALS['language']->category[strtolower('sort_'.$field.'_'.$order)] ?? $direction;
+                $assign = ['name' => $name, 'field' => $field, 'order' => $order, 'direction' => $direction];
 
-                if ((isset($_GET['sort'][$field]) && strtoupper($_GET['sort'][$field]) == $order) || (!isset($_GET['sort']) && $field == $default['field'] && $order == $default['sort'])) {
+                if ((isset($_GET['sort'][$field]) && strtoupper((string) $_GET['sort'][$field]) == $order) || (!isset($_GET['sort']) && $field == $default['field'] && $order == $default['sort'])) {
                     $assign['selected'] = 'selected="selected"';
                 } else {
                     $assign['selected'] = '';
@@ -715,11 +709,11 @@ class Catalogue
      * @param int $category_id
      * @return array/false
      */
-    public function displaySubCategory($category_id)
+    public function displaySubCategory($category_id): array|false
     {
         if (!empty($category_id) && is_numeric($category_id)) {
-            if (($subcats = $GLOBALS['db']->select('CubeCart_category', false, array('cat_parent_id' => $category_id, 'status' => '1', 'hide' => '0'), array('priority'=>'ASC'))) !== false) {
-                $return = array();
+            if (($subcats = $GLOBALS['db']->select('CubeCart_category', false, ['cat_parent_id' => $category_id, 'status' => '1', 'hide' => '0'], ['priority' => 'ASC'])) !== false) {
+                $return = [];
                 foreach ($subcats as $cat) {
                     if (!$this->categoryAccessAllowed($cat['cat_id'])) {
                         continue;
@@ -727,10 +721,10 @@ class Catalogue
                     // Translate
                     $GLOBALS['language']->translateCategory($cat);
                     $products = $this->productCount($cat['cat_id']);
-                    
+
                     if ($products || $GLOBALS['config']->get('config', 'catalogue_show_empty') == '1') {
                         $cat['cat_image'] = $this->imagePath($cat['cat_image'], 'subcategory', 'url');
-                        $cat['image_tags'] = $GLOBALS['catalogue']->image_tags[$cat['cat_image']] ?? array();
+                        $cat['image_tags'] = $GLOBALS['catalogue']->image_tags[$cat['cat_image']] ?? [];
                         $cat['url'] = $GLOBALS['seo']->buildURL('cat', $cat['cat_id'], '&');
                         $cat['products_number'] = $products;
                         $return[] = $cat;
@@ -746,9 +740,8 @@ class Catalogue
      * Convert parameter to int
      *
      * @param undefined $input
-     * @return int
      */
-    public function get_int($input)
+    public function get_int($input): int
     {
         return (int)$input;
     }
@@ -757,11 +750,10 @@ class Catalogue
      * Convert array values to int
      *
      * @param array $input
-     * @return array
      */
-    public function get_int_array($inputArray)
+    public function get_int_array($inputArray): array
     {
-        return array_map(array(&$this, 'get_int'), $inputArray);
+        return array_map($this->get_int(...), $inputArray);
     }
 
     /**
@@ -772,7 +764,7 @@ class Catalogue
      */
     public function getCategoryData($category_id)
     {
-        if (($result = $GLOBALS['db']->select('CubeCart_category', false, array('cat_id' => $category_id, 'status' => 1))) !== false) {
+        if (($result = $GLOBALS['db']->select('CubeCart_category', false, ['cat_id' => $category_id, 'status' => 1])) !== false) {
             if (!$this->categoryAccessAllowed($category_id)) {
                 return false;
             }
@@ -793,19 +785,19 @@ class Catalogue
      * @param bool $hidden
      * @return array/false
      */
-    public function getCategoryProducts($category_id, $page = 1, $per_page = 10, $hidden = false)
+    public function getCategoryProducts($category_id, $page = 1, $per_page = 10, $hidden = false): array|false
     {
         if (strtolower($page) == 'all') {
-            httpredir(currentPage(array('page')), '', false, $status = 301);
+            httpredir(currentPage(['page']), '', false, $status = 301);
         }
 
         $where2 = $this->outOfStockWhere(false, 'INV', true);
 
-        if (($result = $GLOBALS['db']->select('`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_category_index` AS `I` INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_inventory` AS `INV`', '`I`.`product_id`','`I`.`cat_id` = '.$category_id.' AND `I`.`product_id` = `INV`.`product_id` AND `INV`.`status` = 1 '.$where2)) !== false) {
+        if (($result = $GLOBALS['db']->select('`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_category_index` AS `I` INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_inventory` AS `INV`', '`I`.`product_id`', '`I`.`cat_id` = '.$category_id.' AND `I`.`product_id` = `INV`.`product_id` AND `INV`.`status` = 1 '.$where2)) !== false) {
             $this->_category_count = $GLOBALS['db']->numrows();
             if (isset($_GET['sort']) && is_array($_GET['sort'])) {
                 foreach ($_GET['sort'] as $field => $direction) {
-                    $order[$field] = (strtolower($direction) == 'asc') ? 'ASC' : 'DESC';
+                    $order[$field] = (strtolower((string) $direction) == 'asc') ? 'ASC' : 'DESC';
                     break;
                 }
             } else {
@@ -827,7 +819,6 @@ class Catalogue
         return (isset($productList) && is_array($productList)) ? $productList : false;
     }
 
-
     /**
      * Get status of category from product ID
      *
@@ -836,7 +827,7 @@ class Catalogue
      */
     public function getCategoryStatusByProductID($product_id)
     {
-        if (is_numeric($product_id) && $product_id>0) {
+        if (is_numeric($product_id) && $product_id > 0) {
             if (empty($this->_category_status_prod_id[$product_id])) {
                 $query = sprintf("SELECT CI.* , C.status FROM `%1\$sCubeCart_category_index` AS CI, `%1\$sCubeCart_category` AS C WHERE CI.product_id = '$product_id' AND CI.cat_id = C.cat_id ORDER BY CI.primary DESC", $GLOBALS['config']->get('config', 'dbprefix'));
                 if (($data = $GLOBALS['db']->query($query)) !== false) {
@@ -845,12 +836,9 @@ class Catalogue
                     }
                 }
             }
-            if (isset($this->_category_status_prod_id[$product_id])) {
-                return $this->_category_status_prod_id[$product_id];
-            }
-            return array();
+            return $this->_category_status_prod_id[$product_id] ?? [];
         }
-        return array();
+        return [];
     }
 
     /**
@@ -862,10 +850,10 @@ class Catalogue
     public function getCategoryTree($parent_id = 0, $level = 0)
     {
         $level++;
-        if (($categories = $GLOBALS['db']->select('CubeCart_category', array('cat_parent_id', 'cat_id', 'cat_name'), array('cat_parent_id' => $parent_id, 'status' => 1, 'hide' => 0), 'priority, cat_name ASC')) !== false) {
+        if (($categories = $GLOBALS['db']->select('CubeCart_category', ['cat_parent_id', 'cat_id', 'cat_name'], ['cat_parent_id' => $parent_id, 'status' => 1, 'hide' => 0], 'priority, cat_name ASC')) !== false) {
 
             // Write over with translations
-            if (!$this->_category_translations && ($translations = $GLOBALS['db']->select('CubeCart_category_language', array('cat_id', 'cat_name'), array('language' => $GLOBALS['language']->current()))) !== false) {
+            if (!$this->_category_translations && ($translations = $GLOBALS['db']->select('CubeCart_category_language', ['cat_id', 'cat_name'], ['language' => $GLOBALS['language']->current()])) !== false) {
                 foreach ($translations as $translation) {
                     $this->_category_translations[$translation['cat_id']] = $translation['cat_name'];
                 }
@@ -879,36 +867,38 @@ class Catalogue
                 $available_products = $GLOBALS['db']->misc($sql);
 
                 if ($available_products && $GLOBALS['config']->get('config', 'hide_out_of_stock')) {
-                    
+
                     // Hide products out of stock
-                    $in_stock = array();
+                    $in_stock = [];
                     foreach ($available_products as $key => $product) {
-                        if ($product['use_stock_level']=='1') {
-                            if ($options = $GLOBALS['db']->select('CubeCart_option_matrix', array('stock_level', 'use_stock'), array('product_id' => $product['product_id'], 'status' => 1), false, false, false, false)) {
-                                $oos_combos = array();
-                                foreach ($options as $option) {
-                                    if ($option['use_stock']==1 && $option['stock_level']<=0) {
-                                        $oos_combos[] = true;
-                                    }
-                                }
-                                // If ALL matrix options are out of stock and all use stock levels
-                                if (count($options)==count($oos_combos)) {
-                                    unset($available_products[$key]);
-                                } else {
-                                    $in_stock[] = $product['product_id'];
-                                }
+                        if ($product['use_stock_level'] != '1') {
+                            continue;
+                        }
+                        if (!$options = $GLOBALS['db']->select('CubeCart_option_matrix', ['stock_level', 'use_stock'], ['product_id' => $product['product_id'], 'status' => 1], false, false, false, false)) {
+                            continue;
+                        }
+                        $oos_combos = [];
+                        foreach ($options as $option) {
+                            if ($option['use_stock'] == 1 && $option['stock_level'] <= 0) {
+                                $oos_combos[] = true;
                             }
                         }
+                        // If ALL matrix options are out of stock and all use stock levels
+                        if (count($options) == count($oos_combos)) {
+                            unset($available_products[$key]);
+                        } else {
+                            $in_stock[] = $product['product_id'];
+                        }
                     }
-                    
+
                     // Check stock at main level
                     $product_dataset = $GLOBALS['db']->misc($sql.' AND I.use_stock_level = 1 AND I.stock_level <= 0');
 
                     if ($product_dataset) {
-                        foreach ($product_dataset as $key => $product) {
+                        foreach ($product_dataset as $product) {
                             if (!in_array($product['product_id'], $in_stock)) {
                                 foreach ($available_products as $master_key => $master_product) {
-                                    if ($master_product['product_id']==$product['product_id']) {
+                                    if ($master_product['product_id'] == $product['product_id']) {
                                         unset($available_products[$master_key]);
                                     }
                                 }
@@ -919,14 +909,14 @@ class Catalogue
 
                 $products = $available_products ? count($available_products) : 0;
 
-                $children = $GLOBALS['db']->count('CubeCart_category', 'cat_id', array('cat_parent_id' => $category['cat_id'], 'status' => '1'));
-                if (($products> 0 || $GLOBALS['config']->get('config', 'catalogue_show_empty')) || $children) {
-                    $result = array(
+                $children = $GLOBALS['db']->count('CubeCart_category', 'cat_id', ['cat_parent_id' => $category['cat_id'], 'status' => '1']);
+                if (($products > 0 || $GLOBALS['config']->get('config', 'catalogue_show_empty')) || $children) {
+                    $result = [
                         'name'  => (isset($this->_category_translations[$category['cat_id']]) && !empty($this->_category_translations[$category['cat_id']])) ? $this->_category_translations[$category['cat_id']] : $category['cat_name'],
                         'cat_id' => $category['cat_id'],
                         'cat_level' => $level,
-                        'product_count' => $products
-                    );
+                        'product_count' => $products,
+                    ];
                     if ($GLOBALS['config']->get('config', 'catalogue_expand_tree') && $children = $this->getCategoryTree($category['cat_id'], $level)) {
                         $result['children'] = $children;
                     }
@@ -934,7 +924,7 @@ class Catalogue
                 }
             }
         }
-        return (isset($tree_data)) ? $tree_data : false;
+        return $tree_data ?? false;
     }
 
     /**
@@ -986,30 +976,29 @@ class Catalogue
     /**
      * Get group restrictions for a category, walking up the parent chain (inheritance)
      *
-     * @param int $cat_id
      * @return array|null  null if unrestricted, otherwise ['groups' => [...], 'guest_access' => 0|1]
      */
-    private function _getCategoryRestrictions($cat_id)
+    private function _getCategoryRestrictions(int $cat_id): ?array
     {
-        $visited = array();
-        $current = (int)$cat_id;
+        $visited = [];
+        $current = $cat_id;
 
         while ($current > 0 && !isset($visited[$current])) {
             $visited[$current] = true;
 
-            $groups = $GLOBALS['db']->select('CubeCart_category_group', array('group_id'), array('cat_id' => $current));
+            $groups = $GLOBALS['db']->select('CubeCart_category_group', ['group_id'], ['cat_id' => $current]);
             if ($groups) {
-                $group_ids = array();
+                $group_ids = [];
                 foreach ($groups as $g) {
                     $group_ids[] = (int)$g['group_id'];
                 }
-                $cat = $GLOBALS['db']->select('CubeCart_category', array('guest_access'), array('cat_id' => $current));
+                $cat = $GLOBALS['db']->select('CubeCart_category', ['guest_access'], ['cat_id' => $current]);
                 $guest_access = ($cat) ? (int)$cat[0]['guest_access'] : 1;
-                return array('groups' => $group_ids, 'guest_access' => $guest_access);
+                return ['groups' => $group_ids, 'guest_access' => $guest_access];
             }
 
             // No restrictions on this category — walk up to parent
-            $parent = $GLOBALS['db']->select('CubeCart_category', array('cat_parent_id'), array('cat_id' => $current));
+            $parent = $GLOBALS['db']->select('CubeCart_category', ['cat_parent_id'], ['cat_id' => $current]);
             if (!$parent || (int)$parent[0]['cat_parent_id'] === 0) {
                 break;
             }
@@ -1024,19 +1013,19 @@ class Catalogue
      *
      * @return array
      */
-    public function getSelectableTypes() {
+    public function getSelectableTypes()
+    {
         return $this->_options_selectable;
     }
 
     /**
      * Get default product options
-     *
-     * @return array
      */
-    public function getDefaultOptions() {
-        $output = array();
+    public function getDefaultOptions(): array
+    {
+        $output = [];
         $descriptions = $this->_optionDescriptions();
-        foreach($this->_options_default as $key) {
+        foreach ($this->_options_default as $key) {
             $output[$key] = $descriptions[$key];
         }
         return $output;
@@ -1051,15 +1040,13 @@ class Catalogue
      */
     public function getManufacturer($manufacturer_id, $placeholder = false)
     {
-        if (($manufacturers = $GLOBALS['db']->select('CubeCart_manufacturers', false, array('id' => $manufacturer_id))) !== false) {
-            if (filter_var($manufacturers[0]['URL'], FILTER_VALIDATE_URL)) {
-                return '<a href="'.$manufacturers[0]['URL'].'" target="_blank">'.($placeholder ? '%s' : $manufacturers[0]['name']).'</a>';
-            } else {
-                return $manufacturers[0]['name'];
-            }
-        } else {
+        if ($manufacturers = $GLOBALS['db']->select('CubeCart_manufacturers', false, ['id' => $manufacturer_id]) === false) {
             return false;
         }
+        if (filter_var($manufacturers[0]['URL'], FILTER_VALIDATE_URL)) {
+            return '<a href="'.$manufacturers[0]['URL'].'" target="_blank">'.($placeholder ? '%s' : $manufacturers[0]['name']).'</a>';
+        }
+        return $manufacturers[0]['name'];
     }
 
     /**
@@ -1070,17 +1057,16 @@ class Catalogue
      */
     public function getManufacturerGPSR($id)
     {
-        if (($manufacturer = $GLOBALS['db']->select('CubeCart_manufacturers', false, array('id' => $id))) !== false) {
+        if (($manufacturer = $GLOBALS['db']->select('CubeCart_manufacturers', false, ['id' => $id])) !== false) {
             $manufacturer[0]['contact_url'] = filter_var($manufacturer[0]['contact_url'], FILTER_VALIDATE_URL) ? $manufacturer[0]['contact_url'] : '';
             $manufacturer[0]['eu_contact_url'] = filter_var($manufacturer[0]['eu_contact_url'], FILTER_VALIDATE_URL) ? $manufacturer[0]['eu_contact_url'] : '';
             $manufacturer[0]['email'] = filter_var($manufacturer[0]['email'], FILTER_VALIDATE_EMAIL) ? $manufacturer[0]['email'] : '';
             $manufacturer[0]['eu_email'] = filter_var($manufacturer[0]['eu_email'], FILTER_VALIDATE_EMAIL) ? $manufacturer[0]['eu_email'] : '';
-            $manufacturer[0]['country'] = ctype_digit($manufacturer[0]['country']) ? getCountryFormat($manufacturer[0]['country']) : $manufacturer[0]['country'];
-            $manufacturer[0]['eu_country'] = ctype_digit($manufacturer[0]['eu_country']) ? getCountryFormat($manufacturer[0]['eu_country']) : $manufacturer[0]['eu_country'];
+            $manufacturer[0]['country'] = ctype_digit((string) $manufacturer[0]['country']) ? getCountryFormat($manufacturer[0]['country']) : $manufacturer[0]['country'];
+            $manufacturer[0]['eu_country'] = ctype_digit((string) $manufacturer[0]['eu_country']) ? getCountryFormat($manufacturer[0]['eu_country']) : $manufacturer[0]['eu_country'];
             return $manufacturer[0];
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -1092,38 +1078,37 @@ class Catalogue
      */
     public function getOptionData($option_id, $assign_id)
     {
-        if (($category = $GLOBALS['db']->select('CubeCart_option_group', false, array('option_id' => (int)$option_id))) !== false) {
+        if (($category = $GLOBALS['db']->select('CubeCart_option_group', false, ['option_id' => (int)$option_id])) !== false) {
             // Is it assigned, or was it from an option set?
             if (is_int($assign_id) && $assign_id < 0) {
                 // Option Set
-                if (($value = $GLOBALS['db']->select('CubeCart_option_value', false, array('value_id' => abs($assign_id)))) !== false) {
+                if (($value = $GLOBALS['db']->select('CubeCart_option_value', false, ['value_id' => abs($assign_id)])) !== false) {
                     return array_merge($category[0], $value[0]);
                 }
             } else {
-                $assigned = $GLOBALS['db']->select('CubeCart_option_assign', false, array('assign_id' => (int)$assign_id));
+                $assigned = $GLOBALS['db']->select('CubeCart_option_assign', false, ['assign_id' => (int)$assign_id]);
 
                 foreach ($GLOBALS['hooks']->load('class.catalogue.option_data') as $hook) {
                     include $hook;
                 }
-                
+
                 if ($assigned) {
-                    if ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == 2 && $GLOBALS['config']->get('config', 'catalogue_sale_percentage')>0) {
+                    if ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == 2 && $GLOBALS['config']->get('config', 'catalogue_sale_percentage') > 0) {
                         $assigned[0]['option_price'] = $assigned[0]['option_price'] - ($assigned[0]['option_price'] / 100) * $GLOBALS['config']->get('config', 'catalogue_sale_percentage');
                     }
                 }
-                
+
                 if (is_array($assigned) && in_array($category[0]['option_type'], $this->_options_selectable)) {
                     // Select
-                    if (($value = $GLOBALS['db']->select('CubeCart_option_value', false, array('option_id' => $category[0]['option_id'], 'value_id' => $assigned[0]['value_id']))) !== false) {
+                    if (($value = $GLOBALS['db']->select('CubeCart_option_value', false, ['option_id' => $category[0]['option_id'], 'value_id' => $assigned[0]['value_id']])) !== false) {
                         return array_merge($category[0], $assigned[0], $value[0]);
                     }
                 } else {
                     // Text
                     if (is_array($assigned) && isset($assigned[0])) {
                         return array_merge($category[0], $assigned[0]);
-                    } else {
-                        return $category[0];
                     }
+                    return $category[0];
                 }
             }
         }
@@ -1132,10 +1117,8 @@ class Catalogue
 
     /**
      * Get product option price
-     *
-     * @return float
      */
-    public function getOptionsLinePrice()
+    public function getOptionsLinePrice(): float
     {
         return (float)$this->_options_line_price;
     }
@@ -1151,12 +1134,12 @@ class Catalogue
         if (isset($_POST['add'])) {
             $single_fixed_options = false;
 
-            $assigned_options = $GLOBALS['db']->select('CubeCart_option_assign', false, array('product' => (int)$_POST['add']));
+            $assigned_options = $GLOBALS['db']->select('CubeCart_option_assign', false, ['product' => (int)$_POST['add']]);
 
             if ($assigned_options) {
                 $single_fixed_options = true;
-                $forced_options = array();
-                $default_options = array();
+                $forced_options = [];
+                $default_options = [];
                 // First find any default option values
                 foreach ($assigned_options as $assigned_option) {
                     // If the store owner set multiple defaults for the same option, only the last one will be used
@@ -1180,20 +1163,20 @@ class Catalogue
 
                     $forced_options[$assigned_option['option_id']] = $assigned_option['assign_id'];
 
-                    $group = $GLOBALS['db']->select('CubeCart_option_group', array('option_type', 'option_required'), array('option_id' => $assigned_option['option_id']));
-                
-                    if ($group[0]['option_required']=="0") {
+                    $group = $GLOBALS['db']->select('CubeCart_option_group', ['option_type', 'option_required'], ['option_id' => $assigned_option['option_id']]);
+
+                    if ($group[0]['option_required'] == '0') {
                         $single_fixed_options = false;
                         break;
                     }
 
-                    if ($group && in_array($group[0]['option_type'], array(1, 2))) {
+                    if ($group && in_array($group[0]['option_type'], [1, 2])) {
                         $single_fixed_options = false;
                         break;
                     }
                 }
             }
-            if ($single_fixed_options && is_array($forced_options) && count($forced_options)>0) {
+            if ($single_fixed_options && is_array($forced_options) && count($forced_options) > 0) {
                 return $forced_options;
             }
         }
@@ -1214,13 +1197,13 @@ class Catalogue
      * @param int $assign_id
      * @return array/false
      */
-    public function getProductData($product_id, $quantity = 1, $order = false, $per_page = 10, $page = 1, $category = false, $options_identifier = null, $check_category_status = true)
+    public function getProductData($product_id, $quantity = 1, $order = false, $per_page = 10, $page = 1, $category = false, $options_identifier = null, $check_category_status = true): false|array
     {
         if ($check_category_status && !is_array($product_id)) {
             $category_data = $this->getCategoryStatusByProductID($product_id);
             $category_status = false;
             if (is_array($category_data)) {
-                foreach ($category_data as $trash => $data) {
+                foreach ($category_data as $data) {
                     if ($data['status'] == 1) {
                         $category_status = true;
                     }
@@ -1231,12 +1214,12 @@ class Catalogue
             }
         }
 
-        $where = $this->outOfStockWhere(array('product_id' => $product_id, 'status' => 1));
+        $where = $this->outOfStockWhere(['product_id' => $product_id, 'status' => 1]);
 
         if (is_array($order) && isset($order['price']) && $GLOBALS['config']->get('config', 'catalogue_sale_mode')) {
             $query = 'SELECT *, IF(`sale_price`> 0 AND `sale_price` < `price`,`sale_price`,`price`) AS `price_sort` FROM '.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_inventory WHERE '.$where.' ORDER BY `price_sort` '.$order['price'];
             if (!empty($page) && is_numeric($page)) {
-                $query = $query.' LIMIT '.$per_page.' OFFSET '.(int)($page-1)*$per_page;
+                $query = $query.' LIMIT '.$per_page.' OFFSET '.(int)($page - 1) * $per_page;
             }
             $result = $GLOBALS['db']->query($query);
         } else {
@@ -1244,7 +1227,7 @@ class Catalogue
         }
 
         // Get product option specific data
-        $products_matrix_data = $GLOBALS['db']->select('CubeCart_option_matrix', array('stock_level' , 'product_code', 'upc', 'jan', 'isbn', 'image'), array('product_id' => $product_id, 'options_identifier' => $options_identifier, 'status' => 1), false, false, false, false);
+        $products_matrix_data = $GLOBALS['db']->select('CubeCart_option_matrix', ['stock_level' , 'product_code', 'upc', 'jan', 'isbn', 'image'], ['product_id' => $product_id, 'options_identifier' => $options_identifier, 'status' => 1], false, false, false, false);
         if ($products_matrix_data) {
             foreach ($products_matrix_data[0] as $key => $value) {
                 if (!is_null($value) && !empty($value)) {
@@ -1254,12 +1237,12 @@ class Catalogue
         }
         if ($result !== false) {
             $count = count($result);
-            $data = array();
+            $data = [];
             foreach ($result as $product) {
-                $product['spec_array'] = !empty($product['spec_array']) ? json_decode(base64_decode($product['spec_array']), true) : array();
+                $product['spec_array'] = !empty($product['spec_array']) ? json_decode(base64_decode((string) $product['spec_array']), true) : [];
                 $product['product_weight'] = (float)$product['product_weight'];
                 $GLOBALS['language']->translateProduct($product);
-                $product['description'] = ($product['product_parse']==1) ? $GLOBALS['smarty']->fetch('string:'.$product['description']) : $product['description'];
+                $product['description'] = ($product['product_parse'] == 1) ? $GLOBALS['smarty']->fetch('string:'.$product['description']) : $product['description'];
                 $this->getProductPrice($product, $quantity);
                 if (!$category && $count == 1) {
                     $data = $product;
@@ -1283,27 +1266,27 @@ class Catalogue
      * @param int $id
      * @return string/false
      */
-    public function getProductHash($product_id, $id)
+    public function getProductHash($product_id, $id): false|string
     {
-        $inventory = $GLOBALS['db']->select('CubeCart_inventory', array('-updated'), array('product_id' => $product_id));
+        $inventory = $GLOBALS['db']->select('CubeCart_inventory', ['-updated'], ['product_id' => $product_id]);
 
         if ($inventory == false) {
             return false;
         }
 
-        $data = array(
+        $data = [
             $inventory,
-            $this->_sortHashData($GLOBALS['db']->select('CubeCart_category_index', array('cat_id','primary'), array('product_id' => $product_id))),
-            $this->_sortHashData($GLOBALS['db']->select('CubeCart_option_assign', array('-assign_id', '-product'), array('product' => $product_id))),
-            $this->_sortHashData($GLOBALS['db']->select('CubeCart_option_matrix', array('-matrix_id', '-product_id'), array('product_id' => $product_id))),
-            $GLOBALS['db']->select('CubeCart_reviews', false, array('product_id' => $product_id)),
-            $this->_sortHashData($GLOBALS['db']->select('CubeCart_image_index', array('-id', '-product_id'), array('product_id' => $product_id))),
-            $this->_sortHashData($GLOBALS['db']->select('CubeCart_pricing_group', array('-price_id', '-product_id'), array('product_id' => $product_id))),
-            $this->_sortHashData($GLOBALS['db']->select('CubeCart_pricing_quantity', array('-discount_id', '-product_id'), array('product_id' => $product_id))),
-            $GLOBALS['db']->select('CubeCart_inventory_language', false, array('product_id' => $product_id)),
-            $this->_sortHashData($GLOBALS['db']->select('CubeCart_options_set_product', array('-set_product_id', '-product_id'), array('product_id' => $product_id))),
-            $GLOBALS['db']->select('CubeCart_seo_urls', false, array('type' => 'prod', 'item_id' => $product_id))
-        );
+            $this->_sortHashData($GLOBALS['db']->select('CubeCart_category_index', ['cat_id','primary'], ['product_id' => $product_id])),
+            $this->_sortHashData($GLOBALS['db']->select('CubeCart_option_assign', ['-assign_id', '-product'], ['product' => $product_id])),
+            $this->_sortHashData($GLOBALS['db']->select('CubeCart_option_matrix', ['-matrix_id', '-product_id'], ['product_id' => $product_id])),
+            $GLOBALS['db']->select('CubeCart_reviews', false, ['product_id' => $product_id]),
+            $this->_sortHashData($GLOBALS['db']->select('CubeCart_image_index', ['-id', '-product_id'], ['product_id' => $product_id])),
+            $this->_sortHashData($GLOBALS['db']->select('CubeCart_pricing_group', ['-price_id', '-product_id'], ['product_id' => $product_id])),
+            $this->_sortHashData($GLOBALS['db']->select('CubeCart_pricing_quantity', ['-discount_id', '-product_id'], ['product_id' => $product_id])),
+            $GLOBALS['db']->select('CubeCart_inventory_language', false, ['product_id' => $product_id]),
+            $this->_sortHashData($GLOBALS['db']->select('CubeCart_options_set_product', ['-set_product_id', '-product_id'], ['product_id' => $product_id])),
+            $GLOBALS['db']->select('CubeCart_seo_urls', false, ['type' => 'prod', 'item_id' => $product_id]),
+        ];
         return $this->_productHash[$id] = md5(serialize($data));
     }
 
@@ -1314,12 +1297,12 @@ class Catalogue
     {
         if (is_array($data)) {
             foreach ($data as &$row) {
-                if (is_array($row)) ksort($row);
+                if (is_array($row)) {
+                    ksort($row);
+                }
             }
             unset($row);
-            usort($data, function($a, $b) {
-                return strcmp(serialize($a), serialize($b));
-            });
+            usort($data, fn ($a, $b) => strcmp(serialize($a), serialize($b)));
         }
         return $data;
     }
@@ -1330,20 +1313,20 @@ class Catalogue
      * @param int $product_id
      * @return array/false
      */
-    public function getProductOptions($product_id = null)
+    public function getProductOptions($product_id = null): array|false
     {
-        $sale_percent = ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == 2 && $GLOBALS['config']->get('config', 'catalogue_sale_percentage')>0) ? $GLOBALS['config']->get('config', 'catalogue_sale_percentage') : false;
+        $sale_percent = ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == 2 && $GLOBALS['config']->get('config', 'catalogue_sale_percentage') > 0) ? $GLOBALS['config']->get('config', 'catalogue_sale_percentage') : false;
 
-        if (($setlist = $GLOBALS['db']->select('CubeCart_options_set_product', array('set_id'), array('product_id' => (int)$product_id))) !== false) {
+        if (($setlist = $GLOBALS['db']->select('CubeCart_options_set_product', ['set_id'], ['product_id' => (int)$product_id])) !== false) {
             // Fetch Option Sets
             foreach ($setlist as $set_data) {
-                if (($sets = $GLOBALS['db']->select('CubeCart_options_set_member', false, array('set_id' => (int)$set_data['set_id']))) !== false) {
+                if (($sets = $GLOBALS['db']->select('CubeCart_options_set_member', false, ['set_id' => (int)$set_data['set_id']])) !== false) {
                     foreach ($sets as $set) {
                         $set_members[] = $set['set_member_id'];
                         $set_groups[] = $set['option_id'];
                         $set_values[$set['option_id']][] = $set['value_id'];
                     }
-                    if (($groups = $GLOBALS['db']->select('CubeCart_option_group', false, array('option_id' => $set_groups), array('priority' => 'ASC', 'option_name' => 'ASC'))) !== false) {
+                    if (($groups = $GLOBALS['db']->select('CubeCart_option_group', false, ['option_id' => $set_groups], ['priority' => 'ASC', 'option_name' => 'ASC'])) !== false) {
                         foreach ($groups as $group) {
                             if ($group['option_required']) {
                                 $this->_option_required = true;
@@ -1352,9 +1335,9 @@ class Catalogue
                                 if (isset($set_values[$group['option_id']]) && !empty($set_values[$group['option_id']])) {
                                     $value_id = $set_values[$group['option_id']];
                                 }
-                                if (is_array($value_id) && ($values = $GLOBALS['db']->select('CubeCart_option_value', false, array('value_id' => $value_id), array('priority' => 'ASC', 'value_name' => 'ASC'))) !== false) {
+                                if (($values = $GLOBALS['db']->select('CubeCart_option_value', false, ['value_id' => $value_id], ['priority' => 'ASC', 'value_name' => 'ASC'])) !== false) {
                                     foreach ($values as $value) {
-                                        if (($assigns = $GLOBALS['db']->select('CubeCart_option_assign', false, array('value_id' => $value['value_id'], 'option_id' => $value['option_id'], 'product' => (int)$product_id, 'set_member_id' => $set_members))) !== false) {
+                                        if (($assigns = $GLOBALS['db']->select('CubeCart_option_assign', false, ['value_id' => $value['value_id'], 'option_id' => $value['option_id'], 'product' => (int)$product_id, 'set_member_id' => $set_members])) !== false) {
                                             foreach ($assigns as $assign) {
                                                 if (!$assign['set_enabled']) {
                                                     continue;
@@ -1367,20 +1350,20 @@ class Catalogue
                                             }
                                         } else {
                                             ## Unassigned, default option from set
-                                            $option_array[$group['option_type']][$value['option_id']][] = array_merge($group, $value, array('assign_id' => (int)($value['value_id']*(-1))));
+                                            $option_array[$group['option_type']][$value['option_id']][] = array_merge($group, $value, ['assign_id' => (int)($value['value_id'] * (-1))]);
                                         }
                                     }
                                 }
                             } else {
                                 // Text option
-                                if (($assigns = $GLOBALS['db']->select('CubeCart_option_assign', false, array('option_id' => $group['option_id'], 'product' => (int)$product_id))) !== false) {
+                                if (($assigns = $GLOBALS['db']->select('CubeCart_option_assign', false, ['option_id' => $group['option_id'], 'product' => (int)$product_id])) !== false) {
                                     if ($sale_percent) {
                                         $assigns[0]['option_price_original'] = $assigns[0]['option_price'];
                                         $assigns[0]['option_price'] = $assigns[0]['option_price'] - ($assigns[0]['option_price'] / 100) * $sale_percent;
                                     }
                                     $assign = $assigns[0];
                                 } else {
-                                    $assign = array();
+                                    $assign = [];
                                 }
                                 $assign['assign_id'] = $product_id.$set_data['set_id'].$group['option_id'];
                                 $option_array[$group['option_type']][$group['option_id']][] = array_merge($group, $assign);
@@ -1394,10 +1377,10 @@ class Catalogue
             }
         }
 
-        if (($products = $GLOBALS['db']->select('CubeCart_option_assign', false, array('product' => (int)$product_id, 'set_member_id' => 0, 'set_enabled' => '1'))) !== false) {
-            $option = array();
+        if (($products = $GLOBALS['db']->select('CubeCart_option_assign', false, ['product' => (int)$product_id, 'set_member_id' => 0, 'set_enabled' => '1'])) !== false) {
+            $option = [];
 
-            $sale_percent = ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == 2 && $GLOBALS['config']->get('config', 'catalogue_sale_percentage')>0) ? $GLOBALS['config']->get('config', 'catalogue_sale_percentage') : false;
+            $sale_percent = ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == 2 && $GLOBALS['config']->get('config', 'catalogue_sale_percentage') > 0) ? $GLOBALS['config']->get('config', 'catalogue_sale_percentage') : false;
 
             foreach ($products as $assigned) {
                 if ($sale_percent) {
@@ -1411,7 +1394,7 @@ class Catalogue
                     $mid[] = $assigned['value_id'];
                 }
             }
-            if (($categories = $GLOBALS['db']->select('CubeCart_option_group', false, array('option_id' => $top), array('priority' => 'ASC', 'option_name' => 'ASC'))) !== false) {
+            if (($categories = $GLOBALS['db']->select('CubeCart_option_group', false, ['option_id' => $top], ['priority' => 'ASC', 'option_name' => 'ASC'])) !== false) {
                 foreach ($categories as $category) {
                     $array = false;
                     if ($category['option_required']) {
@@ -1419,7 +1402,7 @@ class Catalogue
                     }
                     if (in_array($category['option_type'], $this->_options_selectable)) {
                         // Get Option Values
-                        if (($values = $GLOBALS['db']->select('CubeCart_option_value', false, array('option_id' => $category['option_id'], 'value_id' => $mid), array('priority' => 'ASC', 'value_name' => 'ASC'))) !== false) {
+                        if (($values = $GLOBALS['db']->select('CubeCart_option_value', false, ['option_id' => $category['option_id'], 'value_id' => $mid], ['priority' => 'ASC', 'value_name' => 'ASC'])) !== false) {
                             foreach ($values as $value) {
                                 foreach ($option[$value['option_id']] as $opt) {
                                     if ($opt['value_id'] == $value['value_id']) {
@@ -1444,13 +1427,12 @@ class Catalogue
             foreach ($option_array as $type => $option_list) {
                 if (is_array($option_list)) {
                     foreach ($option_list as $oid => $array) {
-                        uasort($array, 'cmpmc');
+                        uasort($array, cmpmc(...));
                         $option_array[$type][$oid] = $array;
                     }
                 }
             }
         }
-
 
         if (isset($option_array) && is_array($option_array)) {
             foreach ($GLOBALS['hooks']->load('class.catalogue.product_options') as $hook) {
@@ -1465,10 +1447,9 @@ class Catalogue
     /**
      * Get product price
      *
-     * @param array $product_data
      * @return array/false
      */
-    public function getProductPrice(&$product_data, $quantity = 1, $retail_only = false)
+    public function getProductPrice(array &$product_data, $quantity = 1, $retail_only = false): array|false
     {
         if (isset($product_data['product_id']) && is_numeric($product_data['product_id'])) {
             $product_id = (int)$product_data['product_id'];
@@ -1477,34 +1458,34 @@ class Catalogue
             // Check for group pricing
             if ($retail_only === false) {
                 if (isset($GLOBALS['user']) && $GLOBALS['user']->is() && ($memberships = $GLOBALS['user']->getMemberships()) !== false) {
-                    $group_id = array();
+                    $group_id = [];
                     foreach ($memberships as $membership) {
                         $group_id[] = $membership['group_id'];
                     }
                     // Comparison data for best price
-                    $prices = array(
-                        'standard' => array(
+                    $prices = [
+                        'standard' => [
                             'price' => $product_data['price'],
-                            'sale_price' => $product_data['sale_price']
-                        ),
-                        'category' => array(
+                            'sale_price' => $product_data['sale_price'],
+                        ],
+                        'category' => [
                             'price' => $product_data['price'],
-                            'sale_price' => $product_data['sale_price']
-                        ),
-                        'product' => array(
+                            'sale_price' => $product_data['sale_price'],
+                        ],
+                        'product' => [
                             'price' => $product_data['price'],
-                            'sale_price' => $product_data['sale_price']
-                        )
-                    );
+                            'sale_price' => $product_data['sale_price'],
+                        ],
+                    ];
                     // Check category discounts
-                    if(($pricing_group = $GLOBALS['db']->select('CubeCart_category_discount', false, array('cat_id' => $product_data['cat_id'], 'group_id' => $group_id), array('percent' => 'DESC'), 1)) !== false) {
-                        if($pricing_group[0]['percent']>0) {
-                            $prices['category']['price'] = $product_data['price']*((100-$pricing_group[0]['percent'])/100);
-                            $prices['category']['sale_price'] = $product_data['sale_price']*((100-$pricing_group[0]['sale_price'])/100);
+                    if (($pricing_group = $GLOBALS['db']->select('CubeCart_category_discount', false, ['cat_id' => $product_data['cat_id'], 'group_id' => $group_id], ['percent' => 'DESC'], 1)) !== false) {
+                        if ($pricing_group[0]['percent'] > 0) {
+                            $prices['category']['price'] = $product_data['price'] * ((100 - $pricing_group[0]['percent']) / 100);
+                            $prices['category']['sale_price'] = $product_data['sale_price'] * ((100 - $pricing_group[0]['sale_price']) / 100);
                         }
                     }
                     // Check specific product group pricing
-                    if (($pricing_group = $GLOBALS['db']->select('CubeCart_pricing_group', false, array('product_id' => $product_id, 'group_id' => $group_id), array('price' => 'ASC'), 1)) !== false) {
+                    if (($pricing_group = $GLOBALS['db']->select('CubeCart_pricing_group', false, ['product_id' => $product_id, 'group_id' => $group_id], ['price' => 'ASC'], 1)) !== false) {
                         $prices['product']['price'] = $pricing_group[0]['price'];
                         $prices['product']['sale_price'] = $pricing_group[0]['sale_price'];
                         $product_data['tax_inclusive'] = $pricing_group[0]['tax_inclusive']; # do not rely on retail price setting!
@@ -1512,12 +1493,12 @@ class Catalogue
                     }
                     // Give the customer the lowest price but sale price can't be 0.00 if there is one of value
                     $sale_price = '0.00';
-                    foreach($prices as $type => $price) {
+                    foreach ($prices as $price) {
                         $product_data['price'] = $price['price'] < $product_data['price'] ? $price['price'] : $product_data['price'];
-                        if($sale_price == '0.00' && $price['sale_price'] > 0) {
+                        if ($sale_price == '0.00' && $price['sale_price'] > 0) {
                             $sale_price = $price['sale_price'];
                         }
-                        if($sale_price > 0 && $price['sale_price'] < $sale_price) {
+                        if ($sale_price > 0 && $price['sale_price'] < $sale_price) {
                             $sale_price = $price['sale_price'];
                         }
                         $product_data['sale_price'] = $sale_price;
@@ -1537,36 +1518,35 @@ class Catalogue
             $product_data['full_base_price'] = $product_data['price'];
 
             switch ((int)$GLOBALS['config']->get('config', 'catalogue_sale_mode')) {
-            case 0:
-                break;
-            case 1:
-                if ($product_data['sale_price'] && ($product_data['sale_price'] > 0 && $product_data['sale_price'] != Tax::getInstance()->priceFormatHidden())) {
-                    $product_data['price_to_pay'] = $product_data['sale_price'];
-                    $product_data['ctrl_sale'] = true;
-                }
-                $sale = true;
-                break;
-            case 2:
-                if (!$GLOBALS['config']->isEmpty('config', 'catalogue_sale_percentage')) {
-                    $product_price = $product_data['price'];
-                    //Make sure the first character is a digit
-                    $product_price = preg_replace('/[^0-9.]*/', '', $product_price);
-                    settype($product_price, "float");
-                    $product_data['sale_price'] = $product_price - ($product_price / 100) * $GLOBALS['config']->get('config', 'catalogue_sale_percentage');
-
-                    $product_data['ctrl_sale'] = ($product_data['sale_price'] > 0 && $product_data['sale_price'] != Tax::getInstance()->priceFormatHidden()) ? true : false;
-                    $product_data['price_to_pay'] = $product_data['sale_price'];
+                case 0:
+                    break;
+                case 1:
+                    if ($product_data['sale_price'] && ($product_data['sale_price'] > 0 && $product_data['sale_price'] != Tax::getInstance()->priceFormatHidden())) {
+                        $product_data['price_to_pay'] = $product_data['sale_price'];
+                        $product_data['ctrl_sale'] = true;
+                    }
                     $sale = true;
-                }
-                break;
+                    break;
+                case 2:
+                    if (!$GLOBALS['config']->isEmpty('config', 'catalogue_sale_percentage')) {
+                        $product_price = $product_data['price'];
+                        //Make sure the first character is a digit
+                        $product_price = preg_replace('/[^0-9.]*/', '', (string) $product_price);
+                        settype($product_price, 'float');
+                        $product_data['sale_price'] = $product_price - ($product_price / 100) * $GLOBALS['config']->get('config', 'catalogue_sale_percentage');
+
+                        $product_data['ctrl_sale'] = ($product_data['sale_price'] > 0 && $product_data['sale_price'] != Tax::getInstance()->priceFormatHidden()) ? true : false;
+                        $product_data['price_to_pay'] = $product_data['sale_price'];
+                        $sale = true;
+                    }
+                    break;
             }
 
+            $search = ['product_id' => $product_id, 'group_id' => $group_id];
 
-            $search = array('product_id' => $product_id, 'group_id' => $group_id);
-
-            if (($pricing = $GLOBALS['db']->select('CubeCart_pricing_quantity', array('quantity', 'price'), $search, array('quantity' => 'ASC', 'price' => 'ASC'))) !== false) {
+            if (($pricing = $GLOBALS['db']->select('CubeCart_pricing_quantity', ['quantity', 'price'], $search, ['quantity' => 'ASC', 'price' => 'ASC'])) !== false) {
                 foreach ($pricing as $price) {
-                    $prices[$price['quantity']] = ($GLOBALS['config']->get('config', 'catalogue_sale_mode')==2) ? ($price['price'] - ($price['price'] / 100) * $GLOBALS['config']->get('config', 'catalogue_sale_percentage')) : $price['price'];
+                    $prices[$price['quantity']] = ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == 2) ? ($price['price'] - ($price['price'] / 100) * $GLOBALS['config']->get('config', 'catalogue_sale_percentage')) : $price['price'];
                 }
                 krsort($prices);
                 // Ok so we need to get quantity for other items with same product ID for quantity discounts.
@@ -1574,26 +1554,25 @@ class Catalogue
                 $original_quantity = $quantity;
                 if (is_array($GLOBALS['cart']->basket) && is_array($GLOBALS['cart']->basket['contents'])) {
                     $quantity = 0;
-                    foreach ($GLOBALS['cart']->basket['contents'] as $hash => $item) {
-                        if ($item['id']==$product_id) {
+                    foreach ($GLOBALS['cart']->basket['contents'] as $item) {
+                        if ($item['id'] == $product_id) {
                             $quantity += $item['quantity'];
                         }
                     }
                 }
-                $quantity = ($quantity==0) ? $original_quantity : $quantity;
+                $quantity = ($quantity == 0) ? $original_quantity : $quantity;
 
                 foreach ($prices as $quant => $price) {
                     if ($quant > $quantity) {
                         continue;
-                    } else {
-                        //If the sale price is still better than the quantity price use the sale price
-                        if (!$sale || ((double)$product_data['sale_price'] == 0) || ($sale && $product_data['sale_price'] > $price)) {
-                            $product_data['price'] = $price;
-                            $product_data['sale_price'] = $price;
-                            $product_data['price_to_pay'] = $price;
-                        }
-                        break;
                     }
+                    //If the sale price is still better than the quantity price use the sale price
+                    if (!$sale || ((float)$product_data['sale_price'] == 0) || ($sale && $product_data['sale_price'] > $price)) {
+                        $product_data['price'] = $price;
+                        $product_data['sale_price'] = $price;
+                        $product_data['price_to_pay'] = $price;
+                    }
+                    break;
                 }
             }
 
@@ -1624,12 +1603,12 @@ class Catalogue
         if (is_numeric($product_id) && (!empty($options_identifier_string) || $return_max == true)) {
             if ($return_max) {
                 $rows = 'MAX(stock_level) AS `stock_level`';
-                $where = array('product_id' => (int)$product_id, 'status' => 1, 'use_stock' => 1);
+                $where = ['product_id' => (int)$product_id, 'status' => 1, 'use_stock' => 1];
             } else {
-                $rows = array('stock_level', 'restock_note');
-                $where = array('product_id' => (int)$product_id, 'options_identifier' => $options_identifier_string, 'status' => 1, 'use_stock' => 1);
+                $rows = ['stock_level', 'restock_note'];
+                $where = ['product_id' => (int)$product_id, 'options_identifier' => $options_identifier_string, 'status' => 1, 'use_stock' => 1];
             }
-            if($products_matrix = $GLOBALS['db']->select('CubeCart_option_matrix', $rows, $where, false, 1, false, false)) {
+            if ($products_matrix = $GLOBALS['db']->select('CubeCart_option_matrix', $rows, $where, false, 1, false, false)) {
                 if (is_numeric($products_matrix[0]['stock_level'])) {
                     if (!empty($products_matrix[0]['restock_note'])) {
                         $GLOBALS['session']->set('restock_note', $products_matrix[0]['restock_note']);
@@ -1640,12 +1619,12 @@ class Catalogue
         }
 
         // Fall back to traditional stock check if there are no results for the combination or it is not used
-        if (is_numeric($product_id) && ($products = $GLOBALS['db']->select('CubeCart_inventory', array('stock_level'), array('product_id' => (int)$product_id), false, 1, false, false)) !== false) {
-            
+        if (is_numeric($product_id) && ($products = $GLOBALS['db']->select('CubeCart_inventory', ['stock_level'], ['product_id' => (int)$product_id], false, 1, false, false)) !== false) {
+
             // Check this product id isn't already in the cart with different options identifier
             if ($check_existing) {
                 if (is_array($check_existing)) {
-                    foreach ($check_existing as $key => $value) {
+                    foreach ($check_existing as $value) {
                         if ($value['id'] == $product_id) {
                             $products[0]['stock_level'] -= 	$quantity;
                         }
@@ -1673,15 +1652,15 @@ class Catalogue
         foreach ($GLOBALS['hooks']->load('class.catalogue.imagepath') as $hook) {
             include $hook;
         }
-        
+
         if (is_numeric($input)) {
-            if (($result = $GLOBALS['db']->select('CubeCart_filemanager', false, array('file_id' => (int)$input))) !== false) {
+            if (($result = $GLOBALS['db']->select('CubeCart_filemanager', false, ['file_id' => (int)$input])) !== false) {
                 $file  = $result[0]['filepath'].$result[0]['filename'];
             } else {
                 $return_placeholder = true;
             }
         } elseif (!empty($input)) {
-            $file  = str_replace(array('images/cache/', 'images/uploads/'), '', (string)$input);
+            $file  = str_replace(['images/cache/', 'images/uploads/'], '', (string)$input);
         }
 
         $skins = $GLOBALS['gui']->getSkinData();
@@ -1697,7 +1676,7 @@ class Catalogue
         $placeholder_image = '';
         if ($return_placeholder && isset($skins['images'][$mode])) {
             $default = (string)$skins['images'][$mode]['default'];
-            
+
             if (isset($skins['styles'][$GLOBALS['gui']->getStyle()]['images']) && !empty($skins['styles'][$GLOBALS['gui']->getStyle()]['images'])) { // do we use a separate style folder for images?
                 $files = glob('skins/'.$GLOBALS['gui']->getSkin().'/'.'images/{common,'.$GLOBALS['gui']->getStyle().'}/'.$default, GLOB_BRACE);
             } else {
@@ -1728,7 +1707,7 @@ class Catalogue
                     $filename = sprintf('%s.%d%s', $match[1], $size, $match[2]);
                     ## Find the source
                     $image  = CC_ROOT_DIR.'/images/'.$folder.'/'.$filename;
-                    
+
                     if (!file_exists($image)) {
                         ## Check if the target folder exists - if not, create it!
                         if (!file_exists(dirname($image))) {
@@ -1744,7 +1723,7 @@ class Catalogue
                         $gd->gdSave(basename($image));
                     }
                     // panic for corrupt cached images
-                    if(filesize($image)===0) {
+                    if (filesize($image) === 0) {
                         $folder = 'source';
                         $filename = $file;
                     }
@@ -1773,16 +1752,15 @@ class Catalogue
                     trigger_error('No image path set', E_USER_NOTICE);
                     return false;
             }
-            if(!empty($result[0]['alt']) && !isset($this->image_tags[$img]['alt'])) {
+            if (!empty($result[0]['alt']) && !isset($this->image_tags[$img]['alt'])) {
                 $this->image_tags[$img]['alt'] = $result[0]['alt'];
             }
-            if(!empty($result[0]['title']) && !isset($this->image_tags[$img]['title'])) {
+            if (!empty($result[0]['title']) && !isset($this->image_tags[$img]['title'])) {
                 $this->image_tags[$img]['title'] = $result[0]['title'];
             }
             return $img;
-        } else {
-            return '';
         }
+        return '';
     }
 
     /**
@@ -1800,7 +1778,7 @@ class Catalogue
 
         if ($GLOBALS['config']->get('config', 'hide_out_of_stock') && !Admin::getInstance()->is()) {
             $def .= ($force || $def) ? ' AND' : '';
-            $oos = sprintf('%1$s ((%2$s.stock_level > 0 AND %2$s.use_stock_level = 1) OR %2$s.use_stock_level = 0)', $def, ($label ? $label : sprintf('%sCubeCart_inventory', $GLOBALS['config']->get('config', 'dbprefix'))));
+            $oos = sprintf('%1$s ((%2$s.stock_level > 0 AND %2$s.use_stock_level = 1) OR %2$s.use_stock_level = 0)', $def, ($label ?: sprintf('%sCubeCart_inventory', $GLOBALS['config']->get('config', 'dbprefix'))));
         }
         return ($GLOBALS['config']->get('config', 'hide_out_of_stock') && !Admin::getInstance()->is()) ? $oos : $def;
     }
@@ -1811,7 +1789,7 @@ class Catalogue
      * @param int $product
      * @param bool $product_view
      */
-    public function productAssign(&$product, $product_view = true)
+    public function productAssign(array &$product, $product_view = true): bool
     {
         $product['description_short'] = $this->descriptionShort($product);
 
@@ -1841,13 +1819,13 @@ class Catalogue
         if (isset($skins['images'])) {
             $image_types = $skins['images'];
             if (!isset($image_types['source'])) {
-                $image_types['source'] = array();
+                $image_types['source'] = [];
             }
             foreach ($image_types as $image_key => $values) {
                 $product[$image_key] = $GLOBALS['gui']->getProductImage($product['product_id'], $image_key);
-                $product['image_tags'][$image_key] = $GLOBALS['catalogue']->image_tags[$product[$image_key]] ?? array();
+                $product['image_tags'][$image_key] = $GLOBALS['catalogue']->image_tags[$product[$image_key]] ?? [];
                 if ($image_key == 'medium') {
-                    if (strpos($product[$image_key], 'noimage') !== false) {
+                    if (str_contains((string) $product[$image_key], 'noimage')) {
                         $product['magnify'] = false;
                     } else {
                         $product['magnify'] = true;
@@ -1857,20 +1835,20 @@ class Catalogue
         }
 
         ## Calculate average review score
-        if ($GLOBALS['config']->get('config', 'enable_reviews') && ($reviews = $GLOBALS['db']->select('CubeCart_reviews', array('rating'), array('product_id' => (int)$product['product_id'], 'approved' => '1'))) !== false) {
+        if ($GLOBALS['config']->get('config', 'enable_reviews') && ($reviews = $GLOBALS['db']->select('CubeCart_reviews', ['rating'], ['product_id' => (int)$product['product_id'], 'approved' => '1'])) !== false) {
             $score = 0;
             $count = 0;
             foreach ($reviews as $review) {
                 $score += $review['rating'];
                 $count++;
             }
-            $product['review_score'] = round($score/$count, 1);
+            $product['review_score'] = round($score / $count, 1);
             if (!$product_view) {
                 $link = $GLOBALS['seo']->buildURL('prod', $product['product_id'], '&') . '#reviews';
             } else {
                 $link = '#reviews';
             }
-            $score = number_format(($score/$count), 1);
+            $score = number_format(($score / $count), 1);
             if ($product_view) {
                 $GLOBALS['smarty']->assign('LANG_REVIEW_INFO', sprintf($GLOBALS['language']->catalogue['review_info'], $score, $count, $link));
             }
@@ -1889,9 +1867,9 @@ class Catalogue
                 $group_id = 0;
             }
             // Limit by membership
-            if (($prices = $GLOBALS['db']->select('CubeCart_pricing_quantity', false, array('product_id' => $product['product_id'], 'group_id' => $group_id), array('quantity' => 'ASC'))) !== false) {
+            if (($prices = $GLOBALS['db']->select('CubeCart_pricing_quantity', false, ['product_id' => $product['product_id'], 'group_id' => $group_id], ['quantity' => 'ASC'])) !== false) {
                 foreach ($prices as $price) {
-                    $price['price'] = ($GLOBALS['config']->get('config', 'catalogue_sale_mode')==2) ? ($price['price'] - ($price['price'] / 100) * $GLOBALS['config']->get('config', 'catalogue_sale_percentage')) : $price['price'];
+                    $price['price'] = ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == 2) ? ($price['price'] - ($price['price'] / 100) * $GLOBALS['config']->get('config', 'catalogue_sale_percentage')) : $price['price'];
                     $price['price'] = $GLOBALS['tax']->priceFormat($price['price'], true);
                     $product['discounts'][] = $price;
                 }
@@ -1907,14 +1885,13 @@ class Catalogue
      * Count products in a category
      *
      * @param int $cat_id
-     * @return int
      */
-    public function productCount($cat_id, $inc_children = true)
+    public function productCount($cat_id, $inc_children = true): int
     {
-        $products = $GLOBALS['db']->select('CubeCart_category_index', array('id'), array('cat_id' => $cat_id));
+        $products = $GLOBALS['db']->select('CubeCart_category_index', ['id'], ['cat_id' => $cat_id]);
         $count  = ($products) ? count($products) : 0;
         if ($inc_children) {
-            $children = $GLOBALS['db']->select('CubeCart_category', array('cat_id'), array('cat_parent_id' => (int)$cat_id));
+            $children = $GLOBALS['db']->select('CubeCart_category', ['cat_id'], ['cat_parent_id' => (int)$cat_id]);
             if ($children) {
                 foreach ($children as $child) {
                     $count += $this->productCount($child['cat_id']);
@@ -1929,37 +1906,35 @@ class Catalogue
      *
      * @param string $hash1
      * @param string $hash2
-     * @return bool
      */
-    public function productHashMatch($hash1, $hash2)
+    public function productHashMatch($hash1, $hash2): bool
     {
         if ($this->_productHash[$hash1] === $this->_productHash[$hash2]) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
-    public function saleOn() {
-        switch($GLOBALS['config']->get('config', 'catalogue_sale_mode')) {
+    public function saleOn()
+    {
+        switch ($GLOBALS['config']->get('config', 'catalogue_sale_mode')) {
             case '1':
             case '2':
                 $this->sale_on = true;
-                if (!empty($GLOBALS['config']->get('config', 'sale_starts')) && (strtotime($GLOBALS['config']->get('config', 'sale_starts')) > time())) {
+                if (!empty($GLOBALS['config']->get('config', 'sale_starts')) && (strtotime((string) $GLOBALS['config']->get('config', 'sale_starts')) > time())) {
                     // Sale has not yet started
                     $this->sale_on = false;
                 }
-                if (!empty($GLOBALS['config']->get('config', 'sale_expires')) && (strtotime($GLOBALS['config']->get('config', 'sale_expires')) < time())) {
+                if (!empty($GLOBALS['config']->get('config', 'sale_expires')) && (strtotime((string) $GLOBALS['config']->get('config', 'sale_expires')) < time())) {
                     // Sale has expired
                     $this->sale_on = false;
                 }
                 return $this->sale_on;
-            break;
             default:
                 return false;
-        }  
+        }
     }
- 
+
     /**
      * Search product catalog
      *
@@ -1971,8 +1946,10 @@ class Catalogue
      */
     public function searchCatalogue($search_data = null, $page = 1, $per_page = 10, $search_mode = 'elastic')
     {
-        if(isset($search_data['keywords']) && !empty($search_data['keywords']) && stristr('{search_term}', $search_data['keywords'])) return false;
-        
+        if (isset($search_data['keywords']) && !empty($search_data['keywords']) && stristr('{search_term}', (string) $search_data['keywords'])) {
+            return false;
+        }
+
         $per_page = (!is_numeric($per_page) || $per_page < 1) ? 10 : $per_page;
 
         $original_search_data = $search_data;
@@ -1987,8 +1964,8 @@ class Catalogue
             CI for CubeCart_category_index
             C for CubeCart_category
         */
-        $where = array();
-        $joins = array();
+        $where = [];
+        $joins = [];
         foreach ($GLOBALS['hooks']->load('class.catalogue.pre_search') as $hook) {
             include $hook;
         }
@@ -2010,26 +1987,26 @@ class Catalogue
 
         if (strtolower($page) != 'all') {
             $page = (is_numeric($page)) ? $page : 1;
-            $limit = sprintf('LIMIT %d OFFSET %d', (int)$per_page, $per_page*($page-1));
+            $limit = sprintf('LIMIT %d OFFSET %d', (int)$per_page, $per_page * ($page - 1));
         } else {
             $limit = 'LIMIT 100';
         }
-        
+
         // Presence of a join is similar to presence of a search keyword
-        if (!empty($joins) || is_array($search_data)) {
-            if($search_mode == 'elastic') {
-                if($GLOBALS['config']->get('config', 'elasticsearch')=='1') {
-                    $es = new ElasticsearchHandler;
-                    $sort = isset($_REQUEST['sort']) ? $_REQUEST['sort'] : array();
+        if (is_array($search_data)) {
+            if ($search_mode == 'elastic') {
+                if ($GLOBALS['config']->get('config', 'elasticsearch') == '1') {
+                    $es = new ElasticsearchHandler();
+                    $sort = $_REQUEST['sort'] ?? [];
                     $es->query($search_data, $sort);
                     $result = $es->search($page, $per_page);
-                    
-                    $this->_category_products = array();
-                    if($result) {
+
+                    $this->_category_products = [];
+                    if ($result) {
                         // Array reverse for sort by relevence DESC
-                        $hits = isset($_REQUEST['sort']['Relevance']) &&  $_REQUEST['sort']['Relevance'] == 'DESC' ? array_reverse($result["hits"]["hits"]) : $result["hits"]["hits"];
-                        $hit_ids = array();
-                        foreach($hits as $hit) {
+                        $hits = isset($_REQUEST['sort']['Relevance']) &&  $_REQUEST['sort']['Relevance'] == 'DESC' ? array_reverse($result['hits']['hits']) : $result['hits']['hits'];
+                        $hit_ids = [];
+                        foreach ($hits as $hit) {
                             $hit_ids[] = (int)$hit['_id'];
                         }
                         if (!empty($hit_ids)) {
@@ -2045,7 +2022,7 @@ class Catalogue
                             $prefix = $GLOBALS['config']->get('config', 'dbprefix');
                             $id_list = implode(',', $hit_ids);
                             $query = sprintf(
-                                "SELECT I.* FROM %1\$sCubeCart_inventory AS I%2\$s WHERE I.product_id IN (%3\$s) AND I.product_id IN (SELECT product_id FROM `%1\$sCubeCart_category_index` as CI INNER JOIN %1\$sCubeCart_category as C WHERE CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1%4\$s",
+                                'SELECT I.* FROM %1$sCubeCart_inventory AS I%2$s WHERE I.product_id IN (%3$s) AND I.product_id IN (SELECT product_id FROM `%1$sCubeCart_category_index` as CI INNER JOIN %1$sCubeCart_category as C WHERE CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1%4$s',
                                 $prefix,
                                 $joinString,
                                 $id_list,
@@ -2054,7 +2031,7 @@ class Catalogue
                             $products = $GLOBALS['db']->query($query);
                             if ($products) {
                                 // Re-order results to match Elasticsearch relevance order
-                                $products_by_id = array();
+                                $products_by_id = [];
                                 foreach ($products as $p) {
                                     $products_by_id[$p['product_id']] = $p;
                                 }
@@ -2066,48 +2043,46 @@ class Catalogue
                             }
                         }
                     }
-                    $this->_category_count  = $result["hits"]["total"]["value"];
-                    if(!empty($this->_category_products)) {
+                    $this->_category_count  = $result['hits']['total']['value'];
+                    if (!empty($this->_category_products)) {
                         $this->_sort_by_relevance = true;
                         return true;
-                    } else {
-                        $this->_elasticsearch = false;
-                        return $this->searchCatalogue($original_search_data, $page, $per_page, 'fulltext');  
                     }
-                } else {
+                    $this->_elasticsearch = false;
                     return $this->searchCatalogue($original_search_data, $page, $per_page, 'fulltext');
                 }
-                
+                return $this->searchCatalogue($original_search_data, $page, $per_page, 'fulltext');
+
             }
-            if($GLOBALS['config']->get('config', 'hide_out_of_stock')=='1') {
+            if ($GLOBALS['config']->get('config', 'hide_out_of_stock') == '1') {
                 $search_data['inStock'] = true;
             }
             // Only uses expensive join if really needed
             $pg_join = '';
             $pg = false;
-            if($GLOBALS['db']->select('CubeCart_pricing_group', false, false, false, 1, false, true)) {
+            if ($GLOBALS['db']->select('CubeCart_pricing_group', false, false, false, 1, false, true)) {
                 $pg = true;
-                $pg_join = " LEFT JOIN (SELECT product_id, MAX(price) as price, MAX(sale_price) as sale_price FROM ".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_pricing_group $group_id GROUP BY product_id) as G ON G.product_id = I.product_id ";
+                $pg_join = ' LEFT JOIN (SELECT product_id, MAX(price) as price, MAX(sale_price) as sale_price FROM '.$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_pricing_group $group_id GROUP BY product_id) as G ON G.product_id = I.product_id ";
             }
             if (!empty($search_data['priceVary'])) {
                 // Allow for a 5% variance in prices
                 if (!empty($search_data['priceMin']) && is_numeric($search_data['priceMin'])) {
-                    $price = round($GLOBALS['tax']->priceConvertFX($search_data['priceMin'])/1.05, 3);
+                    $price = round($GLOBALS['tax']->priceConvertFX($search_data['priceMin']) / 1.05, 3);
                     if ($sale_mode == 1) {
-                        if($pg) {
+                        if ($pg) {
                             $where[] = 'AND (IF (G.product_id IS NULL, IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price) >= '.$price.', IF (G.sale_price IS NULL OR G.sale_price = 0, G.price, G.sale_price) >= '.$price.'))';
                         } else {
                             $where[] = 'AND (IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price) >= '.$price.')';
                         }
-                        
+
                     } elseif ($sale_mode == 2) {
-                        if($pg) {
+                        if ($pg) {
                             $where[] = 'AND (IF (G.price IS NULL, (I.price - ((I.price / 100) * '.$sale_percentage.')) >= '.$price.', (G.price - ((G.price / 100) * '.$sale_percentage.')) >= '.$price.'))';
                         } else {
                             $where[] = 'AND ((I.price - ((I.price / 100) * '.$sale_percentage.')) >= '.$price.')';
                         }
                     } else {
-                        if($pg) {
+                        if ($pg) {
                             $where[] = 'AND (IF (G.price IS NULL, I.price >= '.$price.', G.price >= '.$price.'))';
                         } else {
                             $where[] = 'AND (I.price >= '.$price.')';
@@ -2116,15 +2091,15 @@ class Catalogue
                 }
 
                 if (!empty($search_data['priceMax']) && is_numeric($search_data['priceMax'])) {
-                    $price = round($GLOBALS['tax']->priceConvertFX($search_data['priceMax'])*1.05, 3);
+                    $price = round($GLOBALS['tax']->priceConvertFX($search_data['priceMax']) * 1.05, 3);
                     if ($sale_mode == 1) {
-                        if($pg) {
+                        if ($pg) {
                             $where[] = 'AND (IF (G.product_id IS NULL, IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price) <= '.$price.', IF (G.sale_price IS NULL OR G.sale_price = 0, G.price, G.sale_price) <= '.$price.'))';
                         } else {
                             $where[] = 'AND (IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price) <= '.$price.')';
                         }
                     } elseif ($sale_mode == 2) {
-                        if($pg) {
+                        if ($pg) {
                             $where[] = 'AND (IF (G.price IS NULL, (I.price - ((I.price / 100) * '.$sale_percentage.')) <= '.$price.', (G.price - ((G.price / 100) * '.$sale_percentage.')) <= '.$price.'))';
                         } else {
                             $where[] = 'AND ((I.price - ((I.price / 100) * '.$sale_percentage.')) <= '.$price.')';
@@ -2138,19 +2113,19 @@ class Catalogue
                     $search_data['priceMax'] == $search_data['priceMin']) {
                     $price = round($GLOBALS['tax']->priceConvertFX($search_data['priceMin']), 3);
                     if ($sale_mode == 1) {
-                        if($pg) {
+                        if ($pg) {
                             $where[] = 'AND (IF (G.product_id IS NULL, IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price) = '.$price.', IF (G.sale_price IS NULL OR G.sale_price = 0, G.price, G.sale_price) = '.$price.'))';
-                        } else {   
+                        } else {
                             $where[] = 'AND (IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price) = '.$price.')';
                         }
                     } elseif ($sale_mode == 2) {
-                        if($pg) {
+                        if ($pg) {
                             $where[] = 'AND (IF (G.price IS NULL, (I.price - ((I.price / 100) * '.$sale_percentage.')) = '.$price.', (G.price - ((G.price / 100) * '.$sale_percentage.')) = '.$price.'))';
                         } else {
                             $where[] = 'AND ((I.price - ((I.price / 100) * '.$sale_percentage.')) = '.$price.')';
                         }
                     } else {
-                        if($pg) {
+                        if ($pg) {
                             $where[] = 'AND (IF (G.price IS NULL, I.price = '.$price.', G.price = '.$price.'))';
                         } else {
                             $where[] = 'AND (I.price = '.$price.')';
@@ -2160,19 +2135,19 @@ class Catalogue
                     if (!empty($search_data['priceMin']) && is_numeric($search_data['priceMin'])) {
                         $price = round($GLOBALS['tax']->priceConvertFX($search_data['priceMin']), 3);
                         if ($sale_mode == 1) {
-                            if($pg) {
+                            if ($pg) {
                                 $where[] = 'AND (IF (G.product_id IS NULL, IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price) >= '.$price.', IF (G.sale_price IS NULL OR G.sale_price = 0, G.price, G.sale_price) >= '.$price.'))';
                             } else {
                                 $where[] = 'AND (IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price) >= '.$price.')';
                             }
                         } elseif ($sale_mode == 2) {
-                            if($pg) {
+                            if ($pg) {
                                 $where[] = 'AND (IF (G.price IS NULL, (I.price - ((I.price / 100) * '.$sale_percentage.')) >= '.$price.', (G.price - ((G.price / 100) * '.$sale_percentage.')) >= '.$price.'))';
                             } else {
                                 $where[] = 'AND ((I.price - ((I.price / 100) * '.$sale_percentage.')) >= '.$price.')';
                             }
                         } else {
-                            if($pg) {
+                            if ($pg) {
                                 $where[] = 'AND (IF (G.price IS NULL, I.price >= '.$price.', G.price >= '.$price.'))';
                             } else {
                                 $where[] = 'AND (I.price >= '.$price.')';
@@ -2182,19 +2157,19 @@ class Catalogue
                     if (!empty($search_data['priceMax']) && is_numeric($search_data['priceMax'])) {
                         $price = round($GLOBALS['tax']->priceConvertFX($search_data['priceMax']), 3);
                         if ($sale_mode == 1) {
-                            if($pg) {
+                            if ($pg) {
                                 $where[] = 'AND (IF (G.product_id IS NULL, IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price) <= '.$price.', IF (G.sale_price IS NULL OR G.sale_price = 0, G.price, G.sale_price) <= '.$price.'))';
                             } else {
                                 $where[] = 'AND (IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price) <= '.$price.')';
                             }
                         } elseif ($sale_mode == 2) {
-                            if($pg) {
+                            if ($pg) {
                                 $where[] = 'AND (IF (G.price IS NULL, (I.price - ((I.price / 100) * '.$sale_percentage.')) <= '.$price.', (G.price - ((G.price / 100) * '.$sale_percentage.')) <= '.$price.'))';
                             } else {
                                 $where[] = 'AND ((I.price - ((I.price / 100) * '.$sale_percentage.')) <= '.$price.')';
                             }
                         } else {
-                            if($pg) {
+                            if ($pg) {
                                 $where[] = 'AND (IF (G.price IS NULL, I.price <= '.$price.', G.price <= '.$price.'))';
                             } else {
                                 $where[] = 'AND (I.price <= '.$price.')';
@@ -2204,20 +2179,20 @@ class Catalogue
                 }
             }
             // Manufacturer
-            if (isset($search_data['manufacturer']) && is_array($search_data['manufacturer']) && count($search_data['manufacturer'])>0) {
+            if (isset($search_data['manufacturer']) && is_array($search_data['manufacturer']) && count($search_data['manufacturer']) > 0) {
                 $where[] = 'AND I.manufacturer IN ('.implode(',', $this->get_int_array($search_data['manufacturer'])).')';
             }
 
-            $order = array();
-            
+            $order = [];
+
             if (isset($_GET['sort']) && is_array($_GET['sort'])) {
                 foreach ($_GET['sort'] as $field => $direction) {
-                    if (strtolower($field) == 'relevance' && $search_mode !== 'fulltext') {
+                    if (strtolower((string) $field) == 'relevance' && $search_mode !== 'fulltext') {
                         break;
                     }
                     $order['field'] = $field;
                     if ($field == 'price') {
-                        if($pg) {
+                        if ($pg) {
                             if ($sale_mode == 1) {
                                 $order['field'] = 'IF (G.product_id IS NULL, IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price), IF (G.sale_price IS NULL OR G.sale_price = 0, G.price, G.sale_price))';
                             } else {
@@ -2231,7 +2206,7 @@ class Catalogue
                             }
                         }
                     }
-                    $order['sort'] = (strtolower($direction) == 'asc') ? 'ASC' : 'DESC';
+                    $order['sort'] = (strtolower((string) $direction) == 'asc') ? 'ASC' : 'DESC';
                     break;
                 }
             } elseif ($search_mode == 'fulltext') {
@@ -2248,7 +2223,7 @@ class Catalogue
             }
             $order_string = '';
             if (empty($search_data['keywords']) && isset($order) && $order['field'] == 'Relevance') {
-                if($pg) {
+                if ($pg) {
                     if ($sale_mode == 1) {
                         $order['field'] = 'IF (G.product_id IS NULL, IF (I.sale_price IS NULL OR I.sale_price = 0, I.price, I.sale_price), IF (G.sale_price IS NULL OR G.sale_price = 0, G.price, G.sale_price))';
                     } else {
@@ -2263,7 +2238,7 @@ class Catalogue
                 }
             }
             if (is_array($order)) {
-                $field_format = preg_match('/[\s\.]/', $order['field']) ? $order['field'] : '`'.$order['field'].'`';
+                $field_format = preg_match('/[\s\.]/', (string) $order['field']) ? $order['field'] : '`'.$order['field'].'`';
                 $order_string = 'ORDER BY '.$field_format.' '.$order['sort'];
             }
 
@@ -2273,18 +2248,18 @@ class Catalogue
             // Only look for items that are in stock
             if (isset($search_data['inStock'])) {
                 $oosWhere = $this->outOfStockWhere(false, 'I');
-                if(!empty($oosWhere)) {
+                if (!empty($oosWhere)) {
                     $where[] = "AND $oosWhere";
                 }
             }
 
             $manufacturer_or = '';
-            if(!isset($search_data['manufacturer']) && $manufacturers  = $GLOBALS['db']->select('CubeCart_manufacturers', array('id'), "`name` LIKE '%".$GLOBALS['db']->sqlSafe($search_data['keywords'])."%'")) {
-                $ids = array();
-                foreach($manufacturers as $manufacturer) {
+            if (!isset($search_data['manufacturer']) && $manufacturers  = $GLOBALS['db']->select('CubeCart_manufacturers', ['id'], "`name` LIKE '%".$GLOBALS['db']->sqlSafe($search_data['keywords'])."%'")) {
+                $ids = [];
+                foreach ($manufacturers as $manufacturer) {
                     $ids[] = (int)$manufacturer['id'];
                 }
-                $manufacturer_or = 'OR `I`.`manufacturer` IN('.implode(',',$ids).')';
+                $manufacturer_or = 'OR `I`.`manufacturer` IN('.implode(',', $ids).')';
             }
 
             $whereString = (isset($where) && is_array($where)) ? implode(' ', $where) : '';
@@ -2297,7 +2272,7 @@ class Catalogue
 
             $indexes = $GLOBALS['db']->getFulltextIndex('CubeCart_inventory', 'I');
 
-            if (!empty($joins) || (isset($search_data['keywords']) && is_array($indexes) && !empty($search_data['keywords']))) {
+            if (isset($search_data['keywords']) && is_array($indexes) && !empty($search_data['keywords'])) {
                 if ($search_mode == 'fulltext') {
                     $fulltext_min_word_len = $GLOBALS['db']->getSearchWordLen();
                     $words = preg_split('/[\s,]+/', $search_data['keywords']);
@@ -2309,143 +2284,134 @@ class Catalogue
                     } else {
                         $longest_search_word_len = strlen($search_data['keywords']);
                     }
-                }
-
-                if ($search_mode == 'fulltext') {
                     if ($longest_search_word_len < $fulltext_min_word_len) {
                         return $this->searchCatalogue($original_search_data, $page, $per_page, 'rlike');
                     }
-
                     switch (true) {
-                    case (preg_match('#[\+\-\>\<][\w]+#iu', $search_data['keywords'])):
-                        ## Switch to bolean mode
-                        $mode = 'IN BOOLEAN MODE';
-                        break;
-                    default:
-                        $search_data['keywords'] = str_replace(' ', '*) +(*', $search_data['keywords']);
-                        $search_data['keywords'] .= '*)';
-                        $search_data['keywords'] = '+(*'.$search_data['keywords'];
-                        $mode = 'IN BOOLEAN MODE';
-                        break;
+                        case (preg_match('#[\+\-\>\<][\w]+#iu', $search_data['keywords'])):
+                            ## Switch to bolean mode
+                            $mode = 'IN BOOLEAN MODE';
+                            break;
+                        default:
+                            $search_data['keywords'] = str_replace(' ', '*) +(*', $search_data['keywords']);
+                            $search_data['keywords'] .= '*)';
+                            $search_data['keywords'] = '+(*'.$search_data['keywords'];
+                            $mode = 'IN BOOLEAN MODE';
+                            break;
                     }
                     $words = preg_replace('/[^\p{Greek}a-zA-Z0-9\-\s]+/u', '', $search_data['keywords']);
                     $words = $GLOBALS['db']->sqlSafe($words);
                     // Score matching string
                     $match = sprintf("MATCH (%s) AGAINST('%s' %s)", implode(',', $indexes), $words, $mode);
                     $match_val = '0.5';
-
-                    if($pg) {
+                    if ($pg) {
                         $query_string = "SELECT I.*, %2\$s AS Relevance FROM %1\$sCubeCart_inventory AS I LEFT JOIN (SELECT product_id, MAX(price) as price, MAX(sale_price) as sale_price FROM %1\$sCubeCart_pricing_group $group_id GROUP BY product_id) as G ON G.product_id = I.product_id $joinString WHERE I.product_id IN (SELECT product_id FROM `%1\$sCubeCart_category_index` as CI INNER JOIN %1\$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 AND ((%2\$s) >= %4\$s $manufacturer_or) %3\$s %5\$s %6\$s";
                     } else {
                         $query_string = "SELECT I.*, %2\$s AS Relevance FROM %1\$sCubeCart_inventory AS I $joinString WHERE I.product_id IN (SELECT product_id FROM `%1\$sCubeCart_category_index` as CI INNER JOIN %1\$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 AND ((%2\$s) >= %4\$s $manufacturer_or) %3\$s %5\$s %6\$s";
                     }
                     $query = sprintf($query_string, $GLOBALS['config']->get('config', 'dbprefix'), $match, $whereString, $match_val, $order_string, $limit);
-            
                     if ($search = $GLOBALS['db']->query($query)) {
-                        if($pg) {
+                        if ($pg) {
                             $query_string = "SELECT COUNT(I.product_id) as count, %2\$s AS Relevance FROM %1\$sCubeCart_inventory AS I LEFT JOIN (SELECT product_id, MAX(price) as price, MAX(sale_price) as sale_price FROM %1\$sCubeCart_pricing_group $group_id GROUP BY product_id) as G ON G.product_id = I.product_id $joinString WHERE I.product_id IN (SELECT product_id FROM `%1\$sCubeCart_category_index` as CI INNER JOIN %1\$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 AND ((%2\$s) >= %4\$s $manufacturer_or) %3\$s GROUP BY I.product_id %5\$s";
                         } else {
                             $query_string = "SELECT COUNT(I.product_id) as count, %2\$s AS Relevance FROM %1\$sCubeCart_inventory AS I $joinString WHERE I.product_id IN (SELECT product_id FROM `%1\$sCubeCart_category_index` as CI INNER JOIN %1\$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 AND ((%2\$s) >= %4\$s $manufacturer_or) %3\$s GROUP BY I.product_id %5\$s";
                         }
                         $q2 = sprintf($query_string, $GLOBALS['config']->get('config', 'dbprefix'), $match, $whereString, $match_val, $order_string);
                         $count = $GLOBALS['db']->query($q2);
-                        $this->_category_count  = (int)count($count);
+                        $this->_category_count  = count($count);
                         $this->_category_products = $search;
                         $this->_sort_by_relevance = true;
-                        if ($page == 1 && count($this->_category_products)==1 && ctype_digit($this->_category_products[0]['product_id']) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH']!=='XMLHttpRequest')) {
+                        if ($page == 1 && count($this->_category_products) == 1 && ctype_digit((string) $this->_category_products[0]['product_id']) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] !== 'XMLHttpRequest')) {
                             $GLOBALS['gui']->setNotify(sprintf($GLOBALS['language']->catalogue['notify_product_search_one'], $_REQUEST['search']['keywords']));
                             httpredir('?_a=product&product_id='.$this->_category_products[0]['product_id']);
                         }
                         return true;
-                    } elseif ($search_mode == 'fulltext') {
-                        return $this->searchCatalogue($original_search_data, $page, $per_page, 'rlike');
                     }
-                } else {
-                    $search_mode = in_array($search_mode, array('rlike','like')) ? $search_mode : 'rlike';
-                    $this->_sort_by_relevance = false;
-                    $like = array();
-                    if (!empty($search_data['keywords'])) {
-                        $searchwords = preg_split('/[\s,]+/', $GLOBALS['db']->sqlSafe($search_data['keywords']));
-                        $searchArray = array();
-                        foreach ($searchwords as $word) {
-                            if (empty($word) && !is_numeric($word)) {
-                                continue;
-                            }
-                            $searchArray[] = $word;
+                    return $this->searchCatalogue($original_search_data, $page, $per_page, 'rlike');
+                }
+                $search_mode = in_array($search_mode, ['rlike','like']) ? $search_mode : 'rlike';
+                $this->_sort_by_relevance = false;
+                $like = [];
+                if (!empty($search_data['keywords'])) {
+                    $searchwords = preg_split('/[\s,]+/', (string) $GLOBALS['db']->sqlSafe($search_data['keywords']));
+                    $searchArray = [];
+                    foreach ($searchwords as $word) {
+                        if (empty($word) && !is_numeric($word)) {
+                            continue;
                         }
+                        $searchArray[] = $word;
+                    }
 
-                        $noKeys = count($searchArray);
-                        $regexp = $regexp_desc = '';
-                        
-                        $search_mode = in_array($search_mode, array('rlike','like')) ? $search_mode : 'rlike';
-                        if($search_mode == 'rlike' && version_compare($GLOBALS['db']->serverVersion(), '8.0.0') >= 0) {
-                            $like_keyword = "RLIKE";
-                            $like_prefix = '\\\b';
-                            $like_postfix = '\\\b';
-                        } elseif ($search_mode == 'rlike') {
-                            $like_keyword = "RLIKE";
-                            $like_prefix = '[[:<:]]';
-                            $like_postfix = '[[:>:]].*';
-                        } else {
-                            $like_keyword = "LIKE";
-                            $like_prefix = '%';
-                            $like_postfix = '%';
+                    $noKeys = count($searchArray);
+                    $regexp = $regexp_desc = '';
+
+                    $search_mode = in_array($search_mode, ['rlike','like']) ? $search_mode : 'rlike';
+                    if ($search_mode == 'rlike' && version_compare($GLOBALS['db']->serverVersion(), '8.0.0') >= 0) {
+                        $like_keyword = 'RLIKE';
+                        $like_prefix = '\\\b';
+                        $like_postfix = '\\\b';
+                    } elseif ($search_mode == 'rlike') {
+                        $like_keyword = 'RLIKE';
+                        $like_prefix = '[[:<:]]';
+                        $like_postfix = '[[:>:]].*';
+                    } else {
+                        $like_keyword = 'LIKE';
+                        $like_prefix = '%';
+                        $like_postfix = '%';
+                    }
+                    for ($i = 0; $i < $noKeys; ++$i) {
+                        $ucSearchTerm = strtoupper($searchArray[$i]);
+                        if (($ucSearchTerm != 'AND') && ($ucSearchTerm != 'OR')) {
+                            // Decode HTML entities from the raw search term first
+                            $term = html_entity_decode($searchArray[$i], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                            // For RLIKE, escape MySQL regex metacharacters to prevent parse errors on input like ( ) [ ] . * etc.
+                            $term_safe = ($search_mode === 'rlike') ? addcslashes($term, '\\.[]()*+?{}^$|') : $term;
+                            $regexp = $like_prefix.$term_safe.$like_postfix;
+                            // For the description column (stored as HTML) re-encode entities then escape regex metacharacters
+                            $term_desc = htmlspecialchars($term, ENT_QUOTES, 'UTF-8', false);
+                            $term_desc_safe = ($search_mode === 'rlike') ? addcslashes($term_desc, '\\.[]()*+?{}^$|') : $term_desc;
+                            $regexp_desc = $like_prefix.$term_desc_safe.$like_postfix;
                         }
-                        for ($i=0; $i<$noKeys; ++$i) {
-                            $ucSearchTerm = strtoupper($searchArray[$i]);
-                            if (($ucSearchTerm != 'AND') && ($ucSearchTerm != 'OR')) {
-                                // Decode HTML entities from the raw search term first
-                                $term = html_entity_decode($searchArray[$i], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                                // For RLIKE, escape MySQL regex metacharacters to prevent parse errors on input like ( ) [ ] . * etc.
-                                $term_safe = ($search_mode === 'rlike') ? addcslashes($term, '\\.[]()*+?{}^$|') : $term;
-                                $regexp = $like_prefix.$term_safe.$like_postfix;
-                                // For the description column (stored as HTML) re-encode entities then escape regex metacharacters
-                                $term_desc = htmlspecialchars($term, ENT_QUOTES, 'UTF-8', false);
-                                $term_desc_safe = ($search_mode === 'rlike') ? addcslashes($term_desc, '\\.[]()*+?{}^$|') : $term_desc;
-                                $regexp_desc = $like_prefix.$term_desc_safe.$like_postfix;
-                            }
 
                         if ($search_mode == 'rlike' && strstr($like_postfix, '.*')) {
-                            $regexp = substr($regexp, 0, strlen($regexp)-2);
-                            $regexp_desc = substr($regexp_desc, 0, strlen($regexp_desc)-2);
+                            $regexp = substr($regexp, 0, strlen($regexp) - 2);
+                            $regexp_desc = substr($regexp_desc, 0, strlen($regexp_desc) - 2);
                         }
 
                         // Use fulltext index columns so RLIKE/LIKE searches the same fields
-                        $search_cols = array();
+                        $search_cols = [];
                         if (is_array($indexes)) {
                             foreach ($indexes as $col) {
-                                $search_cols[] = preg_replace('/^[A-Z]+\./', '', $col);
+                                $search_cols[] = preg_replace('/^[A-Z]+\./', '', (string) $col);
                             }
                         }
                         if (empty($search_cols)) {
-                            $search_cols = array('name', 'description', 'product_code');
+                            $search_cols = ['name', 'description', 'product_code'];
                         }
-                        $cq = array();
-                        foreach($search_cols as $col) {
+                        $cq = [];
+                        foreach ($search_cols as $col) {
                             $r = ($col === 'product_code') ? $regexp : $regexp_desc;
                             $cq[] = "I.$col ".$like_keyword." '".addslashes($r)."'";
                         }
-                        $like[$i] = "(".implode(' OR ', $cq).")";
+                        $like[$i] = '('.implode(' OR ', $cq).')';
                     }
-                  }
-                  $likeString = ' AND ('.implode(' OR ',$like).' '.$manufacturer_or.')';
-
-                  $q2 = "SELECT I.* FROM ".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_inventory AS I".$pg_join.$joinString." WHERE I.product_id IN (SELECT product_id FROM `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_category_index` as CI INNER JOIN ".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 ".$whereString.$likeString;
-                    
-                    $query = $q2.' '.$order_string.' '.$limit;
-                    $search = $GLOBALS['db']->query($query);
-                    if (is_array($search) && count($search)>0) {
-                        $count = $GLOBALS['db']->query($q2);
-                        $this->_category_count  = (int)count($count);
-                        $this->_category_products = $search;
-                        if ($page == 1 && count($this->_category_products)==1 && ctype_digit($this->_category_products[0]['product_id']) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH']!=='XMLHttpRequest')) {
-                            $GLOBALS['gui']->setNotify(sprintf($GLOBALS['language']->catalogue['notify_product_search_one'], $_REQUEST['search']['keywords']));
-                            httpredir('?_a=product&product_id='.$this->_category_products[0]['product_id']);
-                        }
-                        return true;
-                    } elseif ($search_mode=="rlike") {
-                        return $this->searchCatalogue($original_search_data, $page, $per_page, 'like');
+                }
+                $likeString = ' AND ('.implode(' OR ', $like).' '.$manufacturer_or.')';
+                $q2 = 'SELECT I.* FROM '.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_inventory AS I'.$pg_join.$joinString.' WHERE I.product_id IN (SELECT product_id FROM `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_category_index` as CI INNER JOIN '.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 '.$whereString.$likeString;
+                $query = $q2.' '.$order_string.' '.$limit;
+                $search = $GLOBALS['db']->query($query);
+                if (is_array($search) && count($search) > 0) {
+                    $count = $GLOBALS['db']->query($q2);
+                    $this->_category_count  = count($count);
+                    $this->_category_products = $search;
+                    if ($page == 1 && count($this->_category_products) == 1 && ctype_digit((string) $this->_category_products[0]['product_id']) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] !== 'XMLHttpRequest')) {
+                        $GLOBALS['gui']->setNotify(sprintf($GLOBALS['language']->catalogue['notify_product_search_one'], $_REQUEST['search']['keywords']));
+                        httpredir('?_a=product&product_id='.$this->_category_products[0]['product_id']);
                     }
+                    return true;
+                }
+                if ($search_mode == 'rlike') {
+                    return $this->searchCatalogue($original_search_data, $page, $per_page, 'like');
                 }
             }
         } else {
@@ -2456,10 +2422,10 @@ class Catalogue
                         return true;
                     }
                 }
-            } elseif (strtolower($search_data) == 'sale') {
+            } elseif (strtolower((string) $search_data) == 'sale') {
                 if (isset($_GET['sort']) && is_array($_GET['sort'])) {
                     foreach ($_GET['sort'] as $field => $direction) {
-                        $order[$field] = (strtolower($direction) == 'asc') ? 'ASC' : 'DESC';
+                        $order[$field] = (strtolower((string) $direction) == 'asc') ? 'ASC' : 'DESC';
                         break;
                     }
                 } else {
@@ -2467,7 +2433,7 @@ class Catalogue
                 }
 
                 if (is_array($order)) {
-                    if (key($order) == "price") {
+                    if (key($order) == 'price') {
                         if ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == '1') {
                             $order_string = 'ORDER BY I.sale_price '.current($order);
                         } elseif ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == '2' && $GLOBALS['config']->get('config', 'catalogue_sale_percentage') > 0) {
@@ -2480,7 +2446,7 @@ class Catalogue
                     }
                 }
                 $where2 = $this->outOfStockWhere(false, 'I', true);
-                if($pg) {
+                if ($pg) {
                     $whereString = 'IF (G.sale_price IS NULL, I.sale_price, G.sale_price) > 0'.$where2;
                 } else {
                     $whereString = 'I.sale_price > 0'.$where2;
@@ -2488,11 +2454,11 @@ class Catalogue
                 if ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == '1') {
                     $query = sprintf("SELECT I.* FROM %1\$sCubeCart_inventory AS I LEFT JOIN (SELECT product_id, MAX(price) as price, MAX(sale_price) as sale_price FROM %1\$sCubeCart_pricing_group $group_id GROUP BY product_id) as G ON G.product_id = I.product_id WHERE I.product_id IN (SELECT product_id FROM `%1\$sCubeCart_category_index` as CI INNER JOIN %1\$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 AND %2\$s %3\$s %4\$s", $GLOBALS['config']->get('config', 'dbprefix'), $whereString, $order_string, $limit);
                 } elseif ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == '2') {
-                    $decimal_percent = $GLOBALS['config']->get('config', 'catalogue_sale_percentage')/100;
-                    if($pg) {
+                    $decimal_percent = $GLOBALS['config']->get('config', 'catalogue_sale_percentage') / 100;
+                    if ($pg) {
                         $query_string = "SELECT I.* FROM %1\$sCubeCart_inventory AS I LEFT JOIN (SELECT product_id, MAX(price) as price, price*%4\$s as sale_price FROM %1\$sCubeCart_pricing_group $group_id GROUP BY product_id) as G ON G.product_id = I.product_id WHERE I.product_id IN (SELECT product_id FROM `%1\$sCubeCart_category_index` as CI INNER JOIN %1\$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 %2\$s %3\$s";
                     } else {
-                        $query_string = "SELECT I.* FROM %1\$sCubeCart_inventory AS I WHERE I.product_id IN (SELECT product_id FROM `%1\$sCubeCart_category_index` as CI INNER JOIN %1\$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 %2\$s %3\$s";
+                        $query_string = 'SELECT I.* FROM %1$sCubeCart_inventory AS I WHERE I.product_id IN (SELECT product_id FROM `%1$sCubeCart_category_index` as CI INNER JOIN %1$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 %2$s %3$s';
                     }
                     $query = sprintf($query_string, $GLOBALS['config']->get('config', 'dbprefix'), $order_string, $limit, $decimal_percent);
                 } else {
@@ -2502,12 +2468,12 @@ class Catalogue
                     include $hook;
                 }
                 if (($sale = $GLOBALS['db']->query($query)) !== false) {
-                    if($pg) {
+                    if ($pg) {
                         $query_string = "SELECT COUNT(*) AS `Count` FROM %1\$sCubeCart_inventory AS I LEFT JOIN (SELECT product_id, MAX(price) as price, MAX(sale_price) as sale_price FROM %1\$sCubeCart_pricing_group $group_id GROUP BY product_id) as G ON G.product_id = I.product_id WHERE I.product_id IN (SELECT product_id FROM `%1\$sCubeCart_category_index` as CI INNER JOIN %1\$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 AND %2\$s";
                     } else {
-                        $query_string = "SELECT COUNT(*) AS `Count` FROM %1\$sCubeCart_inventory AS I WHERE I.product_id IN (SELECT product_id FROM `%1\$sCubeCart_category_index` as CI INNER JOIN %1\$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 AND %2\$s";
+                        $query_string = 'SELECT COUNT(*) AS `Count` FROM %1$sCubeCart_inventory AS I WHERE I.product_id IN (SELECT product_id FROM `%1$sCubeCart_category_index` as CI INNER JOIN %1$sCubeCart_category as C where CI.cat_id = C.cat_id AND C.status = 1) AND I.status = 1 AND %2$s';
                     }
-                    
+
                     $q2 = sprintf($query_string, $GLOBALS['config']->get('config', 'dbprefix'), $whereString);
                     $count = $GLOBALS['db']->query($q2);
                     $this->_category_count  = (int)$count[0]['Count'];
@@ -2515,8 +2481,8 @@ class Catalogue
                     foreach ($GLOBALS['hooks']->load('class.catalogue.search_catalogue.sale_items.post') as $hook) {
                         include $hook;
                     }
-                    if(isset($sale) && is_array($sale) && !empty($sale)){
-                        foreach($sale as $k => $s){
+                    if (isset($sale) && is_array($sale) && !empty($sale)) {
+                        foreach ($sale as $k => $s) {
                             $sale[$k] = $this->getProductPrice($s);
                         }
                         $this->_category_products = $sale;
@@ -2534,22 +2500,19 @@ class Catalogue
      * @param string $cat_data_key
      * @param string $cat_data_value
      */
-    public function setCategory($cat_data_key, $cat_data_value)
+    public function setCategory($cat_data_key, $cat_data_value): void
     {
         $this->_categoryData[$cat_data_key] = $cat_data_value;
     }
 
     //=====[ Private ]=======================================
-
     /**
      * Translate a category if a translation exists
-     *
-     * @return bool
      */
-    private function _categoryTranslation()
+    private function _categoryTranslation(): bool
     {
         if (isset($GLOBALS['language']) && !empty($GLOBALS['language'])) {
-            if (($result = $GLOBALS['db']->select('CubeCart_category_language', array('cat_name', 'cat_desc'), array('cat_id' => $this->_categoryData['cat_id'], 'language' => $GLOBALS['language']))) !== false) {
+            if (($result = $GLOBALS['db']->select('CubeCart_category_language', ['cat_name', 'cat_desc'], ['cat_id' => $this->_categoryData['cat_id'], 'language' => $GLOBALS['language']])) !== false) {
                 $this->_categoryData['cat_name'] = $result[0]['cat_name'];
                 $this->_categoryData['cat_desc'] = $result[0]['cat_desc'];
                 return true;
@@ -2557,14 +2520,15 @@ class Catalogue
         }
         return false;
     }
-    
+
     /**
      * Give option keys a description
      *
      * @return arra
      */
-    private function _optionDescriptions() {
-        return array(
+    private function _optionDescriptions(): array
+    {
+        return [
             self::OPTION_SELECT     => $GLOBALS['language']->catalogue['option_type_select'],
             self::OPTION_TEXTBOX    => $GLOBALS['language']->catalogue['option_type_textbox'],
             self::OPTION_TEXTAREA   => $GLOBALS['language']->catalogue['option_type_textarea'],
@@ -2573,8 +2537,8 @@ class Catalogue
             self::OPTION_CHECKBOX   => $GLOBALS['language']->catalogue['option_type_checkbox'],
             self::OPTION_DATEPICKER => $GLOBALS['language']->catalogue['option_type_datepicker'],
             self::OPTION_HIDDEN     => $GLOBALS['language']->catalogue['option_type_hidden'],
-            self::OPTION_FILE       => $GLOBALS['language']->catalogue['option_type_file']
-        );
+            self::OPTION_FILE       => $GLOBALS['language']->catalogue['option_type_file'],
+        ];
     }
 
     /**
@@ -2583,7 +2547,7 @@ class Catalogue
      * @param int $product_id
      * @return array/false
      */
-    private function _productGallery($product_id = false)
+    private function _productGallery($product_id = false): array
     {
         if (isset($product_id) && is_numeric($product_id)) {
             $skins = $GLOBALS['gui']->getSkinData();
@@ -2597,13 +2561,13 @@ class Catalogue
 
             // Look for images
             if (($gallery = $GLOBALS['db']->select('`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_image_index` AS `i` INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_filemanager` AS `f` ON i.file_id = f.file_id', false, 'i.product_id = '.$product_id, 'ORDER BY i.main_img DESC')) !== false) {
-                $duplicates = array();
+                $duplicates = [];
                 foreach ($gallery as $key => $image) {
-                    if (is_array($image_types) && !in_array($image['file_id'], $duplicates)) {
+                    if (!in_array($image['file_id'], $duplicates)) {
                         $duplicates[] = $image['file_id'];
                         foreach ($image_types as $type) {
                             $image[$type] = $this->imagePath($image['file_id'], $type);
-                            $image['image_tags'] = $GLOBALS['catalogue']->image_tags[$image[$type]] ?? array();
+                            $image['image_tags'] = $GLOBALS['catalogue']->image_tags[$image[$type]] ?? [];
                         }
                         $return[] = $image;
                         $json['image_'.$image['id']] = $image;
@@ -2618,20 +2582,19 @@ class Catalogue
         }
         $GLOBALS['smarty']->assign('GALLERY_JSON', "''");
 
-        return array();
+        return [];
     }
 
     /**
      * Increment product views
      *
      * @param int $product_id
-     * @return bool
      */
-    private function _productPopularity($product_id = false)
+    private function _productPopularity($product_id = false): bool
     {
         $product_id = intval($product_id);
         if ($product_id > 0) {
-            $GLOBALS['db']->update('CubeCart_inventory', array('popularity' => '+1'), array('product_id' => $product_id), false);
+            $GLOBALS['db']->update('CubeCart_inventory', ['popularity' => '+1'], ['product_id' => $product_id], false);
             return true;
         }
         return false;

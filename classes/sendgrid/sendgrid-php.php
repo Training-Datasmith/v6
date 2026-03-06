@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This file is used to load the Composer autoloader if required.
  */
@@ -20,9 +22,7 @@ if (!class_exists(Mail::class)) {
         require_once $composerAutoloadFile;
 
         // If desired class still not existing
-        if (!class_exists(Mail::class)) {
-            // Suggest to review the Composer autoloader settings
-            error_log("Error finding SendGrid classes. Please review your autoloading configuration.");
-        }
+        // Suggest to review the Composer autoloader settings
+        error_log('Error finding SendGrid classes. Please review your autoloading configuration.');
     }
 }

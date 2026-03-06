@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -46,7 +48,7 @@ try {
 $request_body = json_decode('{
   "name": "new_example_name"
 }');
-$template_id = "test_url_param";
+$template_id = 'test_url_param';
 
 try {
     $response = $sg->client->templates()->_($template_id)->patch($request_body);
@@ -61,7 +63,7 @@ try {
 // Retrieve a single transactional template. #
 // GET /templates/{template_id} #
 
-$template_id = "test_url_param";
+$template_id = 'test_url_param';
 
 try {
     $response = $sg->client->templates()->_($template_id)->get();
@@ -76,7 +78,7 @@ try {
 // Delete a template. #
 // DELETE /templates/{template_id} #
 
-$template_id = "test_url_param";
+$template_id = 'test_url_param';
 
 try {
     $response = $sg->client->templates()->_($template_id)->delete();
@@ -99,7 +101,7 @@ $request_body = json_decode('{
   "subject": "<%subject%>",
   "template_id": "ddb96bbc-9b92-425e-8979-99464621b543"
 }');
-$template_id = "test_url_param";
+$template_id = 'test_url_param';
 
 try {
     $response = $sg->client->templates()->_($template_id)->versions()->post($request_body);
@@ -121,8 +123,8 @@ $request_body = json_decode('{
   "plain_content": "<%body%>",
   "subject": "<%subject%>"
 }');
-$template_id = "test_url_param";
-$version_id = "test_url_param";
+$template_id = 'test_url_param';
+$version_id = 'test_url_param';
 
 try {
     $response = $sg->client->templates()->_($template_id)->versions()->_($version_id)->patch($request_body);
@@ -137,8 +139,8 @@ try {
 // Retrieve a specific transactional template version. #
 // GET /templates/{template_id}/versions/{version_id} #
 
-$template_id = "test_url_param";
-$version_id = "test_url_param";
+$template_id = 'test_url_param';
+$version_id = 'test_url_param';
 
 try {
     $response = $sg->client->templates()->_($template_id)->versions()->_($version_id)->get();
@@ -153,8 +155,8 @@ try {
 // Delete a transactional template version. #
 // DELETE /templates/{template_id}/versions/{version_id} #
 
-$template_id = "test_url_param";
-$version_id = "test_url_param";
+$template_id = 'test_url_param';
+$version_id = 'test_url_param';
 
 try {
     $response = $sg->client->templates()->_($template_id)->versions()->_($version_id)->delete();
@@ -169,8 +171,8 @@ try {
 // Activate a transactional template version. #
 // POST /templates/{template_id}/versions/{version_id}/activate #
 
-$template_id = "test_url_param";
-$version_id = "test_url_param";
+$template_id = 'test_url_param';
+$version_id = 'test_url_param';
 
 try {
     $response = $sg->client->templates()->_($template_id)->versions()->_($version_id)->activate()->post();

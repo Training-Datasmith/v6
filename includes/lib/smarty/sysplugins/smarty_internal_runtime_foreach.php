@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Foreach Runtime Methods count(), init(), restore()
  *
@@ -14,7 +16,7 @@ class Smarty_Internal_Runtime_Foreach
      *
      * @var array
      */
-    private $stack = array();
+    private $stack = [];
 
     /**
      * Init foreach loop
@@ -39,10 +41,10 @@ class Smarty_Internal_Runtime_Foreach
         $needTotal = false,
         $key = null,
         $name = null,
-        $properties = array()
+        $properties = []
     ) {
         $needTotal = $needTotal || isset($properties[ 'total' ]);
-        $saveVars = array();
+        $saveVars = [];
         $total = null;
         if (!is_array($from)) {
             if (is_object($from)) {
@@ -57,10 +59,10 @@ class Smarty_Internal_Runtime_Foreach
             $total = empty($from) ? 0 : ($needTotal ? count($from) : 1);
         }
         if (isset($tpl->tpl_vars[ $item ])) {
-            $saveVars[ 'item' ] = array(
+            $saveVars[ 'item' ] = [
                 $item,
-                $tpl->tpl_vars[ $item ]
-            );
+                $tpl->tpl_vars[ $item ],
+            ];
         }
         $tpl->tpl_vars[ $item ] = new Smarty_Variable(null, $tpl->isRenderingCache);
         if ($total === 0) {
@@ -68,10 +70,10 @@ class Smarty_Internal_Runtime_Foreach
         } else {
             if ($key) {
                 if (isset($tpl->tpl_vars[ $key ])) {
-                    $saveVars[ 'key' ] = array(
+                    $saveVars[ 'key' ] = [
                         $key,
-                        $tpl->tpl_vars[ $key ]
-                    );
+                        $tpl->tpl_vars[ $key ],
+                    ];
                 }
                 $tpl->tpl_vars[ $key ] = new Smarty_Variable(null, $tpl->isRenderingCache);
             }
@@ -82,12 +84,12 @@ class Smarty_Internal_Runtime_Foreach
         if ($name) {
             $namedVar = "__smarty_foreach_{$name}";
             if (isset($tpl->tpl_vars[ $namedVar ])) {
-                $saveVars[ 'named' ] = array(
+                $saveVars[ 'named' ] = [
                     $namedVar,
-                    $tpl->tpl_vars[ $namedVar ]
-                );
+                    $tpl->tpl_vars[ $namedVar ],
+                ];
             }
-            $namedProp = array();
+            $namedProp = [];
             if (isset($properties[ 'total' ])) {
                 $namedProp[ 'total' ] = $total;
             }

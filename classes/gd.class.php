@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -13,32 +15,27 @@
 
 class GD
 {
-    private $_abort = false;
+    private bool $_abort = false;
+    private readonly string $_gdTargetDir;
+    private readonly bool $_gdWebpSupport;
 
-    private $_gdImageMax;
-    private $_gdJpegQuality;
-    private $_gdTargetDir;
-    private $_gdWebpSupport;
+    private bool|array|null $_gdImageData = null;
+    private array|bool $_gdImageExif = [];
+    private ?int $_gdImageType = null;
 
-    private $_gdImageData;
-    private $_gdImageExif = array();
-    private $_gdImageType;
+    private bool|\GdImage|null $_gdImageSource = null;
+    private bool|\GdImage|null $_gdImageOutput = null;
 
-    private $_gdImageSource;
-    private $_gdImageOutput;
-
-    private $_gdImageArray = array();
+    private $_gdImageArray = [];
 
     ##############################################
 
-    public function __construct($targetDir, $maxImage = false, $jpegQuality = 80)
+    public function __construct(string $targetDir, private $_gdImageMax = false, private $_gdJpegQuality = 80)
     {
-        if (substr($targetDir, -1) != '/') {
+        if (!str_ends_with($targetDir, '/')) {
             $targetDir .= '/';
         }
         $this->_gdTargetDir  = $targetDir;
-        $this->_gdImageMax  = $maxImage;
-        $this->_gdJpegQuality = $jpegQuality;
         $this->_gdWebpSupport = function_exists('imagecreatefromwebp');
     }
 
@@ -52,7 +49,7 @@ class GD
         $this->gdClear();
     }
 
-    public function gdClear()
+    public function gdClear(): void
     {
         if ($this->_gdImageOutput) {
             imagedestroy($this->_gdImageOutput);
@@ -63,7 +60,7 @@ class GD
         $this->_gdImageOutput = false;
         $this->_gdImageSource = false;
         $this->_gdImageData  = false;
-        $this->_gdImageExif = array();
+        $this->_gdImageExif = [];
     }
 
     /**
@@ -74,7 +71,7 @@ class GD
      * @param int $w
      * @param int $h
      */
-    public function gdCrop($x, $y, $w, $h)
+    public function gdCrop($x, $y, $w, $h): void
     {
         if ($im = $this->gdGetCurrentData()) {
             $oh = imagesy($im);
@@ -119,14 +116,15 @@ class GD
      * Load file
      *
      * @param string $file
-     * @return bool
      */
-    public function gdLoadFile($file)
+    public function gdLoadFile($file): bool
     {
         if (file_exists($file)) {
             $this->_gdImageData = getimagesize($file);
-            $this->_gdImageExif = ($this->_gdImageData[2] == IMAGETYPE_JPEG && function_exists('exif_read_data')) ? @exif_read_data($file) : array();
-            if($this->_gdImageExif === false) $this->_gdImageExif = array();
+            $this->_gdImageExif = ($this->_gdImageData[2] == IMAGETYPE_JPEG && function_exists('exif_read_data')) ? @exif_read_data($file) : [];
+            if ($this->_gdImageExif === false) {
+                $this->_gdImageExif = [];
+            }
             $this->_gdImageType = $this->_gdImageData[2];
 
             switch ($this->_gdImageType) {
@@ -145,7 +143,7 @@ class GD
                     imagesavealpha($this->_gdImageSource, true);
                     break;
                 case IMAGETYPE_WEBP:
-                    if($this->_gdWebpSupport) {
+                    if ($this->_gdWebpSupport) {
                         $this->_gdImageSource = imagecreatefromwebp($file);
                     } else {
                         return false;
@@ -170,13 +168,10 @@ class GD
             switch ($this->_gdImageExif['Orientation']) {
                 case 3:
                     return imagerotate($im, 180, 0);
-                break;
                 case 6:
                     return imagerotate($im, -90, 0);
-                break;
                 case 8:
                     return imagerotate($im, 90, 0);
-                break;
             }
         }
         return $im;
@@ -185,9 +180,8 @@ class GD
     /**
      * Resize image
      * @param int $resize
-     * @return bool
      */
-    private function gdResize($resize)
+    private function gdResize($resize): bool
     {
         // Resize the image, while maintaining the proportions
         $im = $this->gdGetCurrentData();
@@ -240,11 +234,10 @@ class GD
     /**
      * Save modified file
      *
-     * @param string $filename
      * @param bool $resize
      * @return bool
      */
-    public function gdSave($filename, $resize = false)
+    public function gdSave(string $filename, $resize = false)
     {
         if ($this->_abort) {
             return false;
@@ -252,7 +245,7 @@ class GD
 
         // Do we need to resize the file before saving?
         if ($resize || $this->_gdImageMax) {
-            $this->gdResize(($resize) ? $resize : $this->_gdImageMax);
+            $this->gdResize($resize ?: $this->_gdImageMax);
         }
         $im = $this->gdGetCurrentData();
         if ($im) {
@@ -273,7 +266,7 @@ class GD
                     $result = imagepng($im, $file);
                     break;
                 case IMAGETYPE_WEBP:
-                    if($this->_gdWebpSupport) {
+                    if ($this->_gdWebpSupport) {
                         $result = imagewebp($im, $file, $this->_gdJpegQuality);
                     } else {
                         if ($im !== $source) {
@@ -309,7 +302,7 @@ class GD
     {
         $this->_abort = false;
         $memLimit = ini_get('memory_limit');
-        if($memLimit == -1) {
+        if ($memLimit == -1) {
             return true;
         }
         $suffix = strtoupper(substr($memLimit, -1));
@@ -321,12 +314,12 @@ class GD
             $memLimit = (int)$memLimit;
         }
 
-        $bits = isset($this->_gdImageData['bits']) ? $this->_gdImageData['bits'] : 8;
-        $channels = isset($this->_gdImageData['channels']) ? $this->_gdImageData['channels'] : 4;
-        $memoryNeeded = round(($this->_gdImageData[0] * $this->_gdImageData[1] * $bits * $channels / 8 + pow(2, 16)) * 1.65);
-    
-        if (function_exists('memory_get_usage') && memory_get_usage() + $memoryNeeded > $memLimit * pow(1024, 2)) {
-            $new_memory_limit = $memLimit + ceil(((memory_get_usage() + $memoryNeeded) - $memLimit * pow(1024, 2)) / pow(1024, 2)) . 'M';
+        $bits = $this->_gdImageData['bits'] ?? 8;
+        $channels = $this->_gdImageData['channels'] ?? 4;
+        $memoryNeeded = round(($this->_gdImageData[0] * $this->_gdImageData[1] * $bits * $channels / 8 + 2 ** 16) * 1.65);
+
+        if (function_exists('memory_get_usage') && memory_get_usage() + $memoryNeeded > $memLimit * 1024 ** 2) {
+            $new_memory_limit = $memLimit + ceil(((memory_get_usage() + $memoryNeeded) - $memLimit * 1024 ** 2) / 1024 ** 2) . 'M';
             // ini_set may be a disabled function
             if (!function_exists('ini_set')) {
                 $this->_abort = true;
@@ -338,9 +331,8 @@ class GD
                 $this->_abort = true;
                 $this->gdClear();
                 return false;
-            } else {
-                return true;
             }
+            return true;
         }
     }
 }

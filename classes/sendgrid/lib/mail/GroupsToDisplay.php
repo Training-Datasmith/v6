@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the GroupsToDisplay object for a /mail/send API call
  */
@@ -49,7 +51,7 @@ class GroupsToDisplay implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setGroupsToDisplay($groups_to_display)
+    public function setGroupsToDisplay($groups_to_display): void
     {
         Assert::maxItems($groups_to_display, 'groups_to_display', 25);
 
@@ -66,10 +68,10 @@ class GroupsToDisplay implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function addGroupToDisplay($group_to_display)
+    public function addGroupToDisplay($group_to_display): void
     {
         Assert::integer($group_to_display, 'group_to_display');
-        Assert::accept($group_to_display, 'group_to_display', function () {
+        Assert::accept($group_to_display, 'group_to_display', function (): bool {
             $groups = $this->groups_to_display;
             if (!\is_array($groups)) {
                 $groups = [];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Helper class for input parameters validation
  *
@@ -21,7 +23,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function string($value, $property, $message = null)
+    public static function string($value, $property, $message = null): void
     {
         if (!\is_string($value)) {
             $message = sprintf(
@@ -43,7 +45,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function email($value, $property, $message = null)
+    public static function email($value, $property, $message = null): void
     {
         static::string($value, $property, $message);
 
@@ -71,7 +73,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function integer($value, $property, $message = null)
+    public static function integer($value, $property, $message = null): void
     {
         if (filter_var($value, FILTER_VALIDATE_INT) === false) {
             $message = sprintf(
@@ -93,7 +95,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function boolean($value, $property, $message = null)
+    public static function boolean($value, $property, $message = null): void
     {
         if (!\is_bool($value)) {
             $message = sprintf(
@@ -116,14 +118,14 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function isInstanceOf($value, $property, $className, $message = null)
+    public static function isInstanceOf($value, $property, $className, $message = null): void
     {
         if (!($value instanceof $className)) {
             $message = sprintf(
                 $message ?: '"$%s" must be an instance of "%s". Got: %s',
                 $property,
                 $className,
-                \is_object($value) ? \get_class($value) : (string) $value
+                \is_object($value) ? $value::class : (string) $value
             );
 
             throw new TypeException($message);
@@ -139,7 +141,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function isArray($value, $property, $message = null)
+    public static function isArray($value, $property, $message = null): void
     {
         if (!\is_array($value)) {
             $message = sprintf(
@@ -161,7 +163,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function isCallable($value, $property, $message = null)
+    public static function isCallable($value, $property, $message = null): void
     {
         if (!\is_callable($value)) {
             $message = sprintf(
@@ -184,7 +186,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function accept($value, $property, $callback, $message = null)
+    public static function accept($value, $property, $callback, $message = null): void
     {
         static::isCallable($callback, 'callback', $message);
 
@@ -208,7 +210,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function maxItems($value, $property, $size, $message = null)
+    public static function maxItems($value, $property, $size, $message = null): void
     {
         static::isArray($value, $property, $message);
 
@@ -233,7 +235,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function minItems($value, $property, $size, $message = null)
+    public static function minItems($value, $property, $size, $message = null): void
     {
         static::isArray($value, $property, $message);
 
@@ -258,7 +260,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function maxValue($value, $property, $limit, $message = null)
+    public static function maxValue($value, $property, $limit, $message = null): void
     {
         static::integer($value, $property, $message);
 
@@ -286,7 +288,7 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function minValue($value, $property, $limit, $message = null)
+    public static function minValue($value, $property, $limit, $message = null): void
     {
         static::integer($value, $property, $message);
 
@@ -314,11 +316,11 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function maxLength($value, $property, $limit, $message = null)
+    public static function maxLength($value, $property, $limit, $message = null): void
     {
         static::string($value, $property, $message);
 
-        $length = mb_strlen($value, 'utf8');
+        $length = mb_strlen((string) $value, 'utf8');
 
         if ($length > $limit) {
             $message = sprintf(
@@ -342,11 +344,11 @@ class Assert
      *
      * @throws TypeException
      */
-    public static function minLength($value, $property, $limit, $message = null)
+    public static function minLength($value, $property, $limit, $message = null): void
     {
         static::string($value, $property, $message);
 
-        $length = mb_strlen($value, 'utf8');
+        $length = mb_strlen((string) $value, 'utf8');
 
         if ($length < $limit) {
             $message = sprintf(
@@ -365,12 +367,10 @@ class Assert
      *
      * @param mixed $value
      * @param string $property
-     * @param array $choices
      * @param string|null $message
-     *
      * @throws TypeException
      */
-    public static function anyOf($value, $property, array $choices, $message = null)
+    public static function anyOf($value, $property, array $choices, $message = null): void
     {
         if (!\in_array($value, $choices, true)) {
             $message = sprintf(

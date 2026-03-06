@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Compile Insert
  * Compiles the {insert} tag
@@ -22,7 +24,7 @@ class Smarty_Internal_Compile_Insert extends Smarty_Internal_CompileBase
      * @var array
      * @see Smarty_Internal_CompileBase
      */
-    public $required_attributes = array('name');
+    public $required_attributes = ['name'];
 
     /**
      * Attribute definition: Overwrites base class.
@@ -30,7 +32,7 @@ class Smarty_Internal_Compile_Insert extends Smarty_Internal_CompileBase
      * @var array
      * @see Smarty_Internal_CompileBase
      */
-    public $shorttag_order = array('name');
+    public $shorttag_order = ['name'];
 
     /**
      * Attribute definition: Overwrites base class.
@@ -38,7 +40,7 @@ class Smarty_Internal_Compile_Insert extends Smarty_Internal_CompileBase
      * @var array
      * @see Smarty_Internal_CompileBase
      */
-    public $optional_attributes = array('_any');
+    public $optional_attributes = ['_any'];
 
     /**
      * Compiles code for the {insert} tag
@@ -132,11 +134,11 @@ class Smarty_Internal_Compile_Insert extends Smarty_Internal_CompileBase
         // delete {insert} standard attributes
         unset($_attr[ 'name' ], $_attr[ 'assign' ], $_attr[ 'script' ], $_attr[ 'nocache' ]);
         // convert attributes into parameter array string
-        $_paramsArray = array();
+        $_paramsArray = [];
         foreach ($_attr as $_key => $_value) {
             $_paramsArray[] = "'$_key' => $_value";
         }
-        $_params = 'array(' . implode(", ", $_paramsArray) . ')';
+        $_params = 'array(' . implode(', ', $_paramsArray) . ')';
         // call insert
         if (isset($_assign)) {
             if ($_smarty_tpl->caching && !$nocacheParam) {

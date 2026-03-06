@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -104,7 +106,6 @@ try {
 // Get a user's profile #
 // GET /user/profile #
 
-
 try {
     $response = $sg->client->user()->profile()->get();
     print $response->statusCode() . "\n";
@@ -152,7 +153,7 @@ try {
 $request_body = json_decode('{
   "status": "pause"
 }');
-$batch_id = "test_url_param";
+$batch_id = 'test_url_param';
 
 try {
     $response = $sg->client->user()->scheduled_sends()->_($batch_id)->patch($request_body);
@@ -167,7 +168,7 @@ try {
 // Retrieve scheduled send #
 // GET /user/scheduled_sends/{batch_id} #
 
-$batch_id = "test_url_param";
+$batch_id = 'test_url_param';
 
 try {
     $response = $sg->client->user()->scheduled_sends()->_($batch_id)->get();
@@ -182,7 +183,7 @@ try {
 // Delete a cancellation or pause of a scheduled send #
 // DELETE /user/scheduled_sends/{batch_id} #
 
-$batch_id = "test_url_param";
+$batch_id = 'test_url_param';
 
 try {
     $response = $sg->client->user()->scheduled_sends()->_($batch_id)->delete();
@@ -355,7 +356,7 @@ $request_body = json_decode('{
   "spam_check": false,
   "url": "http://newdomain.com/parse"
 }');
-$hostname = "test_url_param";
+$hostname = 'test_url_param';
 
 try {
     $response = $sg->client->user()->webhooks()->parse()->settings()->_($hostname)->patch($request_body);
@@ -370,7 +371,7 @@ try {
 // Retrieve a specific parse setting #
 // GET /user/webhooks/parse/settings/{hostname} #
 
-$hostname = "test_url_param";
+$hostname = 'test_url_param';
 
 try {
     $response = $sg->client->user()->webhooks()->parse()->settings()->_($hostname)->get();
@@ -385,7 +386,7 @@ try {
 // Delete a parse setting #
 // DELETE /user/webhooks/parse/settings/{hostname} #
 
-$hostname = "test_url_param";
+$hostname = 'test_url_param';
 
 try {
     $response = $sg->client->user()->webhooks()->parse()->settings()->_($hostname)->delete();

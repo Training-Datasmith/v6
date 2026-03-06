@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -24,7 +26,7 @@ try {
 // Validate batch ID #
 // GET /mail/batch/{batch_id} #
 
-$batch_id = "test_url_param";
+$batch_id = 'test_url_param';
 
 try {
     $response = $sg->client->mail()->batch()->_($batch_id)->get();

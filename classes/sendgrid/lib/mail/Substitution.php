@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Substitution object for a /mail/send API call
  */
@@ -49,7 +51,7 @@ class Substitution implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setKey($key)
+    public function setKey($key): void
     {
         Assert::string($key, 'key');
 
@@ -73,16 +75,14 @@ class Substitution implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setValue($value)
+    public function setValue($value): void
     {
-        Assert::accept($value, 'value', static function ($val) {
-            return \is_string($val)
-                || filter_var($val, FILTER_VALIDATE_INT) !== false
-                || \is_float($val)
-                || \is_bool($val)
-                || \is_array($val)
-                || \is_object($val);
-        }, '"$value" must be an array, object, boolean, string, numeric or integer.');
+        Assert::accept($value, 'value', static fn ($val) => \is_string($val)
+            || filter_var($val, FILTER_VALIDATE_INT) !== false
+            || \is_float($val)
+            || \is_bool($val)
+            || \is_array($val)
+            || \is_object($val), '"$value" must be an array, object, boolean, string, numeric or integer.');
 
         $this->value = $value;
     }
@@ -108,11 +108,9 @@ class Substitution implements \JsonSerializable
         return array_filter(
             [
                 'key' => $this->getKey(),
-                'value' => $this->getValue()
+                'value' => $this->getValue(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (string $value) => $value !== null
         ) ?: null;
     }
 }

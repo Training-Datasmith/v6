@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -14,11 +16,11 @@ if (!defined('CC_INI_SET')) {
     die('Access Denied');
 }
 Admin::getInstance()->permissions('customers', CC_PERM_READ, true);
-$del_cid = array();
+$del_cid = [];
 
 ## Delete customers with order older than x months
 if (isset($_POST['customer_purge']) && ctype_digit($_POST['customer_purge'])) {
-    if ($purge_customers = $GLOBALS['db']->select('CubeCart_order_summary', "DISTINCT `customer_id`", "`order_date` < ".strtotime("-".(string)$_POST['customer_purge']." month"))) {
+    if ($purge_customers = $GLOBALS['db']->select('CubeCart_order_summary', 'DISTINCT `customer_id`', '`order_date` < '.strtotime('-'.(string)$_POST['customer_purge'].' month'))) {
         foreach ($purge_customers as $purge_customer) {
             $del_cid[] = $purge_customer['customer_id'];
         }
@@ -46,7 +48,7 @@ if (isset($_POST['no_order_purge'])) {
 
 ## Delete guest accounts
 if (isset($_POST['delete_guests'])) {
-    if ($purge_customers = $GLOBALS['db']->select('CubeCart_customer', 'customer_id', array('type' => 2))) {
+    if ($purge_customers = $GLOBALS['db']->select('CubeCart_customer', 'customer_id', ['type' => 2])) {
         foreach ($purge_customers as $purge_customer) {
             $del_cid[] = $purge_customer['customer_id'];
         }
@@ -58,12 +60,12 @@ if (isset($_POST['delete_guests'])) {
     }
 }
 
-if (count($del_cid)>0) {
+if (count($del_cid) > 0) {
     foreach ($del_cid as $cid) {
-        $GLOBALS['db']->delete('CubeCart_customer', array('customer_id' => $cid));
-        $GLOBALS['db']->delete('CubeCart_addressbook', array('customer_id' => $cid));
-        $GLOBALS['db']->delete('CubeCart_customer_membership', array('customer_id' => $cid));
-        $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', array('customer_id' => $cid));
+        $GLOBALS['db']->delete('CubeCart_customer', ['customer_id' => $cid]);
+        $GLOBALS['db']->delete('CubeCart_addressbook', ['customer_id' => $cid]);
+        $GLOBALS['db']->delete('CubeCart_customer_membership', ['customer_id' => $cid]);
+        $GLOBALS['db']->delete('CubeCart_newsletter_subscriber', ['customer_id' => $cid]);
         foreach ($GLOBALS['hooks']->load('admin.customer.delete') as $hook) {
             include $hook;
         }
@@ -72,24 +74,24 @@ if (count($del_cid)>0) {
 }
 
 if (isset($_POST['email']) && filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-    echo "<html><head><title>GDPR Report - ".$_POST['email']."</title></head><body>";
-    $data = array();
+    echo '<html><head><title>GDPR Report - '.$_POST['email'].'</title></head><body>';
+    $data = [];
     // Subscription consent Log
-    $data['consent'] = $GLOBALS['db']->select('CubeCart_newsletter_subscriber_log', false, array('email' => $_POST['email']));
+    $data['consent'] = $GLOBALS['db']->select('CubeCart_newsletter_subscriber_log', false, ['email' => $_POST['email']]);
     // Customer Account
-    $data['customers'] = $GLOBALS['db']->select('CubeCart_customer', false, array('email' => $_POST['email']));
+    $data['customers'] = $GLOBALS['db']->select('CubeCart_customer', false, ['email' => $_POST['email']]);
     // Orders
-    $data['orders'] = $GLOBALS['db']->select('CubeCart_order_summary', false, array('email' => $_POST['email']));
+    $data['orders'] = $GLOBALS['db']->select('CubeCart_order_summary', false, ['email' => $_POST['email']]);
     // Subscribers
-    $data['subscribers'] = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', false, array('email' => $_POST['email']));
+    $data['subscribers'] = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', false, ['email' => $_POST['email']]);
     // Reviews
-    $data['reviews'] = $GLOBALS['db']->select('CubeCart_reviews', false, array('email' => $_POST['email']));
+    $data['reviews'] = $GLOBALS['db']->select('CubeCart_reviews', false, ['email' => $_POST['email']]);
     // Email Log
-    $data['email'] = $GLOBALS['db']->select('CubeCart_email_log', false, array('to' => $_POST['email']));
+    $data['email'] = $GLOBALS['db']->select('CubeCart_email_log', false, ['to' => $_POST['email']]);
     foreach ($GLOBALS['hooks']->load('admin.customer.gdpr.list') as $hook) {
         include $hook;
     }
-    $excluded = array(
+    $excluded = [
         'customers.new_password',
         'customers.password',
         'customers.salt',
@@ -109,31 +111,35 @@ if (isset($_POST['email']) && filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)
         'email.email_content_id',
         'email.fail_reason',
         'email.result',
-        'email.id'
-    );
+        'email.id',
+    ];
     foreach ($data as $type => $data) {
         echo "<h1>$type</h1>";
         if (is_array($data)) {
             echo '<table cellspacing="0" cellpadding="3" border="1"><thead><tr>';
             foreach ($data[0] as $col_name => $value) {
-                if(in_array($type.'.'.$col_name, $excluded)) continue;
-                echo "<th>".$col_name."</th>";
-            }
-            echo "</tr></thead><tbody>";
-            foreach ($data as $k => $value) {
-                echo "<tr>";
-                foreach ($value as $col => $v) {
-                    if(in_array($type.'.'.$col, $excluded)) continue;
-                    echo "<td>".$v."</td>";
+                if (in_array($type.'.'.$col_name, $excluded)) {
+                    continue;
                 }
-                echo "</tr>";
+                echo '<th>'.$col_name.'</th>';
             }
-            echo "</tbody></table>";
+            echo '</tr></thead><tbody>';
+            foreach ($data as $k => $value) {
+                echo '<tr>';
+                foreach ($value as $col => $v) {
+                    if (in_array($type.'.'.$col, $excluded)) {
+                        continue;
+                    }
+                    echo '<td>'.$v.'</td>';
+                }
+                echo '</tr>';
+            }
+            echo '</tbody></table>';
         } else {
-            echo "No data";
+            echo 'No data';
         }
     }
-    echo "</body></html>";
+    echo '</body></html>';
     exit;
 }
 $GLOBALS['main']->addTabControl($lang['search']['gdpr_tools'], 'general');

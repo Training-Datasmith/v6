@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Config Source Plugin
  *
@@ -75,7 +77,7 @@ class Smarty_Template_Config extends Smarty_Template_Source
         Smarty $smarty = null,
         $template_resource = null
     ) {
-        static $_incompatible_resources = array('extends' => true, 'php' => true);
+        static $_incompatible_resources = ['extends' => true, 'php' => true];
         if ($_template) {
             $smarty = $_template->smarty;
             $template_resource = $_template->template_resource;

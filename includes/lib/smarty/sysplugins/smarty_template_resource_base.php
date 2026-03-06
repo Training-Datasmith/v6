@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Template Resource Base Object
  *
@@ -63,7 +65,7 @@ abstract class Smarty_Template_Resource_Base
      *
      * @var array
      */
-    public $file_dependency = array();
+    public $file_dependency = [];
 
     /**
      * Content buffer
@@ -79,7 +81,7 @@ abstract class Smarty_Template_Resource_Base
      *
      * @var int[]
      */
-    public $includes = array();
+    public $includes = [];
 
     /**
      * Flag if this is a cache resource

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -15,8 +17,7 @@ if (!defined('CC_INI_SET')) {
 }
 Admin::getInstance()->permissions('customers', CC_PERM_READ, true);
 
-
-$GLOBALS['gui']->addBreadcrumb($lang['email']['title_newsletters'], currentPage(array('action', 'newsletter_id')));
+$GLOBALS['gui']->addBreadcrumb($lang['email']['title_newsletters'], currentPage(['action', 'newsletter_id']));
 
 $seo  = SEO::getInstance();
 $newsletter = Newsletter::getInstance();
@@ -59,7 +60,7 @@ if (isset($_GET['action']) && strtolower($_GET['action']) == 'delete') {
     } else {
         $GLOBALS['main']->errorMessage($lang['email']['error_news_delete']);
     }
-    httpredir(currentPage(array('newsletter_id', 'action')));
+    httpredir(currentPage(['newsletter_id', 'action']));
 } elseif (isset($_GET['action']) && strtolower($_GET['action']) == 'send') {
     if (isset($_GET['newsletter_id']) && is_numeric($_GET['newsletter_id'])) {
         $GLOBALS['main']->addTabControl($lang['email']['title_sending'], 'newsletter_send');
@@ -67,23 +68,23 @@ if (isset($_GET['action']) && strtolower($_GET['action']) == 'delete') {
         $GLOBALS['smarty']->assign('NEWSLETTER_ID', (int)$_GET['newsletter_id']);
     }
     $GLOBALS['smarty']->assign('DISPLAY_SEND', true);
-} elseif (isset($_GET['action']) && in_array(strtolower($_GET['action']), array('add', 'edit'))) {
+} elseif (isset($_GET['action']) && in_array(strtolower($_GET['action']), ['add', 'edit'])) {
     Admin::getInstance()->permissions('customers', CC_PERM_EDIT, true);
 
     $GLOBALS['main']->addTabControl($lang['common']['general'], 'general');
     $GLOBALS['main']->addTabControl($lang['email']['title_content_html'], 'email_html');
     $GLOBALS['main']->addTabControl($lang['email']['title_send_test'], 'send_test');
     if (isset($_GET['newsletter_id']) && is_numeric($_GET['newsletter_id'])) {
-        if (($content = $GLOBALS['db']->select('CubeCart_newsletter', false, array('newsletter_id' => (int)$_GET['newsletter_id']))) !== false) {
+        if (($content = $GLOBALS['db']->select('CubeCart_newsletter', false, ['newsletter_id' => (int)$_GET['newsletter_id']])) !== false) {
             // Render editor window
             $GLOBALS['gui']->addBreadcrumb($content[0]['subject'], currentPage());
             $GLOBALS['smarty']->assign('NEWSLETTER', $content[0]);
         } else {
-            httpredir(currentPage(array('newsletter_id')));
+            httpredir(currentPage(['newsletter_id']));
         }
     }
     // Get template list
-    if (($templates = $GLOBALS['db']->select('CubeCart_email_template', array('template_default', 'template_id', 'title'))) !== false) {
+    if (($templates = $GLOBALS['db']->select('CubeCart_email_template', ['template_default', 'template_id', 'title'])) !== false) {
         foreach ($templates as $template) {
             if (isset($content)) {
                 $template['selected'] = ($template['template_id'] == $content[0]['template_id']) ? ' selected="selected"' : '';
@@ -97,13 +98,13 @@ if (isset($_GET['action']) && strtolower($_GET['action']) == 'delete') {
     $GLOBALS['smarty']->assign('DISPLAY_FORM', true);
 } else {
     $GLOBALS['main']->addTabControl($lang['email']['title_newsletters'], 'newsletter-list');
-    $GLOBALS['main']->addTabControl($lang['email']['title_news_create'], false, currentPage(null, array('action' => 'add')));
+    $GLOBALS['main']->addTabControl($lang['email']['title_news_create'], false, currentPage(null, ['action' => 'add']));
     // List newsletters, reverse chronology
     if (($contents = $GLOBALS['db']->select('CubeCart_newsletter', false)) !== false) {
         foreach ($contents as $content) {
-            $content['edit'] = currentPage(null, array('action' => 'edit', 'newsletter_id' => $content['newsletter_id']));
-            $content['send'] = currentPage(null, array('action' => 'send', 'newsletter_id' => $content['newsletter_id'], 'token' => SESSION_TOKEN));
-            $content['delete'] = currentPage(null, array('action' => 'delete', 'newsletter_id' => $content['newsletter_id'], 'token' => SESSION_TOKEN));
+            $content['edit'] = currentPage(null, ['action' => 'edit', 'newsletter_id' => $content['newsletter_id']]);
+            $content['send'] = currentPage(null, ['action' => 'send', 'newsletter_id' => $content['newsletter_id'], 'token' => SESSION_TOKEN]);
+            $content['delete'] = currentPage(null, ['action' => 'delete', 'newsletter_id' => $content['newsletter_id'], 'token' => SESSION_TOKEN]);
             $smarty_data['newsletters'][] = $content;
         }
         $GLOBALS['smarty']->assign('NEWSLETTERS', $smarty_data['newsletters']);

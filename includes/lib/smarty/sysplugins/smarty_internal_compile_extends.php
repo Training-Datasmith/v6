@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Compile extend
  * Compiles the {extends} tag
@@ -22,7 +24,7 @@ class Smarty_Internal_Compile_Extends extends Smarty_Internal_Compile_Shared_Inh
      * @var array
      * @see Smarty_Internal_CompileBase
      */
-    public $required_attributes = array('file');
+    public $required_attributes = ['file'];
 
     /**
      * Array of names of optional attribute required by tag
@@ -30,7 +32,7 @@ class Smarty_Internal_Compile_Extends extends Smarty_Internal_Compile_Shared_Inh
      *
      * @var array
      */
-    public $optional_attributes = array('extends_resource');
+    public $optional_attributes = ['extends_resource'];
 
     /**
      * Attribute definition: Overwrites base class.
@@ -38,7 +40,7 @@ class Smarty_Internal_Compile_Extends extends Smarty_Internal_Compile_Shared_Inh
      * @var array
      * @see Smarty_Internal_CompileBase
      */
-    public $shorttag_order = array('file');
+    public $shorttag_order = ['file'];
 
     /**
      * Compiles code for the {extends} tag extends: resource
@@ -102,7 +104,7 @@ class Smarty_Internal_Compile_Extends extends Smarty_Internal_Compile_Shared_Inh
     {
         $inlineUids = '';
         if (isset($template) && $compiler->smarty->merge_compiled_includes) {
-            $code = $compiler->compileTag('include', array($template, array('scope' => 'parent')));
+            $code = $compiler->compileTag('include', [$template, ['scope' => 'parent']]);
             if (preg_match('/([,][\s]*[\'][a-z0-9]+[\'][,][\s]*[\']content.*[\'])[)]/', $code, $match)) {
                 $inlineUids = $match[ 1 ];
             }
@@ -131,10 +133,10 @@ class Smarty_Internal_Compile_Extends extends Smarty_Internal_Compile_Shared_Inh
             $compiler->parser,
             $compiler->compileTag(
                 'include',
-                array(
+                [
                     $template,
-                    array('scope' => 'parent')
-                )
+                    ['scope' => 'parent'],
+                ]
             )
         );
     }
@@ -148,7 +150,7 @@ class Smarty_Internal_Compile_Extends extends Smarty_Internal_Compile_Shared_Inh
      */
     public static function extendsSourceArrayCode(Smarty_Internal_Template $template)
     {
-        $resources = array();
+        $resources = [];
         foreach ($template->source->components as $source) {
             $resources[] = $source->resource;
         }

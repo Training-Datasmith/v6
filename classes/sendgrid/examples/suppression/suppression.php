@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -47,7 +49,7 @@ try {
 // Retrieve a specific block #
 // GET /suppression/blocks/{email} #
 
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->suppression()->blocks()->_($email)->get();
@@ -62,7 +64,7 @@ try {
 // Delete a specific block #
 // DELETE /suppression/blocks/{email} #
 
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->suppression()->blocks()->_($email)->delete();
@@ -113,7 +115,7 @@ try {
 // Retrieve a Bounce #
 // GET /suppression/bounces/{email} #
 
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->suppression()->bounces()->_($email)->get();
@@ -129,7 +131,7 @@ try {
 // DELETE /suppression/bounces/{email} #
 
 $query_params = json_decode('{"email_address": "example@example.com"}');
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->suppression()->bounces()->_($email)->delete(null, $query_params);
@@ -180,7 +182,7 @@ try {
 // Retrieve a specific invalid email #
 // GET /suppression/invalid_emails/{email} #
 
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->suppression()->invalid_emails()->_($email)->get();
@@ -195,7 +197,7 @@ try {
 // Delete a specific invalid email #
 // DELETE /suppression/invalid_emails/{email} #
 
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->suppression()->invalid_emails()->_($email)->delete();
@@ -210,7 +212,7 @@ try {
 // Retrieve a specific spam report #
 // GET /suppression/spam_report/{email} #
 
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->suppression()->spam_reports()->_($email)->get();
@@ -225,7 +227,7 @@ try {
 // Delete a specific spam report #
 // DELETE /suppression/spam_report/{email} #
 
-$email = "test_url_param";
+$email = 'test_url_param';
 
 try {
     $response = $sg->client->suppression()->spam_reports()->_($email)->delete();

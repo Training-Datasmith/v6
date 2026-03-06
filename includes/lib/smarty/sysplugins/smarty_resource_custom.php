@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Resource Plugin
  *
@@ -98,7 +100,8 @@ abstract class Smarty_Resource_Custom extends Smarty_Resource
      *
      * @return string
      */
-    private function generateSafeName($name): string {
+    private function generateSafeName($name): string
+    {
         return substr(preg_replace('/[^A-Za-z0-9._]/', '', (string) $name), 0, 127);
     }
 }

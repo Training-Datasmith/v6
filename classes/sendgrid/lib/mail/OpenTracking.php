@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the OpenTracking object for a /mail/send API call
  */
@@ -55,7 +57,7 @@ class OpenTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable)
+    public function setEnable($enable): void
     {
         Assert::boolean($enable, 'enable');
 
@@ -83,7 +85,7 @@ class OpenTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setSubstitutionTag($substitution_tag)
+    public function setSubstitutionTag($substitution_tag): void
     {
         Assert::string($substitution_tag, 'substitution_tag');
 
@@ -111,11 +113,9 @@ class OpenTracking implements \JsonSerializable
         return array_filter(
             [
                 'enable' => $this->getEnable(),
-                'substitution_tag' => $this->getSubstitutionTag()
+                'substitution_tag' => $this->getSubstitutionTag(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (bool|string $value) => $value !== null
         ) ?: null;
     }
 }

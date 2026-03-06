@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Smarty Template  Base
  * This file contains the basic shared methods for template handling
@@ -90,14 +92,14 @@ abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data
      *
      * @var array
      */
-    public $tplFunctions = array();
+    public $tplFunctions = [];
 
     /**
      * universal cache
      *
      * @var array()
      */
-    public $_cache = array();
+    public $_cache = [];
 
     /**
      * fetches a rendered Smarty template
@@ -243,7 +245,7 @@ abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data
                 } else {
                     if (!$function && !isset(Smarty_Internal_Template::$tplObjCache[ $template->templateId ])) {
                         $template->parent = null;
-                        $template->tpl_vars = $template->config_vars = array();
+                        $template->tpl_vars = $template->config_vars = [];
                         Smarty_Internal_Template::$tplObjCache[ $template->templateId ] = $template;
                     }
                 }
@@ -345,9 +347,9 @@ abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data
     public function registerObject(
         $object_name,
         $object,
-        $allowed_methods_properties = array(),
+        $allowed_methods_properties = [],
         $format = true,
-        $block_methods = array()
+        $block_methods = []
     ) {
         return $this->ext->registerObject->registerObject(
             $this,

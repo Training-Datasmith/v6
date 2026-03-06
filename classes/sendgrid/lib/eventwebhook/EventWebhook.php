@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SendGrid\EventWebhook;
 
 use EllipticCurve\Ecdsa;
@@ -36,7 +38,7 @@ class EventWebhook
      *                         'X-Twilio-Email-Event-Webhook-Timestamp' header
      * @return bool true or false if signature is valid
      */
-    public function verifySignature($publicKey, $payload, $signature, $timestamp)
+    public function verifySignature($publicKey, string $payload, $signature, string $timestamp)
     {
         $timestampedPayload = $timestamp . $payload;
         $decodedSignature = Signature::fromBase64($signature);

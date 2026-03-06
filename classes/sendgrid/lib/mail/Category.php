@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Category object for a /mail/send API call
  */
@@ -41,7 +43,7 @@ class Category implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setCategory($category)
+    public function setCategory($category): void
     {
         Assert::maxLength($category, 'category', 255);
 

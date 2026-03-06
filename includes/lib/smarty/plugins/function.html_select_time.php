@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -27,12 +29,12 @@
 function smarty_function_html_select_time($params, Smarty_Internal_Template $template)
 {
     $template->_checkPlugins(
-        array(
-            array(
+        [
+            [
                 'function' => 'smarty_function_escape_special_chars',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
-            )
-        )
+                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php',
+            ],
+        ]
     );
     $prefix = 'Time_';
     $field_array = null;
@@ -77,12 +79,12 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
             case 'time':
                 if (!is_array($_value) && $_value !== null) {
                     $template->_checkPlugins(
-                        array(
-                            array(
+                        [
+                            [
                                 'function' => 'smarty_make_timestamp',
-                                'file'     => SMARTY_PLUGINS_DIR . 'shared.make_timestamp.php'
-                            )
-                        )
+                                'file'     => SMARTY_PLUGINS_DIR . 'shared.make_timestamp.php',
+                            ],
+                        ]
                     );
                     $time = smarty_make_timestamp($_value);
                 }
@@ -141,11 +143,11 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
     if (isset($params[ 'time' ]) && is_array($params[ 'time' ])) {
         if (isset($params[ 'time' ][ $prefix . 'Hour' ])) {
             // $_REQUEST[$field_array] given
-            foreach (array(
+            foreach ([
                 'H' => 'Hour',
                 'i' => 'Minute',
-                's' => 'Second'
-            ) as $_elementKey => $_elementName) {
+                's' => 'Second',
+            ] as $_elementKey => $_elementName) {
                 $_variableName = '_' . strtolower($_elementName);
                 $$_variableName =
                     isset($params[ 'time' ][ $prefix . $_elementName ]) ? $params[ 'time' ][ $prefix . $_elementName ] :
@@ -158,11 +160,11 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
             list($_hour, $_minute, $_second) = $time = explode('-', date('H-i-s', $time));
         } elseif (isset($params[ 'time' ][ $field_array ][ $prefix . 'Hour' ])) {
             // $_REQUEST given
-            foreach (array(
+            foreach ([
                 'H' => 'Hour',
                 'i' => 'Minute',
-                's' => 'Second'
-            ) as $_elementKey => $_elementName) {
+                's' => 'Second',
+            ] as $_elementKey => $_elementName) {
                 $_variableName = '_' . strtolower($_elementName);
                 $$_variableName = isset($params[ 'time' ][ $field_array ][ $prefix . $_elementName ]) ?
                     $params[ 'time' ][ $field_array ][ $prefix . $_elementName ] : date($_elementKey);
@@ -240,11 +242,11 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
         $_html_minutes = '<select name="' . $_name . '"';
         if ($minute_id !== null || $all_id !== null) {
             $_html_minutes .= ' id="' . smarty_function_escape_special_chars(
-                    $minute_id !== null ?
+                $minute_id !== null ?
                         ($minute_id ? $minute_id : $_name) :
                         ($all_id ? ($all_id . $_name) :
                             $_name)
-                ) . '"';
+            ) . '"';
         }
         if ($minute_size) {
             $_html_minutes .= ' size="' . $minute_size . '"';
@@ -278,11 +280,11 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
         $_html_seconds = '<select name="' . $_name . '"';
         if ($second_id !== null || $all_id !== null) {
             $_html_seconds .= ' id="' . smarty_function_escape_special_chars(
-                    $second_id !== null ?
+                $second_id !== null ?
                         ($second_id ? $second_id : $_name) :
                         ($all_id ? ($all_id . $_name) :
                             $_name)
-                ) . '"';
+            ) . '"';
         }
         if ($second_size) {
             $_html_seconds .= ' size="' . $second_size . '"';
@@ -316,12 +318,12 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
         $_html_meridian = '<select name="' . $_name . '"';
         if ($meridian_id !== null || $all_id !== null) {
             $_html_meridian .= ' id="' . smarty_function_escape_special_chars(
-                    $meridian_id !== null ?
+                $meridian_id !== null ?
                         ($meridian_id ? $meridian_id :
                             $_name) :
                         ($all_id ? ($all_id . $_name) :
                             $_name)
-                ) . '"';
+            ) . '"';
         }
         if ($meridian_size) {
             $_html_meridian .= ' size="' . $meridian_size . '"';
@@ -337,12 +339,12 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
                            '</select>';
     }
     $_html = '';
-    foreach (array(
+    foreach ([
         '_html_hours',
         '_html_minutes',
         '_html_seconds',
-        '_html_meridian'
-    ) as $k) {
+        '_html_meridian',
+    ] as $k) {
         if (isset($$k)) {
             if ($_html) {
                 $_html .= $field_separator;

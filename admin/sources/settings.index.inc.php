@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -16,7 +18,6 @@ if (!defined('CC_INI_SET')) {
 
 Admin::getInstance()->permissions('settings', CC_PERM_READ, true);
 
-
 $cookie_domain 	= $GLOBALS['config']->get('config', 'cookie_domain');
 if (empty($cookie_domain)) {
     $domain = parse_url(CC_STORE_URL);
@@ -26,7 +27,7 @@ if (empty($cookie_domain)) {
 
 if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_PERM_FULL)) {
     $config_old = $GLOBALS['config']->get('config');
-    if ($_POST['config']['oid_mode']=='i') {
+    if ($_POST['config']['oid_mode'] == 'i') {
         $order = Order::getInstance();
         $oid_data = $order->setOrderFormat($_POST['oid_prefix'], $_POST['oid_postfix'], $_POST['oid_zeros'], $_POST['oid_start'], true, (bool)$_POST['oid_force']);
         if (!$oid_data) {
@@ -34,35 +35,35 @@ if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_
             $_POST['config']['oid_mode'] = 't';
         } else {
             $_POST['config'] = array_merge($_POST['config'], $oid_data);
-            $fields_find = array('cart_order_id');
+            $fields_find = ['cart_order_id'];
             $field_replace = $_POST['config']['oid_col'];
         }
     } else {
         $_POST['config'] = array_merge(
             $_POST['config'],
-            array(
+            [
                 'oid_prefix' => $config_old['oid_prefix'] ?? '',
                 'oid_postfix' => $config_old['oid_postfix'] ?? '',
                 'oid_zeros' => $config_old['oid_zeros'] ?? '',
                 'oid_zeros' => $config_old['oid_zeros'] ?? '',
                 'oid_start' => $config_old['oid_start'] ?? '',
-                'oid_col' => $config_old['oid_col'] ?? ''
-            )
+                'oid_col' => $config_old['oid_col'] ?? '',
+            ]
         );
         $_POST['config']['oid_col'] = 'cart_order_id';
-        $fields_find = array('id', 'custom_oid');
+        $fields_find = ['id', 'custom_oid'];
         $field_replace = 'cart_order_id';
     }
-    if(is_array($fields_find)) {
-        foreach (array('subject', 'content_html') as $column) {
+    if (is_array($fields_find)) {
+        foreach (['subject', 'content_html'] as $column) {
             foreach ($fields_find as $field) {
-                $GLOBALS['db']->misc("UPDATE `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_email_content` SET `".$column."` = REPLACE(`".$column."`, 'DATA.".$field."', 'DATA.".$field_replace."')");
+                $GLOBALS['db']->misc('UPDATE `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_email_content` SET `'.$column.'` = REPLACE(`'.$column."`, 'DATA.".$field."', 'DATA.".$field_replace."')");
             }
         }
     }
     if (!empty($_FILES)) {
         ## Do we already have a logo enabled?
-        $existing_logo = $GLOBALS['db']->select('CubeCart_logo', 'logo_id', array('status' => 1));
+        $existing_logo = $GLOBALS['db']->select('CubeCart_logo', 'logo_id', ['status' => 1]);
 
         ## New logos being uploaded
         foreach ($_FILES as $logo) {
@@ -74,16 +75,16 @@ if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_
                             $filename = preg_replace('#[^\w\d\.\-]#', '_', $logo['name']);
                             $target  = CC_ROOT_DIR.'/images/logos/'.$filename;
                             move_uploaded_file($logo['tmp_name'], $target);
-                            
-                            $record  = array(
+
+                            $record  = [
                                 'filename' => $filename,
-                                'status' => (count($_FILES)==1 && !$existing_logo) ? '1' : '0'
-                            );
+                                'status' => (count($_FILES) == 1 && !$existing_logo) ? '1' : '0',
+                            ];
 
                             if (preg_match('/^.*\.(svg)$/i', $logo['name'])) {
                                 $xml = simplexml_load_file($target);
                                 $attr = $xml->attributes();
-                                $record['mimetype'] = "image/svg+xml";
+                                $record['mimetype'] = 'image/svg+xml';
                                 $record['width']  	= $attr->width;
                                 $record['height'] 	= $attr->height;
                             } else {
@@ -92,14 +93,14 @@ if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_
                                 $record['width']  	= $image[0];
                                 $record['height'] 	= $image[1];
                             }
-                            
+
                             $GLOBALS['db']->insert('CubeCart_logo', $record);
                             if (!isset($logo_update)) { // prevents x amount of notifications for same thing
                                 $GLOBALS['main']->successMessage($lang['settings']['notify_logo_upload']);
                             }
                             $logo_update = true;
 
-                        break;
+                            break;
                         case UPLOAD_ERR_INI_SIZE:
                         case UPLOAD_ERR_FORM_SIZE:
                         case UPLOAD_ERR_PARTIAL:
@@ -108,9 +109,9 @@ if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_
                         case UPLOAD_ERR_CANT_WRITE:
                         case UPLOAD_ERR_EXTENSION:
                         default:
-                        $GLOBALS['main']->errorMessage($lang['settings']['error_logo_upload']);
+                            $GLOBALS['main']->errorMessage($lang['settings']['error_logo_upload']);
                             trigger_error('Upload Error! Logo not saved.');
-                        break;
+                            break;
                     }
                 } else {
                     $GLOBALS['main']->errorMessage($lang['settings']['error_logo_upload']);
@@ -120,27 +121,27 @@ if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_
     }
     $skin_data = $GLOBALS['gui']->getSkinConfig('', $_POST['config']['skin_folder']);
 
-    if (isset($skin_data->info->{'csrf'}) && (string)$skin_data->info->{'csrf'}=='true') {
+    if (isset($skin_data->info->{'csrf'}) && (string)$skin_data->info->{'csrf'} == 'true') {
         $_POST['config']['csrf'] = '1';
     } else {
         $_POST['config']['csrf'] = '0';
     }
-    if(isset($_POST['config']['elasticsearch']) && $_POST['config']['elasticsearch']==1) {
+    if (isset($_POST['config']['elasticsearch']) && $_POST['config']['elasticsearch'] == 1) {
         $es_test = new ElasticsearchHandler($_POST['config'], true);
-        if(!$es_test->connect(true)) {
+        if (!$es_test->connect(true)) {
             $_POST['config']['elasticsearch'] = '0';
             $error = !empty($es_test->last_error) ? $es_test->last_error : $lang['settings']['no_elasticsearch'];
             $GLOBALS['main']->errorMessage($error);
         }
     }
-    if(isset($_POST['config']['w3w_status']) && $_POST['config']['w3w_status']==1 && empty($_POST['config']['w3w'])) {
+    if (isset($_POST['config']['w3w_status']) && $_POST['config']['w3w_status'] == 1 && empty($_POST['config']['w3w'])) {
         $request = new Request('accountsapi.what3words.com', '/partner/v1/application?key=PKNNHD3FJC1D');
         $request->cache(false);
         $request->setMethod('POST');
         $request->customHeaders('Content-Type: application/json');
-        $request->setData(json_encode(array('name' => $_POST['config']['store_name'], 'description' => CC_STORE_URL.' powered by CubeCart')));
+        $request->setData(json_encode(['name' => $_POST['config']['store_name'], 'description' => CC_STORE_URL.' powered by CubeCart']));
         $request->setSSL();
-        if($response = $request->send()) {
+        if ($response = $request->send()) {
             $response = json_decode($response, true);
             $_POST['config']['w3w_status'] = '1';
             $_POST['config']['w3w'] = $response['api_key'];
@@ -148,44 +149,44 @@ if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_
             $_POST['config']['w3w_status'] = '0';
             $_POST['config']['w3w'] = '';
         }
-    } else if(isset($_POST['config']['w3w_status']) && $_POST['config']['w3w_status']==0) {
+    } elseif (isset($_POST['config']['w3w_status']) && $_POST['config']['w3w_status'] == 0) {
         $_POST['config']['w3w_status'] = '0';
         $_POST['config']['w3w'] = '';
     }
 
     ## Disable "mobile" skin if master skin is responsive
-    if ($_POST['config']['disable_mobile_skin']==0 && isset($_POST['config']['skin_folder']) && !empty($_POST['config']['skin_folder'])) {
-        if ((string)$skin_data->info->{'responsive'}=='true') {
+    if ($_POST['config']['disable_mobile_skin'] == 0 && isset($_POST['config']['skin_folder']) && !empty($_POST['config']['skin_folder'])) {
+        if ((string)$skin_data->info->{'responsive'} == 'true') {
             $_POST['config']['disable_mobile_skin'] = '1';
             $GLOBALS['main']->errorMessage($lang['settings']['error_mobile_vs_responsive']);
         }
     }
-    
+
     if (!preg_match('#^([a-z\s_]+)/([a-z\s_]+)$|^UTC$#i', $_POST['config']['time_zone'])) {
         $_POST['config']['time_zone'] = '';
     }
 
-    $dmu = (($_POST['config']['product_weight_unit']=='Lb') ? 'in' : 'cm');
-    $GLOBALS['db']->misc("ALTER TABLE `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_inventory` CHANGE `dimension_unit` `dimension_unit` VARCHAR(2) NULL DEFAULT '$dmu'");
+    $dmu = (($_POST['config']['product_weight_unit'] == 'Lb') ? 'in' : 'cm');
+    $GLOBALS['db']->misc('ALTER TABLE `'.$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_inventory` CHANGE `dimension_unit` `dimension_unit` VARCHAR(2) NULL DEFAULT '$dmu'");
 
     if (isset($_POST['logo']) && is_array($_POST['logo'])) {
         foreach ($_POST['logo'] as $logo_id => $logo) {
             if ($logo['status']) {
                 ## Disable all other logos for this skin/style combo
-                $GLOBALS['db']->update('CubeCart_logo', array('status' => 0), array('skin' => $logo['skin'], 'style' => $logo['style']));
+                $GLOBALS['db']->update('CubeCart_logo', ['status' => 0], ['skin' => $logo['skin'], 'style' => $logo['style']]);
             }
-            if ($GLOBALS['db']->update('CubeCart_logo', $logo, array('logo_id' => (int)$logo_id))) {
+            if ($GLOBALS['db']->update('CubeCart_logo', $logo, ['logo_id' => (int)$logo_id])) {
                 $logo_update = true;
             }
         }
         $GLOBALS['gui']->rebuildLogos();
     }
 
-    if($_POST['download_update_existing']=='1' && $_POST['config']['download_expire']!==$_POST['download_expire_old']) {
-        if(in_array($_POST['config']['download_expire'], array('0',''))) {
-            $GLOBALS['db']->update('CubeCart_downloads', array('expire' => 0));
-        } else if($_POST['config']['download_expire']>0) {
-            $new_expiry = ($_POST['download_expire_old']=='0') ? time()+$_POST['config']['download_expire'] : $_POST['config']['download_expire'];
+    if ($_POST['download_update_existing'] == '1' && $_POST['config']['download_expire'] !== $_POST['download_expire_old']) {
+        if (in_array($_POST['config']['download_expire'], ['0',''])) {
+            $GLOBALS['db']->update('CubeCart_downloads', ['expire' => 0]);
+        } elseif ($_POST['config']['download_expire'] > 0) {
+            $new_expiry = ($_POST['download_expire_old'] == '0') ? time() + $_POST['config']['download_expire'] : $_POST['config']['download_expire'];
             $old_expiry = $_POST['download_expire_old'];
             $query = 'UPDATE `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_downloads` SET `expire` = `expire` + '.(string)$new_expiry.' - '.(string)$old_expiry;
             $GLOBALS['db']->misc($query);
@@ -193,7 +194,7 @@ if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_
     }
 
     $config_new = $_POST['config'];
-    if($config_old['default_currency']!==$config_new['default_currency']) {
+    if ($config_old['default_currency'] !== $config_new['default_currency']) {
         $GLOBALS['main']->successMessage($lang['settings']['currency_changed']);
     }
     $config_new['enc_key'] =  $config_old['enc_key'] ?? ''; // Keep old encryption key
@@ -210,12 +211,12 @@ if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_
     }
 
     // Trim
-    foreach(array('facebook','flickr','instagram','linkedin','pinterest','twitter','vimeo','wordpress','youtube','reddit','tumblr') as $t) {
+    foreach (['facebook','flickr','instagram','linkedin','pinterest','twitter','vimeo','wordpress','youtube','reddit','tumblr'] as $t) {
         $config_new[$t] = trim($config_new[$t]);
     }
 
     ## Set default currency to have an exchange rate of 1
-    $GLOBALS['db']->update('CubeCart_currency', array('value' => 1), array('code' => $_POST['config']['default_currency']));
+    $GLOBALS['db']->update('CubeCart_currency', ['value' => 1], ['code' => $_POST['config']['default_currency']]);
 
     // Preserve current default_language (now managed in Settings > Languages)
     $config_new['default_language'] = $config_old['default_language'];
@@ -225,11 +226,11 @@ if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_
     ## Save cron task settings if submitted
     if (isset($_POST['cron_tasks'])) {
         foreach ($_POST['cron_tasks'] as $id => $data) {
-            $update = array(
+            $update = [
                 'enabled'   => isset($data['enabled']) ? (int)$data['enabled'] : 0,
                 'frequency' => (int)$data['frequency'],
-            );
-            $GLOBALS['db']->update('CubeCart_cron_tasks', $update, array('id' => (int)$id));
+            ];
+            $GLOBALS['db']->update('CubeCart_cron_tasks', $update, ['id' => (int)$id]);
         }
     }
 
@@ -242,29 +243,29 @@ if (isset($_POST['config']) && Admin::getInstance()->permissions('settings', CC_
 }
 
 if (isset($_GET['logo']) && isset($_GET['logo_id'])) {
-    if (($logo = $GLOBALS['db']->select('CubeCart_logo', false, array('logo_id' => (int)$_GET['logo_id']))) !== false) {
+    if (($logo = $GLOBALS['db']->select('CubeCart_logo', false, ['logo_id' => (int)$_GET['logo_id']])) !== false) {
         switch (strtolower($_GET['logo'])) {
-        case 'delete':
-            if (Admin::getInstance()->permissions('settings', CC_PERM_DELETE)) {
-                $paths = array(
-                    'images/logos/'.$logo[0]['filename'],
-                    'images/logos/'.$logo[0]['skin'].'-'.$logo[0]['style'].'.php',
-                    'images/logos/'.$logo[0]['skin'].'.php'
-                );
-                foreach ($paths as $path) {
-                    if (file_exists($logo_path)) {
-                        unlink($logo_path);
+            case 'delete':
+                if (Admin::getInstance()->permissions('settings', CC_PERM_DELETE)) {
+                    $paths = [
+                        'images/logos/'.$logo[0]['filename'],
+                        'images/logos/'.$logo[0]['skin'].'-'.$logo[0]['style'].'.php',
+                        'images/logos/'.$logo[0]['skin'].'.php',
+                    ];
+                    foreach ($paths as $path) {
+                        if (file_exists($logo_path)) {
+                            unlink($logo_path);
+                        }
                     }
+                    $GLOBALS['db']->delete('CubeCart_logo', ['logo_id' => $logo[0]['logo_id']]);
+                    $GLOBALS['main']->successMessage('Logo removed');
                 }
-                $GLOBALS['db']->delete('CubeCart_logo', array('logo_id' => $logo[0]['logo_id']));
-                $GLOBALS['main']->successMessage('Logo removed');
-            }
-            break;
+                break;
         }
     }
-    
+
     $GLOBALS['gui']->rebuildLogos();
-    httpredir(currentPage(array('logo', 'logo_id')), 'Logos');
+    httpredir(currentPage(['logo', 'logo_id']), 'Logos');
 }
 
 ###########################################
@@ -289,7 +290,7 @@ if ($GLOBALS['db']->select('CubeCart_order_summary', 'id', "`custom_oid` <> ''",
 
 ## Get Front End skins
 if (($skins = $GLOBALS['gui']->listSkins()) !== false) {
-    $smarty_data['skins'] = $smarty_data['skins_mobile'] = $other_logo_array = array();
+    $smarty_data['skins'] = $smarty_data['skins_mobile'] = $other_logo_array = [];
 
     foreach ($skins as $folder => $skin) {
         if ($skin['info']['mobile']) {
@@ -315,10 +316,10 @@ if (($skins = $GLOBALS['gui']->listSkins()) !== false) {
     $GLOBALS['smarty']->assign('SKINS', $smarty_data['skins']);
     $GLOBALS['smarty']->assign('SKINS_MOBILE', $smarty_data['skins_mobile']);
 
-    $other_logo_array = array(
-        '0' => array('other_optgroup' => true, 'name' => 'invoices', 'display' => $lang['orders']['title_invoices']),
-        '1' => array('name' => 'emails', 'display' => $lang['email']['title_email_templates'])
-    );
+    $other_logo_array = [
+        '0' => ['other_optgroup' => true, 'name' => 'invoices', 'display' => $lang['orders']['title_invoices']],
+        '1' => ['name' => 'emails', 'display' => $lang['email']['title_email_templates']],
+    ];
 
     $GLOBALS['smarty']->assign('SKINS_ALL', array_merge($smarty_data['skins'], $smarty_data['skins_mobile'], $other_logo_array));
 
@@ -343,13 +344,13 @@ $GLOBALS['smarty']->assign('CACHE_METHOD', $GLOBALS['cache']->getCacheSystem());
 ## Get Logos
 if (($logos = $GLOBALS['db']->select('CubeCart_logo')) !== false) {
     foreach ($logos as $logo) {
-        $logo['delete'] = currentPage(null, array('logo' => 'delete', 'logo_id' => $logo['logo_id']));
+        $logo['delete'] = currentPage(null, ['logo' => 'delete', 'logo_id' => $logo['logo_id']]);
         $smarty_data['logos'][] = $logo;
     }
     $GLOBALS['smarty']->assign('LOGOS', $smarty_data['logos']);
 }
 ## Get countries
-if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', array('numcode', 'name'), false, array('name'=>'ASC'))) !== false) {
+if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', ['numcode', 'name'], false, ['name' => 'ASC'])) !== false) {
     $store_country = $GLOBALS['config']->get('config', 'store_country');
     foreach ($countries as $country) {
         $country['selected'] = ($country['numcode'] == $store_country) ? ' selected="selected"' : '';
@@ -360,9 +361,8 @@ if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', array('numcode'
     $GLOBALS['smarty']->assign('VAL_JSON_COUNTY', state_json());
 }
 
-
 ## Get Currencies
-if (($currencies = $GLOBALS['db']->select('CubeCart_currency', array('name', 'code'), array('active' => '1'), array('name' => 'ASC'))) !== false) {
+if (($currencies = $GLOBALS['db']->select('CubeCart_currency', ['name', 'code'], ['active' => '1'], ['name' => 'ASC'])) !== false) {
     foreach ($currencies as $currency) {
         $currency['selected'] = ($currency['code'] == $GLOBALS['config']->get('config', 'default_currency')) ? ' selected="selected"' : '';
         $smarty_data['currencies'][] = $currency;
@@ -386,11 +386,11 @@ if (class_exists('DateTimeZone')) {
         $default_timezone = ini_get('date.timezone');
         $current_timezone = empty($current_timezone) ? (empty($default_timezone) ? 'UTC' : $default_timezone) : $current_timezone;
         foreach ($timezones as $timezone) {
-            $smarty_data['timezones'][] = array(
+            $smarty_data['timezones'][] = [
                 'value'  => $timezone,
                 'zone'  => $timezone,
                 'selected' => ($timezone == $current_timezone) ? ' selected="selected"' : '',
-            );
+            ];
         }
         $GLOBALS['smarty']->assign('TIMEZONES', $smarty_data['timezones']);
     }
@@ -405,56 +405,56 @@ for ($i = 1; $i <= 6; ++$i) {
     $a_n_s[(string)$i] = $lang['order_state']['name_' . (string)$i];
 }
 
-$select_options = array(
+$select_options = [
     'admin_notify_status'	=> $a_n_s,
     'basket_jump_to'  => null,
-    'cache'					=> array('1' => $lang['common']['enabled'], '0' => $lang['common']['disabled']),
+    'cache'					=> ['1' => $lang['common']['enabled'], '0' => $lang['common']['disabled']],
     'catalogue_expand_tree' => null,
-    'skin_change'   => array($lang['common']['no'], $lang['settings']['all_skin_select'], $lang['settings']['admin_only_skin_select']),
-    'debug'     => array($lang['common']['disabled'], $lang['common']['enabled']),
+    'skin_change'   => [$lang['common']['no'], $lang['settings']['all_skin_select'], $lang['settings']['admin_only_skin_select']],
+    'debug'     => [$lang['common']['disabled'], $lang['common']['enabled']],
     'catalogue_hide_prices' => null,
-    'email_method'			=> array('mail' => $lang['settings']['email_method_mail'], 'smtp' => $lang['settings']['email_method_smtp'], 'smtp_ssl' => $lang['settings']['email_method_smtp_ssl'].' ('.$lang['common']['recommended'].')', 'smtp_tls' => $lang['settings']['email_method_smtp_tls'].' ('.$lang['common']['recommended'].')', 'sendgrid' => 'SendGrid'),
+    'email_method'			=> ['mail' => $lang['settings']['email_method_mail'], 'smtp' => $lang['settings']['email_method_smtp'], 'smtp_ssl' => $lang['settings']['email_method_smtp_ssl'].' ('.$lang['common']['recommended'].')', 'smtp_tls' => $lang['settings']['email_method_smtp_tls'].' ('.$lang['common']['recommended'].')', 'sendgrid' => 'SendGrid'],
     'offline'    => null,
     'basket_out_of_stock_purchase'  => null,
-    'catalogue_popular_products_source' => array($lang['settings']['product_popular_views'], $lang['settings']['product_popular_sales']),
-    'basket_tax_by_delivery'   => array($lang['address']['billing_address'], $lang['address']['delivery_address']),
+    'catalogue_popular_products_source' => [$lang['settings']['product_popular_views'], $lang['settings']['product_popular_sales']],
+    'basket_tax_by_delivery'   => [$lang['address']['billing_address'], $lang['address']['delivery_address']],
     'proxy'     => null,
-    'catalogue_sale_mode' => array($lang['common']['disabled'], $lang['settings']['sales_per_product'], $lang['settings']['sales_percentage']),
-    'recaptcha' => array(0 => $lang['common']['off'], 2 => "reCaptcha v2 - Tickbox", 3 => "reCaptcha v2 - Invisible", 4 => "hCaptcha", 5 => "Cloudflare Turnstile (".$lang['common']['recommended'].")"),
-    'seo_metadata'   => array($lang['settings']['seo_meta_option_disable'], $lang['settings']['seo_meta_option_merge'], $lang['settings']['seo_meta_option_replace']),
+    'catalogue_sale_mode' => [$lang['common']['disabled'], $lang['settings']['sales_per_product'], $lang['settings']['sales_percentage']],
+    'recaptcha' => [0 => $lang['common']['off'], 2 => 'reCaptcha v2 - Tickbox', 3 => 'reCaptcha v2 - Invisible', 4 => 'hCaptcha', 5 => 'Cloudflare Turnstile ('.$lang['common']['recommended'].')'],
+    'seo_metadata'   => [$lang['settings']['seo_meta_option_disable'], $lang['settings']['seo_meta_option_merge'], $lang['settings']['seo_meta_option_replace']],
     'basket_allow_non_invoice_address' => null,
     'catalogue_latest_products'   => null,
     'catalogue_show_empty' => null,
     'email_smtp'   => null,
     'stock_level'   => null,
-    'stock_change_time'  => array(1 => $lang['settings']['stock_reduce_process'], 0 => $lang['settings']['stock_reduce_complete'], 2 => $lang['settings']['stock_reduce_pending']),
-    'stock_warn_type'  => array($lang['settings']['stock_warning_method_global'], $lang['settings']['stock_warning_method_product']),
-    'product_weight_unit' => array('Lb' => $lang['settings']['weight_unit_lb'], 'Kg' => $lang['settings']['weight_unit_kg']),
-    'product_size_unit' => array('cm' => 'Centimeters (cm)', 'in' => 'Inches (in)'),
+    'stock_change_time'  => [1 => $lang['settings']['stock_reduce_process'], 0 => $lang['settings']['stock_reduce_complete'], 2 => $lang['settings']['stock_reduce_pending']],
+    'stock_warn_type'  => [$lang['settings']['stock_warning_method_global'], $lang['settings']['stock_warning_method_product']],
+    'product_weight_unit' => ['Lb' => $lang['settings']['weight_unit_lb'], 'Kg' => $lang['settings']['weight_unit_kg']],
+    'product_size_unit' => ['cm' => 'Centimeters (cm)', 'in' => 'Inches (in)'],
     'time_format'   => 'Y-m-d H:i',
-    'product_sort_direction' => array('ASC' => 'ASC', 'DESC' => 'DESC'),
-    'product_clone'      => array('0' => $lang['common']['disabled'], '2' => $lang['settings']['product_clone_hide'], '1' => $lang['common']['enabled']),
-    'product_clone_code'    => array('1' => $lang['settings']['product_clone_new_code'], '2' => $lang['settings']['product_clone_old_code']),
-    'seo_add_cats'      => array('0' => $lang['common']['no'], '1' => $lang['settings']['seo_add_cats_top'], '2' => $lang['settings']['seo_add_cats_all']),
-    'seo_cat_add_cats'      => array('1' => $lang['common']['yes'], '0' => $lang['common']['no']),
-    'seo_ext'      => array('' => $lang['common']['none'].' ('.$lang['common']['recommended'].')', '.html' => '.html'),
-    'oid_mode'      => array('t' => $lang['orders']['id_traditional'], 'i' => $lang['orders']['id_incremental']),
-    'shipping_defaults' => array('0' => $lang['common']['cheapest'], '1' => $lang['settings']['cheapest_not_free'], '2' => $lang['settings']['most_expensive'], '3' => $lang['settings']['force_choice']),
-    'newsletter_status' => array('1' => $lang['common']['enabled'], '0' => $lang['common']['disabled'])
-);
+    'product_sort_direction' => ['ASC' => 'ASC', 'DESC' => 'DESC'],
+    'product_clone'      => ['0' => $lang['common']['disabled'], '2' => $lang['settings']['product_clone_hide'], '1' => $lang['common']['enabled']],
+    'product_clone_code'    => ['1' => $lang['settings']['product_clone_new_code'], '2' => $lang['settings']['product_clone_old_code']],
+    'seo_add_cats'      => ['0' => $lang['common']['no'], '1' => $lang['settings']['seo_add_cats_top'], '2' => $lang['settings']['seo_add_cats_all']],
+    'seo_cat_add_cats'      => ['1' => $lang['common']['yes'], '0' => $lang['common']['no']],
+    'seo_ext'      => ['' => $lang['common']['none'].' ('.$lang['common']['recommended'].')', '.html' => '.html'],
+    'oid_mode'      => ['t' => $lang['orders']['id_traditional'], 'i' => $lang['orders']['id_incremental']],
+    'shipping_defaults' => ['0' => $lang['common']['cheapest'], '1' => $lang['settings']['cheapest_not_free'], '2' => $lang['settings']['most_expensive'], '3' => $lang['settings']['force_choice']],
+    'newsletter_status' => ['1' => $lang['common']['enabled'], '0' => $lang['common']['disabled']],
+];
 $current_skin_path = CC_ROOT_DIR.'/skins/'.$GLOBALS['config']->get('config', 'skin_folder').'/templates/';
-$unavailable_captchas = array();
+$unavailable_captchas = [];
 
-if(!file_exists($current_skin_path.'content.recaptcha.head.php')) {
+if (!file_exists($current_skin_path.'content.recaptcha.head.php')) {
     $unavailable_captchas['reCaptcha v2 - Tickbox'] = true;
 }
-if(!file_exists($current_skin_path.'element.recaptcha.invisible.php')) {
+if (!file_exists($current_skin_path.'element.recaptcha.invisible.php')) {
     $unavailable_captchas['reCaptcha v2 - Invisible'] = true;
 }
-if(!file_exists($current_skin_path.'element.hcaptcha.php')) {
+if (!file_exists($current_skin_path.'element.hcaptcha.php')) {
     $unavailable_captchas['hCaptcha'] = true;
 }
-if(!file_exists($current_skin_path.'element.turnstile.php')) {
+if (!file_exists($current_skin_path.'element.turnstile.php')) {
     $unavailable_captchas['Cloudflare Turnstile'] = true;
 }
 
@@ -462,11 +462,11 @@ $GLOBALS['smarty']->assign('unavailable_captchas', $unavailable_captchas);
 $GLOBALS['smarty']->assign('w3w_compatibility', file_exists($current_skin_path.'element.w3w.php'));
 
 if ($inventory_columns = $GLOBALS['db']->misc('SHOW FULL COLUMNS FROM '.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_inventory')) {
-    $excluded = array('use_stock_level');
-    $select_options['product_sort_column'] = array();
+    $excluded = ['use_stock_level'];
+    $select_options['product_sort_column'] = [];
     foreach ($inventory_columns as $inventory_column) {
         if (!in_array($inventory_column['Field'], $excluded)) {
-            $inventory_column['Comment'] = ($inventory_column['Field']=='price') ? $lang['common']['price'] : $inventory_column['Comment'];
+            $inventory_column['Comment'] = ($inventory_column['Field'] == 'price') ? $lang['common']['price'] : $inventory_column['Comment'];
             $select_options['product_sort_column'][$inventory_column['Field']] = (empty($inventory_column['Comment'])) ? $inventory_column['Field'] : $inventory_column['Comment'];
         }
     }
@@ -474,7 +474,7 @@ if ($inventory_columns = $GLOBALS['db']->misc('SHOW FULL COLUMNS FROM '.$GLOBALS
 }
 
 // Cart recovery delay options
-$select_options['abandoned_cart_delay'] = array(
+$select_options['abandoned_cart_delay'] = [
     3600   => '1 Hour',
     7200   => '2 Hours',
     14400  => '4 Hours',
@@ -483,20 +483,8 @@ $select_options['abandoned_cart_delay'] = array(
     86400  => '1 Day',
     172800 => '2 Days',
     259200 => '3 Days',
-);
-$select_options['abandoned_cart_notify_cooldown'] = array(
-    3600   => '1 Hour',
-    7200   => '2 Hours',
-    14400  => '4 Hours',
-    21600  => '6 Hours',
-    43200  => '12 Hours',
-    86400  => '1 Day',
-    172800 => '2 Days',
-    259200 => '3 Days',
-    432000 => '5 Days',
-    604800 => '7 Days',
-);
-$select_options['abandoned_cart_order_window'] = array(
+];
+$select_options['abandoned_cart_notify_cooldown'] = [
     3600   => '1 Hour',
     7200   => '2 Hours',
     14400  => '4 Hours',
@@ -507,11 +495,23 @@ $select_options['abandoned_cart_order_window'] = array(
     259200 => '3 Days',
     432000 => '5 Days',
     604800 => '7 Days',
-);
+];
+$select_options['abandoned_cart_order_window'] = [
+    3600   => '1 Hour',
+    7200   => '2 Hours',
+    14400  => '4 Hours',
+    21600  => '6 Hours',
+    43200  => '12 Hours',
+    86400  => '1 Day',
+    172800 => '2 Days',
+    259200 => '3 Days',
+    432000 => '5 Days',
+    604800 => '7 Days',
+];
 
 // Cart recovery discount code - active, non-archived coupons (fixed or percentage)
-$select_options['abandoned_cart_coupon'] = array(0 => $lang['common']['none']);
-$active_coupons = $GLOBALS['db']->select('CubeCart_coupons', array('coupon_id', 'code', 'discount_percent', 'discount_price', 'expires'), "`status` = 1 AND (`cart_order_id` IS NULL OR `cart_order_id` = '') AND (`expires` = '0000-00-00' OR `expires` >= CURDATE()) AND (`discount_percent` > 0 OR `discount_price` > 0)", false, false, false, false);
+$select_options['abandoned_cart_coupon'] = [0 => $lang['common']['none']];
+$active_coupons = $GLOBALS['db']->select('CubeCart_coupons', ['coupon_id', 'code', 'discount_percent', 'discount_price', 'expires'], "`status` = 1 AND (`cart_order_id` IS NULL OR `cart_order_id` = '') AND (`expires` = '0000-00-00' OR `expires` >= CURDATE()) AND (`discount_percent` > 0 OR `discount_price` > 0)", false, false, false, false);
 if ($active_coupons) {
     foreach ($active_coupons as $coupon) {
         $desc = $coupon['code'].' - ';
@@ -531,11 +531,11 @@ $GLOBALS['smarty']->assign('CONFIG', $smarty_data['config']);
 if (isset($select_options)) {
     foreach ($select_options as $field => $options) {
         if (!is_array($options) || empty($options)) {
-            $options = array($lang['common']['no'], $lang['common']['yes']);
+            $options = [$lang['common']['no'], $lang['common']['yes']];
         }
         foreach ($options as $value => $title) {
             $selected = ($GLOBALS['config']->has('config', $field) && $GLOBALS['config']->get('config', $field) == $value) ? ' selected="selected"' : '';
-            $smarty_data['options'][] = array('value' => $value, 'title' => $title, 'selected' => $selected);
+            $smarty_data['options'][] = ['value' => $value, 'title' => $title, 'selected' => $selected];
         }
         $GLOBALS['smarty']->assign('OPT_'.strtoupper($field), $smarty_data['options']);
         unset($smarty_data['options']);
@@ -546,8 +546,8 @@ $GLOBALS['smarty']->assign('HOOK_TAB_CONTENT', $GLOBALS['hook_tab_content']);
 ## Cron tasks
 Cron::ensureDefaults();
 $cron_tasks = $GLOBALS['db']->select('CubeCart_cron_tasks', false, false, false, false, false, false);
-$GLOBALS['smarty']->assign('CRON_TASKS', $cron_tasks ? $cron_tasks : array());
-$GLOBALS['smarty']->assign('CRON_FREQUENCIES', array(
+$GLOBALS['smarty']->assign('CRON_TASKS', $cron_tasks ? $cron_tasks : []);
+$GLOBALS['smarty']->assign('CRON_FREQUENCIES', [
     300    => '5 Minutes',
     900    => '15 Minutes',
     1800   => '30 Minutes',
@@ -556,5 +556,5 @@ $GLOBALS['smarty']->assign('CRON_FREQUENCIES', array(
     43200  => '12 Hours',
     86400  => 'Daily',
     604800 => 'Weekly',
-));
+]);
 $page_content = $GLOBALS['smarty']->fetch('templates/settings.index.php');

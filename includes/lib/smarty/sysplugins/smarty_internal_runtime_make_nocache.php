@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * {make_nocache} Runtime Methods save(), store()
  *

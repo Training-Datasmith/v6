@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Personalization object for a /mail/send API call
  */
@@ -27,17 +29,15 @@ class Personalization implements \JsonSerializable
     /** @var $bccs Bcc[] objects */
     private $bccs;
     /** @var $subject Subject object */
-    private $subject;
+    private ?\SendGrid\Mail\Subject $subject = null;
     /** @var $headers Header[] array of header key values */
-    private $headers;
+    private ?array $headers = null;
     /** @var $substitutions Substitution[] array of substitution key values, used for legacy templates */
-    private $substitutions;
-    /** @var array of dynamic template data key values */
-    private $dynamic_template_data;
+    private ?array $substitutions = null;
     /** @var bool if we are using dynamic templates this will be true */
     private $has_dynamic_template = false;
     /** @var $custom_args CustomArg[] array of custom arg key values */
-    private $custom_args;
+    private ?array $custom_args = null;
     /** @var $send_at SendAt object */
     private $send_at;
 
@@ -46,7 +46,7 @@ class Personalization implements \JsonSerializable
      *
      * @param To $email To object
      */
-    public function addTo($email)
+    public function addTo($email): void
     {
         $this->tos[] = $email;
     }
@@ -66,7 +66,7 @@ class Personalization implements \JsonSerializable
      *
      * @param From $email From object
      */
-    public function addFrom($email)
+    public function addFrom($email): void
     {
         $this->from = $email;
     }
@@ -86,7 +86,7 @@ class Personalization implements \JsonSerializable
      *
      * @param Cc $email Cc object
      */
-    public function addCc($email)
+    public function addCc($email): void
     {
         $this->ccs[] = $email;
     }
@@ -106,7 +106,7 @@ class Personalization implements \JsonSerializable
      *
      * @param Bcc $email Bcc object
      */
-    public function addBcc($email)
+    public function addBcc($email): void
     {
         $this->bccs[] = $email;
     }
@@ -128,7 +128,7 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSubject($subject)
+    public function setSubject($subject): void
     {
         if (!($subject instanceof Subject)) {
             Assert::string($subject, 'subject', '"$subject" must be an instance of SendGrid\Mail\Subject or a string');
@@ -153,7 +153,7 @@ class Personalization implements \JsonSerializable
      *
      * @param Header $header Header object
      */
-    public function addHeader($header)
+    public function addHeader($header): void
     {
         Assert::isInstanceOf($header, 'header', Header::class);
 
@@ -179,7 +179,7 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function addDynamicTemplateData($data, $value = null)
+    public function addDynamicTemplateData($data, $value = null): void
     {
         $this->addSubstitution($data, $value);
     }
@@ -203,7 +203,7 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function addSubstitution($substitution, $value = null)
+    public function addSubstitution($substitution, $value = null): void
     {
         if (!($substitution instanceof Substitution)) {
             $key = $substitution;
@@ -229,7 +229,7 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function addCustomArg($custom_arg)
+    public function addCustomArg($custom_arg): void
     {
         Assert::isInstanceOf($custom_arg, 'custom_arg', CustomArg::class);
 
@@ -253,7 +253,7 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSendAt($send_at)
+    public function setSendAt($send_at): void
     {
         Assert::isInstanceOf($send_at, 'send_at', SendAt::class);
 
@@ -277,7 +277,7 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setHasDynamicTemplate($has_dynamic_template)
+    public function setHasDynamicTemplate($has_dynamic_template): void
     {
         Assert::boolean($has_dynamic_template, 'has_dynamic_template');
 
@@ -321,11 +321,9 @@ class Personalization implements \JsonSerializable
                 'substitutions' => $substitutions,
                 'dynamic_template_data' => $dynamic_substitutions,
                 'custom_args' => $this->getCustomArgs(),
-                'send_at' => $this->getSendAt()
+                'send_at' => $this->getSendAt(),
             ],
-            static function ($value) {
-                return $value !== null;
-            }
+            static fn (\SendGrid\Mail\From|\SendGrid\Mail\Subject|\SendGrid\Mail\SendAt|array|null $value) => $value !== null
         ) ?: null;
     }
 }

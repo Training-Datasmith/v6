@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -20,31 +22,26 @@
  */
 class Encryption
 {
-
     /**
      * Encryption cipher
      *
      * @var string
      */
-    private $_cipher = null;
+    private $_cipher;
     /**
      * Initialisation for encryption
-     *
-     * @var string
      */
-    private $_iv  = null;
+    private string $_iv  = null;
     /**
      * Encryption key
      *
      * @var string
      */
-    private $_key  = null;
+    private $_key;
     /**
      * Encryption method
-     *
-     * @var string
      */
-    private $_method  = 'openssl';
+    private string|bool $_method  = 'openssl';
 
     /**
      * Class instance
@@ -57,21 +54,17 @@ class Encryption
 
     final protected function __construct()
     {
-        if(function_exists('openssl_encrypt')) {
+        if (function_exists('openssl_encrypt')) {
             $this->_method = 'openssl';
         } else {
-            $this->_method = false; 
+            $this->_method = false;
         }
     }
 
-    public function __destruct() {}
-
     /**
      * Setup the instance (singleton)
-     *
-     * @return Encryption
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -89,11 +82,11 @@ class Encryption
      * @param string $data
      * @return string/false
      */
-    public function decrypt($data)
+    public function decrypt($data): string|false
     {
         if (!empty($data)) {
             $data_parts = explode(':iv:', $data);
-			return openssl_decrypt($data_parts[1], $this->_cipher, $this->_key, 0, $data_parts[0]);
+            return openssl_decrypt($data_parts[1], $this->_cipher, $this->_key, 0, $data_parts[0]);
         }
         return false;
     }
@@ -105,7 +98,7 @@ class Encryption
      * @param string $cart_order_id
      * @return string/false
      */
-    public function decryptDepreciated($data, $cart_order_id)
+    public function decryptDepreciated($data, $cart_order_id): bool
     {
         return false;
     }
@@ -114,9 +107,8 @@ class Encryption
      * Encrypt data
      *
      * @param string $data
-     * @return bool
      */
-    public function encrypt($data)
+    public function encrypt($data): string|false
     {
         if (!empty($data)) {
             return $this->_iv.':iv:'.openssl_encrypt($data, $this->_cipher, $this->_key, 0, $this->_iv);
@@ -137,11 +129,10 @@ class Encryption
                 return $this->setEncryptKey();
             }
             return $enc_key;
-        } else {
-            return $this->setEncryptKey();
         }
+        return $this->setEncryptKey();
     }
-    
+
     /**
      * Get encryption method
      *
@@ -187,7 +178,7 @@ class Encryption
      * @param string $mode (unused hangover from mcrypt days)
      * @param string $method (unused hangover from mcrypt/openssl switch days)
      */
-    public function setup($key = '', $iv = '', $cipher = '', $mode = '', $method = '')
+    public function setup($key = '', $iv = '', $cipher = '', $mode = '', $method = ''): void
     {
         $key = (!empty($key)) ? $key : $this->getEncryptKey();
         $this->_method = 'openssl';

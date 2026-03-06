@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Footer object for a /mail/send API call
  */
@@ -49,7 +51,7 @@ class Footer implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable)
+    public function setEnable($enable): void
     {
         Assert::boolean($enable, 'enable');
 
@@ -73,7 +75,7 @@ class Footer implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setText($text)
+    public function setText($text): void
     {
         Assert::string($text, 'text');
 
@@ -97,7 +99,7 @@ class Footer implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setHtml($html)
+    public function setHtml($html): void
     {
         Assert::string($html, 'html');
 
@@ -126,11 +128,9 @@ class Footer implements \JsonSerializable
             [
                 'enable' => $this->getEnable(),
                 'text' => $this->getText(),
-                'html' => $this->getHtml()
+                'html' => $this->getHtml(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (bool|string $value) => $value !== null
         ) ?: null;
     }
 }

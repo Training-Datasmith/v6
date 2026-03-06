@@ -1,57 +1,59 @@
 <?php
+
+declare(strict_types=1);
 ## Update homepage data
 $short_lang_identifier = (empty($_SESSION['setup']['short_lang_identifier'])) ? 'en' : $_SESSION['setup']['short_lang_identifier'];
 
 switch ($short_lang_identifier) {
-case 'cn':
-    $_SESSION['setup']['long_lang_identifier'] = 'cn-CN';
-    break;
-case 'de':
-    $_SESSION['setup']['long_lang_identifier'] = 'de-DE';
-    break;
-case 'dk':
-    $_SESSION['setup']['long_lang_identifier'] = 'dk-DK';
-    break;
-case 'en':
-    $_SESSION['setup']['long_lang_identifier'] = 'en-GB';
-    break;
-case 'es':
-    $_SESSION['setup']['long_lang_identifier'] = 'es-ES';
-    break;
-case 'fi':
-    $_SESSION['setup']['long_lang_identifier'] = 'fi-FI';
-    break;
-case 'fr':
-    $_SESSION['setup']['long_lang_identifier'] = 'fr-FR';
-    break;
-case 'it':
-    $_SESSION['setup']['long_lang_identifier'] = 'it-IT';
-    break;
-case 'nl':
-    $_SESSION['setup']['long_lang_identifier'] = 'nl-NL';
-    break;
-case 'no':
-    $_SESSION['setup']['long_lang_identifier'] = 'no-NO';
-    break;
-case 'pl':
-    $_SESSION['setup']['long_lang_identifier'] = 'pl-PL';
-    break;
-case 'pt':
-    $_SESSION['setup']['long_lang_identifier'] = 'pt-PT';
-    break;
-case 'se':
-    $_SESSION['setup']['long_lang_identifier'] = 'se-SE';
-    break;
-case 'sk':
-    $_SESSION['setup']['long_lang_identifier'] = 'sk-SK';
-    break;
-default:
-    $_SESSION['setup']['long_lang_identifier'] = 'en-GB';
+    case 'cn':
+        $_SESSION['setup']['long_lang_identifier'] = 'cn-CN';
+        break;
+    case 'de':
+        $_SESSION['setup']['long_lang_identifier'] = 'de-DE';
+        break;
+    case 'dk':
+        $_SESSION['setup']['long_lang_identifier'] = 'dk-DK';
+        break;
+    case 'en':
+        $_SESSION['setup']['long_lang_identifier'] = 'en-GB';
+        break;
+    case 'es':
+        $_SESSION['setup']['long_lang_identifier'] = 'es-ES';
+        break;
+    case 'fi':
+        $_SESSION['setup']['long_lang_identifier'] = 'fi-FI';
+        break;
+    case 'fr':
+        $_SESSION['setup']['long_lang_identifier'] = 'fr-FR';
+        break;
+    case 'it':
+        $_SESSION['setup']['long_lang_identifier'] = 'it-IT';
+        break;
+    case 'nl':
+        $_SESSION['setup']['long_lang_identifier'] = 'nl-NL';
+        break;
+    case 'no':
+        $_SESSION['setup']['long_lang_identifier'] = 'no-NO';
+        break;
+    case 'pl':
+        $_SESSION['setup']['long_lang_identifier'] = 'pl-PL';
+        break;
+    case 'pt':
+        $_SESSION['setup']['long_lang_identifier'] = 'pt-PT';
+        break;
+    case 'se':
+        $_SESSION['setup']['long_lang_identifier'] = 'se-SE';
+        break;
+    case 'sk':
+        $_SESSION['setup']['long_lang_identifier'] = 'sk-SK';
+        break;
+    default:
+        $_SESSION['setup']['long_lang_identifier'] = 'en-GB';
 }
 
-if ($homepage = $db->select('CubeCart_lang', false, array('identifier' => '/'.$short_lang_identifier.'/home.inc.php'))) {
+if ($homepage = $db->select('CubeCart_lang', false, ['identifier' => '/'.$short_lang_identifier.'/home.inc.php'])) {
     $data = unserialize($homepage[0]['langArray']);
-    $record = array(
+    $record = [
         'doc_lang'  => $_SESSION['setup']['long_lang_identifier'],
         'doc_home'  => 1,
         'doc_name'  => $data['title'],
@@ -59,18 +61,18 @@ if ($homepage = $db->select('CubeCart_lang', false, array('identifier' => '/'.$s
         'seo_meta_title'  => $data['doc_metatitle'],
         'seo_meta_description' => $data['doc_metadesc'],
         'seo_meta_keywords'  => $data['doc_metakeywords'],
-    );
+    ];
     $db->insert('CubeCart_documents', $record);
 } else {
     $lang_path = CC_ROOT_DIR.'/language/'.$short_lang_identifier.'/'.'home.inc.php';
     if (file_exists($lang_path)) {
         include $lang_path;
-        $record = array(
+        $record = [
             'doc_lang'  => $_SESSION['setup']['long_lang_identifier'],
             'doc_home'  => 1,
             'doc_name'  => $home['title'],
-            'doc_content' => str_replace(array(CC_ROOT_REL.'images/uploads', 'images/uploads'), 'images/source', $home['copy']),
-        );
+            'doc_content' => str_replace([CC_ROOT_REL.'images/uploads', 'images/uploads'], 'images/source', $home['copy']),
+        ];
         $db->insert('CubeCart_documents', $record);
     }
 }
@@ -104,7 +106,7 @@ function update_image_paths($pattern, $flags = 0)
         rename($filename, preg_replace($regex_slash_keep, '_', $filename));
     }
 
-    foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+    foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
         update_image_paths($dir.'/'.basename($pattern), $flags);
     }
 }
@@ -112,34 +114,34 @@ update_image_paths(CC_ROOT_DIR.'/images/source/*');
 
 ## Format filenames
 include $global_file; // Just to make sure we have it
-$product_files = $db->select('CubeCart_inventory', array('image', 'product_id'));
+$product_files = $db->select('CubeCart_inventory', ['image', 'product_id']);
 if ($product_files) {
     foreach ($product_files as $file) {
-        $db->misc("UPDATE `".$glob['dbprefix']."CubeCart_inventory` SET `image` = '".preg_replace($regex_slash_keep, '_', $file['image'])."' WHERE `product_id` = '".$file['product_id']."'");
+        $db->misc('UPDATE `'.$glob['dbprefix']."CubeCart_inventory` SET `image` = '".preg_replace($regex_slash_keep, '_', $file['image'])."' WHERE `product_id` = '".$file['product_id']."'");
     }
 }
 
-$category_files = $db->select('CubeCart_category', array('cat_image', 'cat_id'));
+$category_files = $db->select('CubeCart_category', ['cat_image', 'cat_id']);
 if ($category_files) {
     foreach ($category_files as $file) {
-        $db->misc("UPDATE `".$glob['dbprefix']."CubeCart_category` SET `cat_image` = '".preg_replace($regex_slash_keep, '_', $file['cat_image'])."' WHERE `cat_id` = '".$file['cat_id']."'");
+        $db->misc('UPDATE `'.$glob['dbprefix']."CubeCart_category` SET `cat_image` = '".preg_replace($regex_slash_keep, '_', $file['cat_image'])."' WHERE `cat_id` = '".$file['cat_id']."'");
     }
 }
 
-$filemanager_files = $db->select('CubeCart_filemanager', array('filepath', 'filename', 'file_id'));
+$filemanager_files = $db->select('CubeCart_filemanager', ['filepath', 'filename', 'file_id']);
 if ($filemanager_files) {
     foreach ($filemanager_files as $file) {
         $new_file_path = preg_replace($regex_slash_keep, '_', $file['filepath']);
         $new_file_path = (empty($new_file_path)) ? 'NULL' : "'".$new_file_path."'";
-        $db->misc("UPDATE `".$glob['dbprefix']."CubeCart_filemanager` SET `filepath` = ".$new_file_path.", `filename` = '".preg_replace($regex_slash_remove, '_', $file['filename'])."' WHERE `file_id` = '".$file['file_id']."'");
+        $db->misc('UPDATE `'.$glob['dbprefix'].'CubeCart_filemanager` SET `filepath` = '.$new_file_path.", `filename` = '".preg_replace($regex_slash_remove, '_', $file['filename'])."' WHERE `file_id` = '".$file['file_id']."'");
     }
 }
 
-$image_indexes = $db->select('CubeCart_image_index', array('img', 'id'));
+$image_indexes = $db->select('CubeCart_image_index', ['img', 'id']);
 if ($image_indexes) {
     foreach ($image_indexes as $row) {
         if (!empty($row['img'])) {
-            $db->misc("UPDATE `".$glob['dbprefix']."CubeCart_image_index` SET `img` = '".preg_replace($regex_slash_keep, '_', $row['img'])."' WHERE `id` = '".$row['id']."'");
+            $db->misc('UPDATE `'.$glob['dbprefix']."CubeCart_image_index` SET `img` = '".preg_replace($regex_slash_keep, '_', $row['img'])."' WHERE `id` = '".$row['id']."'");
         }
     }
 }
@@ -150,14 +152,14 @@ unset($product_files, $category_files, $filemanager_files, $image_indexes);
 $fm = new FileManager();
 $fm->buildDatabase();
 
-$config_string = $db->select('CubeCart_config', array('array'), array('name' => 'config'));
+$config_string = $db->select('CubeCart_config', ['array'], ['name' => 'config']);
 $v4config = json_decode(base64_decode($config_string[0]['array']), true);
 foreach (glob('../images/logos/*') as $file) {
     if (!preg_match('/[.][a-z]{3}/', $file, $match)) {
         $mime = $fm->getMimeType($file);
         $size = getimagesize($file);
         if (preg_match('/(png|jpg|jpeg|gif)/', $mime, $match)) {
-            $match[0] = ($match[0]=='jpeg') ? 'jpg' : $match[0];
+            $match[0] = ($match[0] == 'jpeg') ? 'jpg' : $match[0];
             $new_name = $file.'.'.$match[0];
             chmod($file, chmod_writable());
             rename($file, $new_name);
@@ -165,15 +167,15 @@ foreach (glob('../images/logos/*') as $file) {
         }
         $file_name = preg_replace('/..\/images\/logos\//', '', $file);
         $new_file_name = preg_replace('/..\/images\/logos\//', '', $new_name);
-        if ($file_name==$v4config['skinDir']) {
-            $db->insert('CubeCart_logo', array('status' => 1, 'filename' => $new_file_name, 'mimetype' => $mime, 'width' => $size[0], 'height' => $size[1]));
+        if ($file_name == $v4config['skinDir']) {
+            $db->insert('CubeCart_logo', ['status' => 1, 'filename' => $new_file_name, 'mimetype' => $mime, 'width' => $size[0], 'height' => $size[1]]);
         }
     }
 }
 build_logos($new_file_name);
 
 ## Remap category images
-if ($indexes = $db->select('CubeCart_category', array('cat_id', 'cat_image'))) {
+if ($indexes = $db->select('CubeCart_category', ['cat_id', 'cat_image'])) {
     foreach ($indexes as $index) {
         if (empty($index['cat_image'])) {
             continue;
@@ -190,14 +192,14 @@ if ($indexes = $db->select('CubeCart_category', array('cat_id', 'cat_image'))) {
         }
 
         if ($reference = $db->select('CubeCart_filemanager', 'file_id', $where)) {
-            $db->update('CubeCart_category', array('cat_image' => $reference[0]['file_id']), array('cat_id' => $index['cat_id']));
+            $db->update('CubeCart_category', ['cat_image' => $reference[0]['file_id']], ['cat_id' => $index['cat_id']]);
         }
         unset($where, $reference);
     }
 }
 
 ## Create new image indexes for main images
-if ($indexes = $db->select('CubeCart_inventory', array('product_id', 'image'))) {
+if ($indexes = $db->select('CubeCart_inventory', ['product_id', 'image'])) {
     foreach ($indexes as $index) {
         if (empty($index['image'])) {
             continue;
@@ -216,12 +218,12 @@ if ($indexes = $db->select('CubeCart_inventory', array('product_id', 'image'))) 
         }
 
         if ($reference = $db->select('CubeCart_filemanager', 'file_id', $where)) {
-            $record = array(
+            $record = [
                 'file_id'  => $reference[0]['file_id'],
                 'product_id' => $product_id,
-                'main_img'  => '1'
-            );
-            if (!$db->select('CubeCart_image_index', false, array('product_id' => $record['product_id'], 'file_id' => $record['file_id']))) {
+                'main_img'  => '1',
+            ];
+            if (!$db->select('CubeCart_image_index', false, ['product_id' => $record['product_id'], 'file_id' => $record['file_id']])) {
                 $db->insert('CubeCart_image_index', $record);
             }
         }
@@ -233,5 +235,5 @@ if ($indexes = $db->select('CubeCart_inventory', array('product_id', 'image'))) 
 $GLOBALS['db']->parseSchema(file_get_contents('db/install/email.sql', false));
 
 ## Remap store country from id to numcode
-$country = $db->select('CubeCart_geo_country', array('numcode'), array('id' => $v4config['siteCountry']));
+$country = $db->select('CubeCart_geo_country', ['numcode'], ['id' => $v4config['siteCountry']]);
 Config::getInstance()->set('config', 'store_country', $country[0]['numcode']);

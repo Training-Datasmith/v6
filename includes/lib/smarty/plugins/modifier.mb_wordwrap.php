@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -31,7 +33,7 @@ function smarty_modifier_mb_wordwrap($str, $width = 75, $break = "\n", $cut = fa
     $_space = false;
     foreach ($tokens as $_token) {
         $token_length = mb_strlen($_token, Smarty::$_CHARSET);
-        $_tokens = array($_token);
+        $_tokens = [$_token];
         if ($token_length > $width) {
             if ($cut) {
                 $_tokens = preg_split(

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -25,31 +27,23 @@ class Admin
      *
      * @var array
      */
-    private $_admin_data = array();
+    private $_admin_data = [];
     /**
      * Logged in?
-     *
-     * @var bool
      */
-    private $_logged_in  = false;
+    private bool $_logged_in  = false;
     /**
      * Permission array
-     *
-     * @var array
      */
-    private $_permissions = array();
+    private array $_permissions = [];
     /**
      * Permissions sections
-     *
-     * @var array
      */
-    private $_sections  = array();
+    private array $_sections  = [];
     /**
      * Length of validation key
-     *
-     * @var int
      */
-    private $_validate_key_len  = 32;
+    private int $_validate_key_len  = 32;
 
     /**
      * Class instance
@@ -70,7 +64,7 @@ class Admin
         }
 
         // Ensure the ACP is only ever using the default currency
-        if (ADMIN_CP==true) {
+        if (ADMIN_CP == true) {
             $GLOBALS['session']->set('currency', $GLOBALS['config']->get('config', 'default_currency'), 'client');
         }
 
@@ -85,10 +79,8 @@ class Admin
 
     /**
      * Setup the instance (singleton)
-     *
-     * @return Admin
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -108,10 +100,9 @@ class Admin
     public function get($element)
     {
         if (!empty($element)) {
-            return isset($this->_admin_data[$element]) ? $this->_admin_data[$element] : false;
-        } else {
-            return $this->_admin_data;
+            return $this->_admin_data[$element] ?? false;
         }
+        return $this->_admin_data;
     }
 
     /**
@@ -121,7 +112,7 @@ class Admin
      */
     public function getId()
     {
-        return isset($this->_admin_data['admin_id']) ? $this->_admin_data['admin_id'] : 0;
+        return $this->_admin_data['admin_id'] ?? 0;
     }
 
     /**
@@ -134,23 +125,22 @@ class Admin
     {
         if (!$force_login) {
             return $this->_logged_in;
-        } else {
-            if (!$this->_logged_in) {
-                httpredir('?_a=login');
-            }
-            return true;
         }
+        if (!$this->_logged_in) {
+            httpredir('?_a=login');
+        }
+        return true;
     }
 
     /**
      * Logout of admin
      */
-    public function logout($redirect = '')
+    public function logout($redirect = ''): void
     {
         $this->_load();
-        $GLOBALS['db']->update('CubeCart_admin_users', array('session_id' => ''), array('admin_id' => (int)$this->_admin_data['admin_id']));
+        $GLOBALS['db']->update('CubeCart_admin_users', ['session_id' => ''], ['admin_id' => (int)$this->_admin_data['admin_id']]);
         $GLOBALS['session']->destroy();
-        if ($redirect=='front') {
+        if ($redirect == 'front') {
             httpredir($GLOBALS['rootRel']);
         } else {
             httpredir($GLOBALS['rootRel'] . $GLOBALS['config']->get('config', 'adminFile'));
@@ -169,24 +159,24 @@ class Admin
     {
         $email = preg_replace('/[^a-z0-9.@_\-\+]/i', '', $email);
         $validation = preg_replace('/[^a-z0-9]/i', '', $validation);
-        if ($GLOBALS['session']->has('recover_login') && filter_var($email, FILTER_VALIDATE_EMAIL) && strlen($validation) == $this->_validate_key_len && !empty($password['new']) && !empty($password['confirm']) && ($password['new'] === $password['confirm'])) {
-            if (($check = $GLOBALS['db']->select('CubeCart_admin_users', array('admin_id', 'username'), array('email' => $email, 'verify' => $validation, 'status' => 1))) !== false) {
+        if ($GLOBALS['session']->has('recover_login') && filter_var($email, FILTER_VALIDATE_EMAIL) && strlen((string) $validation) == $this->_validate_key_len && !empty($password['new']) && !empty($password['confirm']) && ($password['new'] === $password['confirm'])) {
+            if (($check = $GLOBALS['db']->select('CubeCart_admin_users', ['admin_id', 'username'], ['email' => $email, 'verify' => $validation, 'status' => 1])) !== false) {
 
                 // Remove any blocks
-                $GLOBALS['db']->delete('CubeCart_blocker', array('username' => $email));
-                
+                $GLOBALS['db']->delete('CubeCart_blocker', ['username' => $email]);
+
                 $salt = Password::getInstance()->createSalt();
-                $record = array(
+                $record = [
                     'salt'  => $salt,
                     'password' => Password::getInstance()->getSalted($password['new'], $salt),
                     'verify' => null,
-                    'new_password' => 1
-                );
-                $where = array(
+                    'new_password' => 1,
+                ];
+                $where = [
                     'admin_id' => $check[0]['admin_id'],
                     'email'  => $email,
                     'verify' => $validation,
-                );
+                ];
 
                 $GLOBALS['session']->delete('recover_login');
 
@@ -208,10 +198,10 @@ class Admin
     {
         $email = preg_replace('/[^a-z0-9.@_\-\+]/i', '', $email);
         if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            if ($check = $GLOBALS['db']->select('CubeCart_admin_users', array('admin_id', 'email', 'language', 'name'), array('email' => $email, 'status' => 1))) {
+            if ($check = $GLOBALS['db']->select('CubeCart_admin_users', ['admin_id', 'email', 'language', 'name'], ['email' => $email, 'status' => 1])) {
                 // Generate validation key
                 $validation = randomString($this->_validate_key_len);
-                if ($GLOBALS['db']->update('CubeCart_admin_users', array('verify' => $validation), array('admin_id' => (int)$check[0]['admin_id']))) {
+                if ($GLOBALS['db']->update('CubeCart_admin_users', ['verify' => $validation], ['admin_id' => (int)$check[0]['admin_id']])) {
                     // Send email
                     $mailer = new Mailer();
                     $data['link'] = $GLOBALS['storeURL'].'/'.$GLOBALS['config']->get('config', 'adminFile').'?_g=recovery&email='.$check[0]['email'].'&validate='.$validation;
@@ -235,9 +225,8 @@ class Admin
      * @param mixed $sections
      * @param unknown_type $level
      * @param unknown_type $halt
-     * @return bool
      */
-    public function permissions($sections, $level = 4, $halt = false, $message = true)
+    public function permissions($sections, $level = 4, $halt = false, $message = true): bool
     {
 
         // Are they a Superuser? If so, they get automatic authorization
@@ -285,31 +274,27 @@ class Admin
             $GLOBALS['main']->errorMessage($GLOBALS['language']->notification['error_privileges']);
         }
         if ($halt) {
-            httpredir($GLOBALS['rootRel'].$GLOBALS['config']->get('config', 'adminFile')."?_g=401");
+            httpredir($GLOBALS['rootRel'].$GLOBALS['config']->get('config', 'adminFile').'?_g=401');
         }
         return false;
     }
 
     /**
      * Is a super user
-     *
-     * @return bool
      */
-    public function superUser()
+    public function superUser(): bool
     {
         return ($this->_admin_data['super_user']) ? true : false;
     }
 
     //=====[ Private ]=======================================
-
     /**
      * Authenticate user as admin
      *
      * @param string $username
      * @param string $password
-     * @return bool
      */
-    private function _authenticate($username, $password)
+    private function _authenticate($username, $password): bool
     {
         $username = (string)$username;
         $password = (string)$password;
@@ -317,18 +302,18 @@ class Admin
 
         if (!empty($username)) {
             // Fetch salt
-            if (($user = $GLOBALS['db']->select('CubeCart_admin_users', array('admin_id', 'password', 'salt', 'new_password'), array('username' => $username, 'status' => '1'), null, 1)) !== false) {
+            if (($user = $GLOBALS['db']->select('CubeCart_admin_users', ['admin_id', 'password', 'salt', 'new_password'], ['username' => $username, 'status' => '1'], null, 1)) !== false) {
                 if (empty($user[0]['salt'])) {
                     // Generate Salt
                     $salt = Password::getInstance()->createSalt();
                     //Update it to the newer MD5 so we can fix it later
                     $pass = Password::getInstance()->updateOld($user[0]['password'], $salt);
-                    $update = array(
+                    $update = [
                         'salt'  => $salt,
                         'password' => $pass,
-                        'new_password' => 0
-                    );
-                    if ($GLOBALS['db']->update('CubeCart_admin_users', $update, array('admin_id' => (int)$user[0]['admin_id']))) {
+                        'new_password' => 0,
+                    ];
+                    if ($GLOBALS['db']->update('CubeCart_admin_users', $update, ['admin_id' => (int)$user[0]['admin_id']])) {
                         $hash_password = $pass;
                     }
                 } else {
@@ -347,29 +332,29 @@ class Admin
                 $GLOBALS['gui']->setError($GLOBALS['language']->account['error_login']);
                 return false;
             }
-            $result = $GLOBALS['db']->select('CubeCart_admin_users', array('admin_id', 'customer_id', 'logins', 'new_password', 'name', 'email', 'language', 'twofa_enabled', 'twofa_method', 'twofa_secret', 'ip_address', 'browser'), array('username' => $username, 'password' => $hash_password, 'status' => '1'));
+            $result = $GLOBALS['db']->select('CubeCart_admin_users', ['admin_id', 'customer_id', 'logins', 'new_password', 'name', 'email', 'language', 'twofa_enabled', 'twofa_method', 'twofa_secret', 'ip_address', 'browser'], ['username' => $username, 'password' => $hash_password, 'status' => '1']);
             $GLOBALS['session']->blocker($username, 0, (bool)$result, Session::BLOCKER_BACKEND, $GLOBALS['config']->get('config', 'bfattempts'), $GLOBALS['config']->get('config', 'bftime'));
             if ($result) {
                 if (!$GLOBALS['session']->blocked()) {
-                    $update = array(
+                    $update = [
                         'blockTime'  => 0,
-                        'browser'  => htmlspecialchars($_SERVER['HTTP_USER_AGENT']),
+                        'browser'  => htmlspecialchars((string) $_SERVER['HTTP_USER_AGENT']),
                         'failLevel'  => 0,
                         'ip_address' => get_ip_address(),
                         'verify'  => '',
                         'lastTime'  => time(),
-                        'logins'  => $result[0]['logins'] +1,
-                    );
+                        'logins'  => $result[0]['logins'] + 1,
+                    ];
                     if ($result[0]['new_password'] != 1) {
                         $salt = Password::getInstance()->createSalt();
                         $pass = Password::getInstance()->getSalted($password, $salt);
-                        $update = array_merge($update, array(
+                        $update = array_merge($update, [
                                 'salt'   => $salt,
                                 'password'  => $pass,
                                 'new_password' => 1,
-                            ));
+                            ]);
                     }
-                    $GLOBALS['db']->update('CubeCart_admin_users', $update, array('admin_id' => (int)$result[0]['admin_id']));
+                    $GLOBALS['db']->update('CubeCart_admin_users', $update, ['admin_id' => (int)$result[0]['admin_id']]);
                     $this->_sendNewDeviceNotification($result[0]);
                     if (!empty($result[0]['twofa_enabled'])) {
                         // 2FA required – store pending state and redirect to challenge page (exits)
@@ -381,13 +366,13 @@ class Admin
                     foreach ($GLOBALS['hooks']->load('admin.authenticate.failed_valid_admin') as $hook) {
                         include $hook;
                     }
-                    $minutes_blocked = ceil(($GLOBALS['config']->get('config', 'bftime')/60));
+                    $minutes_blocked = ceil(($GLOBALS['config']->get('config', 'bftime') / 60));
                     $GLOBALS['gui']->setError(sprintf('Too many invalid logins have been made. Access has been blocked for %s minutes.', $minutes_blocked));
                 }
             } else {
                 if (!$GLOBALS['session']->blocked()) {
-                    if (($user = $GLOBALS['db']->select('CubeCart_admin_users', false, array('username' => $_POST['username']))) !== false) {
-                        if ($user[0]['blockTime']>0 && $user[0]['blockTime'] < time()) {
+                    if (($user = $GLOBALS['db']->select('CubeCart_admin_users', false, ['username' => $_POST['username']])) !== false) {
+                        if ($user[0]['blockTime'] > 0 && $user[0]['blockTime'] < time()) {
                             // reset fail level and time
                             $newdata['failLevel'] = 1;
                             $newdata['blockTime'] = 0;
@@ -403,20 +388,20 @@ class Admin
                             }
                         } elseif ($user[0]['blockTime'] < time()) {
                             $timeAgo    = time() - $GLOBALS['config']->get('config', 'bftime');
-                            $newdata['failLevel'] = ($user[0]['lastTime']<$timeAgo) ? 1 : $user[0]['failLevel'] + 1;
+                            $newdata['failLevel'] = ($user[0]['lastTime'] < $timeAgo) ? 1 : $user[0]['failLevel'] + 1;
                             $newdata['blockTime'] = 0;
                         } else {
                             // Display Blocked message
-                            $GLOBALS['gui']->setError(sprintf($GLOBALS['language']->account['error_login_block'],($GLOBALS['config']->get('config', 'bftime') / 60)));
+                            $GLOBALS['gui']->setError(sprintf($GLOBALS['language']->account['error_login_block'], ($GLOBALS['config']->get('config', 'bftime') / 60)));
                         }
                         if (isset($newdata)) {
                             $newdata['lastTime'] = time();
-                            $GLOBALS['db']->update('CubeCart_admin_users', $newdata, array('admin_id' => $user[0]['admin_id']));
+                            $GLOBALS['db']->update('CubeCart_admin_users', $newdata, ['admin_id' => $user[0]['admin_id']]);
                         }
                     }
                     $GLOBALS['gui']->setError($GLOBALS['language']->account['error_login']);
                 } else {
-                    $minutes_blocked = ceil(($GLOBALS['config']->get('config', 'bftime')/60));
+                    $minutes_blocked = ceil(($GLOBALS['config']->get('config', 'bftime') / 60));
                     $GLOBALS['gui']->setError(sprintf('Too many invalid logins have been made. Access has been blocked for %s minutes.', $minutes_blocked));
                 }
                 foreach ($GLOBALS['hooks']->load('admin.authenticate.failed_valid_admin') as $hook) {
@@ -437,7 +422,7 @@ class Admin
 
                 if (!empty($redir)) {
                     // Prevent phishing attacks, or anything untoward, unless it's redirecting back to this store
-                    if(!$GLOBALS['ssl']->validRedirect($redir)) {
+                    if (!$GLOBALS['ssl']->validRedirect($redir)) {
                         trigger_error(sprintf("Possible Phishing attack - Redirection to '%s' is not allowed. Please check the value of 'Store URL' in the SSL section of your store settings.", $redir));
                         $redir = '';
                         if ($GLOBALS['session']->has('back') && $redir == $GLOBALS['session']->get('back')) {
@@ -451,7 +436,7 @@ class Admin
 
                 httpredir((isset($redir) && !empty($redir)) ? $redir : $GLOBALS['rootRel'].$GLOBALS['config']->get('config', 'adminFile'));
             } else {
-                $minutes_blocked = ceil(($GLOBALS['config']->get('config', 'bftime')/60));
+                $minutes_blocked = ceil(($GLOBALS['config']->get('config', 'bftime') / 60));
                 $GLOBALS['gui']->setError(sprintf('Too many invalid logins have been made. Access has been blocked for %s minutes.', $minutes_blocked));
             }
         } else {
@@ -468,21 +453,12 @@ class Admin
      */
     private function _convertPermission($name = null)
     {
-        switch (strtolower($name)) {
-        case 'delete':
-            $value = CC_PERM_DELETE;
-            break;
-        case 'edit':
-        case 'write':
-            $value = CC_PERM_EDIT;
-            break;
-        case 'read':
-            $value = CC_PERM_READ;
-            break;
-        default:
-            $value = 0;
-        }
-        return $value;
+        return match (strtolower((string) $name)) {
+            'delete' => CC_PERM_DELETE,
+            'edit', 'write' => CC_PERM_EDIT,
+            'read' => CC_PERM_READ,
+            default => 0,
+        };
     }
 
     /**
@@ -497,7 +473,7 @@ class Admin
             foreach ($GLOBALS['hooks']->load('class.admin.get_section_id') as $hook) {
                 include $hook;
             }
-            $sections = array(
+            $sections = [
                 'categories' => 3,
                 'customers'  => 5,
                 'documents'  => 4,
@@ -510,7 +486,7 @@ class Admin
                 'statistics' => 8,
                 'settings'  => 9,
                 'reviews'  => 12,
-            );
+            ];
             if (isset($sections[$name])) {
                 return (int)$sections[$name];
             }
@@ -526,10 +502,8 @@ class Admin
 
     /**
      * Load admin data
-     *
-     * @return bool
      */
-    private function _load()
+    private function _load(): bool
     {
         //Try to get the admin_id from the sessions
         $admin_id = $GLOBALS['session']->get('admin_id', 'client', 0);
@@ -541,14 +515,14 @@ class Admin
             }
             if (!isset($data) || empty($data) || !isset($data['admin_id'])) {
                 //Load from the DB
-                if (($data = $GLOBALS['db']->select('CubeCart_admin_users', false, array('admin_id' => $admin_id, 'status' => '1'), false, 1, false, false)) !== false) {
+                if (($data = $GLOBALS['db']->select('CubeCart_admin_users', false, ['admin_id' => $admin_id, 'status' => '1'], false, 1, false, false)) !== false) {
                     //Unset these for security reasons
                     unset($data[0]['password']);
                     unset($data[0]['salt']);
                     unset($data[0]['session_id']);
                     $GLOBALS['session']->set('', $data[0], 'admin_data');
                     $data = $data[0];
-                    $GLOBALS['db']->update('CubeCart_sessions', array('admin_id' => $data['admin_id']), array('session_id' => $GLOBALS['session']->getId()));
+                    $GLOBALS['db']->update('CubeCart_sessions', ['admin_id' => $data['admin_id']], ['session_id' => $GLOBALS['session']->getId()]);
                 }
             }
             if (!empty($data)) {
@@ -556,7 +530,7 @@ class Admin
                 $this->_admin_data = $data;
                 $GLOBALS['session']->set('user_language', (!empty($data['language'])) ? $data['language'] : $GLOBALS['config']->get('config', 'default_language'), 'admin');
                 // Load Permission Rules
-                if (($permissions = $GLOBALS['db']->select('CubeCart_permissions', false, array('admin_id' => $this->_admin_data['admin_id']))) !== false) {
+                if (($permissions = $GLOBALS['db']->select('CubeCart_permissions', false, ['admin_id' => $this->_admin_data['admin_id']])) !== false) {
                     foreach ($permissions as $permission) {
                         $this->_permissions[$permission['section_id']] = $permission['level'];
                     }
@@ -569,12 +543,10 @@ class Admin
 
     /**
      * Magic get
-     *
-     * @param string $name
      */
-    public function __get($name)
+    public function __get(string $name): mixed
     {
-        return (isset($this->_admin_data[$name])) ? $this->_admin_data[$name] : false;
+        return $this->_admin_data[$name] ?? false;
     }
 
     /**
@@ -583,7 +555,7 @@ class Admin
      * @param string $code
      * @return bool  Always redirects on success; returns false on failure
      */
-    public function verify2FA($code)
+    public function verify2FA($code): bool
     {
         $admin_id = (int)$GLOBALS['session']->get('twofa_pending_admin_id', 'client', 0);
         if (!$admin_id) {
@@ -598,7 +570,7 @@ class Admin
             httpredir($GLOBALS['rootRel'].$GLOBALS['config']->get('config', 'adminFile'));
         }
 
-        $admin = $GLOBALS['db']->select('CubeCart_admin_users', false, array('admin_id' => $admin_id, 'status' => 1), false, 1, false, false);
+        $admin = $GLOBALS['db']->select('CubeCart_admin_users', false, ['admin_id' => $admin_id, 'status' => 1], false, 1, false, false);
         if (!$admin) {
             $this->_clearPending2FA();
             httpredir($GLOBALS['rootRel'].$GLOBALS['config']->get('config', 'adminFile'));
@@ -613,11 +585,13 @@ class Admin
             $backup_codes = json_decode($admin['twofa_backup_codes'] ?? '[]', true);
             if (is_array($backup_codes)) {
                 foreach ($backup_codes as $i => $hash) {
-                    if (password_verify(strtoupper($code), $hash)) {
+                    if (password_verify(strtoupper($code), (string) $hash)) {
                         unset($backup_codes[$i]);
-                        $GLOBALS['db']->update('CubeCart_admin_users',
-                            array('twofa_backup_codes' => json_encode(array_values($backup_codes))),
-                            array('admin_id' => $admin_id));
+                        $GLOBALS['db']->update(
+                            'CubeCart_admin_users',
+                            ['twofa_backup_codes' => json_encode(array_values($backup_codes))],
+                            ['admin_id' => $admin_id]
+                        );
                         $verified = true;
                         break;
                     }
@@ -628,10 +602,12 @@ class Admin
         if (!$verified) {
             if ($admin['twofa_method'] === 'email') {
                 if (!empty($admin['twofa_otp_hash']) && (int)$admin['twofa_otp_expires'] > time()) {
-                    if (password_verify($code, $admin['twofa_otp_hash'])) {
-                        $GLOBALS['db']->update('CubeCart_admin_users',
-                            array('twofa_otp_hash' => null, 'twofa_otp_expires' => 0),
-                            array('admin_id' => $admin_id));
+                    if (password_verify($code, (string) $admin['twofa_otp_hash'])) {
+                        $GLOBALS['db']->update(
+                            'CubeCart_admin_users',
+                            ['twofa_otp_hash' => null, 'twofa_otp_expires' => 0],
+                            ['admin_id' => $admin_id]
+                        );
                         $verified = true;
                     }
                 }
@@ -669,19 +645,22 @@ class Admin
 
     /**
      * Resend the email OTP for a pending 2FA login (rate-limited to once per 60 s)
-     *
-     * @return bool
      */
-    public function resend2FACode()
+    public function resend2FACode(): bool
     {
         $admin_id = (int)$GLOBALS['session']->get('twofa_pending_admin_id', 'client', 0);
         if (!$admin_id) {
             return false;
         }
-        $admin = $GLOBALS['db']->select('CubeCart_admin_users',
-            array('admin_id', 'name', 'email', 'language', 'twofa_method', 'twofa_otp_expires'),
-            array('admin_id' => $admin_id, 'status' => 1, 'twofa_method' => 'email'),
-            false, 1, false, false);
+        $admin = $GLOBALS['db']->select(
+            'CubeCart_admin_users',
+            ['admin_id', 'name', 'email', 'language', 'twofa_method', 'twofa_otp_expires'],
+            ['admin_id' => $admin_id, 'status' => 1, 'twofa_method' => 'email'],
+            false,
+            1,
+            false,
+            false
+        );
         if (!$admin) {
             return false;
         }
@@ -699,15 +678,15 @@ class Admin
 
     /**
      * Establish an authenticated admin session after credentials (and 2FA) are verified
-     *
-     * @param int $admin_id
      */
-    private function _establishSession($admin_id)
+    private function _establishSession(int $admin_id): void
     {
         $GLOBALS['session']->regenerateSessionId();
-        $GLOBALS['db']->update('CubeCart_admin_users',
-            array('session_id' => $GLOBALS['session']->getId()),
-            array('admin_id' => $admin_id));
+        $GLOBALS['db']->update(
+            'CubeCart_admin_users',
+            ['session_id' => $GLOBALS['session']->getId()],
+            ['admin_id' => $admin_id]
+        );
         $GLOBALS['session']->set('admin_id', $admin_id, 'client');
         $this->_logged_in = true;
         $this->_load();
@@ -718,7 +697,7 @@ class Admin
      *
      * @param array $admin  admin record from DB (must include admin_id, twofa_method, name, email, language)
      */
-    private function _initiate2FA($admin)
+    private function _initiate2FA(array $admin): void
     {
         $GLOBALS['session']->set('twofa_pending_admin_id', (int)$admin['admin_id'], 'client');
         $GLOBALS['session']->set('twofa_pending_ip', md5(get_ip_address()), 'client');
@@ -746,22 +725,24 @@ class Admin
      *
      * @param array $admin  must include admin_id, name, email, language
      */
-    private function _send2FACode($admin)
+    private function _send2FACode(array $admin): void
     {
         $code    = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $hash    = password_hash($code, PASSWORD_DEFAULT);
         $expires = time() + 600;
 
-        $GLOBALS['db']->update('CubeCart_admin_users',
-            array('twofa_otp_hash' => $hash, 'twofa_otp_expires' => $expires),
-            array('admin_id' => (int)$admin['admin_id']));
+        $GLOBALS['db']->update(
+            'CubeCart_admin_users',
+            ['twofa_otp_hash' => $hash, 'twofa_otp_expires' => $expires],
+            ['admin_id' => (int)$admin['admin_id']]
+        );
 
         $mailer = new Mailer();
-        $data   = array(
+        $data   = [
             'code'    => $code,
-            'name'    => isset($admin['name']) ? $admin['name'] : '',
+            'name'    => $admin['name'] ?? '',
             'expires' => '10 minutes',
-        );
+        ];
         $content = $mailer->loadContent('admin.two_factor_code', $admin['language'], $data);
         if ($content) {
             $GLOBALS['smarty']->assign('DATA', $data);
@@ -774,7 +755,7 @@ class Admin
      *
      * @param array $admin  Admin record (must include ip_address, browser, name, email, language)
      */
-    private function _sendNewDeviceNotification($admin)
+    private function _sendNewDeviceNotification(array $admin): void
     {
         if ($GLOBALS['config']->get('config', 'admin_login_notify') === '0') {
             return;
@@ -789,7 +770,7 @@ class Admin
         }
 
         $current_ip      = get_ip_address();
-        $current_browser = htmlspecialchars($_SERVER['HTTP_USER_AGENT']);
+        $current_browser = htmlspecialchars((string) $_SERVER['HTTP_USER_AGENT']);
 
         $ip_changed      = (!empty($prev_ip) && $prev_ip !== $current_ip);
         $browser_changed = (!empty($prev_browser)
@@ -800,8 +781,8 @@ class Admin
         }
 
         $mailer = new Mailer();
-        $data   = array(
-            'name'             => isset($admin['name']) ? $admin['name'] : '',
+        $data   = [
+            'name'             => $admin['name'] ?? '',
             'new_ip'           => $current_ip,
             'previous_ip'      => $prev_ip,
             'new_browser'      => htmlspecialchars_decode($current_browser),
@@ -809,7 +790,7 @@ class Admin
             'login_time'       => date('Y-m-d H:i:s T'),
             'ip_changed'       => $ip_changed,
             'browser_changed'  => $browser_changed,
-        );
+        ];
         $content = $mailer->loadContent('admin.new_device_login', $admin['language'], $data);
         if ($content) {
             $GLOBALS['smarty']->assign('DATA', $data);
@@ -821,18 +802,17 @@ class Admin
      * Normalize a user agent string by stripping version numbers
      * so that browser auto-updates don't trigger false positives
      *
-     * @param string $ua
      * @return string
      */
-    private function _normalizeBrowser($ua)
+    private function _normalizeBrowser(string $ua): ?string
     {
-        return preg_replace('/\/[\d]+[\d.]*/', '/', (string)$ua);
+        return preg_replace('/\/[\d]+[\d.]*/', '/', $ua);
     }
 
     /**
      * Clear all pending 2FA session state
      */
-    private function _clearPending2FA()
+    private function _clearPending2FA(): void
     {
         $GLOBALS['session']->delete('twofa_pending_admin_id', 'client');
         $GLOBALS['session']->delete('twofa_pending_ip', 'client');

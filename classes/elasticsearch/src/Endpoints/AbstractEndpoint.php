@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -21,10 +22,7 @@ abstract class AbstractEndpoint
 {
     use EndpointTrait;
 
-    protected ClientInterface $client;
-
-    public function __construct(ClientInterface $client)
+    public function __construct(protected ClientInterface $client)
     {
-        $this->client = $client;
     }
 }

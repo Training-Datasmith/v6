@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -17,62 +19,62 @@ Admin::getInstance()->permissions('settings', CC_PERM_READ, true);
 $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->statistics['product_stats']);
 $GLOBALS['main']->addTabControl($GLOBALS['language']->statistics['product_stats'], 'general');
 $product = $GLOBALS['catalogue']->getProductData((int)$_GET['product_id'], 1, false, 10, 1, false, null, false);
-if($product) {
+if ($product) {
     $master_image = isset($_GET['product_id']) ? $GLOBALS['gui']->getProductImage((int)$_GET['product_id']) : '';
     $product['image'] = $master_image;
 
-    $join = "`".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_order_inventory` AS `I` INNER JOIN `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_order_summary` AS `S` ON `I`.`cart_order_id` = `S`.`cart_order_id`";
+    $join = '`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_inventory` AS `I` INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_summary` AS `S` ON `I`.`cart_order_id` = `S`.`cart_order_id`';
     $columns = '`S`.`order_date`, `S`.`id`, `I`.`quantity`';
     $where = '`I`.`product_id` = '.(string)$_GET['product_id'].' AND `S`.`status` IN(2, 3)';
     $where_date = '';
     $reset = false;
-    if(isset($_REQUEST['from']) && !empty($_REQUEST['from']) && isset($_REQUEST['to']) && !empty($_REQUEST['to'])) {
+    if (isset($_REQUEST['from']) && !empty($_REQUEST['from']) && isset($_REQUEST['to']) && !empty($_REQUEST['to'])) {
         $reset = true;
         $from = strtotime($_REQUEST['from']['year'].'-'.$_REQUEST['from']['month'].'-'.$_REQUEST['from']['day']);
         $to = strtotime($_REQUEST['to']['year'].'-'.$_REQUEST['to']['month'].'-'.$_REQUEST['to']['day']);
         $redirect = '?_g=statistics&node=product&product_id='.(int)$_GET['product_id'];
-        
-        if(!checkdate((int)$_REQUEST['from']['month'], (int)$_REQUEST['from']['day'], (int)$_REQUEST['from']['year'])) {
+
+        if (!checkdate((int)$_REQUEST['from']['month'], (int)$_REQUEST['from']['day'], (int)$_REQUEST['from']['year'])) {
             $GLOBALS['main']->errorMessage($GLOBALS['language']->statistics['invalid_date_from']);
             httpredir($redirect);
-            exit;   
+            exit;
         }
-        if(!checkdate((int)$_REQUEST['to']['month'], (int)$_REQUEST['to']['day'], (int)$_REQUEST['to']['year'])) {
+        if (!checkdate((int)$_REQUEST['to']['month'], (int)$_REQUEST['to']['day'], (int)$_REQUEST['to']['year'])) {
             $GLOBALS['main']->errorMessage($GLOBALS['language']->statistics['invalid_date_to']);
             httpredir($redirect);
-            exit;     
+            exit;
         }
-        if($from < $to) {
+        if ($from < $to) {
             $where_date = " AND (`S`.`order_date` BETWEEN $from AND $to)";
         } else {
             $GLOBALS['main']->errorMessage($GLOBALS['language']->statistics['date_range_error']);
             httpredir($redirect);
             exit;
-        }       
+        }
     }
     $GLOBALS['smarty']->assign('RESET', $reset);
-    
+
     $first_sale = $GLOBALS['db']->select($join, $columns, $where.$where_date, '`S`.`order_date` ASC', 1);
     $last_sale = $GLOBALS['db']->select($join, $columns, $where.$where_date, '`S`.`order_date` DESC', 1);
     $all_sales = $GLOBALS['db']->select($join, $columns, $where.$where_date);
 
-    $earliest_year = date('Y',$first_sale[0]['order_date']);
-    $earliest_month = date('m',$first_sale[0]['order_date']);
-    $earliest_day = date('d',$first_sale[0]['order_date']);
+    $earliest_year = date('Y', $first_sale[0]['order_date']);
+    $earliest_month = date('m', $first_sale[0]['order_date']);
+    $earliest_day = date('d', $first_sale[0]['order_date']);
     $now['year'] = date('Y');
 
     for ($i = $earliest_year; $i <= $now['year']; ++$i) {
-        if(isset($_REQUEST['from']['year'])) {
+        if (isset($_REQUEST['from']['year'])) {
             $selected_from = ((int)$_REQUEST['from']['year'] == (int)$i) ? ' selected="selected"' : '';
         } else {
             $selected_from = ((int)$earliest_year == (int)$i) ? ' selected="selected"' : '';
         }
-        if(isset($_REQUEST['to']['year'])) {
+        if (isset($_REQUEST['to']['year'])) {
             $selected_to = ((int)$_REQUEST['to']['year'] == (int)$i) ? ' selected="selected"' : '';
         } else {
             $selected_to = ((int)date('Y') == (int)$i) ? ' selected="selected"' : '';
         }
-        $smarty_data['years'][] = array('value' => $i, 'selected_from' => $selected_from, 'selected_to' => $selected_to);
+        $smarty_data['years'][] = ['value' => $i, 'selected_from' => $selected_from, 'selected_to' => $selected_to];
     }
     $GLOBALS['smarty']->assign('YEARS', $smarty_data['years']);
 
@@ -81,44 +83,45 @@ if($product) {
         $value   = isset($monthly[$i]) ? $monthly[$i] : 0;
         $month_text  = date('F', mktime(0, 0, 0, $i, 1));
 
-        if(isset($_REQUEST['from']['month'])) {
+        if (isset($_REQUEST['from']['month'])) {
             $selected_from = ((int)$_REQUEST['from']['month'] == (int)$i) ? ' selected="selected"' : '';
         } else {
             $selected_from = ((int)$earliest_month == (int)$i) ? ' selected="selected"' : '';
         }
-        if(isset($_REQUEST['to']['month'])) {
+        if (isset($_REQUEST['to']['month'])) {
             $selected_to  = ((int)$_REQUEST['to']['month'] == (int)$i) ? ' selected="selected"' : '';
         } else {
             $selected_to  = ((int)date('m') == (int)$i) ? ' selected="selected"' : '';
         }
-        $smarty_data['months'][] = array('value' => $i, 'title' => $month_text, 'selected_from' => $selected_from, 'selected_to' => $selected_to);
+        $smarty_data['months'][] = ['value' => $i, 'title' => $month_text, 'selected_from' => $selected_from, 'selected_to' => $selected_to];
     }
     $GLOBALS['smarty']->assign('MONTHS', $smarty_data['months']);
 
     for ($day = 1; $day <= 31; ++$day) {
-        if(isset($_REQUEST['from']['day'])) {
+        if (isset($_REQUEST['from']['day'])) {
             $selected_from = ((int)$_REQUEST['from']['day'] == (int)$day) ? ' selected="selected"' : '';
         } else {
             $selected_from = ((int)$earliest_day == (int)$day) ? ' selected="selected"' : '';
         }
-        if(isset($_REQUEST['to']['day'])) {
+        if (isset($_REQUEST['to']['day'])) {
             $selected_to = ((int)$_REQUEST['to']['day'] == (int)$day) ? ' selected="selected"' : '';
         } else {
             $selected_to = ((int)date('d') == (int)$day) ? ' selected="selected"' : '';
         }
-        $smarty_data['days'][] = array('value' => $day, 'selected_from' => $selected_from, 'selected_to' => $selected_to);
+        $smarty_data['days'][] = ['value' => $day, 'selected_from' => $selected_from, 'selected_to' => $selected_to];
     }
     $GLOBALS['smarty']->assign('DAYS', $smarty_data['days']);
 
-    function secondsToTime($seconds) {
+    function secondsToTime($seconds)
+    {
         $dtF = new \DateTime('@0');
         $dtT = new \DateTime("@$seconds");
         return $dtF->diff($dtT)->format($GLOBALS['language']->statistics['dhms']);
     }
-    $ids = array();
+    $ids = [];
     $total_sales = 0;
     $total_orders = 0;
-    foreach($all_sales as $s) {
+    foreach ($all_sales as $s) {
         array_push($ids, $s['id']);
         $total_sales += (int)$s['quantity'];
         $total_orders++;
@@ -126,15 +129,15 @@ if($product) {
     $product['date_added'] = formatTime(strtotime($product['date_added']));
     $product['updated'] = formatTime(strtotime($product['updated']));
 
-    $data = array(
+    $data = [
         'first_sale' => !$first_sale ? '-' : formatTime($first_sale[0]['order_date']),
         'last_sale' => !$last_sale ? '-' : formatTime($last_sale[0]['order_date']),
         'total_sales' => $total_sales,
         'total_orders' => $total_orders,
-        'avg_per_order' => ($total_orders > 0) ? round($total_sales/$total_orders, 1) : 0,
-        'order_ids' => urlencode(implode(',',$ids)),
-        'sale_interval' => is_array($all_sales) ? secondsToTime(ceil((time() - strtotime($product['date_added'])) / count($all_sales))) : '-'
-    );
+        'avg_per_order' => ($total_orders > 0) ? round($total_sales / $total_orders, 1) : 0,
+        'order_ids' => urlencode(implode(',', $ids)),
+        'sale_interval' => is_array($all_sales) ? secondsToTime(ceil((time() - strtotime($product['date_added'])) / count($all_sales))) : '-',
+    ];
 
     $GLOBALS['smarty']->assign('PRODUCT', array_merge($product, $data));
 
@@ -142,7 +145,7 @@ if($product) {
     $page  = (isset($_GET['page']) && is_numeric($_GET['page'])) ? $_GET['page'] : 1;
     $query = 'SELECT `C`.`customer_id`, `C`.`first_name`, `C`.`last_name`, `C`.`email`, SUM(`I`.`quantity`) AS `purchases` FROM `'.$glob['dbprefix'].'CubeCart_order_inventory` AS `I` INNER JOIN `'.$glob['dbprefix'].'CubeCart_order_summary` AS `S` ON `I`.`cart_order_id` = `S`.`cart_order_id` INNER JOIN `'.$glob['dbprefix'].'CubeCart_customer` AS `C` ON `S`.`customer_id` = `C`.`customer_id` WHERE `S`.`status` IN(2,3) AND`I`.`product_id` = '.(int)$_GET['product_id'].$where_date.' GROUP BY `S`.`customer_id` ORDER BY SUM(`I`.`quantity`) DESC';
     $customers = $GLOBALS['db']->query($query, $per_page, $page);
-    
+
     $GLOBALS['smarty']->assign('CUSTOMERS', $customers);
     $GLOBALS['smarty']->assign('PAGINATION', $GLOBALS['db']->pagination(false, $per_page, $page, 5, 'page'));
 
@@ -151,4 +154,3 @@ if($product) {
 }
 
 $page_content = $GLOBALS['smarty']->fetch('templates/statistics.product.php');
-?>

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -34,16 +36,12 @@ class Session
     private $_save_path = '';
     /**
      * Current session status
-     *
-     * @var string
      */
-    private $_state	= 'active';
+    private string $_state	= 'active';
     /**
      * Session timeout
-     *
-     * @var int
      */
-    private $_session_timeout = 172800; // 2 days (guest default)
+    private int $_session_timeout = 172800; // 2 days (guest default)
     /**
      * Session path
      *
@@ -52,52 +50,42 @@ class Session
     private $_session_path = '';
     /**
      * Session domain
-     *
-     * @var string
      */
-    private $_session_domain = '';
+    private string $_session_domain = '';
     /**
      * Session token name
-     *
-     * @var string
      */
-    private $_token_name = 'token';
+    private string $_token_name = 'token';
     /**
      * Is user blocked
-     *
-     * @var bool
      */
-    private $_user_blocked	= false;
+    private bool $_user_blocked	= false;
     /**
      * Cookie-backed preference keys: namespace => array(name => cookie_name)
-     *
-     * @var array
      */
-    private static $_cookie_prefs = array(
-        'client' => array(
+    private static array $_cookie_prefs = [
+        'client' => [
             'currency' => 'cc_currency',
             'language' => 'cc_language',
             'skin'     => 'cc_skin',
             'style'    => 'cc_style',
-        ),
-    );
+        ],
+    ];
 
-    const BLOCKER_FRONTEND	= 'F';
-    const BLOCKER_BACKEND	= 'B';
+    public const BLOCKER_FRONTEND	= 'F';
+    public const BLOCKER_BACKEND	= 'B';
 
     /**
      * Class instance
-     *
-     * @var instance
      */
-    private static $_instance;
+    private static ?\Session $_instance = null;
 
     /**
      * Current session data
      *
      * @var array
      */
-    public $session_data = array();
+    public $session_data = [];
 
     ##############################################
 
@@ -111,7 +99,7 @@ class Session
             session_unset();
             session_destroy();
             session_write_close();
-            $_SESSION = array();
+            $_SESSION = [];
         }
 
         //Get all the ini settings to save time later
@@ -156,12 +144,12 @@ class Session
         if ($ini['session.gc_divisor'] != 100) {
             ini_set('session.gc_divisor', 100);
         }
-        $cookie_domain = ltrim($GLOBALS['config']->get('config', 'cookie_domain'), '.');
-        if (!empty($cookie_domain) && strstr($GLOBALS['storeURL'], $cookie_domain) && strpos($cookie_domain, '.')) {
+        $cookie_domain = ltrim((string) $GLOBALS['config']->get('config', 'cookie_domain'), '.');
+        if (!empty($cookie_domain) && strstr((string) $GLOBALS['storeURL'], $cookie_domain) && strpos($cookie_domain, '.')) {
             $this->_session_domain = '.'.$cookie_domain;
             ini_set('session.cookie_domain', $this->_session_domain);
         }
-        $this->_session_path = $GLOBALS['rootRel'] == '/' ? $GLOBALS['rootRel'] : substr($GLOBALS['rootRel'],0,-1);
+        $this->_session_path = $GLOBALS['rootRel'] == '/' ? $GLOBALS['rootRel'] : substr((string) $GLOBALS['rootRel'], 0, -1);
         ini_set('session.cookie_path', $this->_session_path);
 
         //If the current session time is longer we will not change anything
@@ -217,10 +205,8 @@ class Session
 
     /**
      * Setup the instance (singleton)
-     *
-     * @return Session
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -250,19 +236,19 @@ class Session
      * @param int $attempts
      * @param int $time
      */
-    public function blocker($user, $user_id, $login = false, $location = false, $attempts = 5, $time = 600)
+    public function blocker($user, $user_id, $login = false, $location = false, $attempts = 5, $time = 600): bool
     {
         $now = time();
         // Access Log
-        $record	= array(
+        $record	= [
             'type'		=> $location,
             'time'		=> $now,
             'username'	=> (!empty($user)) ? $user : '--',
             'user_id'   => $user_id,
-            'ip_address'=> get_ip_address(),
+            'ip_address' => get_ip_address(),
             'useragent' => $this->_http_user_agent(),
             'success'	=> ($login) ? 'Y' : 'N',
-        );
+        ];
         $log_days = $GLOBALS['config']->get('config', 'r_staff');
         if (ctype_digit((string)$log_days) &&  $log_days > 0) {
             $GLOBALS['db']->insert('CubeCart_access_log', $record);
@@ -271,42 +257,42 @@ class Session
             $GLOBALS['db']->insert('CubeCart_access_log', $record);
         }
         // Remove expired blocks
-        $GLOBALS['db']->delete('CubeCart_blocker', array('last_attempt' => '<='.($now - $time)), 500);
+        $GLOBALS['db']->delete('CubeCart_blocker', ['last_attempt' => '<='.($now - $time)], 500);
 
         // Search for active blocks
-        $where = array(
+        $where = [
             'user_agent'	=> $this->_http_user_agent(),
             'ip_address'	=> get_ip_address(),
             'location'		=> $location,
-        );
-        $blacklist = $GLOBALS['db']->select('CubeCart_blocker', array('block_id', 'ban_expires', 'last_attempt', 'level'), $where);
+        ];
+        $blacklist = $GLOBALS['db']->select('CubeCart_blocker', ['block_id', 'ban_expires', 'last_attempt', 'level'], $where);
         if ($blacklist) {
             $blocked = $blacklist[0];
             if ((int)$blocked['level'] == (int)$attempts) {
                 // Ban level reached
                 if ((int)$blocked['ban_expires'] <= $now) {
                     // Ban expired - Allowed
-                    $GLOBALS['db']->delete('CubeCart_blocker', array('block_id' => $blocked['block_id']));
+                    $GLOBALS['db']->delete('CubeCart_blocker', ['block_id' => $blocked['block_id']]);
                 } else {
                     // Still banned - Denied
                     $this->_user_blocked = true;
                 }
             } elseif (!$login) {
                 // Attempts remaining
-                $record	= array(
+                $record	= [
                     'last_attempt'	=> $now,
                     'level'			=> ($blocked['last_attempt'] <= ($now - $time)) ? 1 : $blocked['level'] + 1,
-                );
+                ];
                 if ($record['level'] == $attempts) {
                     // Blocked
-                    $record['ban_expires'] = ($now+$time);
+                    $record['ban_expires'] = ($now + $time);
                     $this->_user_blocked = true;
                 }
-                $GLOBALS['db']->update('CubeCart_blocker', $record, array('block_id' => $blocked['block_id']));
+                $GLOBALS['db']->update('CubeCart_blocker', $record, ['block_id' => $blocked['block_id']]);
             }
         } elseif (!$login) {
             // Login failed - Create blacklist entry
-            $record	= array(
+            $record	= [
                 'level'			=> 1,
                 'last_attempt'	=> $now,
                 'ban_expires'	=> 0,
@@ -314,7 +300,7 @@ class Session
                 'location'		=> $location,
                 'user_agent'	=> $this->_http_user_agent(),
                 'ip_address'	=> get_ip_address(),
-            );
+            ];
             $GLOBALS['db']->insert('CubeCart_blocker', $record);
         }
         return (bool)$this->_user_blocked;
@@ -341,23 +327,23 @@ class Session
      * Deprecated but left for backward compatibility
      *
      * @param string $token
-     * @return bool
      */
-    public function cookiesBlocked()
+    public function cookiesBlocked(): bool
     {
 
         // Check cookies exists for verified and if so return value
-        if (isset($_COOKIE['cc_accept_cookies']) && $_COOKIE['cc_accept_cookies']=='false') {
+        if (isset($_COOKIE['cc_accept_cookies']) && $_COOKIE['cc_accept_cookies'] == 'false') {
             return false;
-        } elseif (!$GLOBALS['config']->get('config', 'cookie_dialogue')) {
+        }
+        // Check cookies exists for verified and if so return value
+        if (!$GLOBALS['config']->get('config', 'cookie_dialogue')) {
             return false;
         }
 
-        if ($GLOBALS['db']->select('CubeCart_geo_country', false, array('numcode' => $GLOBALS['config']->get('config', 'store_country'), 'eu' => '1')) !== false) {
+        if ($GLOBALS['db']->select('CubeCart_geo_country', false, ['numcode' => $GLOBALS['config']->get('config', 'store_country'), 'eu' => '1']) !== false) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -365,13 +351,12 @@ class Session
      *
      * @param string $name
      * @param string $namespace
-     * @return bool
      */
-    public function delete($name, $namespace = 'system')
+    public function delete($name, $namespace = 'system'): bool
     {
         if ($this->_isCookiePref($name, $namespace)) {
             $cookie = self::$_cookie_prefs[$namespace][$name];
-            $this->set_cookie($cookie, '', time() - 42000, array('httponly' => false));
+            $this->set_cookie($cookie, '', time() - 42000, ['httponly' => false]);
             unset($_COOKIE[$cookie]);
             return true;
         }
@@ -386,13 +371,15 @@ class Session
         if (!isset($_SESSION[$namespace])) {
             return false;
         }
-
         //If there is not a name
         if (empty($name)) {
             //Remove the entire namespace
             unset($_SESSION[$namespace]);
             return true;
-        } elseif (isset($_SESSION[$namespace][$name])) {
+        }
+
+        //If there is not a name
+        if (isset($_SESSION[$namespace][$name])) {
             //Remove just the element
             unset($_SESSION[$namespace][$name]);
             return true;
@@ -403,19 +390,17 @@ class Session
 
     /**
      * Destroy session
-     *
-     * @return bool
      */
-    public function destroy()
+    public function destroy(): bool
     {
         if ($this->_state == 'destroyed') {
             return true;
         }
 
         //Delete the session from the DB
-        $GLOBALS['db']->delete('CubeCart_sessions', array('session_id' => $this->getId()), false);
+        $GLOBALS['db']->delete('CubeCart_sessions', ['session_id' => $this->getId()], false);
         //Completely unset everything
-        $_SESSION = array();
+        $_SESSION = [];
 
         //Kill the cookies
         if (isset($_COOKIE[session_name()])) {
@@ -457,7 +442,8 @@ class Session
         if (isset($_SESSION[$namespace])) {
             if (!empty($name) && isset($_SESSION[$namespace][$name])) {
                 return $_SESSION[$namespace][$name];
-            } elseif (empty($name) && !empty($_SESSION[$namespace])) {
+            }
+            if (empty($name) && !empty($_SESSION[$namespace])) {
                 return $_SESSION[$namespace];
             }
         }
@@ -470,7 +456,7 @@ class Session
      *
      * @return string
      */
-    public function getId()
+    public function getId(): null|string|false
     {
         if ($this->_state == 'destroyed') {
             return null;
@@ -510,15 +496,14 @@ class Session
      */
     public function getSessionTableData($column = false)
     {
-        $data = $GLOBALS['db']->select('CubeCart_sessions', $column, array('session_id' => $this->getId()), false, 1, false, false);
-        if (is_array($data)) {
-            if (count($data[0])==1 && is_string($column)) {
-                return $data[0][$column];
-            } else {
-                return $data[0];
-            }
+        $data = $GLOBALS['db']->select('CubeCart_sessions', $column, ['session_id' => $this->getId()], false, 1, false, false);
+        if (!is_array($data)) {
+            return false;
         }
-        return false;
+        if (count($data[0]) == 1 && is_string($column)) {
+            return $data[0][$column];
+        }
+        return $data[0];
     }
 
     /**
@@ -563,9 +548,8 @@ class Session
 
         if (empty($name)) {
             return true;
-        } else {
-            return isset($_SESSION[$namespace][$name]);
         }
+        return isset($_SESSION[$namespace][$name]);
     }
 
     /**
@@ -612,11 +596,12 @@ class Session
         return $this->_session_domain;
     }
 
-    public function regenerateSessionId() {
+    public function regenerateSessionId(): void
+    {
         $old_session = $this->getId();
         session_regenerate_id();
-        Database::getInstance()->update('CubeCart_sessions', array('session_id' => $this->getId()), array('session_id' => $old_session), false);
-        $this->set_cookie(session_name(), session_id(), time()+$this->_session_timeout);
+        Database::getInstance()->update('CubeCart_sessions', ['session_id' => $this->getId()], ['session_id' => $old_session], false);
+        $this->set_cookie(session_name(), session_id(), time() + $this->_session_timeout);
     }
 
     /**
@@ -626,18 +611,17 @@ class Session
      * @param string $value
      * @param string $namespace
      * @param bool $overwrite
-     * @return bool
      */
-    public function set($name, $value, $namespace = 'system', $overwrite = false)
+    public function set($name, $value, $namespace = 'system', $overwrite = false): bool
     {
         if ($this->_isCookiePref($name, $namespace)) {
             $cookie = self::$_cookie_prefs[$namespace][$name];
             if (is_null($value)) {
-                $this->set_cookie($cookie, '', time() - 42000, array('httponly' => false));
+                $this->set_cookie($cookie, '', time() - 42000, ['httponly' => false]);
                 unset($_COOKIE[$cookie]);
             } else {
                 $_COOKIE[$cookie] = $value;
-                $this->set_cookie($cookie, $value, time() + 31536000, array('httponly' => false)); // 1 year
+                $this->set_cookie($cookie, $value, time() + 31536000, ['httponly' => false]); // 1 year
             }
             return true;
         }
@@ -679,11 +663,11 @@ class Session
     /**
      * Set a page back to the session
      */
-    public function setBack()
+    public function setBack(): void
     {
         if (isset($_SERVER['HTTP_REFERER']) && !empty($_SERVER['HTTP_REFERER'])) {
             //Make sure the referer is local and not the login
-            if (substr($_SERVER['HTTP_REFERER'], 0, strlen(CC_STORE_URL)) == CC_STORE_URL && $_SERVER['HTTP_REFERER'] != CC_STORE_URL.'index.php?_a=login') {
+            if (str_starts_with((string) $_SERVER['HTTP_REFERER'], CC_STORE_URL) && $_SERVER['HTTP_REFERER'] != CC_STORE_URL.'index.php?_a=login') {
                 $this->set('back', $_SERVER['HTTP_REFERER']);
             }
         }
@@ -692,12 +676,9 @@ class Session
     /**
      * Set cookie
      *
-     * @param string $name
-     * @param string $value
      * @param integer $expire
-     * @return bool
      */
-    public function set_cookie($name, $value, $expires = false, $options = array())
+    public function set_cookie(string $name, string $value, $expires = false, $options = []): void
     {
         $params = session_get_cookie_params();
         $params = array_merge($params, $options); // Allow overwrite for specific cookies
@@ -713,7 +694,7 @@ class Session
         $attributes .= ';SameSite='.$params['samesite'];
         $attributes .= ';Secure';
 
-        if($params['httponly']) {
+        if ($params['httponly']) {
             $attributes .= ';HttpOnly';
         }
         // Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
@@ -728,27 +709,27 @@ class Session
      *
      * @return true
      */
-    private function _close()
+    private function _close(): bool
     {
         if ($this->_state == 'closed' || $this->_state == 'destroyed') {
             return true;
         }
 
-        $cp = str_replace($GLOBALS['storeURL'].'/','',currentPage());
+        $cp = str_replace($GLOBALS['storeURL'].'/', '', currentPage());
 
-        $record = array(
-            'location' => $cp . (strpos($cp,"_a=404")!==false ? "<br /><strike>".$_SERVER['REQUEST_URI']."</strike>" : ""),
+        $record = [
+            'location' => $cp . (str_contains($cp, '_a=404') ? '<br /><strike>'.$_SERVER['REQUEST_URI'].'</strike>' : ''),
             'session_last'	=> $this->get('session_last', 'client', ''),
-            'acp'		=> ADMIN_CP
-        );
+            'acp'		=> ADMIN_CP,
+        ];
 
         //Use the instance because the global might be gone already
-        Database::getInstance()->update('CubeCart_sessions', $record, array('session_id' => $this->getId()), false);
+        Database::getInstance()->update('CubeCart_sessions', $record, ['session_id' => $this->getId()], false);
         if (executionChance(2)) {  // 2% probability
             // Tidy Access Logs keep months worth
-            Database::getInstance()->delete('CubeCart_access_log', array('time' => '<'.(time()-(3600*24*7*4))), 500);
+            Database::getInstance()->delete('CubeCart_access_log', ['time' => '<'.(time() - (3600 * 24 * 7 * 4))], 500);
             // Purge sessions older than 7 days (the longest possible session lifetime)
-            Database::getInstance()->delete('CubeCart_sessions', array('session_last' => '<='.(time() - 604800)), 500);
+            Database::getInstance()->delete('CubeCart_sessions', ['session_last' => '<='.(time() - 604800)], 500);
         }
 
         $this->_state = 'closed';
@@ -760,22 +741,18 @@ class Session
 
     /**
      * Create a form token
-     *
-     * @return string
      */
-    private function _createToken()
+    private function _createToken(): string
     {
         return md5(session_name().time().mt_rand(0, mt_getrandmax()));
     }
 
     /**
      * User agent
-     *
-     * @return string
      */
-    private function _http_user_agent()
+    private function _http_user_agent(): string
     {
-        return strpos(($_SERVER['HTTP_USER_AGENT'] ?? "Not Available"), 'Trident') ? 'IEX' : htmlspecialchars($_SERVER['HTTP_USER_AGENT'] ?? "Not Available");
+        return strpos(($_SERVER['HTTP_USER_AGENT'] ?? 'Not Available'), 'Trident') ? 'IEX' : htmlspecialchars($_SERVER['HTTP_USER_AGENT'] ?? 'Not Available');
     }
 
     /**
@@ -785,15 +762,13 @@ class Session
      * Layer 1 — Whitelist: Empty UA or no mozilla/ = bot (kills curl, wget, python, etc.)
      * Layer 2 — Blacklist: Known bots that spoof browser UAs
      * Layer 3 — CCB cookie: checked in constructor (cc_browser cookie set by JS)
-     *
-     * @return bool
      */
-    private function _isBot()
+    private function _isBot(): bool
     {
         $agent = strtolower($_SERVER['HTTP_USER_AGENT'] ?? '');
 
         // Layer 1: Must look like a real browser (all include 'mozilla/')
-        if (empty($agent) || strpos($agent, 'mozilla/') === false) {
+        if (empty($agent) || !str_contains($agent, 'mozilla/')) {
             return true;
         }
 
@@ -802,17 +777,17 @@ class Session
         if (!empty($GLOBALS['glob']['bot_sigs']) && is_array($GLOBALS['glob']['bot_sigs'])) {
             $sigs = $GLOBALS['glob']['bot_sigs'];
         } else {
-            $sigs = array(
+            $sigs = [
                 'bot', 'crawl', 'spider', 'slurp',         // generic patterns
                 'headless', 'phantom', 'puppeteer',         // headless browsers
                 'lighthouse', 'pagespeed', 'gtmetrix',      // performance testing
                 'pingdom', 'uptimerobot', 'statuscake',     // uptime monitors
                 'semrush', 'ahrefs', 'majestic', 'dotbot',  // SEO tools
                 'facebookexternal',                          // social media
-            );
+            ];
         }
         foreach ($sigs as $sig) {
-            if (strpos($agent, $sig) !== false) {
+            if (str_contains($agent, (string) $sig)) {
                 return true;
             }
         }
@@ -824,20 +799,16 @@ class Session
      *
      * @param string $name
      * @param string $namespace
-     * @return bool
      */
-    private function _isCookiePref($name, $namespace)
+    private function _isCookiePref($name, $namespace): bool
     {
         return !empty($name) && isset(self::$_cookie_prefs[$namespace][$name]);
     }
 
     /**
      * Check & build the namespace
-     *
-     * @param string $namespace
-     * @return string
      */
-    private function _namespace($namespace)
+    private function _namespace(string $namespace): string
     {
         if ($namespace[0] == '_') {
             trigger_error('Session namespace cannot start with _', E_USER_ERROR);
@@ -849,7 +820,7 @@ class Session
     /**
      * Setup session timers
      */
-    private function _setTimers()
+    private function _setTimers(): void
     {
         if (!$this->has('session_start', 'client')) {
             $start = time();
@@ -864,7 +835,7 @@ class Session
     /**
      * Start session
      */
-    private function _start()
+    private function _start(): void
     {
         session_cache_limiter('nocache');
         session_name('cc_session');
@@ -872,7 +843,7 @@ class Session
 
         // Increase session length on each page load.
         if (isset($_COOKIE[session_name()])) {
-            $this->set_cookie(session_name(), session_id(), time()+$this->_session_timeout);
+            $this->set_cookie(session_name(), session_id(), time() + $this->_session_timeout);
         }
     }
 
@@ -881,12 +852,12 @@ class Session
      *
      * @param bool $restart
      */
-    private function _validate()
+    private function _validate(): void
     {
         $ip = get_ip_address();
 
-        if (($current = $GLOBALS['db']->select('CubeCart_sessions', false, array('session_id' => $this->getId()), false, 1, false, false)) === false) {
-            $record = array(
+        if (($current = $GLOBALS['db']->select('CubeCart_sessions', false, ['session_id' => $this->getId()], false, 1, false, false)) === false) {
+            $record = [
                 'admin_id'		=> 0,
                 'customer_id'	=> 0,
                 'ip_address'	=> $ip,
@@ -895,8 +866,8 @@ class Session
                 'session_last'	=> time(),
                 'session_start'	=> time(),
                 'useragent'		=> $this->_http_user_agent(),
-                'acp'		=> ADMIN_CP
-            );
+                'acp'		=> ADMIN_CP,
+            ];
             $GLOBALS['db']->insert('CubeCart_sessions', $record, false);
             $this->set('ip_address', $ip, 'client');
             $this->set('useragent', $this->_http_user_agent(), 'client');

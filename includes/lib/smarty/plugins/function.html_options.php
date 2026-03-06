@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -37,12 +39,12 @@
 function smarty_function_html_options($params, Smarty_Internal_Template $template)
 {
     $template->_checkPlugins(
-        array(
-            array(
+        [
+            [
                 'function' => 'smarty_function_escape_special_chars',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
-            )
-        )
+                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php',
+            ],
+        ]
     );
     $name = null;
     $values = null;
@@ -68,7 +70,7 @@ function smarty_function_html_options($params, Smarty_Internal_Template $templat
                 break;
             case 'selected':
                 if (is_array($_val)) {
-                    $selected = array();
+                    $selected = [];
                     foreach ($_val as $_sel) {
                         if (is_object($_sel)) {
                             if (method_exists($_sel, '__toString')) {
@@ -116,8 +118,8 @@ function smarty_function_html_options($params, Smarty_Internal_Template $templat
                     }
                     break;
                 }
-            // omit break; to fall through!
-            // no break
+                // omit break; to fall through!
+                // no break
             default:
                 if (!is_array($_val)) {
                     $extra .= ' ' . $_key . '="' . smarty_function_escape_special_chars($_val) . '"';

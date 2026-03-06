@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * class for undefined variable object
  * This class defines an object for undefined variable handling

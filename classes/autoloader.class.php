@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -19,13 +21,12 @@
  */
 class Autoloader
 {
-
     /**
      * Contains all the paths to search for classes
      *
      * @var array of paths
      */
-    private static $_paths = null;
+    private static $_paths;
 
     //=====[ Public ]=======================================
 
@@ -34,7 +35,7 @@ class Autoloader
      *
      * @param string $path
      */
-    public static function appendPaths($path)
+    public static function appendPaths($path): void
     {
         if (is_null(self::$_paths)) {
             self::$_paths = explode(CC_PS, ini_get('include_path'));
@@ -51,10 +52,12 @@ class Autoloader
      * @param string $class
      * @return bool
      */
-    public static function autoload($class)
+    public static function autoload(?string $class)
     {
-        if(empty($class)) return false;
-        
+        if (empty($class)) {
+            return false;
+        }
+
         //Don't double load
         if (class_exists($class)) {
             return true;
@@ -91,11 +94,14 @@ class Autoloader
         //Loop through the include paths
         if (is_array(self::$_paths)) {
             foreach (self::$_paths as $path) {
-                if(empty($path)) continue;
+                if (empty($path)) {
+                    continue;
+                }
                 if (file_exists($path.'/'.strtolower($class).'.class.php')) {
                     include_once $path.'/'.strtolower($class).'.class.php';
                     return true;
-                } elseif (file_exists($path.'/'.$class.'.php')) {
+                }
+                if (file_exists($path.'/'.$class.'.php')) {
                     include_once $path.'/'.$class.'.php';
                     return true;
                 }
@@ -106,10 +112,8 @@ class Autoloader
 
     /**
      * Autoload the correct cache class
-     *
-     * @return bool
      */
-    public static function autoload_cache()
+    public static function autoload_cache(): bool
     {
         global $glob;
 
@@ -130,7 +134,7 @@ class Autoloader
      *
      * @param string/array $function or array(class, method)
      */
-    public static function autoload_register($function = null)
+    public static function autoload_register($function = null): void
     {
         if (!function_exists('spl_autoload_functions')) {
             trigger_error("!function_exists('spl_autoload_functions')", E_USER_ERROR);
@@ -143,7 +147,7 @@ class Autoloader
 
         //If the function is really a class->method try to load that
         if (is_array($function)) {
-            list($class, $method) = $function;
+            [$class, $method] = $function;
             if (!method_exists($class, $method)) {
                 return ;
             }
@@ -183,7 +187,7 @@ class Autoloader
      * Reload all the paths from the include_path
      * Should not need to run unless you add more paths to the include_path
      */
-    public static function reloadPaths()
+    public static function reloadPaths(): void
     {
         self::$_paths = explode(CC_PS, ini_get('include_path'));
     }

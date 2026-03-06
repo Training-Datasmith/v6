@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -20,7 +22,7 @@ global $glob, $lang, $admin_data;
 ## Release Notification
 $notification_id = CC_VERSION.'_'.Admin::getInstance()->getId();
 $release_notes_path = CC_ROOT_DIR.'/'.$GLOBALS['config']->get('config', 'adminFolder').'/sources/release_notes/'.CC_VERSION.'.inc.php';
-if(file_exists($release_notes_path) && !$GLOBALS['config']->has('release_notes', $notification_id)) {
+if (file_exists($release_notes_path) && !$GLOBALS['config']->has('release_notes', $notification_id)) {
     $GLOBALS['config']->set('release_notes', $notification_id, '1');
     httpredir('?_g=release_notes&node='.CC_VERSION);
 }
@@ -28,17 +30,17 @@ if(file_exists($release_notes_path) && !$GLOBALS['config']->has('release_notes',
 ## Quick tour
 $GLOBALS['smarty']->assign('QUICK_TOUR', true);
 
-if (isset($_GET['ignore_update']) && $_GET['ignore_update']>0) {
-    $GLOBALS['db']->update('CubeCart_extension_info', array('modified' => time()), array('file_id' => (int)$_GET['ignore_update']));
+if (isset($_GET['ignore_update']) && $_GET['ignore_update'] > 0) {
+    $GLOBALS['db']->update('CubeCart_extension_info', ['modified' => time()], ['file_id' => (int)$_GET['ignore_update']]);
     $GLOBALS['main']->successMessage($lang['dashboard']['ignore_update']);
     $GLOBALS['session']->delete('version_check');
-    httpredir(currentPage(array('ignore_update')));
+    httpredir(currentPage(['ignore_update']));
 }
 
 ## Save notes
 if (isset($_POST['notes']['dashboard_notes'])) {
-    $update = array('dashboard_notes' => $_POST['notes']['dashboard_notes']);
-    if ($GLOBALS['db']->update('CubeCart_admin_users', $update, array('admin_id' => Admin::getInstance()->get('admin_id')))) {
+    $update = ['dashboard_notes' => $_POST['notes']['dashboard_notes']];
+    if ($GLOBALS['db']->update('CubeCart_admin_users', $update, ['admin_id' => Admin::getInstance()->get('admin_id')])) {
         $GLOBALS['session']->delete('', 'admin_data');
         $GLOBALS['main']->successMessage($lang['dashboard']['notice_notes_save']);
     } else {
@@ -48,14 +50,14 @@ if (isset($_POST['notes']['dashboard_notes'])) {
 }
 
 ## Delete admin folder if it exists and shouldn't
-if ($glob['adminFolder']!=='admin' && file_exists(CC_ROOT_DIR.'/admin')) {
+if ($glob['adminFolder'] !== 'admin' && file_exists(CC_ROOT_DIR.'/admin')) {
     recursiveDelete(CC_ROOT_DIR.'/admin');
     if (file_exists(CC_ROOT_DIR.'/admin')) {
         $GLOBALS['main']->errorMessage($lang['dashboard']['delete_admin_folder']);
     }
 }
 ## Delete admin file if it exists and shouldn't
-if ($glob['adminFile']!=='admin.php' && file_exists(CC_ROOT_DIR.'/admin.php')) {
+if ($glob['adminFile'] !== 'admin.php' && file_exists(CC_ROOT_DIR.'/admin.php')) {
     unlink(CC_ROOT_DIR.'/admin.php');
     if (file_exists(CC_ROOT_DIR.'/admin.php')) {
         $GLOBALS['main']->errorMessage($lang['dashboard']['delete_admin_file']);
@@ -68,7 +70,7 @@ if ($glob['installed'] && file_exists(CC_ROOT_DIR.'/setup')) {
     if (isset($_COOKIE['cc_delete_setup']) && $_COOKIE['cc_delete_setup']) {
         recursiveDelete(CC_ROOT_DIR.'/setup');
         unlink(CC_ROOT_DIR.'/setup');
-        $GLOBALS['session']->set_cookie('cc_delete_setup', '', time()-3600);
+        $GLOBALS['session']->set_cookie('cc_delete_setup', '', time() - 3600);
     }
 
     $history = $GLOBALS['db']->misc('SELECT `version` FROM `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_history` ORDER BY `time` DESC LIMIT 1');
@@ -100,7 +102,7 @@ if (stristr($mysql_mode[0]['@@sql_mode'], 'strict')) {
 
 ## Get recent extensions
 if ($GLOBALS['session']->has('recent_extensions')) {
-    $GLOBALS['smarty']->assign("RECENT_EXTENSIONS", $GLOBALS['session']->get('recent_extensions'));
+    $GLOBALS['smarty']->assign('RECENT_EXTENSIONS', $GLOBALS['session']->get('recent_extensions'));
 } else {
     $request = new Request('www.cubecart.com', '/extensions/json');
     $request->skiplog(true);
@@ -113,7 +115,7 @@ if ($GLOBALS['session']->has('recent_extensions')) {
     if ($response) {
         $response = json_decode($response, true);
         $GLOBALS['session']->set('recent_extensions', $response);
-        $GLOBALS['smarty']->assign("RECENT_EXTENSIONS", $response);
+        $GLOBALS['smarty']->assign('RECENT_EXTENSIONS', $response);
     }
 }
 
@@ -125,34 +127,34 @@ if (!$GLOBALS['session']->has('version_check') && $request = new Request('www.cu
     $request->setSSL();
     $request->setUserAgent('CubeCart');
     $request->customHeaders('CC-Referer: '.CC_STORE_URL);
-    
-    $request_data = array('version' => CC_VERSION);
+
+    $request_data = ['version' => CC_VERSION];
 
     $extension_versions = $GLOBALS['db']->select('CubeCart_extension_info');
     if (is_array($extension_versions)) {
-        $extension_check = array();
+        $extension_check = [];
         foreach ($extension_versions as $v) {
-            $parts = explode('/',$v['dir']);
+            $parts = explode('/', $v['dir']);
             $module = (isset($parts[2]) && !empty($parts[2])) ? '' : $parts[2];
             $folder =  (isset($parts[3]) && !empty($parts[3])) ? '' : $parts[3];
-            if(($status = $GLOBALS['db']->select('CubeCart_modules', array('status'), array('module' => $module, 'folder' => $folder))) !== false){
+            if (($status = $GLOBALS['db']->select('CubeCart_modules', ['status'], ['module' => $module, 'folder' => $folder])) !== false) {
                 if (file_exists(CC_ROOT_DIR.$v['dir'])) {
-                    if($status[0]['status']=='1') {
+                    if ($status[0]['status'] == '1') {
                         $extension_check[$v['file_id']] = $v['modified'];
                     }
                 } else {
-                    $GLOBALS['db']->delete('CubeCart_extension_info', array('file_id' => $v['file_id']));
+                    $GLOBALS['db']->delete('CubeCart_extension_info', ['file_id' => $v['file_id']]);
                 }
             }
         }
-        if (count($extension_check)>0) {
+        if (count($extension_check) > 0) {
             $request_data['extensions'] = $extension_check;
         }
     }
 
     $request->setData($request_data);
     $response = $request->send();
-    
+
     if ($response !== false) {
         $response_array = json_decode($response, true);
 
@@ -186,7 +188,7 @@ if (Admin::getInstance()->permissions('statistics', CC_PERM_READ, false, false))
         $this_month   = date('m');
         $this_month_start  = mktime(0, 0, 0, $this_month, '01', $this_year);
         ## Work out prev month looks silly but should stop -1 month on 1st March returning January (28 Days in Feb)
-        $last_month   = date('m', strtotime("-1 month", mktime(12, 0, 0, $this_month, 15, $this_year)));
+        $last_month   = date('m', strtotime('-1 month', mktime(12, 0, 0, $this_month, 15, $this_year)));
         $last_year    = ($last_month < $this_month) ? $this_year : ($this_year - 1);
         $last_month_start  = mktime(0, 0, 0, $last_month, '01', $last_year);
         $last_year_start   = mktime(0, 0, 0, '01', '01', $this_year - 1);
@@ -200,8 +202,8 @@ if (Admin::getInstance()->permissions('statistics', CC_PERM_READ, false, false))
         $GLOBALS['smarty']->assign('QUICK_STATS', $quick_stats);
 
         ## Statistics (Google Charts)
-        $sales = $GLOBALS['db']->select('CubeCart_order_summary', array('order_date', 'total'), array('order_date' => '>='.$last_year_start, 'status' => array(2, 3), 'total' => '>0'));
-        $data= array();
+        $sales = $GLOBALS['db']->select('CubeCart_order_summary', ['order_date', 'total'], ['order_date' => '>='.$last_year_start, 'status' => [2, 3], 'total' => '>0']);
+        $data = [];
         if ($sales) { ## Get data to put in chart
             foreach ($sales as $sale) {
                 $year = date('Y', $sale['order_date']);
@@ -220,10 +222,10 @@ if (Admin::getInstance()->permissions('statistics', CC_PERM_READ, false, false))
         $chart_data['data'] = "['Month', '$this_year', '$last_year'],";
 
         for ($month = 1; $month <= 12; $month++) {
-            $empty = (int)($this_year.sprintf("%02d", $month)) <= (int)(date('Ym')) ? '0' : null;
-            $m = date("M", mktime(0, 0, 0, $month, 10));
-            $last_year_month = (isset($data[$last_year][$m]) && $data[$last_year][$m]>0) ? $data[$last_year][$m] : 0;
-            $this_year_month = (isset($data[$this_year][$m]) && $data[$this_year][$m]>0) ? $data[$this_year][$m] : $empty;
+            $empty = (int)($this_year.sprintf('%02d', $month)) <= (int)(date('Ym')) ? '0' : null;
+            $m = date('M', mktime(0, 0, 0, $month, 10));
+            $last_year_month = (isset($data[$last_year][$m]) && $data[$last_year][$m] > 0) ? $data[$last_year][$m] : 0;
+            $this_year_month = (isset($data[$this_year][$m]) && $data[$this_year][$m] > 0) ? $data[$this_year][$m] : $empty;
             $chart_data['data'] .= "['$m',  $this_year_month, $last_year_month],";
         }
 
@@ -234,15 +236,15 @@ if (Admin::getInstance()->permissions('statistics', CC_PERM_READ, false, false))
     $GLOBALS['smarty']->assign('CHART', $chart_data);
 }
 ## Last 5 orders
-if (($last_orders = $GLOBALS['db']->select('CubeCart_order_summary', array('custom_oid', 'id', 'cart_order_id', 'first_name', 'last_name', 'name'), false, array('order_date' => 'DESC'), 5)) !== false) {
+if (($last_orders = $GLOBALS['db']->select('CubeCart_order_summary', ['custom_oid', 'id', 'cart_order_id', 'first_name', 'last_name', 'name'], false, ['order_date' => 'DESC'], 5)) !== false) {
     $GLOBALS['smarty']->assign('LAST_ORDERS', $last_orders);
 }
 
 ## Quick Tasks
-$date_format = "Y-m-d";
+$date_format = 'Y-m-d';
 $today   = date($date_format);
 $quick_tasks['today']   = urlencode(date($date_format));
-$quick_tasks['this_weeks'] = urlencode(date($date_format, strtotime("last monday")));
+$quick_tasks['this_weeks'] = urlencode(date($date_format, strtotime('last monday')));
 foreach ($GLOBALS['hooks']->load('admin.dashboard.quick_tasks') as $hook) {
     include $hook;
 }
@@ -255,29 +257,29 @@ $unsettled_count  = $GLOBALS['db']->count('CubeCart_order_summary', 'cart_order_
 ## Pending Orders Sort
 $order_by = '';
 if (!isset($_GET['sort']) || !is_array($_GET['sort'])) {
-    $_GET['sort'] = array('order_date' => 'ASC');
+    $_GET['sort'] = ['order_date' => 'ASC'];
 }
 $key = array_keys($_GET['sort'])[0];
 $sort = ($_GET['sort'][$key] === 'ASC' ? 'ASC' : 'DESC'); // only allow ASC or DESC sort values
-if (!in_array($key, array('cart_order_id','first_name','status','order_date','total'))) {
+if (!in_array($key, ['cart_order_id','first_name','status','order_date','total'])) {
     $order_by = '`dashboard` DESC, `status` DESC, `order_date` ASC';
 }
 
-$current_page = currentPage(array('sort'));
-$thead_sort = array(
+$current_page = currentPage(['sort']);
+$thead_sort = [
     'cart_order_id' => $GLOBALS['db']->column_sort('cart_order_id', $lang['orders']['order_number'], 'sort', $current_page, $_GET['sort'], 'orders'),
     'first_name' => $GLOBALS['db']->column_sort('first_name', $lang['common']['name'], 'sort', $current_page, $_GET['sort'], 'orders'),
     'status' => $GLOBALS['db']->column_sort('status', $lang['common']['status'], 'sort', $current_page, $_GET['sort'], 'orders'),
     'order_date' => $GLOBALS['db']->column_sort('order_date', $lang['common']['date'], 'sort', $current_page, $_GET['sort'], 'orders'),
     'total' => $GLOBALS['db']->column_sort('total', $lang['basket']['total'], 'sort', $current_page, $_GET['sort'], 'orders'),
-);
+];
 
 $GLOBALS['smarty']->assign('THEAD_ORDERS', $thead_sort);
 $order_by = (empty($order_by) ? '`dashboard` DESC, `'.$key.'` '.$sort : $order_by);
 
 $per_page = $GLOBALS['main']->itemsPerPage('dashboard_pending', $_GET['items'] ?? 0, 25);
-$page_break_url = currentPage(array('items'));
-$GLOBALS['smarty']->assign('PAGE_BREAKS', array(25, 50, 100, 250, 500));
+$page_break_url = currentPage(['items']);
+$GLOBALS['smarty']->assign('PAGE_BREAKS', [25, 50, 100, 250, 500]);
 $GLOBALS['smarty']->assign('PAGE_BREAK', $per_page);
 $GLOBALS['smarty']->assign('PAGE_BREAK_URL', $page_break_url);
 $unsettled_orders = $GLOBALS['db']->select('CubeCart_order_summary', false, '`status` IN (1,2) OR `dashboard` = 1', $order_by, $per_page, $page);
@@ -285,34 +287,34 @@ $unsettled_orders = $GLOBALS['db']->select('CubeCart_order_summary', false, '`st
 if ($unsettled_orders) {
     $tax = Tax::getInstance();
     $GLOBALS['main']->addTabControl($lang['dashboard']['title_orders_unsettled'], 'orders', null, null, $unsettled_count);
-    $customer_ids = array();
+    $customer_ids = [];
     foreach ($unsettled_orders as $order) {
         $customer_ids[$order['customer_id']] = true;
     }
     $customers_in = implode(',', array_keys($customer_ids));
-    
-    $customer_type = array();
-    if($customers = $GLOBALS['db']->select('CubeCart_customer', array('type','customer_id'), 'customer_id IN ('.$customers_in.')')) {
+
+    $customer_type = [];
+    if ($customers = $GLOBALS['db']->select('CubeCart_customer', ['type','customer_id'], 'customer_id IN ('.$customers_in.')')) {
         foreach ($customers as $customer) {
             $customer_type[$customer['customer_id']] = $customer['type'];
         }
     }
-    
-    $smarty_data['order_tasks'][] = array(
+
+    $smarty_data['order_tasks'][] = [
         'opt_group_name' => '', // Leave blank for no option grouping for this group
-        'selections' => array(
-            array('value' => "", 'string' => $lang['orders']['option_nothing'], 'style' => ""),
-            array('value' => "print", 'string' => $lang['orders']['option_print'], 'style' => ""),
-            array('value' => "delete", 'string' => $lang['orders']['option_delete'], 'style' => "color: red"),
-        )
-    );
+        'selections' => [
+            ['value' => '', 'string' => $lang['orders']['option_nothing'], 'style' => ''],
+            ['value' => 'print', 'string' => $lang['orders']['option_print'], 'style' => ''],
+            ['value' => 'delete', 'string' => $lang['orders']['option_delete'], 'style' => 'color: red'],
+        ],
+    ];
 
     for ($i = 1; $i <= 6; ++$i) {
-        $smarty_data['order_status'][] = array(
+        $smarty_data['order_status'][] = [
             'id'  => $i,
             'selected' => (isset($summary[0]) && isset($summary[0]['status']) && (int)$summary[0]['status'] === $i) ? ' selected="selected"' : '',
             'string' => $lang['order_state']['name_'.$i],
-        );
+        ];
     }
 
     foreach ($GLOBALS['hooks']->load('admin.order.index.order_tasks') as $hook) {
@@ -323,9 +325,9 @@ if ($unsettled_orders) {
 
     foreach ($unsettled_orders as $order) {
         $cart_order_ids[] = "'".$order['cart_order_id']."'";
-        $order['icon'] = $customer_type[$order['customer_id']]==1 ? 'user_registered' : 'user_ghost'; // deprecated since 6.1.5
+        $order['icon'] = $customer_type[$order['customer_id']] == 1 ? 'user_registered' : 'user_ghost'; // deprecated since 6.1.5
         $order['type'] = (empty($customer_type[$order['customer_id']])) ? 2 : $customer_type[$order['customer_id']];
-        $order['cust_type'] = array("1" => 'title_key_registered', "2" => 'title_key_unregistered');
+        $order['cust_type'] = ['1' => 'title_key_registered', '2' => 'title_key_unregistered'];
         $order['date'] = formatTime($order['order_date']);
         $order['total'] = Tax::getInstance()->priceFormat($order['total']);
         $order['status_class']  = 'order_status_'.$order['status'];
@@ -333,7 +335,7 @@ if ($unsettled_orders) {
         $order['link_print'] = '?_g=orders&print%5B0%5D='.$order['cart_order_id'];
         $orders[$order['cart_order_id']] = $order;
     }
-    if (($notes = $GLOBALS['db']->select('CubeCart_order_notes', '`cart_order_id`,`time`,`content`', array('cart_order_id' => $cart_order_ids))) !== false) {
+    if (($notes = $GLOBALS['db']->select('CubeCart_order_notes', '`cart_order_id`,`time`,`content`', ['cart_order_id' => $cart_order_ids])) !== false) {
         foreach ($notes as $note) {
             $order_notes[$note['cart_order_id']]['notes'][] = $note;
         }
@@ -343,23 +345,23 @@ if ($unsettled_orders) {
     foreach ($GLOBALS['hooks']->load('admin.dashboard.unsettled_orders') as $hook) {
         include $hook;
     }
-    
+
     $GLOBALS['smarty']->assign('ORDERS', $orders);
     $GLOBALS['smarty']->assign('ORDER_PAGINATION', $GLOBALS['db']->pagination($unsettled_count, $per_page, $page, $show = 5, 'orders', 'orders', $glue = ' ', $view_all = true));
 }
 
 ## Product Reviews Tab
 $page  = (isset($_GET['reviews'])) ? $_GET['reviews'] : 1;
-if (($reviews = $GLOBALS['db']->select('CubeCart_reviews', false, array('approved' => '0'), false, 25, $page)) !== false) {
+if (($reviews = $GLOBALS['db']->select('CubeCart_reviews', false, ['approved' => '0'], false, 25, $page)) !== false) {
     $reviews_count = $GLOBALS['db']->getFoundRows();
 
     $GLOBALS['main']->addTabControl($lang['dashboard']['title_reviews_pending'], 'product_reviews', null, null, $reviews_count);
     foreach ($reviews as $review) {
-        $product   = $GLOBALS['db']->select('CubeCart_inventory', array('name'), array('product_id' => (int)$review['product_id']));
+        $product   = $GLOBALS['db']->select('CubeCart_inventory', ['name'], ['product_id' => (int)$review['product_id']]);
         $review['product'] = $product[0];
         $review['date']  = formatTime($review['time']);
-        $review['delete'] = "?_g=products&node=reviews&delete=".(int)$review['id'].'&token='.SESSION_TOKEN;
-        $review['edit']  = "?_g=products&node=reviews&edit=".(int)$review['id'];
+        $review['delete'] = '?_g=products&node=reviews&delete='.(int)$review['id'].'&token='.SESSION_TOKEN;
+        $review['edit']  = '?_g=products&node=reviews&edit='.(int)$review['id'];
         $review['stars'] = 5;
         $review_list[] = $review;
     }
@@ -371,8 +373,8 @@ if (($reviews = $GLOBALS['db']->select('CubeCart_reviews', false, array('approve
 $page  = (isset($_GET['stock'])) ? $_GET['stock'] : 1;
 
 $per_page = $GLOBALS['main']->itemsPerPage('dashboard_stock', $_GET['items_stock'] ?? 0, 25);
-$page_break_url = currentPage(array('items_stock'));
-$GLOBALS['smarty']->assign('PAGE_BREAKS_STOCK', array(25, 50, 100, 250, 500));
+$page_break_url = currentPage(['items_stock']);
+$GLOBALS['smarty']->assign('PAGE_BREAKS_STOCK', [25, 50, 100, 250, 500]);
 $GLOBALS['smarty']->assign('PAGE_BREAK_STOCK', $per_page);
 $GLOBALS['smarty']->assign('PAGE_BREAK_URL_STOCK', $page_break_url);
 
@@ -382,24 +384,24 @@ $tables = '`'.$dbprefix.'CubeCart_inventory` AS `I` LEFT JOIN `'.$dbprefix.'Cube
 $fields = 'I.name, I.product_code, I.stock_level AS I_stock_level, I.stock_warning AS I_stock_warning, I.product_id, M.stock_level AS M_stock_level, M.use_stock as M_use_stock, M.cached_name';
 $stock_warn_level = ($GLOBALS['config']->isEmpty('config', 'stock_warn_level')) ? '0' : $GLOBALS['config']->get('config', 'stock_warn_level');
 $condition = $GLOBALS['config']->get('config', 'stock_warn_type') == '1' ? 'I.stock_warning' : $stock_warn_level;
-$where = "use_stock_level = 1 AND ((M.status = 1 AND M.use_stock = 1 AND M.stock_level <= $condition) OR (I.stock_level <= $condition AND NOT EXISTS (SELECT 1 FROM `".$dbprefix."CubeCart_option_matrix` M2 WHERE M2.product_id = I.product_id AND M2.status = 1 AND M2.use_stock = 1)))";
+$where = "use_stock_level = 1 AND ((M.status = 1 AND M.use_stock = 1 AND M.stock_level <= $condition) OR (I.stock_level <= $condition AND NOT EXISTS (SELECT 1 FROM `".$dbprefix.'CubeCart_option_matrix` M2 WHERE M2.product_id = I.product_id AND M2.status = 1 AND M2.use_stock = 1)))';
 // Stock Warnings Sort
 if (!isset($_GET['sort']) || !is_array($_GET['sort'])) {
-    $_GET['sort'] = array('stock_level' => 'DESC');
+    $_GET['sort'] = ['stock_level' => 'DESC'];
 }
 $key = array_keys($_GET['sort'])[0];
 $sort = ($_GET['sort'][$key] === 'ASC' ? 'ASC' : 'DESC'); // only allow ASC or DESC sort values
-if (!in_array($key, array('name','stock_level','product_code'))) {
+if (!in_array($key, ['name','stock_level','product_code'])) {
     $key = 'stock_level';
     $sort = 'DESC';
 }
 
-$current_page = currentPage(array('sort'));
-$thead_sort = array(
+$current_page = currentPage(['sort']);
+$thead_sort = [
     'stock_level' => $GLOBALS['db']->column_sort('stock_level', $lang['dashboard']['stock_level'], 'sort', $current_page, $_GET['sort'], 'stock_warnings'),
     'name' => $GLOBALS['db']->column_sort('name', $lang['catalogue']['product_name'], 'sort', $current_page, $_GET['sort'], 'stock_warnings'),
     'product_code' => $GLOBALS['db']->column_sort('product_code', $lang['catalogue']['product_code'], 'sort', $current_page, $_GET['sort'], 'stock_warnings'),
-);
+];
 
 $GLOBALS['smarty']->assign('THEAD_STOCK', $thead_sort);
 $order_by = 'I.`'.$key.'` '.$sort;
@@ -418,16 +420,16 @@ if ($stock_c = $GLOBALS['db']->select($tables, $fields, $where)) {
 
 if ($GLOBALS['session']->has('version_check')) {
     $extension_updates = $GLOBALS['session']->get('version_check');
-    $file_ids = (is_array($extension_updates) && !empty($extension_updates) ? array_keys($extension_updates) : array(-1));
-    $extension_updates = $GLOBALS['db']->select('CubeCart_extension_info', false, array('file_id' => $file_ids));
-    
+    $file_ids = (is_array($extension_updates) && !empty($extension_updates) ? array_keys($extension_updates) : [-1]);
+    $extension_updates = $GLOBALS['db']->select('CubeCart_extension_info', false, ['file_id' => $file_ids]);
+
     if ($extension_updates) {
-        $eu = array();
+        $eu = [];
         $oeu = $GLOBALS['session']->get('version_check');
-        foreach($extension_updates as $u) {
+        foreach ($extension_updates as $u) {
             $u['auto_upgrade'] = $oeu[$u['file_id']] === 'a' ? true : false;
             $eu[] = $u;
-            if($u['keep_current'] == 1) {
+            if ($u['keep_current'] == 1) {
                 httpredir('?_g=plugins&install[type]=plugins&install[id]='.$u['file_id'].'&install[seller_id]='.$u['seller_id']);
                 exit;
             }
@@ -472,11 +474,11 @@ if ($GLOBALS['config']->has('config', 'default_rss_feed') && !$GLOBALS['config']
                     if ($data['version'] >= 2) {
                         $i = 1;
                         foreach ($data->channel->item as $item) {
-                            $news['items'][] = array(
+                            $news['items'][] = [
                                 'title'   => (string)$item->title,
                                 'link'   => (string)$item->link,
-                            );
-                            if ($i==5) {
+                            ];
+                            if ($i == 5) {
                                 break;
                             }
                             $i++;
@@ -493,21 +495,21 @@ if ($GLOBALS['config']->has('config', 'default_rss_feed') && !$GLOBALS['config']
 }
 $GLOBALS['main']->addTabControl($lang['dashboard']['title_store_overview'], 'advanced');
 
-$count = array(
+$count = [
     'products' => number_format((int)$GLOBALS['db']->count('CubeCart_inventory', 'product_id')),
     'categories' => number_format((int)$GLOBALS['db']->count('CubeCart_category', 'cat_id')),
     'orders' => number_format((int)$GLOBALS['db']->count('CubeCart_order_summary', 'cart_order_id')),
-    'customers' => number_format((int)$GLOBALS['db']->count('CubeCart_customer', 'customer_id'))
-);
+    'customers' => number_format((int)$GLOBALS['db']->count('CubeCart_customer', 'customer_id')),
+];
 
-$system = array(
+$system = [
     'cc_version' => CC_VERSION,
     'cc_build'  => null,
     'php_version' => PHP_VERSION,
     'mysql_version' => $GLOBALS['db']->serverVersion(),
     'server'  => htmlspecialchars($_SERVER['SERVER_SOFTWARE']),
-    'client'  => htmlspecialchars($_SERVER['HTTP_USER_AGENT'])
-);
+    'client'  => htmlspecialchars($_SERVER['HTTP_USER_AGENT']),
+];
 
 $GLOBALS['smarty']->assign('SYS', $system);
 $GLOBALS['smarty']->assign('PHP', ini_get_all());
@@ -515,18 +517,22 @@ $GLOBALS['smarty']->assign('COUNT', $count);
 
 $GLOBALS['main']->addTabControl($lang['common']['search'], 'sidebar');
 
-foreach ($GLOBALS['hooks']->load('admin.dashboard.custom_quick_tasks') as $hook) { include $hook; }
+foreach ($GLOBALS['hooks']->load('admin.dashboard.custom_quick_tasks') as $hook) {
+    include $hook;
+}
 if (isset($custom_quick_tasks) && is_array($custom_quick_tasks)) {
     $GLOBALS['smarty']->assign('CUSTOM_QUICK_TASKS', $custom_quick_tasks);
 }
-$default_quick_tasks = array(
+$default_quick_tasks = [
     '?_g=reports&report[date][from]='.$quick_tasks['today'].'&report[date][to]='.$quick_tasks['today'] => $lang['dashboard']['task_orders_view_day'],
     '?_g=reports&report[date][from]='.$quick_tasks['this_weeks'].'&report[date][to]='.$quick_tasks['today'] => $lang['dashboard']['task_orders_view_week'],
     '?_g=reports' => $lang['dashboard']['task_orders_view_month'],
     '?_g=products&action=add' => $lang['catalogue']['product_add'],
-    '?_g=categories&action=add' => $lang['catalogue']['category_add']
-);
-foreach ($GLOBALS['hooks']->load('admin.dashboard.default_quick_tasks') as $hook) { include $hook; }
+    '?_g=categories&action=add' => $lang['catalogue']['category_add'],
+];
+foreach ($GLOBALS['hooks']->load('admin.dashboard.default_quick_tasks') as $hook) {
+    include $hook;
+}
 $GLOBALS['smarty']->assign('DEFAULT_QUICK_TASKS', $default_quick_tasks);
 
 $page_content = $GLOBALS['smarty']->fetch('templates/dashboard.index.php');

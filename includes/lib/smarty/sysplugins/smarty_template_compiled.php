@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Resource Data Object
  * Meta Data Container for Template Files
@@ -168,8 +170,8 @@ class Smarty_Template_Compiled extends Smarty_Template_Resource_Base
      */
     public function compileTemplateSource(Smarty_Internal_Template $_template)
     {
-        $this->file_dependency = array();
-        $this->includes = array();
+        $this->file_dependency = [];
+        $this->includes = [];
         $this->nocache_hash = null;
         $this->unifunc = null;
         // compile locking
@@ -242,7 +244,7 @@ class Smarty_Template_Compiled extends Smarty_Template_Resource_Base
     private function loadCompiledTemplate(Smarty_Internal_Template $_smarty_tpl)
     {
         if (function_exists('opcache_invalidate')
-            && (!function_exists('ini_get') || strlen(ini_get("opcache.restrict_api")) < 1)
+            && (!function_exists('ini_get') || strlen(ini_get('opcache.restrict_api')) < 1)
         ) {
             opcache_invalidate($this->filepath, true);
         } elseif (function_exists('apc_compile_file')) {

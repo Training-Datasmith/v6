@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -16,10 +18,9 @@ if (!defined('CC_INI_SET')) {
 }
 Admin::getInstance()->permissions('reviews', CC_PERM_READ, true);
 
-
 ## Delete Manufacturer
 if (isset($_GET['delete']) && is_numeric($_GET['delete']) && Admin::getInstance()->permissions('products', CC_PERM_DELETE)) {
-    if ($GLOBALS['db']->delete('CubeCart_manufacturers', array('id' => (int)$_GET['delete']))) {
+    if ($GLOBALS['db']->delete('CubeCart_manufacturers', ['id' => (int)$_GET['delete']])) {
         $GLOBALS['main']->successMessage($lang['catalogue']['notify_manufacturer_delete']);
     } else {
         $GLOBALS['main']->errorMessage($lang['catalogue']['error_manufacturer_delete']);
@@ -27,7 +28,7 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete']) && Admin::getInstance(
     foreach ($GLOBALS['hooks']->load('admin.product.manufacturers.delete') as $hook) {
         include $hook;
     }
-    httpredir(currentPage(array('delete')));
+    httpredir(currentPage(['delete']));
 }
 
 ## Update Manufacturer
@@ -38,17 +39,17 @@ if (isset($_POST['manufacturer']) && is_array($_POST['manufacturer'])) {
     if (!empty($_POST['manufacturer']['URL'])) {
         $url_parts = parse_url($_POST['manufacturer']['URL']);
         if (!isset($url_parts['scheme']) || empty($url_parts['scheme'])) {
-            $_POST['manufacturer']['URL'] = "http://".$_POST['manufacturer']['URL'];
+            $_POST['manufacturer']['URL'] = 'http://'.$_POST['manufacturer']['URL'];
         }
     }
     if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
-        if ($GLOBALS['db']->update('CubeCart_manufacturers', $_POST['manufacturer'], array('id' => (int)$_GET['edit']))) {
+        if ($GLOBALS['db']->update('CubeCart_manufacturers', $_POST['manufacturer'], ['id' => (int)$_GET['edit']])) {
             $GLOBALS['main']->successMessage($lang['catalogue']['notify_manufacturer_update']);
         } else {
             $GLOBALS['main']->errorMessage($lang['catalogue']['error_manufacturer_update']);
         }
-    } elseif(isset($_POST['manufacturer']['name']) && !empty($_POST['manufacturer']['name'])) {
-        if (!$GLOBALS['db']->select('CubeCart_manufacturers', array('id'), array('name' => $_POST['manufacturer']['name']))) {
+    } elseif (isset($_POST['manufacturer']['name']) && !empty($_POST['manufacturer']['name'])) {
+        if (!$GLOBALS['db']->select('CubeCart_manufacturers', ['id'], ['name' => $_POST['manufacturer']['name']])) {
             if ($GLOBALS['db']->insert('CubeCart_manufacturers', $_POST['manufacturer'])) {
                 $GLOBALS['main']->successMessage($lang['catalogue']['notify_manufacturer_create']);
             } else {
@@ -63,33 +64,33 @@ if (isset($_POST['manufacturer']) && is_array($_POST['manufacturer'])) {
     }
     httpredir('?_g=products&node=manufacturers', 'manufacturers');
 }
-$GLOBALS['gui']->addBreadcrumb($lang['catalogue']['title_manufacturer'], currentPage(array('edit')));
+$GLOBALS['gui']->addBreadcrumb($lang['catalogue']['title_manufacturer'], currentPage(['edit']));
 
 foreach ($GLOBALS['hooks']->load('admin.product.manufacturer.pre_display') as $hook) {
     include $hook;
 }
-$smarty_data = array();
-if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', array('id', 'numcode', 'name'), false, array('name' => 'ASC'))) !== false) {
-    $smarty_data = array();
-    if (isset($_GET['edit']) && is_numeric($_GET['edit']) && ($geo = $GLOBALS['db']->select('CubeCart_manufacturers', array('country', 'eu_country'), array('id' => (int)$_GET['edit']))) !== false) {
-        
+$smarty_data = [];
+if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', ['id', 'numcode', 'name'], false, ['name' => 'ASC'])) !== false) {
+    $smarty_data = [];
+    if (isset($_GET['edit']) && is_numeric($_GET['edit']) && ($geo = $GLOBALS['db']->select('CubeCart_manufacturers', ['country', 'eu_country'], ['id' => (int)$_GET['edit']])) !== false) {
+
     }
     foreach ($countries as $country) {
-        $array = array(
+        $array = [
             'selected' => (isset($geo[0]['country']) && !empty($geo[0]['country']) && $country['numcode'] == $geo[0]['country']) ? 'selected="selected"' : '',
             'id'  => $country['numcode'],
             'name'  => $country['name'],
-        );
+        ];
         $smarty_data['countries'][] = $array;
     }
     $GLOBALS['smarty']->assign('COUNTRIES', $smarty_data['countries']);
 
     foreach ($countries as $country) {
-        $array = array(
+        $array = [
             'selected' => (isset($geo[0]['eu_country']) && !empty($geo[0]['eu_country']) && $country['numcode'] == $geo[0]['eu_country']) ? 'selected="selected"' : '',
             'id'  => $country['numcode'],
             'name'  => $country['name'],
-        );
+        ];
         $smarty_data['eu_countries'][] = $array;
     }
     $GLOBALS['smarty']->assign('EU_COUNTRIES', $smarty_data['eu_countries']);
@@ -97,23 +98,23 @@ if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', array('id', 'nu
 }
 
 if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
-    $GLOBALS['main']->addTabControl($lang['catalogue']['title_manufacturer'], false, currentPage(array('edit')));
+    $GLOBALS['main']->addTabControl($lang['catalogue']['title_manufacturer'], false, currentPage(['edit']));
     $GLOBALS['main']->addTabControl($lang['catalogue']['title_manufacturer_edit'], 'manu_edit');
-    if (($manufacturers = $GLOBALS['db']->select('CubeCart_manufacturers', false, array('id' => (int)$_GET['edit']))) !== false) {
+    if (($manufacturers = $GLOBALS['db']->select('CubeCart_manufacturers', false, ['id' => (int)$_GET['edit']])) !== false) {
         $GLOBALS['smarty']->assign('EDIT', $manufacturers[0]);
     } else {
         $GLOBALS['main']->errorMessage($lang['catalogue']['error_manufacturer_found']);
-        httpredir(currentPage(array('edit')));
+        httpredir(currentPage(['edit']));
     }
-    
+
     foreach ($GLOBALS['hooks']->load('admin.product.manufacturer.tabs') as $hook) {
         include $hook;
     }
     $GLOBALS['smarty']->assign('PLUGIN_TABS', ($smarty_data['plugin_tabs'] ?? false));
-    
+
     $GLOBALS['smarty']->assign('DISPLAY_FORM', true);
 } else {
-    $GLOBALS['smarty']->assign('EDIT', array());
+    $GLOBALS['smarty']->assign('EDIT', []);
     $GLOBALS['main']->addTabControl($lang['catalogue']['title_manufacturer'], 'manufacturers');
     $GLOBALS['main']->addTabControl($lang['catalogue']['title_manufacturer_add'], 'manu_add');
     $catalogue = Catalogue::getInstance();

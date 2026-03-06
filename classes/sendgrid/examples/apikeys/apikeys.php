@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -56,7 +58,7 @@ $request_body = json_decode('{
     "user.profile.update"
   ]
 }');
-$api_key_id = "test_url_param";
+$api_key_id = 'test_url_param';
 
 try {
     $response = $sg->client->api_keys()->_($api_key_id)->put($request_body);
@@ -74,7 +76,7 @@ try {
 $request_body = json_decode('{
   "name": "A New Hope"
 }');
-$api_key_id = "test_url_param";
+$api_key_id = 'test_url_param';
 
 try {
     $response = $sg->client->api_keys()->_($api_key_id)->patch($request_body);
@@ -89,7 +91,7 @@ try {
 // Retrieve an existing API Key #
 // GET /api_keys/{api_key_id} #
 
-$api_key_id = "test_url_param";
+$api_key_id = 'test_url_param';
 
 try {
     $response = $sg->client->api_keys()->_($api_key_id)->get();
@@ -104,7 +106,7 @@ try {
 // Delete API keys #
 // DELETE /api_keys/{api_key_id} #
 
-$api_key_id = "test_url_param";
+$api_key_id = 'test_url_param';
 
 try {
     $response = $sg->client->api_keys()->_($api_key_id)->delete();

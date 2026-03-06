@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -10,7 +11,7 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Elastic\Elasticsearch\Transport\Adapter;
 
@@ -19,9 +20,9 @@ namespace Elastic\Elasticsearch\Transport\Adapter;
  */
 final class AdapterOptions
 {
-    const HTTP_ADAPTERS = [
-        "GuzzleHttp\\Client" => "Elastic\\Elasticsearch\\Transport\\Adapter\\Guzzle",
-        "Symfony\\Component\\HttpClient\\HttplugClient" => "Elastic\\Elasticsearch\\Transport\\Adapter\\Symfony",
-        "Symfony\\Component\\HttpClient\\Psr18Client" => "Elastic\\Elasticsearch\\Transport\\Adapter\\Symfony"
+    public const HTTP_ADAPTERS = [
+        \GuzzleHttp\Client::class => \Elastic\Elasticsearch\Transport\Adapter\Guzzle::class,
+        \Symfony\Component\HttpClient\HttplugClient::class => \Elastic\Elasticsearch\Transport\Adapter\Symfony::class,
+        \Symfony\Component\HttpClient\Psr18Client::class => \Elastic\Elasticsearch\Transport\Adapter\Symfony::class,
     ];
 }

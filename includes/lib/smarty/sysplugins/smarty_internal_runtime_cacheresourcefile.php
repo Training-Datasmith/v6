@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty cache resource file clear method
  *
@@ -124,7 +126,7 @@ class Smarty_Internal_Runtime_CacheResourceFile
                         }
                         $_count += @unlink($_filepath) ? 1 : 0;
                         if (function_exists('opcache_invalidate')
-                            && (!function_exists('ini_get') || strlen(ini_get("opcache.restrict_api")) < 1)
+                            && (!function_exists('ini_get') || strlen(ini_get('opcache.restrict_api')) < 1)
                         ) {
                             opcache_invalidate($_filepath, true);
                         } elseif (function_exists('apc_delete_file')) {

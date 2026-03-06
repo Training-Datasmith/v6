@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -11,12 +13,12 @@
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
 $GLOBALS['main']->addTabControl($lang['settings']['release_notes'], 'general');
-$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(array('node')), true);
-$features = array( 
-	'GHSA-qfrx-vvvp-h5m2' => 'HTML Injection in Product Reviews Allows Malicious Links and Defacement',
+$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(['node']), true);
+$features = [
+    'GHSA-qfrx-vvvp-h5m2' => 'HTML Injection in Product Reviews Allows Malicious Links and Defacement',
     'GHSA-5hg3-m3q3-v2p4' => 'Stored/Reflected HTML Injection in Contact Enquiry — Admin Receives Raw HTML',
     'GHSA-869v-gjv8-9m7f' => 'Unauthorized Victim Newsletter Unsubscription via force_unsubscribe Parameter',
-    'GHSA-4vwh-x8m2-fmvv' => 'Session Not Invalidated After Password Change'
-);
-$security = array();
+    'GHSA-4vwh-x8m2-fmvv' => 'Session Not Invalidated After Password Change',
+];
+$security = [];
 $page_content = $GLOBALS['main']->newFeatures($_GET['node'], $features, 12, '', $security);

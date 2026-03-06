@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -13,14 +15,14 @@
 ## Don't let anything be cached
 header('Cache-Control: no-store, no-cache, must-revalidate');
 header('Cache-Control: pre-check=0, post-check=0, max-age=0');
-header("Expires: -1");
-header("Pragma: no-cache");
+header('Expires: -1');
+header('Pragma: no-cache');
 header('X-Frame-Options: SAMEORIGIN'); // Do NOT allow iframes
 
 ## Include the ini file (required)
 require 'ini.inc.php';
 
-if (basename(__FILE__)!==$glob['adminFile']) {
+if (basename(__FILE__) !== $glob['adminFile']) {
     header('HTTP/1.1 404 Not Found');
     exit;
 }
@@ -36,7 +38,7 @@ include CC_ROOT_DIR.CC_DS.'controllers'.CC_DS.'controller.admin.pre_session.inc.
 $feed_access_key = $GLOBALS['config']->get('config', 'feed_access_key');
 $feed_access_key = (!$feed_access_key) ? '' : $feed_access_key;
 
-if (Admin::getInstance()->is() || (isset($_GET['_g']) && $_GET['_g']=='products' && $_GET['node']=='export' && !empty($_GET['format']) && $_GET['access']==$feed_access_key && !empty($feed_access_key))) {
+if (Admin::getInstance()->is() || (isset($_GET['_g']) && $_GET['_g'] == 'products' && $_GET['node'] == 'export' && !empty($_GET['format']) && $_GET['access'] == $feed_access_key && !empty($feed_access_key))) {
     error_reporting(E_ALL ^ (E_NOTICE | E_DEPRECATED | E_USER_DEPRECATED));
     include CC_ROOT_DIR.CC_DS.'controllers'.CC_DS.'controller.admin.session.true.inc.php';
 } else {

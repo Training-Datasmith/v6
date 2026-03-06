@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Asm object for a /mail/send API call
  */
@@ -58,13 +60,15 @@ class Asm implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setGroupId($group_id)
+    public function setGroupId($group_id): void
     {
         if ($group_id instanceof GroupId) {
             $this->group_id = $group_id->getGroupId();
         } else {
             Assert::integer(
-                $group_id, 'group_id', 'Value "$group_id" must be an instance of SendGrid\Mail\GroupId or an integer.'
+                $group_id,
+                'group_id',
+                'Value "$group_id" must be an instance of SendGrid\Mail\GroupId or an integer.'
             );
 
             $this->group_id = new GroupId($group_id);
@@ -97,13 +101,14 @@ class Asm implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setGroupsToDisplay($groups_to_display)
+    public function setGroupsToDisplay($groups_to_display): void
     {
         if ($groups_to_display instanceof GroupsToDisplay) {
             $this->groups_to_display = $groups_to_display->getGroupsToDisplay();
         } else {
             Assert::isArray(
-                $groups_to_display, 'groups_to_display',
+                $groups_to_display,
+                'groups_to_display',
                 'Value "$groups_to_display" must be an instance of SendGrid\Mail\GroupsToDisplay or an array.'
             );
             Assert::maxItems($groups_to_display, 'groups_to_display', 25);
@@ -133,11 +138,9 @@ class Asm implements \JsonSerializable
         return array_filter(
             [
                 'group_id' => $this->getGroupId(),
-                'groups_to_display' => $this->getGroupsToDisplay()
+                'groups_to_display' => $this->getGroupsToDisplay(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (int|array $value) => $value !== null
         ) ?: null;
     }
 }

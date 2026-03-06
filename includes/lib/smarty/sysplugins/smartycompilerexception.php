@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty compiler exception class
  *
@@ -17,7 +19,7 @@ class SmartyCompilerException extends SmartyException
      * @param Throwable|null $previous The previous exception used for the exception chaining.
      */
     public function __construct(
-        string $message = "",
+        string $message = '',
         int $code = 0,
         ?string $filename = null,
         ?int $line = null,

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -17,7 +19,7 @@ if (!defined('CC_INI_SET')) {
 ## Helper: generate 8 single-use backup codes (8 uppercase hex characters each)
 function _admin2FAGenerateBackupCodes($count = 8)
 {
-    $codes = array();
+    $codes = [];
     for ($i = 0; $i < $count; $i++) {
         $codes[] = strtoupper(bin2hex(random_bytes(4)));
     }
@@ -35,15 +37,17 @@ if (isset($_POST['twofa_action']) && isset($_POST['admin_id']) && is_numeric($_P
 
         if ($action === 'enable_email') {
             $backup_codes  = _admin2FAGenerateBackupCodes();
-            $hashed_codes  = array_map(function($c) { return password_hash($c, PASSWORD_DEFAULT); }, $backup_codes);
-            $GLOBALS['db']->update('CubeCart_admin_users', array(
+            $hashed_codes  = array_map(function ($c) {
+                return password_hash($c, PASSWORD_DEFAULT);
+            }, $backup_codes);
+            $GLOBALS['db']->update('CubeCart_admin_users', [
                 'twofa_enabled'      => 1,
                 'twofa_method'       => 'email',
                 'twofa_secret'       => null,
                 'twofa_backup_codes' => json_encode($hashed_codes),
                 'twofa_otp_hash'     => null,
                 'twofa_otp_expires'  => 0,
-            ), array('admin_id' => $twofa_admin_id));
+            ], ['admin_id' => $twofa_admin_id]);
             $GLOBALS['session']->set('twofa_show_backup_codes', $backup_codes, 'client');
             $GLOBALS['main']->successMessage($lang['admins']['notify_twofa_email_enabled']);
 
@@ -53,15 +57,17 @@ if (isset($_POST['twofa_action']) && isset($_POST['admin_id']) && is_numeric($_P
             require_once CC_ROOT_DIR.CC_DS.'classes'.CC_DS.'totp.class.php';
             if ($secret && TOTP::verifyCode($secret, $code)) {
                 $backup_codes  = _admin2FAGenerateBackupCodes();
-                $hashed_codes  = array_map(function($c) { return password_hash($c, PASSWORD_DEFAULT); }, $backup_codes);
-                $GLOBALS['db']->update('CubeCart_admin_users', array(
+                $hashed_codes  = array_map(function ($c) {
+                    return password_hash($c, PASSWORD_DEFAULT);
+                }, $backup_codes);
+                $GLOBALS['db']->update('CubeCart_admin_users', [
                     'twofa_enabled'      => 1,
                     'twofa_method'       => 'totp',
                     'twofa_secret'       => $secret,
                     'twofa_backup_codes' => json_encode($hashed_codes),
                     'twofa_otp_hash'     => null,
                     'twofa_otp_expires'  => 0,
-                ), array('admin_id' => $twofa_admin_id));
+                ], ['admin_id' => $twofa_admin_id]);
                 $GLOBALS['session']->delete('twofa_totp_setup_secret', 'client');
                 $GLOBALS['session']->set('twofa_show_backup_codes', $backup_codes, 'client');
                 $GLOBALS['main']->successMessage($lang['admins']['notify_twofa_totp_enabled']);
@@ -70,22 +76,26 @@ if (isset($_POST['twofa_action']) && isset($_POST['admin_id']) && is_numeric($_P
             }
 
         } elseif ($action === 'disable') {
-            $GLOBALS['db']->update('CubeCart_admin_users', array(
+            $GLOBALS['db']->update('CubeCart_admin_users', [
                 'twofa_enabled'      => 0,
                 'twofa_method'       => null,
                 'twofa_secret'       => null,
                 'twofa_backup_codes' => null,
                 'twofa_otp_hash'     => null,
                 'twofa_otp_expires'  => 0,
-            ), array('admin_id' => $twofa_admin_id));
+            ], ['admin_id' => $twofa_admin_id]);
             $GLOBALS['main']->successMessage($lang['admins']['notify_twofa_disabled']);
 
         } elseif ($action === 'regenerate_backup') {
             $backup_codes = _admin2FAGenerateBackupCodes();
-            $hashed_codes = array_map(function($c) { return password_hash($c, PASSWORD_DEFAULT); }, $backup_codes);
-            $GLOBALS['db']->update('CubeCart_admin_users',
-                array('twofa_backup_codes' => json_encode($hashed_codes)),
-                array('admin_id' => $twofa_admin_id));
+            $hashed_codes = array_map(function ($c) {
+                return password_hash($c, PASSWORD_DEFAULT);
+            }, $backup_codes);
+            $GLOBALS['db']->update(
+                'CubeCart_admin_users',
+                ['twofa_backup_codes' => json_encode($hashed_codes)],
+                ['admin_id' => $twofa_admin_id]
+            );
             $GLOBALS['session']->set('twofa_show_backup_codes', $backup_codes, 'client');
             $GLOBALS['main']->successMessage($lang['admins']['notify_twofa_backup_regen']);
         }
@@ -96,14 +106,13 @@ if (isset($_POST['twofa_action']) && isset($_POST['admin_id']) && is_numeric($_P
 }
 
 if (isset($_GET['tour_shown']) && is_numeric($_GET['tour_shown'])) {
-    $query = "UPDATE `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_admin_users` SET `tour_shown` = '1' WHERE `admin_id` = ".$_GET['tour_shown'];
+    $query = 'UPDATE `'.$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_admin_users` SET `tour_shown` = '1' WHERE `admin_id` = ".$_GET['tour_shown'];
     $GLOBALS['db']->misc($query);
     $data = $GLOBALS['session']->set('tour_shown', 1, 'admin_data');
     exit;
 }
 
 Admin::getInstance()->permissions('users', CC_PERM_READ, true);
-
 
 $count = $GLOBALS['db']->query('SELECT COUNT(`admin_id`) as count from `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_admin_users` WHERE `super_user` = 1');
 $count = $count[0]['count'];
@@ -132,7 +141,7 @@ if (isset($_POST['admin']) && is_array($_POST['admin']) && Admin::getInstance()-
         ## Update existing admin
         if (!empty($record['password'])) {
             $logout = true;
-            if (($user = $GLOBALS['db']->select('CubeCart_admin_users', array('salt'), array('admin_id' => $_POST['admin_id']), null, 1)) !== false) {
+            if (($user = $GLOBALS['db']->select('CubeCart_admin_users', ['salt'], ['admin_id' => $_POST['admin_id']], null, 1)) !== false) {
                 if (empty($user[0]['salt'])) {
                     $salt = Password::getInstance()->createSalt();
                     $record['salt'] = $salt;
@@ -148,9 +157,9 @@ if (isset($_POST['admin']) && is_array($_POST['admin']) && Admin::getInstance()-
             $record['super_user'] = '1';
         }
         $record['new_password'] = 1;
-        if ($GLOBALS['db']->update('CubeCart_admin_users', $record, array('admin_id' => $_POST['admin_id']))) {
+        if ($GLOBALS['db']->update('CubeCart_admin_users', $record, ['admin_id' => $_POST['admin_id']])) {
             $admin_id = Admin::getInstance()->get('admin_id');
-            if ($_POST['admin_id']==$admin_id) {
+            if ($_POST['admin_id'] == $admin_id) {
                 $GLOBALS['session']->set('user_language', $record['language'], 'admin');
                 $GLOBALS['session']->set('language', $record['language'], 'admin_data');
             }
@@ -174,41 +183,40 @@ if (isset($_POST['admin']) && is_array($_POST['admin']) && Admin::getInstance()-
     }
 
     ## Update Permissions
-    $GLOBALS['db']->delete('CubeCart_permissions', array('admin_id' => $admin_id));
+    $GLOBALS['db']->delete('CubeCart_permissions', ['admin_id' => $admin_id]);
     if (isset($_POST['permission']) && is_array($_POST['permission']) && Admin::getInstance()->permissions('users', CC_PERM_FULL)) {
         foreach ($_POST['permission'] as $section => $mask) {
             $status = 0;
             foreach ($mask as $value) {
                 $status += $value;
             }
-            $record = array(
+            $record = [
                 'admin_id'  => $admin_id,
                 'section_id' => $section,
                 'level'   => $status,
-            );
+            ];
             $GLOBALS['db']->insert('CubeCart_permissions', $record);
         }
         $updated = true;
     }
 
-    if($logout) {
+    if ($logout) {
         httpredir('?_g=logout&token='.SESSION_TOKEN);
     } elseif ($added) {
-        httpredir(currentPage(array('action')));
+        httpredir(currentPage(['action']));
     } elseif ($updated) {
         $GLOBALS['main']->successMessage($lang['admins']['notify_admin_update']);
-        httpredir(currentPage(array('action', 'admin_id')));
+        httpredir(currentPage(['action', 'admin_id']));
     } else {
         $GLOBALS['main']->errorMessage($lang['common']['error_no_changes']);
     }
 }
 
-
 ## Update status
 if (isset($_POST['status']) && is_array($_POST['status']) && Admin::getInstance()->permissions('users', CC_PERM_FULL)) {
     $updated = false;
     foreach ($_POST['status'] as $admin_id => $status) {
-        if ($GLOBALS['db']->update('CubeCart_admin_users', array('status' => (int)$status), array('admin_id' => (int)$admin_id))) {
+        if ($GLOBALS['db']->update('CubeCart_admin_users', ['status' => (int)$status], ['admin_id' => (int)$admin_id])) {
             $updated = true;
         }
     }
@@ -225,8 +233,8 @@ $GLOBALS['gui']->addBreadcrumb($GLOBALS['lang']['admins']['title_administrators'
 if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET['admin_id'] === (int)Admin::getInstance()->getId() || Admin::getInstance()->permissions('users', CC_PERM_FULL)))) {
     if ($_GET['action'] == 'delete' && is_numeric($_GET['admin_id'])) {
         //If there only one super then don't allow deleting
-        if ($admin_user = $GLOBALS['db']->select('CubeCart_admin_users', false, array('admin_id' => (int)$_GET['admin_id']))) {
-            if ($GLOBALS['db']->delete('CubeCart_admin_users', array('admin_id' => (int)$admin_user[0]['admin_id']))) {
+        if ($admin_user = $GLOBALS['db']->select('CubeCart_admin_users', false, ['admin_id' => (int)$_GET['admin_id']])) {
+            if ($GLOBALS['db']->delete('CubeCart_admin_users', ['admin_id' => (int)$admin_user[0]['admin_id']])) {
                 $GLOBALS['main']->successMessage(sprintf($lang['admins']['notify_admin_delete'], $admin_user[0]['username']));
             } else {
                 $GLOBALS['main']->errorMessage($lang['admins']['error_admin_delete']);
@@ -234,12 +242,12 @@ if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET[
         } else {
             $GLOBALS['main']->errorMessage($lang['admins']['error_admin_exists']);
         }
-        httpredir(currentPage(array('action', 'admin_id')));
+        httpredir(currentPage(['action', 'admin_id']));
     }
     if ($_GET['action'] == 'unlink' && isset($_GET['admin_id']) && is_numeric($_GET['admin_id'])) {
-        $GLOBALS['db']->update('CubeCart_admin_users', array('customer_id' => null), array('admin_id' => (int)$_GET['admin_id']));
+        $GLOBALS['db']->update('CubeCart_admin_users', ['customer_id' => null], ['admin_id' => (int)$_GET['admin_id']]);
         $GLOBALS['main']->successMessage($lang['admins']['notify_admin_unlinked']);
-        httpredir(currentPage(null, array('action' => 'edit')));
+        httpredir(currentPage(null, ['action' => 'edit']));
     }
     ##
     $GLOBALS['main']->addTabControl($lang['common']['general'], 'general');
@@ -247,7 +255,7 @@ if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET[
 
     if ($_GET['action'] == 'edit' && isset($_GET['admin_id']) && is_numeric($_GET['admin_id'])) {
         $GLOBALS['smarty']->assign('ADD_EDIT_ADMIN', $lang['admins']['title_admin_edit']);
-        if (($admin = $GLOBALS['db']->select('CubeCart_admin_users', false, array('admin_id' => (int)$_GET['admin_id']))) !== false) {
+        if (($admin = $GLOBALS['db']->select('CubeCart_admin_users', false, ['admin_id' => (int)$_GET['admin_id']])) !== false) {
             if (!$admin[0]['super_user'] && (bool)Admin::getInstance()->superUser()) {
                 $GLOBALS['main']->addTabControl($lang['admins']['permission'], 'permissions');
             }
@@ -260,7 +268,7 @@ if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET[
             $GLOBALS['smarty']->assign('ADMIN', $admin[0]);
             $GLOBALS['gui']->addBreadcrumb($admin[0]['name'], currentPage());
             ## Load Permissions data
-            $permissions = $GLOBALS['db']->select('CubeCart_permissions', false, array('admin_id' => $admin[0]['admin_id']));
+            $permissions = $GLOBALS['db']->select('CubeCart_permissions', false, ['admin_id' => $admin[0]['admin_id']]);
             if ($permissions) {
                 foreach ($permissions as $perm) {
                     $permission[$perm['section_id']] = $perm['level'];
@@ -268,7 +276,7 @@ if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET[
             }
             if (!empty($admin[0]['customer_id'])) {
                 $GLOBALS['smarty']->assign('USER', $user[0]);
-                $GLOBALS['smarty']->assign('UNLINK', currentPage(null, array('action' => 'unlink')));
+                $GLOBALS['smarty']->assign('UNLINK', currentPage(null, ['action' => 'unlink']));
                 $GLOBALS['smarty']->assign('LINKED', true);
             }
             $GLOBALS['main']->addTabControl($lang['admins']['tab_overview'], 'overview');
@@ -296,12 +304,12 @@ if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET[
                         $bc = json_decode($admin[0]['twofa_backup_codes'], true);
                         $backup_count = is_array($bc) ? count($bc) : 0;
                     }
-                    $GLOBALS['smarty']->assign('ADMIN_TWOFA', array(
+                    $GLOBALS['smarty']->assign('ADMIN_TWOFA', [
                         'enabled'      => (bool)$admin[0]['twofa_enabled'],
                         'method'       => $admin[0]['twofa_method'],
                         'backup_count' => $backup_count,
                         'is_own'       => $is_own_account,
-                    ));
+                    ]);
                     // Show backup codes if they were just generated (flash via session)
                     if ($flash_codes = $GLOBALS['session']->get('twofa_show_backup_codes', 'client')) {
                         $GLOBALS['smarty']->assign('TWOFA_BACKUP_CODES', $flash_codes);
@@ -311,11 +319,11 @@ if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET[
             }
         } else {
             $GLOBALS['main']->errorMessage($lang['admins']['error_admin_exists']);
-            httpredir(currentPage(array('action', 'admin_id')));
+            httpredir(currentPage(['action', 'admin_id']));
         }
     } else {
         if (Admin::getInstance()->superUser()) {
-            $GLOBALS['smarty']->assign('ADMIN', array('super_user' => false));
+            $GLOBALS['smarty']->assign('ADMIN', ['super_user' => false]);
         }
         $GLOBALS['main']->addTabControl($lang['admins']['permission'], 'permissions');
         $GLOBALS['smarty']->assign('ADD_EDIT_ADMIN', $lang['admins']['title_admin_add']);
@@ -326,13 +334,15 @@ if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET[
     $comparitor = (isset($admin[0]['language'])) ? $admin[0]['language'] : $GLOBALS['config']->get('config', 'default_language');
     $enabled = $GLOBALS['config']->get('languages');
     foreach ($languages as $details) {
-        if (isset($enabled[$details['code']]) && !$enabled[$details['code']]) continue;
+        if (isset($enabled[$details['code']]) && !$enabled[$details['code']]) {
+            continue;
+        }
         $details['selected'] = ($comparitor == $details['code']) ? ' selected="selected"' : '';
         $smarty_data['languages'][] = $details;
     }
     $GLOBALS['smarty']->assign('LANGUAGES', $smarty_data['languages']);
 
-    $sections = array(
+    $sections = [
         'categories' => 3,
         'customers'  => 5,
         'documents'  => 4,
@@ -343,7 +353,7 @@ if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET[
         'statistics' => 8,
         'settings'  => 9,
         'reviews'  => 12,
-    );
+    ];
     ## Load Sections data
     foreach ($GLOBALS['hooks']->load('admin.settings.admins.sections') as $hook) {
         include $hook;
@@ -352,23 +362,23 @@ if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET[
         $section['id']  = $section_id;
         $section['info'] = $lang['admins']['perm_'.$name.'_info'];
         $section['name'] = $lang['admins']['perm_'.$name];
-        #
+
         $section['read'] = (isset($permission[$section_id]) && $permission[$section_id] & 1) ? 'checked="checked"' : '';
         $section['edit'] = (isset($permission[$section_id]) && $permission[$section_id] & 2) ? 'checked="checked"' : '';
         $section['delete'] = (isset($permission[$section_id]) && $permission[$section_id] & 4) ? 'checked="checked"' : '';
-        #
+
         $smarty_data['sections'][] = $section;
     }
     $GLOBALS['smarty']->assign('SECTIONS', $smarty_data['sections']);
 } else {
     $GLOBALS['main']->addTabControl($lang['admins']['title_administrators'], 'admins');
     if (Admin::getInstance()->permissions('users', CC_PERM_EDIT)) {
-        $GLOBALS['main']->addTabControl($lang['admins']['tab_admin_create'], false, currentPage(null, array('action' => 'add')));
+        $GLOBALS['main']->addTabControl($lang['admins']['tab_admin_create'], false, currentPage(null, ['action' => 'add']));
     }
     if (($admins = $GLOBALS['db']->select('CubeCart_admin_users')) !== false) {
         $no_delete = false;
         //If there is only one superuser we have to keep him
-        if ($GLOBALS['db']->numrows('SELECT `admin_id` from `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_admin_users` WHERE `super_user` = 1')==1) {
+        if ($GLOBALS['db']->numrows('SELECT `admin_id` from `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_admin_users` WHERE `super_user` = 1') == 1) {
             $no_delete = true;
         }
         foreach ($admins as $admin) {
@@ -376,9 +386,9 @@ if (isset($_GET['action']) && (Admin::getInstance()->superUser() || ((int)$_GET[
                 continue;
             }
             if (!$no_delete || $admin['super_user'] == 0) {
-                $admin['link_delete'] = currentPage(null, array('action' => 'delete', 'admin_id' => $admin['admin_id'], 'token' => SESSION_TOKEN));
+                $admin['link_delete'] = currentPage(null, ['action' => 'delete', 'admin_id' => $admin['admin_id'], 'token' => SESSION_TOKEN]);
             }
-            $admin['link_edit'] = currentPage(null, array('action' => 'edit', 'admin_id' => $admin['admin_id']));
+            $admin['link_edit'] = currentPage(null, ['action' => 'edit', 'admin_id' => $admin['admin_id']]);
             $smarty_data['admins'][] = $admin;
         }
         $GLOBALS['smarty']->assign('ADMINS', $smarty_data['admins']);

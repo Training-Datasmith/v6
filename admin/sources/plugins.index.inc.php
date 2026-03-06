@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -17,26 +19,27 @@ Admin::getInstance()->permissions('maintenance', CC_PERM_READ, true);
 
 global $lang, $glob;
 
-if(isset($_GET['install']) && is_array($_GET['install'])) {
-    if($_GET['install']['seller_id']=='1' || ($_GET['install']['seller_id']!=='1' && $GLOBALS['db']->select('CubeCart_extension_info', false, array('seller_id' => (int)$_GET['install']['seller_id'], 'file_id' => (int)$_GET['install']['id'])))) {
-        $apps = array($_GET['install']['type'] => (string)$_GET['install']['seller_id'].'|'.(string)$_GET['install']['id']);
+if (isset($_GET['install']) && is_array($_GET['install'])) {
+    if ($_GET['install']['seller_id'] == '1' || ($_GET['install']['seller_id'] !== '1' && $GLOBALS['db']->select('CubeCart_extension_info', false, ['seller_id' => (int)$_GET['install']['seller_id'], 'file_id' => (int)$_GET['install']['id']]))) {
+        $apps = [$_GET['install']['type'] => (string)$_GET['install']['seller_id'].'|'.(string)$_GET['install']['id']];
     } else {
-        $apps = array();
+        $apps = [];
     }
-    
+
 } else {
-    $apps = array(
+    $apps = [
         'gateway' => '1|452',
-        'shipping' => '1|44'
-    );
+        'shipping' => '1|44',
+    ];
 }
 
-foreach($apps as $extension_type => $token) {
+foreach ($apps as $extension_type => $token) {
 
-    $app_parts = explode("|",$token);
+    $app_parts = explode('|', $token);
 
-    if(!isset($_GET['install']) && ($GLOBALS['config']->has('default_apps', $token) || $GLOBALS['db']->select('CubeCart_modules', false, array('module' => $extension_type)))) {
-        $GLOBALS['config']->set('default_apps', $token, 1); continue;
+    if (!isset($_GET['install']) && ($GLOBALS['config']->has('default_apps', $token) || $GLOBALS['db']->select('CubeCart_modules', false, ['module' => $extension_type]))) {
+        $GLOBALS['config']->set('default_apps', $token, 1);
+        continue;
     }
 
     $request = new Request('www.cubecart.com', '/extensions/token/'.$token.'/get', 443, false, true, 10);
@@ -45,10 +48,10 @@ foreach($apps as $extension_type => $token) {
     $request->setUserAgent('CubeCart');
     $request->skiplog(true);
 
-    if($json = $request->send()) {
+    if ($json = $request->send()) {
         $data = json_decode($json, true);
-        
-        if(is_array($data) && isset($data['path'])) {
+
+        if (is_array($data) && isset($data['path'])) {
 
             $destination = CC_ROOT_DIR.'/'.$data['path'];
             $tmp_path = CC_BACKUP_DIR.$data['file_name'];
@@ -62,32 +65,32 @@ foreach($apps as $extension_type => $token) {
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $file = $zip->statIndex($i);
                 $root_path = $destination.'/'.$file['name'];
-                if (basename($file['name'])=="config.xml") {
-                    $install_dir = str_replace(array('/config.xml', CC_ROOT_DIR), '', $root_path);
+                if (basename($file['name']) == 'config.xml') {
+                    $install_dir = str_replace(['/config.xml', CC_ROOT_DIR], '', $root_path);
                     break;
                 }
             }
 
-            if($zip->extractTo($destination)) {
-                $extension_info = array(
+            if ($zip->extractTo($destination)) {
+                $extension_info = [
                     'dir' => $install_dir,
                     'file_name' => $data['file_name'],
                     'file_id' => $data['file_id'],
                     'seller_id' => $data['seller_id'],
                     'modified'	=> $data['modified'],
                     'name'	=> $data['name'],
-                    'keep_current' => 1 // Extraction worked so we expect it to work next time. Let's keep it up to date.
-                );
+                    'keep_current' => 1, // Extraction worked so we expect it to work next time. Let's keep it up to date.
+                ];
                 // Required for extension updates
-                if($GLOBALS['db']->select('CubeCart_extension_info', false, array('file_id' => $data['file_id'], 'seller_id' => $data['seller_id']))) {
+                if ($GLOBALS['db']->select('CubeCart_extension_info', false, ['file_id' => $data['file_id'], 'seller_id' => $data['seller_id']])) {
                     unset($extension_info['file_id'], $extension_info['seller_id']);
-                    $GLOBALS['db']->update('CubeCart_extension_info', $extension_info, array('file_id' => $data['file_id'], 'seller_id' => $data['seller_id']));
-                } else {      
+                    $GLOBALS['db']->update('CubeCart_extension_info', $extension_info, ['file_id' => $data['file_id'], 'seller_id' => $data['seller_id']]);
+                } else {
                     $GLOBALS['db']->insert('CubeCart_extension_info', $extension_info);
                 }
 
-                if(isset($_GET['install'])) {
-                    if(isset($_GET['install']['msg'])) {
+                if (isset($_GET['install'])) {
+                    if (isset($_GET['install']['msg'])) {
                         $GLOBALS['main']->successMessage(htmlspecialchars($_GET['install']['msg']));
                         httpredir('?_g=plugins&type='.$_GET['install']['type'].'&module='.basename($extension_info['dir']));
                         exit;
@@ -100,47 +103,47 @@ foreach($apps as $extension_type => $token) {
                 } else {
                     $GLOBALS['config']->set('default_apps', $token, 1);
                 }
-                if(!isset($_GET['install']) && $data['file_id']==44) {
+                if (!isset($_GET['install']) && $data['file_id'] == 44) {
                     // Free Shipping to get us started
-                    $config_data = array(
-                        "module_id" => "7",
-                        "module" => "shipping",
-                        "folder" =>  "All_In_One_Shipping",
-                        "status" =>  "1",
-                        "default" =>  "0",
-                        "position" =>  "0",
-                        "range_weight" =>  "1",
-                        "tax" =>  "999999",
-                        "multiple_zones" =>  "first",
-                        "debug" =>  "0",
-                        "use_flat" =>  "1",
-                        "cc5_data" => 1
-                    );
-                    $GLOBALS['config']->set("All_In_One_Shipping", '', $config_data);
-                    $GLOBALS['db']->insert('CubeCart_shipping_rates', array('method_name' => 'Free Shipping', 'max_weight' => 9999, 'item_rate' => 0));
-                    $GLOBALS['db']->insert('CubeCart_modules', array('module' => 'shipping', 'folder' => "All_In_One_Shipping", 'status' => 1, 'default' => 1));
+                    $config_data = [
+                        'module_id' => '7',
+                        'module' => 'shipping',
+                        'folder' =>  'All_In_One_Shipping',
+                        'status' =>  '1',
+                        'default' =>  '0',
+                        'position' =>  '0',
+                        'range_weight' =>  '1',
+                        'tax' =>  '999999',
+                        'multiple_zones' =>  'first',
+                        'debug' =>  '0',
+                        'use_flat' =>  '1',
+                        'cc5_data' => 1,
+                    ];
+                    $GLOBALS['config']->set('All_In_One_Shipping', '', $config_data);
+                    $GLOBALS['db']->insert('CubeCart_shipping_rates', ['method_name' => 'Free Shipping', 'max_weight' => 9999, 'item_rate' => 0]);
+                    $GLOBALS['db']->insert('CubeCart_modules', ['module' => 'shipping', 'folder' => 'All_In_One_Shipping', 'status' => 1, 'default' => 1]);
                 }
-            } elseif(isset($_GET['install'])) {
-                $GLOBALS['db']->update('CubeCart_extension_info', array('keep_current' => 0), array('file_id' => $app_parts[1], 'seller_id' => $app_parts[0]));
+            } elseif (isset($_GET['install'])) {
+                $GLOBALS['db']->update('CubeCart_extension_info', ['keep_current' => 0], ['file_id' => $app_parts[1], 'seller_id' => $app_parts[0]]);
                 $GLOBALS['main']->errorMessage('Auto upgrade failed. Please update manually.');
                 httpredir('?');
                 exit;
             }
             $zip->close();
-            if(file_exists($tmp_path)) {
+            if (file_exists($tmp_path)) {
                 unlink($tmp_path);
             }
         } else {
-            $GLOBALS['db']->update('CubeCart_extension_info', array('keep_current' => 0), array('file_id' => $app_parts[1], 'seller_id' => $app_parts[0]));
-            $GLOBALS['main']->errorMessage('Failed to retrieve extension data.'); 
+            $GLOBALS['db']->update('CubeCart_extension_info', ['keep_current' => 0], ['file_id' => $app_parts[1], 'seller_id' => $app_parts[0]]);
+            $GLOBALS['main']->errorMessage('Failed to retrieve extension data.');
             httpredir('?');
-            exit; 
+            exit;
         }
     } else {
-        $GLOBALS['db']->update('CubeCart_extension_info', array('keep_current' => 0), array('file_id' => $app_parts[1], 'seller_id' => $app_parts[0]));
-        $GLOBALS['main']->errorMessage('Failed to connect to extension server.'); 
+        $GLOBALS['db']->update('CubeCart_extension_info', ['keep_current' => 0], ['file_id' => $app_parts[1], 'seller_id' => $app_parts[0]]);
+        $GLOBALS['main']->errorMessage('Failed to connect to extension server.');
         httpredir('?');
-        exit;   
+        exit;
     }
 }
 
@@ -154,26 +157,26 @@ if (is_array($hash_files)) {
 
 $GLOBALS['main']->addTabControl($lang['navigation']['nav_plugins'], 'plugins');
 $GLOBALS['gui']->addBreadcrumb($lang['navigation']['nav_modules'], '?_g=plugins', true);
-if (isset($_GET['delete']) && $_GET['delete']==1 && !empty($_GET['type']) && !empty($_GET['module'])) {
+if (isset($_GET['delete']) && $_GET['delete'] == 1 && !empty($_GET['type']) && !empty($_GET['module'])) {
     $type = basename($_GET['type']);
     $module = basename($_GET['module']);
-    if(!empty($type) && !empty($module)) {
+    if (!empty($type) && !empty($module)) {
         $dir = CC_ROOT_DIR.'/modules/'.$type.'/'.$module;
         if (file_exists($dir)) {
             recursiveDelete($dir);
-            $GLOBALS['db']->delete('CubeCart_config', array('name' => $module));
-            $GLOBALS['db']->delete('CubeCart_modules', array('folder' => $module));
-            $GLOBALS['db']->delete('CubeCart_hooks', array('plugin' => $module));
-        
+            $GLOBALS['db']->delete('CubeCart_config', ['name' => $module]);
+            $GLOBALS['db']->delete('CubeCart_modules', ['folder' => $module]);
+            $GLOBALS['db']->delete('CubeCart_hooks', ['plugin' => $module]);
+
             if (file_exists($dir)) {
                 $GLOBALS['main']->errorMessage($lang['module']['plugin_still_exists']);
             } else {
                 $GLOBALS['main']->successMessage($lang['module']['plugin_deleted_successfully']);
             }
         } else {
-            $GLOBALS['db']->delete('CubeCart_config', array('name' => $module));
-            $GLOBALS['db']->delete('CubeCart_modules', array('folder' => $module));
-            $GLOBALS['db']->delete('CubeCart_hooks', array('plugin' => $module));
+            $GLOBALS['db']->delete('CubeCart_config', ['name' => $module]);
+            $GLOBALS['db']->delete('CubeCart_modules', ['folder' => $module]);
+            $GLOBALS['db']->delete('CubeCart_hooks', ['plugin' => $module]);
             $GLOBALS['main']->successMessage($lang['module']['plugin_deleted_already']);
         }
     }
@@ -181,11 +184,11 @@ if (isset($_GET['delete']) && $_GET['delete']==1 && !empty($_GET['type']) && !em
 }
 if (isset($_POST['plugin_token']) && !empty($_POST['plugin_token'])) {
     $token = str_replace('-', '', $_POST['plugin_token']);
-    
+
     $json 	= false;
     $cc_domain = 'www.cubecart.com';
     $cc_get_path 	= '/extensions/token/'.$token.'/get';
-    
+
     $request = new Request($cc_domain, $cc_get_path, 443, false, true, 10);
     $request->setMethod('get');
     $request->setSSL();
@@ -211,7 +214,7 @@ if (isset($_POST['plugin_token']) && !empty($_POST['plugin_token'])) {
                     }
                     $zip = new ZipArchive();
 
-                    if ($zip->open($tmp_path)===true) {
+                    if ($zip->open($tmp_path) === true) {
                         $extract = true;
                         $backup = false;
                         $import_language = false;
@@ -224,13 +227,13 @@ if (isset($_POST['plugin_token']) && !empty($_POST['plugin_token'])) {
                             }
 
                             $root_path = $destination.'/'.$file['name'];
-                            
-                            if (file_exists($root_path) && basename($file['name'])=="config.xml") {
+
+                            if (file_exists($root_path) && basename($file['name']) == 'config.xml') {
                                 // backup existing
-                                $backup = str_replace('config.xml', '', $file['name'])."*";
+                                $backup = str_replace('config.xml', '', $file['name']).'*';
                             }
-                            if (basename($file['name'])=="config.xml") {
-                                $install_dir = str_replace(array('/config.xml', CC_ROOT_DIR), '', $root_path);
+                            if (basename($file['name']) == 'config.xml') {
+                                $install_dir = str_replace(['/config.xml', CC_ROOT_DIR], '', $root_path);
                             }
 
                             if (file_exists($root_path) && !is_writable($root_path)) {
@@ -238,11 +241,11 @@ if (isset($_POST['plugin_token']) && !empty($_POST['plugin_token'])) {
                                 $extract = false;
                             }
                         }
-        
-                        if ($_POST['backup']=='1' && $backup) {
-                            $destination_filepath = CC_BACKUP_DIR.rtrim($data['file_name'], '.zip').'_'.date("dMy-His").'.zip';
+
+                        if ($_POST['backup'] == '1' && $backup) {
+                            $destination_filepath = CC_BACKUP_DIR.rtrim($data['file_name'], '.zip').'_'.date('dMy-His').'.zip';
                             $zip_backup = new ZipArchive();
-                            if ($zip_backup->open($destination_filepath, ZipArchive::CREATE)===true) {
+                            if ($zip_backup->open($destination_filepath, ZipArchive::CREATE) === true) {
                                 chdir($destination);
                                 $files = glob_recursive($backup);
                                 foreach ($files as $file) {
@@ -256,7 +259,7 @@ if (isset($_POST['plugin_token']) && !empty($_POST['plugin_token'])) {
                                 if (file_exists($destination_filepath)) {
                                     $GLOBALS['main']->successMessage($lang['module']['backup_created']);
                                 } else {
-                                    if ($_POST['abort']=='1') {
+                                    if ($_POST['abort'] == '1') {
                                         $extract = false;
                                         $GLOBALS['main']->errorMessage(sprintf($lang['module']['exists_not_writable'], $destination_filepath).' '.$lang['module']['process_aborted']);
                                     } else {
@@ -276,18 +279,18 @@ if (isset($_POST['plugin_token']) && !empty($_POST['plugin_token'])) {
                             }
 
                             if (!empty($install_dir)) {
-                                $extension_info = array(
+                                $extension_info = [
                                     'dir' => $install_dir,
                                     'file_name' => $data['file_name'],
                                     'file_id' => $data['file_id'],
                                     'seller_id' => $data['seller_id'],
                                     'modified'	=> $data['modified'],
                                     'name'	=> $data['name'],
-                                    'keep_current'	=> 1 // if possible
-                                );
+                                    'keep_current'	=> 1, // if possible
+                                ];
 
-                                if ($GLOBALS['db']->select('CubeCart_extension_info', 'file_id', array('file_id' => $extension_info['file_id']))) {
-                                    $GLOBALS['db']->update('CubeCart_extension_info', $extension_info, array('file_id' => $extension_info['file_id']));
+                                if ($GLOBALS['db']->select('CubeCart_extension_info', 'file_id', ['file_id' => $extension_info['file_id']])) {
+                                    $GLOBALS['db']->update('CubeCart_extension_info', $extension_info, ['file_id' => $extension_info['file_id']]);
                                 } else {
                                     $GLOBALS['db']->insert('CubeCart_extension_info', $extension_info);
                                 }
@@ -320,8 +323,8 @@ if (isset($_POST['status'])) {
 
     foreach ($_POST['status'] as $module_name => $status) {
         $module_type = $_POST['type'][$module_name];
-        
-        if ($module_type=='plugins') {
+
+        if ($module_type == 'plugins') {
             if ($status) {
                 $GLOBALS['hooks']->install($module_name);
             } else {
@@ -329,12 +332,12 @@ if (isset($_POST['status'])) {
             }
         }
         // Make any changes
-        if ($GLOBALS['db']->select('CubeCart_modules', array('module_id'), array('folder' => $module_name, 'module' => $module_type))) {
-            $GLOBALS['db']->update('CubeCart_modules', array('status' => (int)$status), array('folder' => $module_name, 'module' => $module_type));
+        if ($GLOBALS['db']->select('CubeCart_modules', ['module_id'], ['folder' => $module_name, 'module' => $module_type])) {
+            $GLOBALS['db']->update('CubeCart_modules', ['status' => (int)$status], ['folder' => $module_name, 'module' => $module_type]);
         } else {
-            $GLOBALS['db']->insert('CubeCart_modules', array('status' => (int)$status, 'folder' => $module_name, 'module' => $module_type));
+            $GLOBALS['db']->insert('CubeCart_modules', ['status' => (int)$status, 'folder' => $module_name, 'module' => $module_type]);
         }
-        
+
         // Update config
         $GLOBALS['config']->set($module_name, 'status', $status);
     }
@@ -342,21 +345,19 @@ if (isset($_POST['status'])) {
     if ($before !== $after) {
         $GLOBALS['gui']->setNotify($lang['module']['notify_module_status']);
     }
-    
+
     httpredir('?_g=plugins');
 }
 
-
-
-$module_paths = glob("modules/*/*/config.xml");
-$i=0;
-$modules = array();
+$module_paths = glob('modules/*/*/config.xml');
+$i = 0;
+$modules = [];
 $configs = $GLOBALS['db']->select('CubeCart_config');
-$config_isset = array();
+$config_isset = [];
 $save_status = false;
-foreach($configs as $c) {
+foreach ($configs as $c) {
     array_push($config_isset, $c['name']);
-} 
+}
 foreach ($module_paths as $module_path) {
     try {
         $xml   = new SimpleXMLElement(file_get_contents($module_path));
@@ -367,8 +368,8 @@ foreach ($module_paths as $module_path) {
         $basename = (string)basename(str_replace('config.xml', '', $module_path));
         $key = trim((string)$xml->info->name.$i);
 
-        $module_config = $GLOBALS['db']->select('CubeCart_modules', '*', array('folder' => $basename, 'module' => (string)$xml->info->type));
-        $modules[$key] = array(
+        $module_config = $GLOBALS['db']->select('CubeCart_modules', '*', ['folder' => $basename, 'module' => (string)$xml->info->type]);
+        $modules[$key] = [
             'uid' 				=> (string)$xml->info->uid,
             'type' 				=> (string)$xml->info->type,
             'mobile_optimized' 	=> (string)$xml->info->mobile_optimized,
@@ -381,12 +382,12 @@ foreach ($module_paths as $module_path) {
             'homepage' 			=> (string)$xml->info->homepage,
             'block' 			=> (string)$xml->info->block,
             'basename' 			=> $basename,
-            'config'			=> (is_array($module_config)) ? $module_config[0] : array('status' => 0),
+            'config'			=> (is_array($module_config)) ? $module_config[0] : ['status' => 0],
             'configured'        => in_array((string)$basename, $config_isset),
             'edit_url'			=> '?_g=plugins&type='.(string)$xml->info->type.'&module='.$basename,
-            'delete_url'		=> '?_g=plugins&type='.(string)$xml->info->type.'&module='.$basename.'&delete=1&token='.SESSION_TOKEN
-        );
-        if($modules[$key]['configured']) {
+            'delete_url'		=> '?_g=plugins&type='.(string)$xml->info->type.'&module='.$basename.'&delete=1&token='.SESSION_TOKEN,
+        ];
+        if ($modules[$key]['configured']) {
             $save_status = true;
         }
         $i++;
@@ -396,7 +397,7 @@ foreach ($module_paths as $module_path) {
 if (is_array($modules)) {
     ksort($modules);
 }
-$GLOBALS['smarty']->assign('SAVE_STATUS', $save_status); 
+$GLOBALS['smarty']->assign('SAVE_STATUS', $save_status);
 $GLOBALS['smarty']->assign('MODULES', $modules);
 
 $skins = $GLOBALS['gui']->listSkins();

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -30,6 +32,6 @@ function smarty_literal_compiler_param($params, $index, $default = null)
         );
     }
     $t = null;
-    eval("\$t = " . $params[ $index ] . ";");
+    eval('$t = ' . $params[ $index ] . ';');
     return $t;
 }

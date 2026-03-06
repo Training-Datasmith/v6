@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -10,7 +11,7 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Elastic\Elasticsearch;
 
@@ -27,28 +28,24 @@ use Psr\Log\LoggerInterface;
 
 final class Client implements ClientInterface
 {
-    const CLIENT_NAME = 'es';
-    const VERSION = '8.6.1';
-    const API_COMPATIBILITY_HEADER_7 = '%s/vnd.elasticsearch+%s; compatible-with=7';
-    const API_COMPATIBILITY_HEADER_8 = '%s/vnd.elasticsearch+%s; compatible-with=8';
+    use ClientEndpointsTrait;
+    use EndpointTrait;
+    use NamespaceTrait;
+    public const CLIENT_NAME = 'es';
+    public const VERSION = '8.6.1';
+    public const API_COMPATIBILITY_HEADER_7 = '%s/vnd.elasticsearch+%s; compatible-with=7';
+    public const API_COMPATIBILITY_HEADER_8 = '%s/vnd.elasticsearch+%s; compatible-with=8';
 
     /**
      * Flag to indicate if the client is connected to Searchly
      */
     public static bool $isSearchly = false;
 
-    use ClientEndpointsTrait;
-    use EndpointTrait;
-    use NamespaceTrait;
-
-    protected Transport $transport;
-    protected LoggerInterface $logger;
-
     /**
      * Specify is the request is asyncronous
      */
     protected bool $async = false;
-    
+
     /**
      * Enable or disable the x-elastic-meta-header
      */
@@ -60,17 +57,14 @@ final class Client implements ClientInterface
     protected bool $responseException = true;
 
     /**
-     * The endpoint namespace storage 
+     * The endpoint namespace storage
      */
     protected array $namespace;
 
     public function __construct(
-        Transport $transport, 
-        LoggerInterface $logger
+        protected Transport $transport,
+        protected LoggerInterface $logger
     ) {
-        $this->transport = $transport;
-        $this->logger = $logger;       
-        
         $this->defaultTransportSettings($this->transport);
     }
 
@@ -152,8 +146,8 @@ final class Client implements ClientInterface
     /**
      * @inheritdoc
      */
-    public function sendRequest(RequestInterface $request)
-    {   
+    public function sendRequest(RequestInterface $request): \Http\Promise\Promise|\Elastic\Elasticsearch\Response\Elasticsearch
+    {
         // If async returns a Promise
         if ($this->getAsync()) {
             if ($this->getElasticMetaHeader()) {
@@ -161,20 +155,20 @@ final class Client implements ClientInterface
             }
             $this->transport->setAsyncOnSuccess(
                 $request->getMethod() === 'HEAD'
-                    ? new AsyncOnSuccessNoException
-                    : ($this->getResponseException() ? new AsyncOnSuccess : new AsyncOnSuccessNoException)
+                    ? new AsyncOnSuccessNoException()
+                    : ($this->getResponseException() ? new AsyncOnSuccess() : new AsyncOnSuccessNoException())
             );
             return $this->transport->sendAsyncRequest($request);
-        }     
+        }
 
         if ($this->getElasticMetaHeader()) {
             $this->transport->setElasticMetaHeader(Client::CLIENT_NAME, Client::VERSION, false);
         }
         $start = microtime(true);
         $response = $this->transport->sendRequest($request);
-        $this->logger->info(sprintf("Response time in %.3f sec", microtime(true) - $start));       
+        $this->logger->info(sprintf('Response time in %.3f sec', microtime(true) - $start));
 
-        $result = new Elasticsearch;
+        $result = new Elasticsearch();
         $result->setResponse($response, $request->getMethod() === 'HEAD' ? false : $this->getResponseException());
         return $result;
     }

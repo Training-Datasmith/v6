@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Method ConfigLoad
  *
@@ -66,7 +68,7 @@ class Smarty_Internal_Method_ConfigLoad
         $confObj->compiled->render($confObj);
         if ($data->_isTplObj()) {
             $data->compiled->file_dependency[ $confObj->source->uid ] =
-                array($confObj->source->filepath, $confObj->source->getTimeStamp(), $confObj->source->type);
+                [$confObj->source->filepath, $confObj->source->getTimeStamp(), $confObj->source->type];
         }
     }
 

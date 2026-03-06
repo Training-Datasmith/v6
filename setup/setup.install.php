@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -18,7 +20,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
     if (!file_exists($global_file)) {
         touch($global_file);
     }
-    $targets = array(
+    $targets = [
         'backup/',
         'cache/',
         'cache/skin/',
@@ -30,7 +32,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
         'includes/',
         'includes/extra/',
         'language/',
-    );
+    ];
     if (file_exists(CC_ROOT_DIR.'/includes/globals.inc.php')) {
         $targets[] = 'includes/global.inc.php';
     }
@@ -50,7 +52,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
                 $errors[] = sprintf($strings['setup']['error_x_not_writable'], $target);
             }
         }
-        $GLOBALS['smarty']->append('PERMISSIONS', array('name' => $target, 'status' => (bool)$perm_status));
+        $GLOBALS['smarty']->append('PERMISSIONS', ['name' => $target, 'status' => (bool)$perm_status]);
     }
     if (!$permissions) {
         $proceed = false;
@@ -67,7 +69,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
             $GLOBALS['smarty']->assign('FORM', $_POST);
             // Validation
             $validated = true;
-            $required = array('dbhost', 'dbusername', 'dbdatabase');
+            $required = ['dbhost', 'dbusername', 'dbdatabase'];
             foreach ($_POST['global'] as $key => $value) {
                 if (in_array($key, $required) && empty($value)) {
                     $validated  = false;
@@ -80,7 +82,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
                 $errors['dbpass'] = $strings['setup']['error_db_password_mismatch'];
             }
             // Validate admin array
-            $required = array('username', 'email', 'name', 'password');
+            $required = ['username', 'email', 'name', 'password'];
             if ($_POST['admin']['password'] !== $_POST['admin']['passconf']) {
                 $errors['password'] = $strings['setup']['error_admin_password_mismatch'];
                 unset($_POST['admin']['password'], $_POST['admin']['passconf']);
@@ -96,7 +98,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
             if (function_exists('mysqli_connect')) {
                 $dbport = !empty($_POST['global']['dbport']) ? $_POST['global']['dbport'] : ini_get('mysqli.default_port');
                 $dbsocket = !empty($_POST['global']['dbsocket']) ? $_POST['global']['dbsocket'] : ini_get('mysqli.default_socket');
-                
+
                 try {
                     $connect_id = new mysqli($_POST['global']['dbhost'], $_POST['global']['dbusername'], $_POST['global']['dbpassword'], $_POST['global']['dbdatabase'], $dbport, $dbsocket);
 
@@ -145,28 +147,28 @@ if (!isset($_SESSION['setup']['permissions'])) {
                 $_SESSION['setup']['progress'] = true;
                 $_SESSION['setup']['droptable'] = (isset($_POST['drop'])) ? true : false;
 
-                $global = array(
+                $global = [
                     'installed'  => true,
                     'adminFolder' => 'admin',
                     'adminFile'  => 'admin.php',
-                    'cache'  => 'file'
-                );
+                    'cache'  => 'file',
+                ];
                 $_SESSION['setup']['global'] = array_merge($_POST['global'], $global);
                 $_SESSION['setup']['config'] = $_POST['config'];
                 $salt = Password::getInstance()->createSalt();
-                $_SESSION['setup']['admin']  = array_merge($_POST['admin'], array(
+                $_SESSION['setup']['admin']  = array_merge($_POST['admin'], [
                         'order_notify' => 1,
                         'super_user' => 1,
                         'status'  => 1,
                         'salt'   => $salt,
                         'language'  => $_POST['config']['default_language'],
                         'password'  => Password::getInstance()->getSalted($_POST['admin']['password'], $salt),
-                    ));
+                    ]);
                 httpredir('index.php');
             }
         }
 
-        $currencies = array(
+        $currencies = [
             'USD' => 'US Dollar',
             'GBP' => 'Pound Sterling',
             'EUR' => 'Euro',
@@ -202,8 +204,8 @@ if (!isset($_SESSION['setup']['permissions'])) {
             'TRY' => 'Turkish Lira',
             'TWD' => 'New Taiwan Dollar',
             'UAH' => 'Ukrainian Hryvnia',
-            'ZAR' => 'South African Rand'
-        );
+            'ZAR' => 'South African Rand',
+        ];
         $lang_default_currency = $language->getData('default_currency');
         foreach ($currencies as $code => $name) {
             if (isset($_POST['config']['default_currency'])) {
@@ -213,7 +215,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
             } else {
                 $selected = '';
             }
-            $list_currency[] = array('code' => $code, 'selected' => $selected, 'name' => (!empty($name))?$name:$code);
+            $list_currency[] = ['code' => $code, 'selected' => $selected, 'name' => (!empty($name)) ? $name : $code];
         }
         $GLOBALS['smarty']->assign('CURRENCIES', $list_currency);
     } else {
@@ -247,17 +249,17 @@ if (!isset($_SESSION['setup']['permissions'])) {
             # }
             ## Insert Email Contents & Templates
             $GLOBALS['db']->parseSchema(file_get_contents($setup_path.'db/install/email.sql', false));
-            
+
             $config_settings = array_merge(
                 $default_config_settings,
-                array(
+                [
                     'default_language'     => $_SESSION['setup']['config']['default_language'],
                     'default_currency'     => $_SESSION['setup']['config']['default_currency'],
                     'email_address'      => $_SESSION['setup']['admin']['email'],
                     'store_title'      => $_SESSION['setup']['config']['store_name'],
                     'store_name'      => $_SESSION['setup']['config']['store_name'],
-                    'email_name'      => $_SESSION['setup']['config']['store_name']
-                )
+                    'email_name'      => $_SESSION['setup']['config']['store_name'],
+                ]
             );
             Config::getInstance($glob)->set('config', '', $config_settings, true);
             $GLOBALS['config'] = array_merge($GLOBALS['config'], $config_settings);
@@ -267,19 +269,19 @@ if (!isset($_SESSION['setup']['permissions'])) {
             $cron = new Cron();
             $cron->updateExchangeRates($_SESSION['setup']['config']['default_currency']);
 
-            $default_docs = array(
-                0 => array('doc_name' => str_replace('CubeCart', $_SESSION['setup']['config']['store_name'], $strings['setup']['default_doc_title_welcome']), 'doc_content' => $strings['setup']['default_doc_content_welcome'], 'doc_order' => 1, 'doc_lang' => $config['default_language'], 'doc_home' => 1, 'doc_terms' => 0, 'doc_privacy' => 0),
-                1 => array('doc_name' => $strings['setup']['default_doc_title_about'], 'doc_content' => $strings['setup']['default_doc_content'], 'doc_order' => 2, 'doc_lang' => $config['default_language'], 'doc_home' => 0, 'doc_terms' => 0, 'doc_privacy' => 0),
-                2 => array('doc_name' => $strings['setup']['default_doc_title_terms'], 'doc_content' => $strings['setup']['default_doc_content'], 'doc_order' => 3, 'doc_lang' => $config['default_language'], 'doc_home' => 0, 'doc_terms' => 1, 'doc_privacy' => 0),
-                3 => array('doc_name' => $strings['setup']['default_doc_title_privacy'], 'doc_content' => $strings['setup']['default_doc_content'], 'doc_order' => 4, 'doc_lang' => $config['default_language'], 'doc_home' => 0, 'doc_terms' => 0, 'doc_privacy' => 1),
-                4 => array('doc_name' => $strings['setup']['default_doc_title_returns'], 'doc_content' => $strings['setup']['default_doc_content'], 'doc_order' => 5, 'doc_lang' => $config['default_language'], 'doc_home' => 0, 'doc_terms' => 0, 'doc_privacy' => 0)
-            );
+            $default_docs = [
+                0 => ['doc_name' => str_replace('CubeCart', $_SESSION['setup']['config']['store_name'], $strings['setup']['default_doc_title_welcome']), 'doc_content' => $strings['setup']['default_doc_content_welcome'], 'doc_order' => 1, 'doc_lang' => $config['default_language'], 'doc_home' => 1, 'doc_terms' => 0, 'doc_privacy' => 0],
+                1 => ['doc_name' => $strings['setup']['default_doc_title_about'], 'doc_content' => $strings['setup']['default_doc_content'], 'doc_order' => 2, 'doc_lang' => $config['default_language'], 'doc_home' => 0, 'doc_terms' => 0, 'doc_privacy' => 0],
+                2 => ['doc_name' => $strings['setup']['default_doc_title_terms'], 'doc_content' => $strings['setup']['default_doc_content'], 'doc_order' => 3, 'doc_lang' => $config['default_language'], 'doc_home' => 0, 'doc_terms' => 1, 'doc_privacy' => 0],
+                3 => ['doc_name' => $strings['setup']['default_doc_title_privacy'], 'doc_content' => $strings['setup']['default_doc_content'], 'doc_order' => 4, 'doc_lang' => $config['default_language'], 'doc_home' => 0, 'doc_terms' => 0, 'doc_privacy' => 1],
+                4 => ['doc_name' => $strings['setup']['default_doc_title_returns'], 'doc_content' => $strings['setup']['default_doc_content'], 'doc_order' => 5, 'doc_lang' => $config['default_language'], 'doc_home' => 0, 'doc_terms' => 0, 'doc_privacy' => 0],
+            ];
             foreach ($default_docs as $default_doc) {
                 $GLOBALS['db']->insert('CubeCart_documents', $default_doc);
             }
-            $contact_form_data = array('status' => 1, 'email' => $_SESSION['setup']['admin']['email'], 'description' => '');
+            $contact_form_data = ['status' => 1, 'email' => $_SESSION['setup']['admin']['email'], 'description' => ''];
             foreach ($contact_form_data as $cf_key => $cf_value) {
-                $GLOBALS['db']->insert('CubeCart_config', array('name' => 'Contact_Form', 'config_key' => $cf_key, 'config_value' => (string)$cf_value));
+                $GLOBALS['db']->insert('CubeCart_config', ['name' => 'Contact_Form', 'config_key' => $cf_key, 'config_value' => (string)$cf_value]);
             }
 
             // Install email templates based on all languages
@@ -290,7 +292,7 @@ if (!isset($_SESSION['setup']['permissions'])) {
             }
 
             // Set version number
-            $GLOBALS['db']->insert('CubeCart_history', array('version' => CC_VERSION, 'time' => time()));
+            $GLOBALS['db']->insert('CubeCart_history', ['version' => CC_VERSION, 'time' => time()]);
 
             build_logos();
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty error handler to fix new error levels in PHP8 for backwards compatibility
  *
@@ -10,7 +12,6 @@
  */
 class Smarty_Internal_ErrorHandler
 {
-
     /**
      * Allows {$foo} where foo is unset.
      * @var bool
@@ -28,7 +29,8 @@ class Smarty_Internal_ErrorHandler
     /**
      * Enable error handler to intercept errors
      */
-    public function activate() {
+    public function activate()
+    {
         /*
             Error muting is done because some people implemented custom error_handlers using
             https://php.net/set_error_handler and for some reason did not understand the following paragraph:
@@ -46,7 +48,8 @@ class Smarty_Internal_ErrorHandler
     /**
      * Disable error handler
      */
-    public function deactivate() {
+    public function deactivate()
+    {
         restore_error_handler();
         $this->previousErrorHandler = null;
     }

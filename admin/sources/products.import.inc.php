@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -15,7 +17,6 @@ if (!defined('CC_INI_SET')) {
 }
 Admin::getInstance()->permissions('products', CC_PERM_EDIT, true);
 
-
 $dir 			= CC_ROOT_DIR.CC_DS.'includes'.CC_DS.'extra'.CC_DS;
 $source			= $dir.'importdata.tmp';
 $import_source	= $dir.'importdata_%s.tmp';
@@ -29,10 +30,10 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
     ignore_user_abort(true);
     set_time_limit(0);
     ini_set('max_execution_time', '0');
-    
+
     ## Truncate?
     if (isset($_POST['option']['truncate'])) {
-        $tables = array(
+        $tables = [
             'CubeCart_inventory',
             'CubeCart_image_index',
             'CubeCart_option_assign',
@@ -42,19 +43,19 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
             'CubeCart_options_set_product',
             'CubeCart_pricing_quantity',
             'CubeCart_pricing_group',
-        );
+        ];
         $GLOBALS['db']->truncate($tables);
-        $GLOBALS['db']->delete('CubeCart_seo_urls', array('type' => 'prod'));
+        $GLOBALS['db']->delete('CubeCart_seo_urls', ['type' => 'prod']);
     }
 
     $column		= 0;
-    
+
     if (isset($_POST['map']) && is_array($_POST['map'])) {
         $GLOBALS['session']->set('map', $_POST['map'], 'import');
-        
+
         $delimiter	= (isset($_POST['delimiter']) && !empty($_POST['delimiter'])) ? $_POST['delimiter'] : ',';
         $GLOBALS['session']->set('delimiter', $delimiter, 'import');
-        
+
         $has_header	= (isset($_POST['option']['headers'])) ? true : false;
         $GLOBALS['session']->set('headers', $has_header, 'import');
     }
@@ -91,31 +92,31 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
                 }
                 foreach ($data as $offset => $value) {
                     $field_name	= ($polymorph) ? $map[$headers[$offset]] : $map[$offset];
-                    
-                    if (in_array($field_name, array('price','sale_price','cost_price'))) {
-                        $value = preg_replace("/[^0-9\.]/", "", $value);
+
+                    if (in_array($field_name, ['price','sale_price','cost_price'])) {
+                        $value = preg_replace("/[^0-9\.]/", '', $value);
                     } elseif ($field_name == 'manufacturer' && !empty($value) && !is_numeric($value)) {
-                        if (($manufacturer = $GLOBALS['db']->select('CubeCart_manufacturers', false, array('name' => $value), false, 1)) !== false) {
+                        if (($manufacturer = $GLOBALS['db']->select('CubeCart_manufacturers', false, ['name' => $value], false, 1)) !== false) {
                             $value	= $manufacturer[0]['id'];
                         } else {
                             ## Insert new manufacturer?
-                            $value = $GLOBALS['db']->insert('CubeCart_manufacturers', array('name' => $value));
+                            $value = $GLOBALS['db']->insert('CubeCart_manufacturers', ['name' => $value]);
                         }
                     } elseif ($field_name == 'image' && !empty($value) && !is_numeric($value)) {
                         foreach ($GLOBALS['hooks']->load('admin.product.import.image.pre_process') as $hook) {
                             include $hook;
                         }
-                        
+
                         $image_splits = explode(',', $value);
-                    
+
                         foreach ($image_splits as $image_split) {
                             $image_name = basename(trim($image_split));
                             $image_path = preg_replace('/^(\.\/|\/)/', '', trim(dirname($image_split))); // lose first slash to match DB storage but add end slash
                             if (!empty($image_path)) {
                                 $image_path .= '/';
                             }
-                            $image = $GLOBALS['db']->select('CubeCart_filemanager', array('file_id'), array('filename' => $image_name, 'type' => 1, 'filepath' => empty($image_path) ? 'NULL' : $image_path), false, 1);
-                            
+                            $image = $GLOBALS['db']->select('CubeCart_filemanager', ['file_id'], ['filename' => $image_name, 'type' => 1, 'filepath' => empty($image_path) ? 'NULL' : $image_path], false, 1);
+
                             if (!$image) {
                                 $root_image_path = CC_ROOT_DIR.'/images/source/'.$image_path.$image_name;
                                 if (file_exists($root_image_path)) {
@@ -130,10 +131,10 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
                                         $mime	= $img_info['mime'];
                                     }
                                     $filesize = filesize($root_image_path);
-                                    $filesize = ($filesize > 0)? $filesize : 0;
+                                    $filesize = ($filesize > 0) ? $filesize : 0;
                                 }
 
-                                if ($image_id = $GLOBALS['db']->insert('CubeCart_filemanager', array('type' => 1, 'filepath' => empty($image_path) ? 'NULL' : $image_path, 'filename' => $image_name, 'filesize' => $filesize, 'mimetype' => $mime, 'md5hash' => md5($root_image_path)))) {
+                                if ($image_id = $GLOBALS['db']->insert('CubeCart_filemanager', ['type' => 1, 'filepath' => empty($image_path) ? 'NULL' : $image_path, 'filename' => $image_name, 'filesize' => $filesize, 'mimetype' => $mime, 'md5hash' => md5($root_image_path)])) {
                                     $images[] = $image_id;
                                 }
                             } else {
@@ -157,14 +158,14 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
                         $product_record['product_code'] = generate_product_code($product_record['name']);
                     }
 
-                    if (!isset($product_record['latest']) || !in_array((string)$product_record['latest'], array('1','0'))) {
+                    if (!isset($product_record['latest']) || !in_array((string)$product_record['latest'], ['1','0'])) {
                         $product_record['latest'] = '1';
                     }
-                    if (!isset($product_record['featured']) || !in_array((string)$product_record['featured'], array('1','0'))) {
+                    if (!isset($product_record['featured']) || !in_array((string)$product_record['featured'], ['1','0'])) {
                         $product_record['featured'] = '1';
                     }
                     // If no stock level is set we assume no stock control is used
-                    if (isset($product_record['use_stock_level']) && ($product_record['use_stock_level']==1 || strtolower($product_record['use_stock_level'])=='true')) {
+                    if (isset($product_record['use_stock_level']) && ($product_record['use_stock_level'] == 1 || strtolower($product_record['use_stock_level']) == 'true')) {
                         $product_record['use_stock_level'] = 1;
                     } elseif (!isset($product_record['stock_level']) || empty($product_record['stock_level'])) {
                         $product_record['use_stock_level'] = 0;
@@ -177,54 +178,54 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
                     if (isset($product_record['cat_id']) && !empty($product_record['cat_id'])) {
                         $cats = explode(',', $product_record['cat_id']);
                         $primary = 1;
-                        foreach($cats as $cat) {
-							$cat = trim($cat);
-							if(!is_numeric($cat)) {
-								$breadcrumbs = explode("/", $cat);
-								$cat = 0;
-								if(!empty($breadcrumbs[0])) {
-									foreach($breadcrumbs as $key => $breadcrumb) {
-										$breadcrumb = trim($breadcrumb);
-										if($key===0) {
-											if($existing = $GLOBALS['db']->select('CubeCart_category', array('cat_id'), array('cat_name' => $breadcrumb, 'cat_parent_id' => $cat), false, false, false, false)) {
-												$cat = $existing[0]['cat_id'];
-											} else {
-												$cat = $GLOBALS['db']->insert('CubeCart_category', array('cat_name' => $breadcrumb, 'cat_parent_id' => $cat));
-											}
-										} else {
-											if($existing = $GLOBALS['db']->select('CubeCart_category', array('cat_id'), array('cat_name' => $breadcrumb, 'cat_parent_id' => $cat), false, false, false, false)) {
-												$cat = $existing[0]['cat_id'];
-											} else {
-												$cat = $GLOBALS['db']->insert('CubeCart_category', array('cat_name' => $breadcrumb, 'cat_parent_id' => $cat));
-											}
-										}
-									}
-								}
-							}
+                        foreach ($cats as $cat) {
+                            $cat = trim($cat);
+                            if (!is_numeric($cat)) {
+                                $breadcrumbs = explode('/', $cat);
+                                $cat = 0;
+                                if (!empty($breadcrumbs[0])) {
+                                    foreach ($breadcrumbs as $key => $breadcrumb) {
+                                        $breadcrumb = trim($breadcrumb);
+                                        if ($key === 0) {
+                                            if ($existing = $GLOBALS['db']->select('CubeCart_category', ['cat_id'], ['cat_name' => $breadcrumb, 'cat_parent_id' => $cat], false, false, false, false)) {
+                                                $cat = $existing[0]['cat_id'];
+                                            } else {
+                                                $cat = $GLOBALS['db']->insert('CubeCart_category', ['cat_name' => $breadcrumb, 'cat_parent_id' => $cat]);
+                                            }
+                                        } else {
+                                            if ($existing = $GLOBALS['db']->select('CubeCart_category', ['cat_id'], ['cat_name' => $breadcrumb, 'cat_parent_id' => $cat], false, false, false, false)) {
+                                                $cat = $existing[0]['cat_id'];
+                                            } else {
+                                                $cat = $GLOBALS['db']->insert('CubeCart_category', ['cat_name' => $breadcrumb, 'cat_parent_id' => $cat]);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
 
-							if(is_numeric($cat) && $cat>0) {
-								$category_record = array (
-									'product_id' => $product_id,
-									'cat_id'  => $cat,
-									'primary'  => $primary
-								);
-								if($primary==1) { 
-									$primary_category = $cat;
-								}
-								$primary = 0;
-								$GLOBALS['db']->insert('CubeCart_category_index', $category_record);
-							}
-						}
+                            if (is_numeric($cat) && $cat > 0) {
+                                $category_record =  [
+                                    'product_id' => $product_id,
+                                    'cat_id'  => $cat,
+                                    'primary'  => $primary,
+                                ];
+                                if ($primary == 1) {
+                                    $primary_category = $cat;
+                                }
+                                $primary = 0;
+                                $GLOBALS['db']->insert('CubeCart_category_index', $category_record);
+                            }
+                        }
                         $product_record['cat_id'] = $primary_category;
                     }
                     if (is_array($images)) {
                         $primary = 1;
                         foreach ($images as $file_id) {
-                            $image_record = array(
+                            $image_record = [
                                 'product_id'	=> $product_id,
                                 'file_id'		=> $file_id,
-                                'main_img'		=> $primary
-                            );
+                                'main_img'		=> $primary,
+                            ];
                             $GLOBALS['db']->insert('CubeCart_image_index', $image_record);
                             $primary = 0;
                         }
@@ -233,7 +234,7 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
                     if (empty($product_record['seo_path'])) {
                         $product_record['seo_path'] = $GLOBALS['seo']->generatePath($product_id, 'prod');
                     }
-                    $GLOBALS['db']->insert('CubeCart_seo_urls', array('path'=> SEO::sanitizeSEOPath($product_record['seo_path']), 'item_id' => $product_id, 'type' => 'prod'));
+                    $GLOBALS['db']->insert('CubeCart_seo_urls', ['path' => SEO::sanitizeSEOPath($product_record['seo_path']), 'item_id' => $product_id, 'type' => 'prod']);
                 }
                 unset($product_record, $category_record, $image_record, $image, $images);
             }
@@ -241,16 +242,16 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
         }
         unlink($this_import);
     }
-    $next_cycle = $cycle+1;
+    $next_cycle = $cycle + 1;
     if (file_exists(sprintf($import_source, $next_cycle))) {
-        $data = array(
+        $data = [
             'next_cycle' => $next_cycle,
-            'total' => ($has_header) ? $GLOBALS['session']->get('columns', 'import')-1 : $GLOBALS['session']->get('columns', 'import'),
-            'imported' => $cycle * $splitSize
-        );
+            'total' => ($has_header) ? $GLOBALS['session']->get('columns', 'import') - 1 : $GLOBALS['session']->get('columns', 'import'),
+            'imported' => $cycle * $splitSize,
+        ];
 
         $GLOBALS['smarty']->assign('DATA', $data);
-        
+
         $page_content = $GLOBALS['smarty']->fetch('templates/products.importing.php');
     } else {
         $GLOBALS['main']->successMessage($lang['catalogue']['notify_import_complete']);
@@ -261,20 +262,20 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
     ## Remove previous import data
     if (isset($_POST['revert']) && is_array($_POST['revert'])) {
         foreach ($_POST['revert'] as $revert) {
-            $products = $GLOBALS['db']->select('CubeCart_inventory', array('product_id'), array('date_added' => (string)$revert));
+            $products = $GLOBALS['db']->select('CubeCart_inventory', ['product_id'], ['date_added' => (string)$revert]);
             if ($products) {
                 foreach ($products as $product) {
-                    $GLOBALS['db']->delete('CubeCart_category_index', array('product_id' => $product['product_id']));
-                    $GLOBALS['db']->delete('CubeCart_image_index', array('product_id' => $product['product_id']));
-                    $GLOBALS['db']->delete('CubeCart_option_assign', array('product' => $product['product_id']));
-                    $GLOBALS['db']->delete('CubeCart_reviews', array('product_id' => $product['product_id']));
-                    $GLOBALS['db']->delete('CubeCart_inventory_language', array('product_id' => $product['product_id']));
-                    $GLOBALS['db']->delete('CubeCart_options_set_product', array('product_id' => $product['product_id']));
-                    $GLOBALS['db']->delete('CubeCart_pricing_quantity', array('product_id' => $product['product_id']));
-                    $GLOBALS['db']->delete('CubeCart_pricing_group', array('product_id' => $product['product_id']));
-                    $GLOBALS['db']->delete('CubeCart_seo_urls', array('type' => 'prod', 'item_id' => $product['product_id']));
+                    $GLOBALS['db']->delete('CubeCart_category_index', ['product_id' => $product['product_id']]);
+                    $GLOBALS['db']->delete('CubeCart_image_index', ['product_id' => $product['product_id']]);
+                    $GLOBALS['db']->delete('CubeCart_option_assign', ['product' => $product['product_id']]);
+                    $GLOBALS['db']->delete('CubeCart_reviews', ['product_id' => $product['product_id']]);
+                    $GLOBALS['db']->delete('CubeCart_inventory_language', ['product_id' => $product['product_id']]);
+                    $GLOBALS['db']->delete('CubeCart_options_set_product', ['product_id' => $product['product_id']]);
+                    $GLOBALS['db']->delete('CubeCart_pricing_quantity', ['product_id' => $product['product_id']]);
+                    $GLOBALS['db']->delete('CubeCart_pricing_group', ['product_id' => $product['product_id']]);
+                    $GLOBALS['db']->delete('CubeCart_seo_urls', ['type' => 'prod', 'item_id' => $product['product_id']]);
                 }
-                $GLOBALS['db']->delete('CubeCart_inventory', array('date_added' => (string)$revert));
+                $GLOBALS['db']->delete('CubeCart_inventory', ['date_added' => (string)$revert]);
                 $GLOBALS['main']->successMessage($lang['catalogue']['notify_import_removed']);
             } else {
                 $GLOBALS['main']->errorMessage($lang['catalogue']['notify_import_removed_fail']);
@@ -310,46 +311,46 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
         fclose($out);
 
         ## No format map available, so give them a manual assignment form
-            $fields	= array(	# Update for language strings
-                'available'			=> $lang['catalogue']['available_for_purchase'],
-                'status'			=> $lang['common']['status'],
-                'name'				=> $lang['catalogue']['product_name'],
-                'image'				=> $lang['catalogue']['image_comma'],
-                'product_code'		=> $lang['catalogue']['product_code'],
-                'cat_id'			=> $lang['catalogue']['master_caregory_id'],
-                'description'		=> $lang['common']['description'],
-                'description_short'		=> $lang['common']['description_short'],
-                'manufacturer'		=> $lang['catalogue']['manufacturer'],
-                'price'				=> $lang['common']['price'],
-                'sale_price'		=> $lang['common']['price_sale'],
-                'cost_price'		=> $lang['common']['price_cost'],
-                'product_weight'	=> $lang['common']['weight'],
-                'use_stock_level'	=> $lang['catalogue']['stock_level_use'],
-                'stock_level'		=> $lang['catalogue']['stock_level'],
-                'stock_warning'		=> $lang['catalogue']['stock_level_warn'],
-                'digital'			=> $lang['catalogue']['is_digital'],
-                'digital_path'		=> $lang['catalogue']['file_path'],
-                'tax_type'			=> $lang['catalogue']['tax_class'],
-                'tax_inclusive'		=> $lang['catalogue']['tax_inclusive'],
-                'featured'			=> $lang['catalogue']['product_featured'],
-                'latest'			=> $lang['catalogue']['product_latest'],
-                'seo_path'			=> $lang['settings']['seo_path'],
-                'seo_meta_title'		=> $lang['settings']['seo_meta_title'],
-                'seo_meta_description'	=> $lang['settings']['seo_meta_description'],
-                'condition'			=> $lang['catalogue']['condition'],
-                'upc'				=> $lang['catalogue']['product_upc'],
-                'ean'				=> $lang['catalogue']['product_ean'],
-                'jan'				=> $lang['catalogue']['product_jan'],
-                'isbn'				=> $lang['catalogue']['product_isbn'],
-                'brand'				=> $lang['catalogue']['product_brand'],
-                'gtin'				=> $lang['catalogue']['product_gtin'],
-                'mpn'				=> $lang['catalogue']['product_mpn'],
-                'condition'			=> $lang['catalogue']['condition'],
-                'product_width'			=> $lang['catalogue']['product_width'],
-                'product_height'			=> $lang['catalogue']['product_height'],
-                'product_depth'			=> $lang['catalogue']['product_depth'],
-                'dimension_unit'			=> $lang['catalogue']['dimension_unit']
-            );
+        $fields	= [	# Update for language strings
+            'available'			=> $lang['catalogue']['available_for_purchase'],
+            'status'			=> $lang['common']['status'],
+            'name'				=> $lang['catalogue']['product_name'],
+            'image'				=> $lang['catalogue']['image_comma'],
+            'product_code'		=> $lang['catalogue']['product_code'],
+            'cat_id'			=> $lang['catalogue']['master_caregory_id'],
+            'description'		=> $lang['common']['description'],
+            'description_short'		=> $lang['common']['description_short'],
+            'manufacturer'		=> $lang['catalogue']['manufacturer'],
+            'price'				=> $lang['common']['price'],
+            'sale_price'		=> $lang['common']['price_sale'],
+            'cost_price'		=> $lang['common']['price_cost'],
+            'product_weight'	=> $lang['common']['weight'],
+            'use_stock_level'	=> $lang['catalogue']['stock_level_use'],
+            'stock_level'		=> $lang['catalogue']['stock_level'],
+            'stock_warning'		=> $lang['catalogue']['stock_level_warn'],
+            'digital'			=> $lang['catalogue']['is_digital'],
+            'digital_path'		=> $lang['catalogue']['file_path'],
+            'tax_type'			=> $lang['catalogue']['tax_class'],
+            'tax_inclusive'		=> $lang['catalogue']['tax_inclusive'],
+            'featured'			=> $lang['catalogue']['product_featured'],
+            'latest'			=> $lang['catalogue']['product_latest'],
+            'seo_path'			=> $lang['settings']['seo_path'],
+            'seo_meta_title'		=> $lang['settings']['seo_meta_title'],
+            'seo_meta_description'	=> $lang['settings']['seo_meta_description'],
+            'condition'			=> $lang['catalogue']['condition'],
+            'upc'				=> $lang['catalogue']['product_upc'],
+            'ean'				=> $lang['catalogue']['product_ean'],
+            'jan'				=> $lang['catalogue']['product_jan'],
+            'isbn'				=> $lang['catalogue']['product_isbn'],
+            'brand'				=> $lang['catalogue']['product_brand'],
+            'gtin'				=> $lang['catalogue']['product_gtin'],
+            'mpn'				=> $lang['catalogue']['product_mpn'],
+            'condition'			=> $lang['catalogue']['condition'],
+            'product_width'			=> $lang['catalogue']['product_width'],
+            'product_height'			=> $lang['catalogue']['product_height'],
+            'product_depth'			=> $lang['catalogue']['product_depth'],
+            'dimension_unit'			=> $lang['catalogue']['dimension_unit'],
+        ];
         $fp		= fopen($source, 'r');
         $data	= fgetcsv($fp, null, str_replace('tab', "\t", $delimiter));
         fclose($fp);
@@ -357,14 +358,14 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
 
         if (is_array($data)) {
             foreach ($data as $offset => $value) {
-                $smarty_data['maps'][]	= array('offset' => (int)$offset, 'example' => $value);
+                $smarty_data['maps'][]	= ['offset' => (int)$offset, 'example' => $value];
             }
             foreach ($fields as $column => $title) {
-                $smarty_data['columns'][] = array('column' => $column, 'title' => $title);
+                $smarty_data['columns'][] = ['column' => $column, 'title' => $title];
             }
             $GLOBALS['smarty']->assign('COLUMNS', $smarty_data['columns']);
             $GLOBALS['smarty']->assign('MAPS', $smarty_data['maps']);
-            $GLOBALS['smarty']->assign('IMPORT', array('delimiter' => $_POST['delimiter']));
+            $GLOBALS['smarty']->assign('IMPORT', ['delimiter' => $_POST['delimiter']]);
 
             $smarty_data['map']	= '';
         } else {
@@ -379,7 +380,7 @@ if (isset($_POST['process']) || isset($_GET['cycle'])) {
     $page_content = $GLOBALS['smarty']->fetch('templates/products.import.php');
 } else {
     ## Find previous imports, and list
-    if (($reverts = $GLOBALS['db']->query(sprintf("SELECT COUNT(product_id) AS Count, date_added FROM %sCubeCart_inventory WHERE 1 GROUP BY date_added ORDER BY date_added ASC", $GLOBALS['config']->get('config', 'dbprefix')))) !== false) {
+    if (($reverts = $GLOBALS['db']->query(sprintf('SELECT COUNT(product_id) AS Count, date_added FROM %sCubeCart_inventory WHERE 1 GROUP BY date_added ORDER BY date_added ASC', $GLOBALS['config']->get('config', 'dbprefix')))) !== false) {
         foreach ($reverts as $revert) {
             if ($revert['date_added'] == 0 || $revert['Count'] == 1) {
                 continue;

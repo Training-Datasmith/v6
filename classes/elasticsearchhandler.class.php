@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -22,33 +24,35 @@ if (!defined('CC_INI_SET')) {
  */
 
 use Elastic\Elasticsearch\ClientBuilder;
+
 require 'elasticsearch/vendor/autoload.php';
 
 class ElasticsearchHandler
 {
     public $last_error = '';
 
-    private $_client;
-    private $_search_body = array();
-    private $_index_body = array();
-    private $_index = '';
-    private $_config = array();
-    private $_config_file = './includes/extra/es.json';
+    private \Elastic\Elasticsearch\Client $_client;
+    private array $_search_body = [];
+    private $_index_body = [];
+    private readonly string $_index;
+    private $_config = [];
+    private string $_config_file = './includes/extra/es.json';
 
-    public function __construct($config = array(), $write = false)
+    public function __construct($config = [], $write = false)
     {
-        if($write) {
+        if ($write) {
             $this->_writeConfig($config);
         }
         $this->_getConfig($config);
         $this->connect();
-        $this->_index = trim($this->_config['es_i']);
+        $this->_index = trim((string) $this->_config['es_i']);
     }
     /**
      * Add product to index
      */
-    public function add($id, $body = array()) {
-        if(!empty($body)) {
+    public function add($id, $body = []): bool
+    {
+        if (!empty($body)) {
             $this->_index_body = $body;
         } else {
             $this->_indexBody($id);
@@ -56,16 +60,15 @@ class ElasticsearchHandler
         $params = [
             'index'     => $this->_index,
             'id'        => $id,
-            'body'      => $this->_index_body
+            'body'      => $this->_index_body,
         ];
         try {
-            if(!$this->indexExists()) {
-                if($this->_config['es_is']=='1' && $this->_index_body['stock_level']<=0) {
+            if (!$this->indexExists()) {
+                if ($this->_config['es_is'] == '1' && $this->_index_body['stock_level'] <= 0) {
                     return false;
-                } else {
-                    $this->createIndex();
                 }
-            } else if ($this->_config['es_is']=='1' && $this->_index_body['stock_level']<=0) {
+                $this->createIndex();
+            } elseif ($this->_config['es_is'] == '1' && $this->_index_body['stock_level'] <= 0) {
                 return $this->delete($id);
             }
             $response = $this->_client->index($params);
@@ -78,23 +81,24 @@ class ElasticsearchHandler
     /**
      * Establish connection to ES
      */
-    public function connect($test = false) {
-        if(empty($this->_config['es_i'])) {
-            $this->_logError("A unique index name is required.");
+    public function connect($test = false)
+    {
+        if (empty($this->_config['es_i'])) {
+            $this->_logError('A unique index name is required.');
             return false;
         }
-        $hosts = empty($this->_config['es_h']) ? array('https://localhost:9200') : explode(',', $this->_config['es_h']);
-        $validate_ssl = ($this->_config['es_v']=='1') ? true : false;
+        $hosts = empty($this->_config['es_h']) ? ['https://localhost:9200'] : explode(',', (string) $this->_config['es_h']);
+        $validate_ssl = ($this->_config['es_v'] == '1') ? true : false;
 
         // Detect if using a hosted Elasticsearch service
         $isElasticCloud = false;
         $isSearchly = false;
         foreach ($hosts as $host) {
-            if (strpos($host, '.elastic-cloud.com') !== false || strpos($host, '.es.io') !== false) {
+            if (str_contains($host, '.elastic-cloud.com') || str_contains($host, '.es.io')) {
                 $isElasticCloud = true;
                 break;
             }
-            if (strpos($host, '.searchly.com') !== false) {
+            if (str_contains($host, '.searchly.com')) {
                 $isElasticCloud = true;
                 $isSearchly = true;
                 break;
@@ -113,7 +117,7 @@ class ElasticsearchHandler
         }
 
         // Authentication (works for both Cloud and self-hosted)
-        $auth_type = isset($this->_config['es_t']) ? $this->_config['es_t'] : '0';
+        $auth_type = $this->_config['es_t'] ?? '0';
         switch ($auth_type) {
             case '2': // No authentication
                 break;
@@ -126,9 +130,9 @@ class ElasticsearchHandler
         }
 
         $this->_client = $clientBuilder->build();
-         
-        if($test) {
-            if(!$this->indexExists()) {
+
+        if ($test) {
+            if (!$this->indexExists()) {
                 try {
                     return $this->createIndex();
                 } catch (Exception $e) {
@@ -137,50 +141,50 @@ class ElasticsearchHandler
                 }
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
     /**
      * Create index
      */
-    public function createIndex() {
+    public function createIndex(): bool
+    {
         $params = [
             'index' => $this->_index,
             'body' => [
-                'settings' => [ 
-                    'analysis' => [ 
+                'settings' => [
+                    'analysis' => [
                         'filter' => [
                             'autocomplete_filter' => [
                                 'type' => 'edge_ngram',
                                 'min_gram' => 1,
-                                'max_gram' => 20
-                            ]
+                                'max_gram' => 20,
+                            ],
                         ],
                         'analyzer' => [
                             'autocomplete' => [
                                 'type' => 'custom',
                                 'tokenizer' => 'standard',
-                                'filter' => ['lowercase','autocomplete_filter']
-                            ]
-                        ]
-                    ]
+                                'filter' => ['lowercase','autocomplete_filter'],
+                            ],
+                        ],
+                    ],
                 ],
-                'mappings' => [ 
+                'mappings' => [
                     'properties' => [
                         'name' => [
                             'type' => 'text',
-                            'analyzer' => 'autocomplete'
+                            'analyzer' => 'autocomplete',
                         ],
                         'date_added' => [
-                            'type' => 'keyword'
+                            'type' => 'keyword',
                         ],
                         'product_name' => [
-                            'type' => 'keyword'
-                        ]
-                    ]
-                ]
-            ]
+                            'type' => 'keyword',
+                        ],
+                    ],
+                ],
+            ],
         ];
         try {
             $response = $this->_client->indices()->create($params);
@@ -188,26 +192,28 @@ class ElasticsearchHandler
         } catch (Exception $e) {
             $this->_logError($e->getMessage());
             return false;
-        } 
+        }
     }
-    
+
     /**
      * Delete index
      */
-    public function deleteIndex() {
+    public function deleteIndex(): bool
+    {
         try {
             $response =  $this->_client->indices()->delete(['index' => $this->_index]);
             return $response->getStatusCode() == 200 ? true : false;
         } catch (Exception $e) {
             $this->_logError($e->getMessage());
             return false;
-        } 
+        }
     }
 
     /**
      * Delete product from index
      */
-    public function delete($id) {
+    public function delete($id): bool
+    {
         try {
             $response =  $this->_client->delete(['index' => $this->_index, 'id' => $id]);
             return $response->getStatusCode() == 200 ? true : false;
@@ -216,50 +222,53 @@ class ElasticsearchHandler
             return false;
         }
     }
-    
+
     /**
      * Check product exists in index
      */
-    public function exists($id = '') {
+    public function exists($id = ''): bool
+    {
         try {
             $response = $this->_client->exists(['index' => $this->_index, 'id' => $id]);
             return $response->getStatusCode() == 200 ? true : false;
         } catch (Exception $e) {
             $this->_logError($e->getMessage());
             return false;
-        } 
+        }
     }
 
     /**
      * Get stats about index
      */
-    public function getStats() {
+    public function getStats(): array
+    {
         try {
             $params = ['index' => $this->_index];
             $params['metric'] = '_all';
             $response = $this->_client->indices()->stats($params);
-            $response = json_decode($response, true);
-            return array('size' => formatBytes($response['_all']['primaries']['store']['size_in_bytes'], true), 'count' => $response['_all']['primaries']['docs']['count']);
+            $response = json_decode((string) $response, true);
+            return ['size' => formatBytes($response['_all']['primaries']['store']['size_in_bytes'], true), 'count' => $response['_all']['primaries']['docs']['count']];
         } catch (Exception $e) {
             $error = $e->getMessage();
-            $error = json_decode($error,true);
+            $error = json_decode($error, true);
 
-            if(isset($error['error']['type']) && $error['error']['type'] == 'index_not_found_exception') {
+            if (isset($error['error']['type']) && $error['error']['type'] == 'index_not_found_exception') {
                 $GLOBALS['gui']->setError('Elasticsearch has no indices. Please rebuild.');
-            } elseif(isset($error['error']['reason'])) {
+            } elseif (isset($error['error']['reason'])) {
                 $GLOBALS['gui']->setError($error['error']['reason']);
             } else {
                 $GLOBALS['gui']->setError('Elasticsearch error: '.$e->getMessage());
             }
-            return array('size' => '0b', 'count' => '0');
-        } 
-        
+            return ['size' => '0b', 'count' => '0'];
+        }
+
     }
 
     /**
      * Check index exists
      */
-    public function indexExists() {
+    public function indexExists(): bool
+    {
         try {
             $response = $this->_client->indices()->exists(['index' => $this->_index]);
             return $response->getStatusCode() == 200 ? true : false;
@@ -272,8 +281,9 @@ class ElasticsearchHandler
     /**
      * Log error
      */
-    private function _logError($message = '') {
-        if(!empty($message)) {
+    private function _logError(string $message = ''): void
+    {
+        if (!empty($message)) {
             trigger_error('Elasticsearch: '.$message, E_USER_NOTICE);
             $this->last_error = $message;
         }
@@ -282,18 +292,21 @@ class ElasticsearchHandler
     /**
      * Create search query to execute later
      */
-    public function query($search, $sort = array()) {
-        if(!isset($search['keywords'])) return false;
+    public function query(array $search, $sort = [])
+    {
+        if (!isset($search['keywords'])) {
+            return false;
+        }
         $q = $search['keywords'];
         $must = [];
-        $should = 
+        $should =
         [
-            ['match' => 
-                ['name' => 
-                    ['query' => $q, 
-                    'analyzer' => 'standard'
-                    ]
-                ]
+            ['match' =>
+                ['name' =>
+                    ['query' => $q,
+                    'analyzer' => 'standard',
+                    ],
+                ],
             ],
             ['match' => ['product_code' => $q]],
             ['match' => ['upc' => $q]],
@@ -301,54 +314,54 @@ class ElasticsearchHandler
             ['match' => ['jan' => $q]],
             ['match' => ['isbn' => $q]],
             ['match' => ['gtin' => $q]],
-            ['match' => ['mpn' => $q]]
+            ['match' => ['mpn' => $q]],
         ];
-        
-        if(count($search)>1) { // Form submitted search 
+
+        if (count($search) > 1) { // Form submitted search
             $should = array_merge($should, [['match' => ['description' => $q]]]);
-            if(isset($search['featured']) && $search['featured']=='1') {
+            if (isset($search['featured']) && $search['featured'] == '1') {
                 $featured =
                 [
                     'match' =>
                     [
-                        'featured' => 1
-                    ]
+                        'featured' => 1,
+                    ],
 
                 ];
                 array_push($must, $featured);
             }
-            if(isset($search['manufacturer']) && is_array($search['manufacturer']) && !empty($search['manufacturer'])) {
+            if (isset($search['manufacturer']) && is_array($search['manufacturer']) && !empty($search['manufacturer'])) {
                 $manufacturer =
                 [
                     'terms' =>
                     [
-                        'manufacturer_id' => array_map('intval', $search['manufacturer'])
-                    ]
+                        'manufacturer_id' => array_map(intval(...), $search['manufacturer']),
+                    ],
 
                 ];
                 array_push($must, $manufacturer);
             }
             $price_range = [];
-            if(isset($search['priceMin']) && $search['priceMin'] > 0) {
-                $price = empty($search['priceVary']) ? $search['priceMin'] : round($GLOBALS['tax']->priceConvertFX($search['priceMin'])/1.05, 2); // Legacy for old skins
+            if (isset($search['priceMin']) && $search['priceMin'] > 0) {
+                $price = empty($search['priceVary']) ? $search['priceMin'] : round($GLOBALS['tax']->priceConvertFX($search['priceMin']) / 1.05, 2); // Legacy for old skins
                 $price_range['gte'] = (float)$price;
             }
-            if(isset($search['priceMax']) && $search['priceMax'] > 0) {
-                $price = empty($search['priceVary']) ? $search['priceMax'] : round($GLOBALS['tax']->priceConvertFX($search['priceMax'])*1.05, 2); // Legacy for old skins
+            if (isset($search['priceMax']) && $search['priceMax'] > 0) {
+                $price = empty($search['priceVary']) ? $search['priceMax'] : round($GLOBALS['tax']->priceConvertFX($search['priceMax']) * 1.05, 2); // Legacy for old skins
                 $price_range['lte'] = (float)$price;
             }
-            if(!empty($price_range)) {
+            if (!empty($price_range)) {
                 $price_range =
                 [
                     'range' =>
                     [
-                        'price_to_pay' => $price_range
-                    ]
+                        'price_to_pay' => $price_range,
+                    ],
 
                 ];
                 array_push($must, $price_range);
             }
-            if(isset($search['inStock']) && $search['inStock']=='1') {
+            if (isset($search['inStock']) && $search['inStock'] == '1') {
                 // (digital = 1 OR stock_level > 1)
                 $inStock =
                 [
@@ -357,83 +370,68 @@ class ElasticsearchHandler
                         'should' =>
                         [
                             [
-                                    
+
                                 'range' =>
                                 [
-                                    'stock_level' => 
+                                    'stock_level' =>
                                     [
-                                        'gte' => 1
-                                    ]
-                                ]
+                                        'gte' => 1,
+                                    ],
+                                ],
                             ],
                             [
-                                'match' => 
+                                'match' =>
                                 [
-                                    'digital' => 1
-                                ]
-                            ]
-                        ]    
-                    ]
+                                    'digital' => 1,
+                                ],
+                            ],
+                        ],
+                    ],
                 ];
                 array_push($must, $inStock);
             }
         }
-        $this->_search_body = 
+        $this->_search_body =
         [
             'query' =>
             [
                 'bool' =>
                 [
-                    'must'      => array_merge($must,[['bool' => ['should' => $should]]])   
-                ]
-            ]
+                    'must'      => array_merge($must, [['bool' => ['should' => $should]]]),
+                ],
+            ],
         ];
-        if(!empty($sort)) {
+        if (!empty($sort)) {
             // Map: stock_level, price_to_pay, date_added, product_name
             foreach ($sort as $field => $direction) {
-                switch(strtolower($field)) {
-                    case 'name':
-                        $f = 'product_name';
-                    break;
-                    case 'date_added':
-                        $f = 'date_added';
-                    break;
-                    case 'stock_level':
-                        $f = 'stock_level';
-                    break;
-                    case 'price':
-                        $f = 'price_to_pay';
-                    break;
-                    default:
-                        $f = '';
-                }
-                switch(strtolower($direction)) {
-                    case 'asc':
-                        $d = 'asc';
-                    break;
-                    case 'desc':
-                        $d = 'desc';
-                    break;
-                    default:
-                        $d = '';
-                }
+                $f = match (strtolower((string) $field)) {
+                    'name' => 'product_name',
+                    'date_added' => 'date_added',
+                    'stock_level' => 'stock_level',
+                    'price' => 'price_to_pay',
+                    default => '',
+                };
+                $d = match (strtolower((string) $direction)) {
+                    'asc' => 'asc',
+                    'desc' => 'desc',
+                    default => '',
+                };
             }
-            if(!empty($f) && !empty($d)) {
+            if (!empty($f) && !empty($d)) {
                 $this->_search_body = array_merge($this->_search_body, ['sort' => [$f => $d]]);
             }
         }
     }
-   
-
 
     /**
      * Execute search query
      */
-    public function search($from, $size) {
-        $from = ($from-1)*$size;
+    public function search($from, $size)
+    {
+        $from = ($from - 1) * $size;
         $params = [
             'index' => $this->_index,
-            'body'  => array_merge(['from' => $from, 'size' => $size], $this->_search_body)
+            'body'  => array_merge(['from' => $from, 'size' => $size], $this->_search_body),
         ];
         try {
             $response = $this->_client->search($params);
@@ -447,75 +445,72 @@ class ElasticsearchHandler
     /**
      * Rebuild index
      */
-    public function rebuild($cycle, $limit = 50) {
+    public function rebuild($cycle, $limit = 50): array|bool
+    {
         ini_set('ignore_user_abort', true);
-        if($cycle == 1) {
-            if($this->indexExists()) {
+        if ($cycle == 1) {
+            if ($this->indexExists()) {
                 $this->deleteIndex();
             }
             $this->createIndex();
         }
-    
-        $where = array('status' => 1);
+
+        $where = ['status' => 1];
         $total = (int)$GLOBALS['db']->count('CubeCart_inventory', 'status', $where);
-        if($total==0 && $cycle==1) {
+        if ($total == 0 && $cycle == 1) {
             $GLOBALS['gui']->setError('No products to index.');
         }
-        if (($products = $GLOBALS['db']->select('CubeCart_inventory', array('product_id'), $where, false, $limit, $cycle)) !== false) {
+        if (($products = $GLOBALS['db']->select('CubeCart_inventory', ['product_id'], $where, false, $limit, $cycle)) !== false) {
             foreach ($products as $product) {
                 $this->add($product['product_id']);
             }
             $sent_to = $limit * $cycle;
             if ($total > $sent_to) {
-                $percent = ($sent_to/$total)*100;
-                
-                if($percent % 10 == 0 && !isset($this->marker[$percent])) {
+                $percent = ($sent_to / $total) * 100;
+
+                if ($percent % 10 == 0 && !isset($this->marker[$percent])) {
                     $this->marker[$percent] = true;
                     $stats = $this->getStats();
                 } else {
-                    $stats = array('count' => false, 'size' => false);
+                    $stats = ['count' => false, 'size' => false];
                 }
-                
-                $data = array(
+                return [
                     'count'  => $sent_to,
                     'total'  => $total,
                     'percent' => $percent,
                     'es_count' => number_format($stats['count']),
-                    'es_size' => $stats['size']
-                );
-                return $data;
-            } else {
-                return true;
+                    'es_size' => $stats['size'],
+                ];
             }
-        } else {
-            return false;
-        } 
-        
+            return true;
+        }
+        return false;
+
     }
 
     /**
      * Update product in index
      */
-    public function update($id, $field = '') {
-        switch($field) {
+    public function update($id, $field = '')
+    {
+        switch ($field) {
             case 'stock_level':
-                $this->_index_body = array('stock_level'   => (int)$GLOBALS['catalogue']->getProductStock($id));
-            break;
+                $this->_index_body = ['stock_level'   => (int)$GLOBALS['catalogue']->getProductStock($id)];
+                break;
             default:
                 $this->_indexBody($id);
         }
-        $params = array(
+        $params = [
             'index' => $this->_index,
             'id'    => $id,
-            'body'  => array('doc' => $this->_index_body)
-        );
+            'body'  => ['doc' => $this->_index_body],
+        ];
         try {
-            if($this->_config['es_is']=='1' && $this->_index_body['stock_level']<=0) {
+            if ($this->_config['es_is'] == '1' && $this->_index_body['stock_level'] <= 0) {
                 return $this->delete($id);
-            } else {
-                return $this->_client->update($params);
             }
-        } catch (Exception $e) {
+            return $this->_client->update($params);
+        } catch (Exception) {
             return false;
         }
     }
@@ -523,29 +518,31 @@ class ElasticsearchHandler
     /**
      * Write config to json file
      */
-    private function _writeConfig($config) {
-        $es_config = array(
+    private function _writeConfig(array $config): void
+    {
+        $es_config = [
             'es_h' => $config['es_h'],
             'es_u' => $config['es_u'],
             'es_p' => $config['es_p'],
-        	'es_a' => $config['es_a'],
-        	'es_t' => $config['es_t'],
+            'es_a' => $config['es_a'],
+            'es_t' => $config['es_t'],
             'es_i' => $config['es_i'],
             'es_v' => $config['es_v'],
             'es_c' => $config['es_c'],
-            'es_is' => $config['es_is']
-        );
-        $fh = fopen($this->_config_file,"w");
-        fwrite($fh,json_encode($es_config));
+            'es_is' => $config['es_is'],
+        ];
+        $fh = fopen($this->_config_file, 'w');
+        fwrite($fh, json_encode($es_config));
         fclose($fh);
     }
 
     /**
      * Get config
      */
-    private function _getConfig($config) {
+    private function _getConfig($config): void
+    {
         global $glob;
-        /* 
+        /*
         #############################
         # Config Variable Reference
         #############################
@@ -561,56 +558,59 @@ class ElasticsearchHandler
         */
 
         // Get config from master config which also merges global.inc.php file
-        if(isset($GLOBALS['config']) && $GLOBALS['config']->has('config', 'es_h')) { 
-            $this->_config = array(
+        if (isset($GLOBALS['config']) && $GLOBALS['config']->has('config', 'es_h')) {
+            $this->_config = [
                 'es_h' => $GLOBALS['config']->get('config', 'es_h'),
                 'es_u' => $GLOBALS['config']->get('config', 'es_u'),
                 'es_p' => $GLOBALS['config']->get('config', 'es_p'),
-            	'es_a' => $GLOBALS['config']->get('config', 'es_a'),
-            	'es_t' => $GLOBALS['config']->get('config', 'es_t'),
+                'es_a' => $GLOBALS['config']->get('config', 'es_a'),
+                'es_t' => $GLOBALS['config']->get('config', 'es_t'),
                 'es_i' => $GLOBALS['config']->get('config', 'es_i'),
                 'es_v' => $GLOBALS['config']->get('config', 'es_v'),
                 'es_c' => $GLOBALS['config']->get('config', 'es_c'),
-                'es_is' => $GLOBALS['config']->get('config', 'es_is')
-            );
+                'es_is' => $GLOBALS['config']->get('config', 'es_is'),
+            ];
         } else {
-            if(!empty($config)) { // Get config from $_POST of admin settings page
+            if (!empty($config)) { // Get config from $_POST of admin settings page
                 $this->_config = $config;
-            } elseif(!empty($glob['es_h'])) { // Get config from globals.inc.php file if set
-                $es_config = array(
+            } elseif (!empty($glob['es_h'])) { // Get config from globals.inc.php file if set
+                $es_config = [
                     'es_h' => $glob['es_h'],
                     'es_u' => $glob['es_u'],
                     'es_p' => $glob['es_p'],
-                	'es_a' => $glob['es_a'],
-                	'es_t' => isset($glob['es_t']) ? $glob['es_t'] : 1,
+                    'es_a' => $glob['es_a'],
+                    'es_t' => $glob['es_t'] ?? 1,
                     'es_i' => $glob['es_i'],
                     'es_v' => $glob['es_v'],
                     'es_c' => $glob['es_c'],
-                    'es_is' => isset($glob['es_is']) ? $glob['es_is'] : 1
-                );
+                    'es_is' => $glob['es_is'] ?? 1,
+                ];
                 $this->_config = $es_config;
             } else { // Get config from cached settings in json file
-                $this->_config = json_decode(file_get_contents($this->_config_file),true);
+                $this->_config = json_decode(file_get_contents($this->_config_file), true);
             }
         }
     }
 
-    private function _indexToPlainText($string) {
-        $string = strip_tags($string);
+    private function _indexToPlainText($string): ?string
+    {
+        $string = strip_tags((string) $string);
         $string = html_entity_decode($string, ENT_QUOTES, 'UTF-8');
-        $string = preg_replace("/\s+/", " ", $string);
-        return $string;
+        return preg_replace("/\s+/", ' ', $string);
     }
 
     /**
      * Create body for product to be indexed
      */
-    private function _indexBody($product_id) {
+    private function _indexBody($product_id): void
+    {
         $product = $GLOBALS['catalogue']->getProductData($product_id);
-        if (empty($product)) return;
-        $cat = $GLOBALS['db']->select('CubeCart_category_index', array('cat_id'), array('product_id' => $product['product_id'], 'primary' => 1));
+        if (empty($product)) {
+            return;
+        }
+        $cat = $GLOBALS['db']->select('CubeCart_category_index', ['cat_id'], ['product_id' => $product['product_id'], 'primary' => 1]);
         $seo = SEO::getInstance();
-        $this->_index_body = array(
+        $this->_index_body = [
             'name'          => (string)$product['name'], ## We can't sort on autocomplete mappings (hence `product_name`)
             'product_code'  => (string)$product['product_code'],
             'upc'           => (string)$product['upc'],
@@ -629,7 +629,7 @@ class ElasticsearchHandler
             'date_added'       => (string)$product['date_added'], ## Sorter
             'product_name'  => (string)$product['name'], ## Sorter
             'stock_level'   => (int)$GLOBALS['catalogue']->getProductStock($product['product_id']), ## Sorter
-            'price_to_pay'  => (float)round($product['price_to_pay'],2) ## Sorter
-        );
+            'price_to_pay'  => round($product['price_to_pay'], 2), ## Sorter
+        ];
     }
 }

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal TestInstall
  * Test Smarty installation
@@ -332,7 +334,7 @@ class Smarty_Internal_TestInstall
         // test if sysplugins are available
         $source = SMARTY_SYSPLUGINS_DIR;
         if (is_dir($source)) {
-            $expectedSysplugins = array(
+            $expectedSysplugins = [
                 'smartycompilerexception.php'                               => true,
                 'smartyexception.php'                                       => true,
                 'smarty_cacheresource.php'                                  => true,
@@ -482,7 +484,7 @@ class Smarty_Internal_TestInstall
                 'smarty_template_source.php'                                => true,
                 'smarty_undefined_variable.php'                             => true,
                 'smarty_variable.php'                                       => true,
-            );
+            ];
             $iterator = new DirectoryIterator($source);
             foreach ($iterator as $file) {
                 if (!$file->isDot()) {
@@ -494,7 +496,7 @@ class Smarty_Internal_TestInstall
             }
             if ($expectedSysplugins) {
                 $status = false;
-                $message = "FAILED: files missing from libs/sysplugins: " . join(', ', array_keys($expectedSysplugins));
+                $message = 'FAILED: files missing from libs/sysplugins: ' . join(', ', array_keys($expectedSysplugins));
                 if ($errors === null) {
                     echo $message . ".\n";
                 } else {
@@ -505,7 +507,7 @@ class Smarty_Internal_TestInstall
             }
         } else {
             $status = false;
-            $message = "FAILED: " . SMARTY_SYSPLUGINS_DIR . ' is not a directory';
+            $message = 'FAILED: ' . SMARTY_SYSPLUGINS_DIR . ' is not a directory';
             if ($errors === null) {
                 echo $message . ".\n";
             } else {
@@ -518,7 +520,7 @@ class Smarty_Internal_TestInstall
         // test if core plugins are available
         $source = SMARTY_PLUGINS_DIR;
         if (is_dir($source)) {
-            $expectedPlugins = array(
+            $expectedPlugins = [
                 'block.textformat.php'                  => true,
                 'function.counter.php'                  => true,
                 'function.cycle.php'                    => true,
@@ -566,7 +568,7 @@ class Smarty_Internal_TestInstall
                 'shared.mb_str_replace.php'             => true,
                 'shared.mb_unicode.php'                 => true,
                 'variablefilter.htmlspecialchars.php'   => true,
-            );
+            ];
             $iterator = new DirectoryIterator($source);
             foreach ($iterator as $file) {
                 if (!$file->isDot()) {
@@ -578,7 +580,7 @@ class Smarty_Internal_TestInstall
             }
             if ($expectedPlugins) {
                 $status = false;
-                $message = "FAILED: files missing from libs/plugins: " . join(', ', array_keys($expectedPlugins));
+                $message = 'FAILED: files missing from libs/plugins: ' . join(', ', array_keys($expectedPlugins));
                 if ($errors === null) {
                     echo $message . ".\n";
                 } else {
@@ -589,7 +591,7 @@ class Smarty_Internal_TestInstall
             }
         } else {
             $status = false;
-            $message = "FAILED: " . SMARTY_PLUGINS_DIR . ' is not a directory';
+            $message = 'FAILED: ' . SMARTY_PLUGINS_DIR . ' is not a directory';
             if ($errors === null) {
                 echo $message . ".\n";
             } else {

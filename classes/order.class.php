@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -27,31 +29,31 @@ class Order
     private $_order_inventory;
     private $_order_summary;
 
-    private $_email_enabled   = true;
-    private $_email_admin_enabled = true;
-    private $_email_details = array();
+    private bool $_email_enabled   = true;
+    private bool $_email_admin_enabled = true;
+    private $_email_details = [];
 
-    private $_skip_order_complete_email = false;
+    private bool $_skip_order_complete_email = false;
 
-    private static $_instance;
+    private static ?\Order $_instance = null;
 
     ## Order status constants
-    const ORDER_PENDING  = 1;
-    const ORDER_PROCESS  = 2;
-    const ORDER_COMPLETE = 3;
-    const ORDER_DECLINED = 4;
-    const ORDER_FAILED  = 5; # Fraudulent
-    const ORDER_CANCELLED = 6;
+    public const ORDER_PENDING  = 1;
+    public const ORDER_PROCESS  = 2;
+    public const ORDER_COMPLETE = 3;
+    public const ORDER_DECLINED = 4;
+    public const ORDER_FAILED  = 5; # Fraudulent
+    public const ORDER_CANCELLED = 6;
 
     ## Payment Constants
-    const PAYMENT_PENDING = 1;
-    const PAYMENT_PROCESS = 2;
-    const PAYMENT_SUCCESS = 3;
-    const PAYMENT_DECLINE = 4;
-    const PAYMENT_FAILED = 5;
-    const PAYMENT_CANCEL = 6;
+    public const PAYMENT_PENDING = 1;
+    public const PAYMENT_PROCESS = 2;
+    public const PAYMENT_SUCCESS = 3;
+    public const PAYMENT_DECLINE = 4;
+    public const PAYMENT_FAILED = 5;
+    public const PAYMENT_CANCEL = 6;
 
-    const TRADITIONAL_ORDER_FORMAT = '/^[0-9]{6}-[0-9]{6}-[0-9]{4}$/i';
+    public const TRADITIONAL_ORDER_FORMAT = '/^[0-9]{6}-[0-9]{6}-[0-9]{4}$/i';
 
     ##############################################
 
@@ -79,7 +81,7 @@ class Order
         }
 
         // Load the cart class
-        if(isset($GLOBALS['cart'])) {
+        if (isset($GLOBALS['cart'])) {
             $this->_basket = &$GLOBALS['cart']->basket;
             if (isset($this->_basket['cart_order_id'])) {
                 $this->_order_id = $this->_basket['cart_order_id'];
@@ -91,10 +93,8 @@ class Order
 
     /**
      * Setup the instance (singleton)
-     *
-     * @return Order
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self();
@@ -115,14 +115,14 @@ class Order
     public function addNote($order_id = null, $note = null, $print = true)
     {
         if (!empty($order_id) && !empty($note)) {
-            $record = array(
+            $record = [
                 'cart_order_id' => $order_id,
                 'time'   => time(),
                 'content'  => $note,
-                'print' => $print ? '1' : '0'  
-            );
+                'print' => $print ? '1' : '0',
+            ];
             // Check for duplicates...
-            if ($GLOBALS['db']->select('CubeCart_order_notes', 'note_id', array('cart_order_id' => $order_id, 'content' => $note))) {
+            if ($GLOBALS['db']->select('CubeCart_order_notes', 'note_id', ['cart_order_id' => $order_id, 'content' => $note])) {
                 return false;
             }
 
@@ -137,13 +137,13 @@ class Order
      * @param array $values
      * @param any $admin
      */
-    public function assignOrderDetails($values = null, $admin = null)
+    public function assignOrderDetails($values = null, $admin = null): void
     {
         $this->_email_details = (is_null($values)) ? $this->_email_details : $values;
         $field = $GLOBALS['config']->get('config', 'oid_mode') == 'i' ? $GLOBALS['config']->get('config', 'oid_col') : 'cart_order_id';
         $order_id = $this->_email_details['order_summary'][$field];
         $this->_email_details['order_summary']['link'] = (is_null($admin)) ? $GLOBALS['storeURL'].'/index.php?_a=vieworder&cart_order_id='.$order_id : $GLOBALS['storeURL'].'/'.$GLOBALS['config']->get('config', 'adminFile').'?_g=orders&action=edit&order_id='.$order_id;
-        if(!empty($this->_email_details['order_summary']['ship_tracking'])) {
+        if (!empty($this->_email_details['order_summary']['ship_tracking'])) {
             $this->_email_details['order_summary']['ship_tracking'] = nl2br(parseUrlToLink($this->_email_details['order_summary']['ship_tracking']));
         }
 
@@ -188,7 +188,7 @@ class Order
     public function createOrderId($return = false, $set_basket = true)
     {
         // Self explainitory really...
-        $this->_order_id = date('ymd-His-').rand(1000, 9999);
+        $this->_order_id = date('ymd-His-').random_int(1000, 9999);
 
         if ($set_basket) {
             $this->_basket['cart_order_id'] = $this->_order_id;
@@ -204,11 +204,10 @@ class Order
      * Delete encrypted credit card
      *
      * @param string $cart_order_id
-     * @return bool
      */
-    public function deleteCard($cart_order_id)
+    public function deleteCard($cart_order_id): bool
     {
-        return (bool)$GLOBALS['db']->update('CubeCart_order_summary', array('offline_capture' => null), array('cart_order_id' => $cart_order_id));
+        return (bool)$GLOBALS['db']->update('CubeCart_order_summary', ['offline_capture' => null], ['cart_order_id' => $cart_order_id]);
     }
 
     /**
@@ -219,13 +218,13 @@ class Order
      */
     public function deleteOrder($order_id)
     {
-        if((int)$GLOBALS['config']->get('config', 'stock_change_time') == 2) {
+        if ((int)$GLOBALS['config']->get('config', 'stock_change_time') == 2) {
             $this->_manageStock(self::ORDER_CANCELLED, $order_id);
         }
         // Delete the order from the system
         $deleted = false;
         if (!empty($order_id)) {
-            $where = array('cart_order_id' => $order_id);
+            $where = ['cart_order_id' => $order_id];
             if ($GLOBALS['db']->delete('CubeCart_order_summary', $where)) {
                 $deleted = true;
 
@@ -251,14 +250,15 @@ class Order
      * @param int $pin
      * @return bool
      */
-    public function pinOrder($order_id, $pin = 1) {
-        return $GLOBALS['db']->update('CubeCart_order_summary', array('dashboard' => (int)$pin), array('cart_order_id' => $order_id));
+    public function pinOrder($order_id, $pin = 1)
+    {
+        return $GLOBALS['db']->update('CubeCart_order_summary', ['dashboard' => (int)$pin], ['cart_order_id' => $order_id]);
     }
 
     /**
      * Disable admin email notification
      */
-    public function disableAdminEmail()
+    public function disableAdminEmail(): void
     {
         $this->_email_admin_enabled = false;
     }
@@ -292,7 +292,7 @@ class Order
         $order_summary['discount']  = Tax::getInstance()->priceFormat($order_summary['discount'], true);
         $order_summary['shipping'] = Tax::getInstance()->priceFormat($order_summary['shipping'], true);
         // Get taxes
-        $order_taxes = $GLOBALS['db']->select('CubeCart_order_tax', array('tax_id', 'amount'), array('cart_order_id' => $order_id));
+        $order_taxes = $GLOBALS['db']->select('CubeCart_order_tax', ['tax_id', 'amount'], ['cart_order_id' => $order_id]);
 
         // Put in items
         $vars = $image_types = [];
@@ -306,19 +306,19 @@ class Order
             $image_types[] = 'source';
         }
         foreach ($this->_order_inventory as $item) {
-            if ($item['product_id']>0) {
+            if ($item['product_id'] > 0) {
                 $existing_data = $GLOBALS['catalogue']->getProductData($item['product_id']);
                 $product    = is_array($existing_data) ? array_merge($existing_data, $item) : $item;
                 $product['raw_price'] = $product['price'];
                 $product['raw_line_total'] = $product['price'] * $product['quantity'];
                 $product['item_price'] = Tax::getInstance()->priceFormat($product['price']);
-                $product['price']   = Tax::getInstance()->priceFormat($product['price']*$product['quantity']);
-                
-                $images = array();
+                $product['price']   = Tax::getInstance()->priceFormat($product['price'] * $product['quantity']);
+
+                $images = [];
                 if (($gallery = $GLOBALS['db']->select('`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_image_index` AS `i` INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_filemanager` AS `f` ON i.file_id = f.file_id', false, 'i.product_id = '.$item['product_id'], 'ORDER BY i.main_img DESC'))) {
-                    $duplicates = array();
-                    foreach ($gallery as $key => $image) {
-                        if (is_array($image_types) && !in_array($image['file_id'], $duplicates)) {
+                    $duplicates = [];
+                    foreach ($gallery as $image) {
+                        if (!in_array($image['file_id'], $duplicates)) {
                             $duplicates[] = $image['file_id'];
                             foreach ($image_types as $type) {
                                 $image[$type] = $GLOBALS['catalogue']->imagePath($image['file_id'], $type, 'url');
@@ -326,7 +326,7 @@ class Order
                             $images[] = $image;
                         }
                     }
-                    if (isset($images) && is_array($images) && !empty($images)) {
+                    if (!empty($images)) {
                         $product['images'] = $images;
                     }
                 }
@@ -351,7 +351,7 @@ class Order
             }
         }
 
-        $billing = array(
+        $billing = [
             'first_name'  => $order_summary['first_name'],
             'last_name'  => $order_summary['last_name'],
             'company_name'  => $order_summary['company_name'],
@@ -363,9 +363,9 @@ class Order
             'country'   => getCountryFormat($order_summary['country']),
             'phone'   => $order_summary['phone'],
             'email'   => $order_summary['email'],
-            'w3w'   => $order_summary['w3w']
-        );
-        $shipping = array(
+            'w3w'   => $order_summary['w3w'],
+        ];
+        $shipping = [
             'first_name'  => $order_summary['first_name_d'],
             'last_name'  => $order_summary['last_name_d'],
             'company_name'  => $order_summary['company_name_d'],
@@ -375,19 +375,18 @@ class Order
             'state'   => getStateFormat($order_summary['state_d']),
             'postcode'   => $order_summary['postcode_d'],
             'country'   => getCountryFormat($order_summary['country_d']),
-            'w3w'   => $order_summary['w3w_d']
-        );
+            'w3w'   => $order_summary['w3w_d'],
+        ];
 
         // Format data
         $order_summary['order_date'] = formatTime($order_summary['order_date'], false, true);
-        $order_summary['ship_date']  = ((int)(str_replace('-', '', (string)$order_summary['ship_date'])) > 0) ? formatDispatchDate($order_summary['ship_date']) : "";
+        $order_summary['ship_date']  = ((int)(str_replace('-', '', (string)$order_summary['ship_date'])) > 0) ? formatDispatchDate($order_summary['ship_date']) : '';
         $order_summary['gateway']    = str_replace('_', ' ', $order_summary['gateway']);
-
 
         $values['order_summary'] = $order_summary;
         $values['billing']       = $billing;
         $values['shipping']      = $shipping;
-        $values['taxes']         = isset($vars['taxes']) ? $vars['taxes'] : array();
+        $values['taxes']         = $vars['taxes'] ?? [];
         $values['products']      = $vars['products'];
 
         foreach ($GLOBALS['hooks']->load('class.order.get_order_details') as $hook) {
@@ -408,7 +407,7 @@ class Order
     {
         // Returns the order summary data
         $this->_order_id = (is_null($order_id)) ? $this->_order_id : $order_id;
-        $order = $GLOBALS['db']->select('CubeCart_order_summary', false, array('cart_order_id' => $order_id), false, false, false, false);
+        $order = $GLOBALS['db']->select('CubeCart_order_summary', false, ['cart_order_id' => $order_id], false, false, false, false);
 
         if ($order) {
             $this->_order_summary = $order[0];
@@ -423,26 +422,25 @@ class Order
      *
      * @param array $log
      * @param bool $force_log
-     * @return bool
      */
-    public function logTransaction($log, $force_log = false)
+    public function logTransaction($log, $force_log = false): bool
     {
         // Log the transaction data returned from the payment gateways
         if (is_array($log) && !empty($log)) {
-            $log['notes'] = (isset($log['notes'])) ? $log['notes'] : '';
-            $record = array(
+            $log['notes'] ??= '';
+            $record = [
                 'time'   => time(),
-                'order_id'  => isset($log['order_id']) ? $log['order_id'] : $this->_order_id,
-                'gateway'  => isset($log['gateway']) ? $log['gateway'] : '',
+                'order_id'  => $log['order_id'] ?? $this->_order_id,
+                'gateway'  => $log['gateway'] ?? '',
 
-                'trans_id'  => isset($log['trans_id']) ? $log['trans_id'] : '',
-                'amount'  => isset($log['amount']) ? $log['amount'] : $this->_basket['total'],
-                'status'  => isset($log['status']) ? $log['status'] : '',
-                'customer_id' => isset($log['customer_id']) ? $log['customer_id'] : '',
-                'extra'   => isset($log['extra']) ? $log['extra'] : '',
-                'notes'   => is_array($log['notes']) ? implode('<br>', $log['notes']) : $log['notes']
-            );
-            $record['amount'] = preg_replace('/[^0-9.]*/', '', $record['amount']);
+                'trans_id'  => $log['trans_id'] ?? '',
+                'amount'  => $log['amount'] ?? $this->_basket['total'],
+                'status'  => $log['status'] ?? '',
+                'customer_id' => $log['customer_id'] ?? '',
+                'extra'   => $log['extra'] ?? '',
+                'notes'   => is_array($log['notes']) ? implode('<br>', $log['notes']) : $log['notes'],
+            ];
+            $record['amount'] = preg_replace('/[^0-9.]*/', '', (string) $record['amount']);
             if ($force_log || !empty($record['order_id']) && !empty($record['gateway'])) {
                 $GLOBALS['db']->insert('CubeCart_transactions', $record);
                 return true;
@@ -457,9 +455,8 @@ class Order
      * @param int $status_id
      * @param string $order_id
      * @param bool $force
-     * @return bool
      */
-    public function orderStatus($status_id, $order_id, $force = false, $send_email = true)
+    public function orderStatus($status_id, ?string $order_id, $force = false, $send_email = true): bool
     {
         foreach ($GLOBALS['hooks']->load('class.order.order_status_start') as $hook) {
             include $hook;
@@ -467,7 +464,7 @@ class Order
 
         // Update order status, manage stock, and email if required
         if (!empty($status_id) && !empty($order_id)) {
-            $currentStatus = $GLOBALS['db']->select('CubeCart_order_summary', array('status'), array('cart_order_id' => $order_id), false, false, false, false);
+            $currentStatus = $GLOBALS['db']->select('CubeCart_order_summary', ['status'], ['cart_order_id' => $order_id], false, false, false, false);
 
             if (!$currentStatus || (int)$currentStatus[0]['status'] == 0) {
                 return false;
@@ -482,7 +479,7 @@ class Order
                 return false;
             }
 
-            if(!$send_email) {
+            if (!$send_email) {
                 $this->_email_enabled = false;
             }
 
@@ -491,7 +488,7 @@ class Order
 
             // Mark cart abandonment as recovered if applicable
             if ((int)$status_id !== self::ORDER_CANCELLED && !empty($this->_order_summary['customer_id'])) {
-                $GLOBALS['db']->misc("UPDATE `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_cart_abandonment` SET `recovered_at` = '".date('Y-m-d H:i:s')."' WHERE `customer_id` = ".(int)$this->_order_summary['customer_id']." AND `recovered_at` IS NULL");
+                $GLOBALS['db']->misc('UPDATE `'.$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_cart_abandonment` SET `recovered_at` = '".date('Y-m-d H:i:s')."' WHERE `customer_id` = ".(int)$this->_order_summary['customer_id'].' AND `recovered_at` IS NULL');
             }
 
             foreach ($GLOBALS['hooks']->load('class.order.order_status') as $hook) {
@@ -504,7 +501,7 @@ class Order
 
                 case self::ORDER_PENDING:
                     // Send email to store admins if set for pending status
-                    if ($GLOBALS['config']->get('config', 'admin_notify_status')=="1" && $this->_email_admin_enabled && $admin_notify = $this->_notifyAdmins()) {
+                    if ($GLOBALS['config']->get('config', 'admin_notify_status') == '1' && $this->_email_admin_enabled && $admin_notify = $this->_notifyAdmins()) {
                         $admin_mailer = new Mailer();
 
                         $message_id = md5('admin.order_received'.$status_id.$order_id);
@@ -520,7 +517,7 @@ class Order
                         unset($content);
                     }
 
-                break;
+                    break;
 
                 case self::ORDER_PROCESS:
                     $complete = true;
@@ -535,18 +532,20 @@ class Order
                     }
                     $already_sent = false;
                     $cart_is_phantom = false;
-                    if(!empty($order_summary['gateway']) && file_exists(CC_ROOT_DIR.'/modules/gateway/'.$order_summary['gateway'].'/gateway.class.php')) {
+                    if (!empty($order_summary['gateway']) && file_exists(CC_ROOT_DIR.'/modules/gateway/'.$order_summary['gateway'].'/gateway.class.php')) {
                         require_once(CC_ROOT_DIR.'/modules/gateway/'.$order_summary['gateway'].'/gateway.class.php');
                         $gateway = new Gateway($GLOBALS['config']->get($order_summary['gateway']));
-                        if(method_exists($gateway, 'processingEmail')) {
+                        if (method_exists($gateway, 'processingEmail')) {
                             if (!isset($GLOBALS['cart'])) {
-                                $GLOBALS['cart'] = (object) array('basket' => array()); // phantom object to prevent PHP 8 getting upset about calls in the gateway construct to $GLOBALS['cart']
+                                $GLOBALS['cart'] = (object) ['basket' => []]; // phantom object to prevent PHP 8 getting upset about calls in the gateway construct to $GLOBALS['cart']
                                 $cart_is_phantom = true;
-                              }
+                            }
                             $already_sent = $gateway->processingEmail($order_summary['cart_order_id']);
                         }
                     }
-                    if ($cart_is_phantom) unset($GLOBALS['cart']);
+                    if ($cart_is_phantom) {
+                        unset($GLOBALS['cart']);
+                    }
                     // Compose the Order Confirmation email to the customer
                     if (!$already_sent && $this->_email_enabled && ($content = $mailer->loadContent('cart.order_confirmation', $order_summary['lang'])) !== false) {
                         $this->assignOrderDetails();
@@ -555,7 +554,7 @@ class Order
                     unset($content);
 
                     // Send email to store admins if set for processing status
-                    if ($GLOBALS['config']->get('config', 'admin_notify_status')=="2" && $this->_email_enabled && $this->_email_admin_enabled && $admin_notify = $this->_notifyAdmins()) {
+                    if ($GLOBALS['config']->get('config', 'admin_notify_status') == '2' && $this->_email_enabled && $this->_email_admin_enabled && $admin_notify = $this->_notifyAdmins()) {
                         $admin_mailer = new Mailer();
 
                         $message_id = md5('admin.order_received'.$status_id.$order_id);
@@ -584,28 +583,28 @@ class Order
                     $this->_digitalDelivery($order_id, $this->_order_summary['email']);
 
                     // Adjust credit balance
-                    if($order_summary['credit_used'] > 0 && $order_summary['credit_shift'] == 0) {
-                        $GLOBALS['db']->misc('UPDATE `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_customer` SET `credit` = `credit` - '.(string)$order_summary['credit_used'].' WHERE `customer_id` = '.$order_summary['customer_id']);
-                        $GLOBALS['db']->update('CubeCart_order_summary', array('credit_shift' => 1), array('cart_order_id' => $order_summary['cart_order_id']));
-                        
+                    if ($order_summary['credit_used'] > 0 && $order_summary['credit_shift'] == 0) {
+                        $GLOBALS['db']->misc('UPDATE `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_customer` SET `credit` = `credit` - '.$order_summary['credit_used'].' WHERE `customer_id` = '.$order_summary['customer_id']);
+                        $GLOBALS['db']->update('CubeCart_order_summary', ['credit_shift' => 1], ['cart_order_id' => $order_summary['cart_order_id']]);
+
                         // Any pending orders with credit applied are no longer valid
-                        if($invalid_orders = $GLOBALS['db']->select('CubeCart_order_summary', array('cart_order_id'), array('status' => 1,'credit_shift' => 0, 'credit_used' => '>0', 'customer_id' => $order_summary['customer_id']))) {
-                            foreach($invalid_orders as $o) {
-                                $this->orderStatus(6, $o['cart_order_id']); 
+                        if ($invalid_orders = $GLOBALS['db']->select('CubeCart_order_summary', ['cart_order_id'], ['status' => 1,'credit_shift' => 0, 'credit_used' => '>0', 'customer_id' => $order_summary['customer_id']])) {
+                            foreach ($invalid_orders as $o) {
+                                $this->orderStatus(6, $o['cart_order_id']);
                                 $this->addNote($o['cart_order_id'], sprintf($GLOBALS['language']->orders['cancelled_invalid_credit'], $order_summary['cart_order_id']));
                             }
                         }
                     }
                     if (isset($order_summary['coupon_data']) && !empty($order_summary['coupon_data'])) {
-                        $coupon_data = json_decode($order_summary['coupon_data'], true);
+                        $coupon_data = json_decode((string) $order_summary['coupon_data'], true);
                         $this->_processCoupons($order_summary['customer_id'], $order_summary['email'], $coupon_data);
                     }
 
-                break;
+                    break;
 
                 case self::ORDER_COMPLETE:
                     // Check that we have not skipped processing if not already disabled
-                    if ($GLOBALS['db']->select('CubeCart_order_history', array('status'), array('cart_order_id' => $order_id, 'status' => 2), false, false, false, false) === false) {
+                    if ($GLOBALS['db']->select('CubeCart_order_history', ['status'], ['cart_order_id' => $order_id, 'status' => 2], false, false, false, false) === false) {
                         // Force order status to processing first if this status has never been met and settings don't allow it to be skipped
                         if (!$GLOBALS['config']->get('config', 'no_skip_processing_check')) {
                             $this->orderStatus(2, $order_id, $force, $send_email);
@@ -622,21 +621,21 @@ class Order
                     }
                     unset($content);
 
-                break;
+                    break;
 
                 case self::ORDER_DECLINED:
                     // Nothing to do, but leave the option here for hooks & such
-                break;
+                    break;
 
                 case self::ORDER_FAILED:
                     // Email the customer to explain their order failed fraud review
                     $content = $mailer->loadContent('cart.payment_fraud', $order_summary['lang'], $this->_order_summary);
-                break;
+                    break;
 
                 case self::ORDER_CANCELLED:
                     // Cancelled
                     $content = $mailer->loadContent('cart.order_cancelled', $order_summary['lang'], $this->_order_summary);
-                break;
+                    break;
                 default:
                     foreach ($GLOBALS['hooks']->load('class.order.order_status_switch') as $hook) {
                         include $hook;
@@ -655,7 +654,7 @@ class Order
 
             // Set status to complete if it is digital only
             if (isset($complete) && $complete) {
-                if ($GLOBALS['config']->get('config', 'force_completed')!="1") {
+                if ($GLOBALS['config']->get('config', 'force_completed') != '1') {
                     $this->_skip_order_complete_email = true;
                 }
                 //$status_id = self::ORDER_COMPLETE;
@@ -686,20 +685,17 @@ class Order
 
             $mailer = new Mailer();
             switch ($status_id) {
-            case self::PAYMENT_PENDING:
-                /* $content = $mailer->loadContent('cart.payment_pending', $this->_order_summary['lang'], $this->_order_summary);*/
-                break;
-            case self::PAYMENT_PROCESS:
-                break;
-            case self::PAYMENT_SUCCESS:
-                $content = $mailer->loadContent('cart.payment_received', $this->_order_summary['lang'], $this->_order_summary);
-                break;
-            case self::PAYMENT_DECLINE:
-                break;
-            case self::PAYMENT_FAILED:
-                break;
-            case self::PAYMENT_CANCEL:
-                break;
+                case self::PAYMENT_PENDING:
+                    /* $content = $mailer->loadContent('cart.payment_pending', $this->_order_summary['lang'], $this->_order_summary);*/
+                    break;
+                case self::PAYMENT_PROCESS:
+                case self::PAYMENT_DECLINE:
+                case self::PAYMENT_FAILED:
+                case self::PAYMENT_CANCEL:
+                    break;
+                case self::PAYMENT_SUCCESS:
+                    $content = $mailer->loadContent('cart.payment_received', $this->_order_summary['lang'], $this->_order_summary);
+                    break;
             }
             if ($this->_email_enabled && isset($content)) {
                 $mailer->sendEmail($this->_order_summary['email'], $content);
@@ -711,9 +707,8 @@ class Order
      * Create order
      *
      * @param bool $force
-     * @return bool
      */
-    public function placeOrder($force_order = false)
+    public function placeOrder($force_order = false): bool
     {
         foreach ($GLOBALS['hooks']->load('class.order.place_order') as $hook) {
             include $hook;
@@ -722,7 +717,7 @@ class Order
         if ($_GET['retrieve'] && isset($_GET['cart_order_id']) && !empty($_GET['cart_order_id'])) {
             // Order retrieval
             if ($this->_retrieveOrder($_GET['cart_order_id'])) {
-                httpredir(currentPage(array('cart_order_id', 'retrieve'), array('_a' => 'confirm')));
+                httpredir(currentPage(['cart_order_id', 'retrieve'], ['_a' => 'confirm']));
             }
         } elseif (!empty($this->_basket)) {
             // Protection against missing data from lost session data
@@ -735,7 +730,7 @@ class Order
             // Order Creation/Updating
             $this->_saveAddresses();
 
-            if (isset($this->_basket['cart_order_id']) && !empty($this->_basket['cart_order_id']) && $GLOBALS['db']->select('CubeCart_order_summary', array('id'), array('cart_order_id' => $this->_basket['cart_order_id'], 'status' => 1), false, false, false, false) && !$GLOBALS['db']->select('CubeCart_transactions', array('id'), array('order_id' => $this->_basket['cart_order_id']), false, false, false, false)) {
+            if (isset($this->_basket['cart_order_id']) && !empty($this->_basket['cart_order_id']) && $GLOBALS['db']->select('CubeCart_order_summary', ['id'], ['cart_order_id' => $this->_basket['cart_order_id'], 'status' => 1], false, false, false, false) && !$GLOBALS['db']->select('CubeCart_transactions', ['id'], ['order_id' => $this->_basket['cart_order_id']], false, false, false, false)) {
                 // Order has already been placed, is still pending and has no payment transactions so we only need to update
                 $this->_updateOrder();
                 $update = true;
@@ -755,7 +750,7 @@ class Order
             }
 
             // Insert Taxes
-            $GLOBALS['db']->delete('CubeCart_order_tax', array('cart_order_id' => $this->_order_id));
+            $GLOBALS['db']->delete('CubeCart_order_tax', ['cart_order_id' => $this->_order_id]);
 
             if (is_array($this->_basket['order_taxes'])) {
                 foreach ($this->_basket['order_taxes'] as $order_tax) {
@@ -765,12 +760,12 @@ class Order
             }
             // Log coupons used but don't use them
             if (isset($this->_basket['coupons']) && is_array($this->_basket['coupons'])) {
-                $certificates_used = $vouchers_used = array();
-                foreach ($this->_basket['coupons'] as $key => $data) {
+                $certificates_used = $vouchers_used = [];
+                foreach ($this->_basket['coupons'] as $data) {
                     if ($data['gc']) {
                         $certificates_used[] = $data['voucher'];
                     } else {
-                        $vouchers_used[] = $data['voucher'];       
+                        $vouchers_used[] = $data['voucher'];
                     }
                 }
                 $note_content = '';
@@ -783,17 +778,17 @@ class Order
                 $this->addNote($this->_order_id, $note_content);
             }
             // Write shipping module packing note if available, and clear all others
-            $module_folder = isset($this->_basket['shipping']['module_folder']) ? $this->_basket['shipping']['module_folder'] : '';
+            $module_folder = $this->_basket['shipping']['module_folder'] ?? '';
             if (!empty($module_folder)) {
-                $packing_session_key = strtolower($module_folder).'_packing_note';
+                $packing_session_key = strtolower((string) $module_folder).'_packing_note';
                 if ($packing_note = $GLOBALS['session']->get($packing_session_key)) {
                     $this->addNote($this->_order_id, $packing_note, false);
                 }
             }
             // Clean up all shipping packing notes from session
-            if (($ship_modules = $GLOBALS['db']->select('CubeCart_modules', array('folder'), array('module' => 'shipping'))) !== false) {
+            if (($ship_modules = $GLOBALS['db']->select('CubeCart_modules', ['folder'], ['module' => 'shipping'])) !== false) {
                 foreach ($ship_modules as $sm) {
-                    $GLOBALS['session']->delete(strtolower($sm['folder']).'_packing_note');
+                    $GLOBALS['session']->delete(strtolower((string) $sm['folder']).'_packing_note');
                 }
             }
             // Set order as 'Pending'
@@ -803,7 +798,9 @@ class Order
             }
             // Insert/Update the order summary
             $this->_orderSummary($update, $force_order);
-            foreach ($GLOBALS['hooks']->load('class.order.place_order.postbasket') as $hook) include $hook;
+            foreach ($GLOBALS['hooks']->load('class.order.place_order.postbasket') as $hook) {
+                include $hook;
+            }
 
             $this->_manageStock(self::ORDER_PENDING, $this->_basket['cart_order_id']);
 
@@ -811,27 +808,28 @@ class Order
 
             if ($this->_basket['total'] == 0) {
                 $this->orderStatus(self::ORDER_PROCESS, $this->_basket['cart_order_id']);
-                httpredir(currentPage(null, array('_a' => 'complete')));
+                httpredir(currentPage(null, ['_a' => 'complete']));
             }
             return true;
         }
         // Go back to the basket page
-        httpredir(currentPage(array('cart_order_id'), array('_a' => 'basket')));
+        httpredir(currentPage(['cart_order_id'], ['_a' => 'basket']));
         return false;
     }
 
-    private function _processCoupons($customer_id, $email, $coupon_data = array()) {
-        foreach ($coupon_data as $k => $data) {
+    private function _processCoupons($customer_id, $email, $coupon_data = []): void
+    {
+        foreach ($coupon_data as $data) {
             if ($data['gc']) {
                 // Update gift certificate balance
-                $GLOBALS['db']->update('CubeCart_coupons', array('discount_price' => $data['remainder']), array('code' => $data['voucher']));
+                $GLOBALS['db']->update('CubeCart_coupons', ['discount_price' => $data['remainder']], ['code' => $data['voucher']]);
             } else {
                 // Update usage count
-                $GLOBALS['db']->update('CubeCart_coupons', array('count' => '+1'), array('code' => $data['voucher']));
-                if($GLOBALS['db']->select('CubeCart_customer_coupon', '*', array('customer_id' => $customer_id), false, false, false, false)) {
-                    $GLOBALS['db']->update('CubeCart_customer_coupon', array('used' => '+1'), array('customer_id' => $customer_id, 'email' => $email, 'coupon' => $data['voucher']));
+                $GLOBALS['db']->update('CubeCart_coupons', ['count' => '+1'], ['code' => $data['voucher']]);
+                if ($GLOBALS['db']->select('CubeCart_customer_coupon', '*', ['customer_id' => $customer_id], false, false, false, false)) {
+                    $GLOBALS['db']->update('CubeCart_customer_coupon', ['used' => '+1'], ['customer_id' => $customer_id, 'email' => $email, 'coupon' => $data['voucher']]);
                 } else {
-                    $GLOBALS['db']->insert('CubeCart_customer_coupon', array('coupon' => $data['voucher'],'used' => 1, 'customer_id' => $customer_id, 'email' => $email));
+                    $GLOBALS['db']->insert('CubeCart_customer_coupon', ['coupon' => $data['voucher'],'used' => 1, 'customer_id' => $customer_id, 'email' => $email]);
                 }
             }
         }
@@ -843,20 +841,24 @@ class Order
      * @param string $option_string
      * @return array
      */
-    public function unSerializeOptions($option_string) {
-        if(empty($option_string)) {
-            return array();
-        } else if(($array = cc_unserialize($option_string)) !== false) {
+    public function unSerializeOptions($option_string)
+    {
+        if (empty($option_string)) {
+            return [];
+        }
+        if (($array = cc_unserialize($option_string)) !== false) {
             return $array;
-        } else if (($array = cc_unserialize(base64_decode($option_string))) !== false) {
+        }
+        if (($array = cc_unserialize(base64_decode($option_string))) !== false) {
             return $array;
-        } else if(($array = unserialize($option_string)) !== false) {
+        }
+        if (($array = unserialize($option_string)) !== false) {
             return $array;
-        } else if (($array = unserialize(base64_decode($option_string))) !== false) {
+        }
+        if (($array = unserialize(base64_decode($option_string))) !== false) {
             return $array;
-        } else {
-            return explode("\n", $option_string);
-        }  
+        }
+        return explode("\n", $option_string);
     }
 
     /**
@@ -864,9 +866,8 @@ class Order
      *
      * @param array $options
      * @param int $product_id
-     * @return string
      */
-    public function serializeOptions($options, $product_id)
+    public function serializeOptions($options, $product_id): string
     {
         if (isset($options) && !empty($options)) {
             foreach ($options as $option_id => $assign_id) {
@@ -876,7 +877,7 @@ class Order
                             include $hook;
                         }
                         $value['price_display'] = '';
-                        if (isset($value['option_price']) && $value['option_price']>0) { // record option price but not zero
+                        if (isset($value['option_price']) && $value['option_price'] > 0) { // record option price but not zero
                             if ((bool)$value['absolute_price']) {
                                 $value['price_display'] = ' (';
                             } elseif ($value['option_negative']) {
@@ -892,11 +893,11 @@ class Order
                     }
                 } else {
                     foreach ($assign_id as $id => $option_value) {
-                        $textfield = $GLOBALS['db']->select('CubeCart_option_group', array('option_name', 'option_type'), array('option_id' => $option_id)); // Kill me
-                        if ($textfield && in_array($textfield[0]['option_type'], array(1,2))) {
+                        $textfield = $GLOBALS['db']->select('CubeCart_option_group', ['option_name', 'option_type'], ['option_id' => $option_id]); // Kill me
+                        if ($textfield && in_array($textfield[0]['option_type'], [1,2])) {
                             $option[$id] = $textfield[0]['option_name'].': '.$option_value;
                         } else {
-                            if (($assign_id = $GLOBALS['db']->select('CubeCart_option_assign', array('assign_id'), array('option_id' => (int)$option_id, 'product' => $product_id))) !== false) {
+                            if (($assign_id = $GLOBALS['db']->select('CubeCart_option_assign', ['assign_id'], ['option_id' => (int)$option_id, 'product' => $product_id])) !== false) {
                                 $assign_id = (int)$assign_id[0]['assign_id'];
                             } else {
                                 $assign_id = 0;
@@ -907,7 +908,7 @@ class Order
                                     include $hook;
                                 }
                                 $value['price_display'] = '';
-                                if (isset($value['option_price']) && $value['option_price']>0) { // record option price but not zero
+                                if (isset($value['option_price']) && $value['option_price'] > 0) { // record option price but not zero
                                     if ($value['option_negative']) {
                                         //$record['price'] -= $value['option_price'];
                                         $value['price_display'] = ' (-';
@@ -935,18 +936,18 @@ class Order
      * @param string $cart_order_id
      * @return boolean
      */
-    public function setOrderCustomID($cart_order_id, $column = 'cart_order_id') {
-        if(empty($cart_order_id)) {
+    public function setOrderCustomID($cart_order_id, $column = 'cart_order_id')
+    {
+        if (empty($cart_order_id)) {
             return false;
         }
-        $concat_params = $GLOBALS['config']->get('order','oid_concat');
-        if($concat_params) {
+        $concat_params = $GLOBALS['config']->get('order', 'oid_concat');
+        if ($concat_params) {
             $concat_params = base64_decode($concat_params);
-            if(empty($concat_params)) {
+            if (empty($concat_params)) {
                 return false;
-            } else {
-                return $GLOBALS['db']->misc("UPDATE `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_order_summary` SET `custom_oid` = CONCAT($concat_params) WHERE `$column` = '$cart_order_id';");
             }
+            return $GLOBALS['db']->misc('UPDATE `'.$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_order_summary` SET `custom_oid` = CONCAT($concat_params) WHERE `$column` = '$cart_order_id';");
         }
         return false;
     }
@@ -971,29 +972,30 @@ class Order
 
         $lpad = empty($oid_zeros) ? "`id`+$oid_start" : "LPAD(`id`+$oid_start, $oid_zeros, 0)";
         $concat_params = $this->_formatConcat($oid_prefix).", $lpad, ".$this->_formatConcat($oid_postfix);
-        $concat = "CONCAT(".$concat_params.")";
-        $GLOBALS['config']->set('order','oid_concat', base64_encode($concat_params));
-
+        $concat = 'CONCAT('.$concat_params.')';
+        $GLOBALS['config']->set('order', 'oid_concat', base64_encode($concat_params));
         if ($set) {
             if (empty($oid_prefix) && empty($oid_postfix) && empty($oid_zeros) && empty($oid_start)) {
-                $GLOBALS['db']->misc("DROP TRIGGER IF EXISTS `custom_oid`");
+                $GLOBALS['db']->misc('DROP TRIGGER IF EXISTS `custom_oid`');
                 $oid_col = 'id';
             } else {
                 if ($force_past_oids) { // Not currently used
-                    $GLOBALS['db']->misc("UPDATE `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_order_summary` SET `custom_oid` = ".$concat);
+                    $GLOBALS['db']->misc('UPDATE `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_summary` SET `custom_oid` = '.$concat);
                 }
-                $GLOBALS['db']->misc("DROP TRIGGER IF EXISTS `custom_oid`");
+                $GLOBALS['db']->misc('DROP TRIGGER IF EXISTS `custom_oid`');
                 $oid_col = 'custom_oid';
             }
-            return array(
+            return [
                     'oid_prefix' => $oid_prefix,
                     'oid_postfix' => $oid_postfix,
                     'oid_zeros' => $oid_zeros,
                     'oid_start' => $oid_start,
-                    'oid_col' => $oid_col
-                );
-        } elseif ($oid>0) {
-            $oid = $GLOBALS['db']->misc("SELECT ".str_replace('`id`', (string)$oid, $concat)." AS `oid`");
+                    'oid_col' => $oid_col,
+                ];
+        }
+
+        if ($oid > 0) {
+            $oid = $GLOBALS['db']->misc('SELECT '.str_replace('`id`', (string)$oid, $concat).' AS `oid`');
             return (string)$oid[0]['oid'];
         }
     }
@@ -1015,16 +1017,15 @@ class Order
      *
      * @param string $order_id
      * @param array $dataArray
-     * @return bool
      */
-    public function updateSummary($order_id, $dataArray)
+    public function updateSummary($order_id, $dataArray): bool
     {
         ## Add notes, update status, gateway, shipping date, courier tracking url
         if (!empty($dataArray) && is_array($dataArray)) {
-            if (!in_array($dataArray['status'], array('1','2'))) {
+            if (!in_array($dataArray['status'], ['1','2'])) {
                 $dataArray['offline_capture'] = '';
             } // GitHub #1886
-            $GLOBALS['db']->update('CubeCart_order_summary', $dataArray, array('cart_order_id' => $order_id));
+            $GLOBALS['db']->update('CubeCart_order_summary', $dataArray, ['cart_order_id' => $order_id]);
             return true;
         }
         return false;
@@ -1034,14 +1035,14 @@ class Order
      * Validate order ID
      *
      * @param string $order_id
-     * @return bool
      */
-    public static function validOrderId($order_id, $traditional = false)
+    public static function validOrderId($order_id, $traditional = false): bool
     {
         $oid_mode = $GLOBALS['config']->get('config', 'oid_mode');
         if (preg_match(self::TRADITIONAL_ORDER_FORMAT, $order_id)) {
             return true;
-        } elseif ($oid_mode=='i' && (ctype_digit($order_id) || preg_match('/[-\w\_]+/', $order_id))) {
+        }
+        if ($oid_mode == 'i' && (ctype_digit($order_id) || preg_match('/[-\w\_]+/', $order_id))) {
             return true;
         }
         return false;
@@ -1056,16 +1057,16 @@ class Order
      * @param int $status_id
      * @return bool
      */
-    private function _addHistory($order_id, $status_id, $initiator = '')
+    private function _addHistory($order_id, $status_id, string $initiator = '')
     {
-        if (filter_var($status_id, FILTER_VALIDATE_INT, array("options" => array("min_range"=>1))) === false) {
+        if (filter_var($status_id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) === false) {
             return false;
         }
 
         if (empty($initiator)) {
             if (defined('CC_IN_ADMIN') && CC_IN_ADMIN) {
                 $initiator = 'S'; // Staff
-            } elseif ($GLOBALS['user']->is() && (isset($_GET['_a']) && $_GET['_a'] == "vieworder") && isset($_GET['cancel'])) {
+            } elseif ($GLOBALS['user']->is() && (isset($_GET['_a']) && $_GET['_a'] == 'vieworder') && isset($_GET['cancel'])) {
                 $initiator = 'C'; // Customer
             } else {
                 $initiator = 'G'; // Gateway
@@ -1075,12 +1076,12 @@ class Order
         }
 
         if (!empty($order_id) && !empty($status_id)) {
-            $record = array(
+            $record = [
                 'cart_order_id' => $order_id,
                 'updated'  => time(),
                 'status'  => $status_id,
-                'initiator' => $initiator
-            );
+                'initiator' => $initiator,
+            ];
             return (bool)$GLOBALS['db']->insert('CubeCart_order_history', $record);
         }
         return false;
@@ -1093,24 +1094,23 @@ class Order
      * @param int $blocks
      * @param int $bsize
      * @param string $glue
-     * @return bool
      */
-    private function _createCertificate($value, $blocks = 5, $bsize = 4, $glue = '-')
+    private function _createCertificate($value, $blocks = 5, $bsize = 4, $glue = '-'): int
     {
         // Create Certificate Code
-        $length = ($blocks*$bsize)+($blocks-1);
-        $seed = hash('whirlpool', time().rand().microtime());
+        $length = ($blocks * $bsize) + ($blocks - 1);
+        $seed = hash('whirlpool', time().random_int(0, mt_getrandmax()).microtime());
         $code = '';
         for ($i = 1; $i <= $length; ++$i) {
-            $code .= ($i%($bsize+1)) ? substr($seed, rand(0, strlen($seed)-1), 1) : trim($glue);
+            $code .= ($i % ($bsize + 1)) ? substr($seed, random_int(0, strlen($seed) - 1), 1) : trim($glue);
         }
         $gc = $GLOBALS['config']->get('gift_certs');
         ## Insert the Certificate Record
-        $record = array(
+        $record = [
             'cart_order_id'  => $this->_order_id,
             'discount_price' => $value,
             'code'    => strtoupper($code),
-        );
+        ];
         if (isset($gc['expires']) && (int)$gc['expires'] > 0) {
             $record['expires'] = date('Y-m-d', strtotime((int)$gc['expires'].' months'));
         }
@@ -1129,40 +1129,39 @@ class Order
         // Create a reference for a download
         $accesskey = md5($this->_order_id.$product_id.date('cZ@u').mt_rand());
 
-        $expire = ($GLOBALS['config']->get('config', 'download_expire')>0) ? time() + $GLOBALS['config']->get('config', 'download_expire') : 0;
+        $expire = ($GLOBALS['config']->get('config', 'download_expire') > 0) ? time() + $GLOBALS['config']->get('config', 'download_expire') : 0;
 
-        if (isset($this->_order_summary['customer_id']) && $this->_order_summary['customer_id']>0) {
+        if (isset($this->_order_summary['customer_id']) && $this->_order_summary['customer_id'] > 0) {
             $customer_id = $this->_order_summary['customer_id'];
         } elseif (isset($GLOBALS['cart']->basket['customer']['customer_id']) && $GLOBALS['cart']->basket['customer']['customer_id'] > 0) {
             $customer_id = $GLOBALS['cart']->basket['customer']['customer_id'];
         } else {
             $customer_id = $GLOBALS['user']->getId();
         }
-        $record		= array(
-            'cart_order_id' => (isset($this->_order_summary['cart_order_id'])) ? $this->_order_summary['cart_order_id'] : $this->_order_id,
+        $record		= [
+            'cart_order_id' => $this->_order_summary['cart_order_id'] ?? $this->_order_id,
             'order_inv_id'	=> $order_inv_id,
             'customer_id' 	=> $customer_id,
             'product_id'	=> (int)$product_id,
             'expire'		=> $expire,
             'accesskey'		=> $accesskey,
-        );
+        ];
         return $GLOBALS['db']->insert('CubeCart_downloads', $record);
     }
 
     /**
      * Deliver digital download from _createDownload
      *
-     * @param string $order_id
      * @param string $email
      * @return bool
      */
-    private function _digitalDelivery($order_id, $email)
+    private function _digitalDelivery(string $order_id, $email)
     {
         if (!empty($order_id) && !empty($email)) {
-            if (($digital = $GLOBALS['db']->select('CubeCart_downloads', false, array('cart_order_id' => $order_id), false, false, false, false)) !== false) {
-                foreach ($digital as $offset => $download) {
+            if (($digital = $GLOBALS['db']->select('CubeCart_downloads', false, ['cart_order_id' => $order_id], false, false, false, false)) !== false) {
+                foreach ($digital as $download) {
                     // Get product name
-                    $product = $GLOBALS['db']->select('CubeCart_order_inventory', array('name'), array('id' => $download['order_inv_id']));
+                    $product = $GLOBALS['db']->select('CubeCart_order_inventory', ['name'], ['id' => $download['order_inv_id']]);
                     // Set minimum expiry time (min 30 mins = 1800 seconds)
                     if (!$GLOBALS['config']->isEmpty('config', 'download_expire')) {
                         $validity_time = ($GLOBALS['config']->get('config', 'download_expire') > 1800) ? $GLOBALS['config']->get('config', 'download_expire') : 1800;
@@ -1170,21 +1169,21 @@ class Order
                     } else {
                         $expire = 0;
                     }
-                    $GLOBALS['db']->update('CubeCart_downloads', array('expire' => $expire), array('digital_id' => $download['digital_id']));
+                    $GLOBALS['db']->update('CubeCart_downloads', ['expire' => $expire], ['digital_id' => $download['digital_id']]);
                     $filemanager = new FileManager();
                     $data = $filemanager->getFileInfo($download['product_id']);
-                    $dkeys[] = array(
+                    $dkeys[] = [
                         'stream' => $data['stream'],
                         'accesskey' => $download['accesskey'],
                         'name'  => $product[0]['name'],
-                        'expire'    => ($expire > 0) ? formatTime($expire, false, true) : $GLOBALS['language']->common['never']
-                    );
+                        'expire'    => ($expire > 0) ? formatTime($expire, false, true) : $GLOBALS['language']->common['never'],
+                    ];
                 }
 
                 $mailer = new Mailer();
                 if ($this->_email_enabled && ($contents = $mailer->loadContent('cart.digital_download', $this->_order_summary['lang'], $this->_order_summary))) {
                     foreach ($dkeys as $dkey) {
-                        $download['url']  = $GLOBALS['storeURL'].'/index.php?_a=download&s='.(string)$dkey['stream'].'&accesskey='.$dkey['accesskey'];
+                        $download['url']  = $GLOBALS['storeURL'].'/index.php?_a=download&s='.$dkey['stream'].'&accesskey='.$dkey['accesskey'];
                         $download['stream']  = $dkey['stream'];
                         $download['name']  = $dkey['name'];
                         $download['expire'] = $dkey['expire'];
@@ -1202,15 +1201,13 @@ class Order
      * Format concat string for order format trigger
      *
      * @param string $string
-     * @return string
      */
-    private function _formatConcat($string)
+    private function _formatConcat(string|array|null $string): string
     {
         if (strstr($string, '%')) {
             return "DATE_FORMAT(NOW(), '$string')";
-        } else {
-            return "'$string'";
         }
+        return "'$string'";
     }
 
     /**
@@ -1223,7 +1220,7 @@ class Order
     private function _getInventory($order_id = null)
     {
         if (!is_null($order_id)) {
-            if (($products = $GLOBALS['db']->select('CubeCart_order_inventory', false, array('cart_order_id' => $order_id), false, false, false, false)) !== false) {
+            if (($products = $GLOBALS['db']->select('CubeCart_order_inventory', false, ['cart_order_id' => $order_id], false, false, false, false)) !== false) {
                 $this->_order_inventory = $products;
                 return $this->_order_inventory;
             }
@@ -1236,69 +1233,68 @@ class Order
      *
      * @param int $status_id
      * @param string $order_id
-     * @return bool
      */
-    private function _manageStock($status_id, $order_id)
+    private function _manageStock($status_id, $order_id): bool
     {
-        if($GLOBALS['config']->get('config', 'elasticsearch')=='1') {
-            $es = new ElasticsearchHandler;
+        if ($GLOBALS['config']->get('config', 'elasticsearch') == '1') {
+            $es = new ElasticsearchHandler();
         }
         foreach ($GLOBALS['hooks']->load('class.order.manage_stock') as $hook) {
             include $hook;
         }
 
-        $matrix_prod = array();
+        $matrix_prod = [];
 
-        if (($items = $GLOBALS['db']->select('CubeCart_order_inventory', false, array('cart_order_id' => $order_id), false, false, false, false)) !== false) {
+        if (($items = $GLOBALS['db']->select('CubeCart_order_inventory', false, ['cart_order_id' => $order_id], false, false, false, false)) !== false) {
             $stock_change_time = (int)$GLOBALS['config']->get('config', 'stock_change_time');
 
             foreach ($items as $item) {
 
                 // Check stock on options first
-                if (!empty($item['options_identifier']) && $options_stock = $GLOBALS['db']->select('CubeCart_option_matrix', array('stock_level', 'matrix_id'), array('product_id' => (int)$item['product_id'], 'options_identifier' => $item['options_identifier'], 'status' => 1, 'use_stock' => 1), false, false, false, false)) {
+                if (!empty($item['options_identifier']) && $options_stock = $GLOBALS['db']->select('CubeCart_option_matrix', ['stock_level', 'matrix_id'], ['product_id' => (int)$item['product_id'], 'options_identifier' => $item['options_identifier'], 'status' => 1, 'use_stock' => 1], false, false, false, false)) {
                     $stock = $options_stock[0]['stock_level'];
 
                     $matrix_prod[] = (int)$item['product_id'];
 
                     switch ($status_id) {
-                    case self::ORDER_PENDING:
-                        // Update stock on order creation
-                        if (!$item['stock_updated'] && $stock_change_time === 2) {
-                            $stock = $stock-$item['quantity'];
-                            $update = 1;
-                        }
-                        break;
-                    case self::ORDER_PROCESS:
-                        // Update stock on order payment
-                        if (!$item['stock_updated'] && $stock_change_time === 1) {
-                            $stock = $stock-$item['quantity'];
-                            $update = 1;
-                        }
-                        break;
-                    case self::ORDER_COMPLETE:
-                        // Update stock on order completion
-                        if (!$item['stock_updated'] && $stock_change_time === 0) {
-                            $stock = $stock-$item['quantity'];
-                            $update = 1;
-                        }
-                        break;
-                    case self::ORDER_DECLINED:
-                    case self::ORDER_FAILED:
-                    case self::ORDER_CANCELLED:
-                        ## Restore stock
-                        if ($item['stock_updated']) {
-                            $stock = $stock+$item['quantity'];
-                            $update = 0;
-                        }
-                        break;
+                        case self::ORDER_PENDING:
+                            // Update stock on order creation
+                            if (!$item['stock_updated'] && $stock_change_time === 2) {
+                                $stock = $stock - $item['quantity'];
+                                $update = 1;
+                            }
+                            break;
+                        case self::ORDER_PROCESS:
+                            // Update stock on order payment
+                            if (!$item['stock_updated'] && $stock_change_time === 1) {
+                                $stock = $stock - $item['quantity'];
+                                $update = 1;
+                            }
+                            break;
+                        case self::ORDER_COMPLETE:
+                            // Update stock on order completion
+                            if (!$item['stock_updated'] && $stock_change_time === 0) {
+                                $stock = $stock - $item['quantity'];
+                                $update = 1;
+                            }
+                            break;
+                        case self::ORDER_DECLINED:
+                        case self::ORDER_FAILED:
+                        case self::ORDER_CANCELLED:
+                            ## Restore stock
+                            if ($item['stock_updated']) {
+                                $stock = $stock + $item['quantity'];
+                                $update = 0;
+                            }
+                            break;
                     }
                     if (isset($stock) && isset($update)) {
                         // Update store inventory
-                        $GLOBALS['db']->update('CubeCart_option_matrix', array('stock_level' => $stock), array('product_id' => (int)$item['product_id'], 'options_identifier' => $item['options_identifier']));
+                        $GLOBALS['db']->update('CubeCart_option_matrix', ['stock_level' => $stock], ['product_id' => (int)$item['product_id'], 'options_identifier' => $item['options_identifier']]);
                         // Update order inventory information
-                        $GLOBALS['db']->update('CubeCart_order_inventory', array('stock_updated' => (int)$update), array('id' => $item['id'], 'cart_order_id' => $order_id));
+                        $GLOBALS['db']->update('CubeCart_order_inventory', ['stock_updated' => (int)$update], ['id' => $item['id'], 'cart_order_id' => $order_id]);
                         // Update Elasticsearch
-                        if(isset($es)) {
+                        if (isset($es)) {
                             $es->update($item['product_id'], 'stock_level');
                         }
                         // Unset variables
@@ -1308,49 +1304,49 @@ class Order
                     continue;
                 }
                 // Traditonal stock if the product opts are not set or not set to use stock
-                if (($product = $GLOBALS['db']->select('CubeCart_inventory', array('stock_level'), array('product_id' => (int)$item['product_id'], 'use_stock_level' => 1), false, false, false, false)) !== false) {
+                if (($product = $GLOBALS['db']->select('CubeCart_inventory', ['stock_level'], ['product_id' => (int)$item['product_id'], 'use_stock_level' => 1], false, false, false, false)) !== false) {
                     $stock = $product[0]['stock_level'];
 
                     switch ($status_id) {
-                    case self::ORDER_PENDING:
-                        // Update stock on order creation
-                        if (!$item['stock_updated'] && $stock_change_time === 2) {
-                            $stock = $stock-$item['quantity'];
-                            $update = 1;
-                        }
-                        break;
-                    case self::ORDER_PROCESS:
-                        // Update stock on order payment
-                        if (!$item['stock_updated'] && $stock_change_time === 1) {
-                            $stock = $stock-$item['quantity'];
-                            $update = 1;
-                        }
-                        break;
-                    case self::ORDER_COMPLETE:
-                        // Update stock on order completion
-                        if (!$item['stock_updated'] && $stock_change_time === 0) {
-                            $stock = $stock-$item['quantity'];
-                            $update = 1;
-                        }
-                        break;
-                    case self::ORDER_DECLINED:
-                    case self::ORDER_FAILED:
-                        break;
-                    case self::ORDER_CANCELLED:
-                        ## Restore stock
-                        if ($item['stock_updated']) {
-                            $stock = $stock+$item['quantity'];
-                            $update = 0;
-                        }
-                        break;
+                        case self::ORDER_PENDING:
+                            // Update stock on order creation
+                            if (!$item['stock_updated'] && $stock_change_time === 2) {
+                                $stock = $stock - $item['quantity'];
+                                $update = 1;
+                            }
+                            break;
+                        case self::ORDER_PROCESS:
+                            // Update stock on order payment
+                            if (!$item['stock_updated'] && $stock_change_time === 1) {
+                                $stock = $stock - $item['quantity'];
+                                $update = 1;
+                            }
+                            break;
+                        case self::ORDER_COMPLETE:
+                            // Update stock on order completion
+                            if (!$item['stock_updated'] && $stock_change_time === 0) {
+                                $stock = $stock - $item['quantity'];
+                                $update = 1;
+                            }
+                            break;
+                        case self::ORDER_DECLINED:
+                        case self::ORDER_FAILED:
+                            break;
+                        case self::ORDER_CANCELLED:
+                            ## Restore stock
+                            if ($item['stock_updated']) {
+                                $stock = $stock + $item['quantity'];
+                                $update = 0;
+                            }
+                            break;
                     }
                     if (isset($stock) && isset($update)) {
                         // Update store inventory
-                        $GLOBALS['db']->update('CubeCart_inventory', array('stock_level' => $stock), array('product_id' => (int)$item['product_id']));
+                        $GLOBALS['db']->update('CubeCart_inventory', ['stock_level' => $stock], ['product_id' => (int)$item['product_id']]);
                         // Update order inventory information
-                        $GLOBALS['db']->update('CubeCart_order_inventory', array('stock_updated' => (int)$update), array('id' => $item['id'], 'cart_order_id' => $order_id));
+                        $GLOBALS['db']->update('CubeCart_order_inventory', ['stock_updated' => (int)$update], ['id' => $item['id'], 'cart_order_id' => $order_id]);
                         // Update Elasticsearch
-                        if(isset($es)) {
+                        if (isset($es)) {
                             $es->update($item['product_id'], 'stock_level');
                         }
                         // Unset variables
@@ -1362,10 +1358,10 @@ class Order
                 $matrix_prods = array_unique($matrix_prod);
 
                 foreach ($matrix_prods as $prod_id) {
-                    $options_stock = $GLOBALS['db']->select('CubeCart_option_matrix', 'SUM(stock_level) AS stock', array('product_id' => (int)$prod_id, 'status' => 1, 'use_stock' => 1), false, false, false, false);
-                    $GLOBALS['db']->update('CubeCart_inventory', array('stock_level' => $options_stock[0]['stock']), array('product_id' => (int)$prod_id));
+                    $options_stock = $GLOBALS['db']->select('CubeCart_option_matrix', 'SUM(stock_level) AS stock', ['product_id' => (int)$prod_id, 'status' => 1, 'use_stock' => 1], false, false, false, false);
+                    $GLOBALS['db']->update('CubeCart_inventory', ['stock_level' => $options_stock[0]['stock']], ['product_id' => (int)$prod_id]);
                     // Update Elasticsearch
-                    if(isset($es)) {
+                    if (isset($es)) {
                         $es->update($prod_id, 'stock_level');
                     }
                 }
@@ -1382,7 +1378,7 @@ class Order
      */
     private function _notifyAdmins()
     {
-        if (($admins = $GLOBALS['db']->select('CubeCart_admin_users', array('email'), array('status' => 1, 'order_notify' => 1))) !== false) {
+        if (($admins = $GLOBALS['db']->select('CubeCart_admin_users', ['email'], ['status' => 1, 'order_notify' => 1])) !== false) {
             ## Get their email addresses
             foreach ($admins as $admin) {
                 if (filter_var($admin['email'], FILTER_VALIDATE_EMAIL)) {
@@ -1390,11 +1386,10 @@ class Order
                 }
             }
             ## Add master email, while avoiding duplications
-            $list = array_merge($list, array($GLOBALS['config']->get('config', 'email_address')));
+            $list = array_merge($list, [$GLOBALS['config']->get('config', 'email_address')]);
             return implode(',', array_unique($list));
-        } else {
-            return $GLOBALS['config']->get('config', 'email_address');
         }
+        return $GLOBALS['config']->get('config', 'email_address');
     }
 
     /**
@@ -1412,19 +1407,14 @@ class Order
                 $gc = $GLOBALS['config']->get('gift_certs');
 
                 if (isset($item['certificate']['method']) && !empty($item['certificate']['method'])) {
-                    switch ($item['certificate']['method']) {
-                        case 'm':
-                            $method = $GLOBALS['language']->common['postal'];
-                        break;
-                        case 'e':
-                            $method = $GLOBALS['language']->common['email'];
-                        break;
-                        default:
-                            $method = '';
-                    }
+                    $method = match ($item['certificate']['method']) {
+                        'm' => $GLOBALS['language']->common['postal'],
+                        'e' => $GLOBALS['language']->common['email'],
+                        default => '',
+                    };
                 }
 
-                $product = array(
+                $product = [
                     'name'   => $method.' '.$GLOBALS['language']->catalogue['gift_certificate'],
                     'price'   => $item['certificate']['value'],
                     'product_code' => $gc['product_code'],
@@ -1432,13 +1422,13 @@ class Order
                     'tax_type'  => 0, // Gift certificates are MPV - no VAT at point of sale
                     'coupon_id'  => $this->_createCertificate($item['certificate']['value']),
                     'custom'  => serialize($item['certificate']),
-                    'hash'   => $hash
-                );
+                    'hash'   => $hash,
+                ];
             } else {
                 $product = $GLOBALS['catalogue']->getProductData($item['id'], 1, false, 10, 1, false, $item['options_identifier']);
             }
 
-            $record = array(
+            $record = [
                 'cart_order_id'  => $this->_order_id,
                 'product_id'  => (int)$item['id'],
                 'quantity'   => $item['quantity'],
@@ -1449,14 +1439,13 @@ class Order
                 'product_code'  => (!empty($product['product_code'])) ? $product['product_code'] : $item['product_code'],
                 'name'    => (!empty($product['name'])) ? $product['name'] : $item['name'],
                 'digital'   => (!empty($product['digital']) || !empty($product['digital_path'])) ? 1 : 0,
-                'custom'   => (isset($product['custom'])) ? $product['custom'] : null,
-                'coupon_id'   => (isset($product['coupon_id'])) ? $product['coupon_id'] : 0,
+                'custom'   => $product['custom'] ?? null,
+                'coupon_id'   => $product['coupon_id'] ?? 0,
                 'hash'    => $hash,
                 'options_identifier' => $item['options_identifier'],
                 'options_array' => serialize($item['options']),
-                'product_options' => $this->serializeOptions($item['options'], $item['id'])
-            );
-
+                'product_options' => $this->serializeOptions($item['options'], $item['id']),
+            ];
 
             foreach ($GLOBALS['hooks']->load('class.order.products.add.pre') as $hook) {
                 include $hook;
@@ -1488,12 +1477,10 @@ class Order
     /**
      * Update or insert order summary
      *
-     * @param bool $update
      * @param bool $force_order
-     * @param bool $suppress_email
      * @return nothing/false
      */
-    private function _orderSummary($update = false, $force_order = false, $suppress_email = false)
+    private function _orderSummary(bool $update = false, $force_order = false)
     {
         // Populate the order summary table
         $userdata = $GLOBALS['user']->get();
@@ -1520,7 +1507,7 @@ class Order
         $this->_basket['billing_address']['phone'] = $phone;
         $GLOBALS['cart']->save();
         $currency = $GLOBALS['session']->get('currency', 'client');
-        $record = array(
+        $record = [
             ## Order Details
             'cart_order_id' => $this->_order_id,
             'order_date' => time(),
@@ -1528,22 +1515,22 @@ class Order
             'status'  => (int)$this->_basket['order_status'],
             # Prices
             'subtotal'  => $this->_basket['subtotal'],
-            'discount'  => (isset($this->_basket['discount'])) ? $this->_basket['discount'] : 0,
-            'discount_type' => (isset($this->_basket['discount_type'])) ? $this->_basket['discount_type'] : '',
+            'discount'  => $this->_basket['discount'] ?? 0,
+            'discount_type' => $this->_basket['discount_type'] ?? '',
             'total_tax'  => $this->_basket['total_tax'],
             'total'   => $this->_basket['total'],
             ## Shipping
             'ship_method' => $this->_basket['shipping']['name'],
             'weight' => $this->_basket['weight'],
             'ship_product' => $this->_basket['shipping']['product'],
-            'shipping'  => ($this->_basket['shipping']['value']>0) ? $this->_basket['shipping']['value'] : '0.00',
+            'shipping'  => ($this->_basket['shipping']['value'] > 0) ? $this->_basket['shipping']['value'] : '0.00',
             'shipping_tax'  => $this->_basket['shipping']['tax']['amount'],
             'shipping_tax_rate'  => $this->_basket['shipping']['tax']['tax_percent'],
             # Misc
             'phone'   => $phone,
             'mobile'   => $mobile,
             'email'   => $email,
-            'customer_comments' => (isset($this->_basket['comments'])) ? $this->_basket['comments'] : null,
+            'customer_comments' => $this->_basket['comments'] ?? null,
             ## Billing Details
             'first_name' => $this->_basket['billing_address']['first_name'],
             'last_name'  => $this->_basket['billing_address']['last_name'],
@@ -1558,7 +1545,7 @@ class Order
             ## Delivery Details
             'first_name_d' => $this->_basket['delivery_address']['first_name'],
             'last_name_d' => $this->_basket['delivery_address']['last_name'],
-            'company_name_d'=> $this->_basket['delivery_address']['company_name'],
+            'company_name_d' => $this->_basket['delivery_address']['company_name'],
             'line1_d'  => $this->_basket['delivery_address']['line1'],
             'line2_d'  => $this->_basket['delivery_address']['line2'],
             'town_d'  => $this->_basket['delivery_address']['town'],
@@ -1570,17 +1557,17 @@ class Order
             'lang'   => $GLOBALS['language']->current(),
             'ip_address' => get_ip_address(),
             'currency' => empty($currency) ? $GLOBALS['config']->get('config', 'default_currency') : $currency,
-            'credit_used' => (isset($this->_basket['credit_used']) && $this->_basket['credit_used']>0) ? $this->_basket['credit_used'] : 0,
-            'coupon_data' => (isset($this->_basket['coupons']) && is_array($this->_basket['coupons'])) ? json_encode($this->_basket['coupons']) : null
-        );
-        if(!empty($this->_basket['gateway'])) {
+            'credit_used' => (isset($this->_basket['credit_used']) && $this->_basket['credit_used'] > 0) ? $this->_basket['credit_used'] : 0,
+            'coupon_data' => (isset($this->_basket['coupons']) && is_array($this->_basket['coupons'])) ? json_encode($this->_basket['coupons']) : null,
+        ];
+        if (!empty($this->_basket['gateway'])) {
             $record['gateway'] = $this->_basket['gateway'];
         }
 
-        if (($orderNotes = $GLOBALS['session']->get(null,'OrderNotes')) !== false) {
+        if (($orderNotes = $GLOBALS['session']->get(null, 'OrderNotes')) !== false) {
             foreach ($orderNotes as $note_source => $note_msg) {
                 if ($this->addNote($this->_order_id, $note_source.':'.$note_msg)) {
-                    $GLOBALS['session']->set($note_source,null,'OrderNotes');
+                    $GLOBALS['session']->set($note_source, null, 'OrderNotes');
                 }
             }
         }
@@ -1589,7 +1576,7 @@ class Order
             include $hook;
         }
 
-        if ($GLOBALS['db']->select('CubeCart_order_summary', array('cart_order_id'), array('cart_order_id' => $this->_order_id), false, false, false, false)) {
+        if ($GLOBALS['db']->select('CubeCart_order_summary', ['cart_order_id'], ['cart_order_id' => $this->_order_id], false, false, false, false)) {
             $this->addNote(
                 $this->_order_id,
                 sprintf($GLOBALS['language']->orders['order_updated_via_basket'], $this->_basket['billing_address']['first_name']),
@@ -1609,7 +1596,7 @@ class Order
             }
         }
         // Add notes if credit has been used
-        if($record['credit_used']>0) {
+        if ($record['credit_used'] > 0) {
             $this->addNote($this->_basket['cart_order_id'], sprintf($GLOBALS['language']->orders['credit_note_usage'], Tax::getInstance()->priceFormat($record['credit_used'])));
         }
     }
@@ -1618,9 +1605,8 @@ class Order
      * Repurchase an existing order
      *
      * @param string $order_id
-     * @return bool
      */
-    private function _retrieveOrder($order_id)
+    private function _retrieveOrder($order_id): bool
     {
         foreach ($GLOBALS['hooks']->load('class.order.retrieveorder') as $hook) {
             include $hook;
@@ -1628,7 +1614,7 @@ class Order
         // Retrieve an order from the database, and put it back into the session
         if (!empty($order_id)) {
             // Fetch summary
-            if (($summary = $GLOBALS['db']->select('CubeCart_order_summary', 'basket', array('cart_order_id' => (string)$order_id), false, false, false, false)) !== false) {
+            if (($summary = $GLOBALS['db']->select('CubeCart_order_summary', 'basket', ['cart_order_id' => (string)$order_id], false, false, false, false)) !== false) {
                 if ($this->_basket = unserialize($summary[0]['basket'])) {
                     $GLOBALS['cart']->save();
                     return true;
@@ -1641,7 +1627,7 @@ class Order
     /**
      * Save customers billing/delivery address
      */
-    private function _saveAddresses()
+    private function _saveAddresses(): void
     {
         if (($addresses = $GLOBALS['user']->getAddresses()) !== false) {
             if (isset($_POST['delivery_address']) && is_numeric($_POST['delivery_address'])) {
@@ -1672,13 +1658,12 @@ class Order
      * Send gift certificate va email
      *
      * @param int $coupon_id
-     * @param array $data
      * @return bool
      */
-    private function _sendCoupon($coupon_id, $data)
+    private function _sendCoupon($coupon_id, array $data)
     {
         if (!empty($coupon_id)) {
-            if (($coupon = $GLOBALS['db']->select('CubeCart_coupons', false, array('coupon_id' => (int)$coupon_id, 'email_sent' => 0))) !== false) {
+            if (($coupon = $GLOBALS['db']->select('CubeCart_coupons', false, ['coupon_id' => (int)$coupon_id, 'email_sent' => 0])) !== false) {
                 $mailer = new Mailer();
                 if (isset($data['value'])) {
                     $data['value'] = Tax::getInstance()->priceFormat($data['value']);
@@ -1686,7 +1671,7 @@ class Order
                 $data['storeURL']  = $GLOBALS['storeURL'];
                 if (($content = $mailer->loadContent('cart.gift_certificate', $this->_order_summary['lang'], array_merge($this->_order_summary, $data, $coupon[0]))) !== false) {
                     if (($return = $mailer->sendEmail($data['email'], $content)) !== false) {
-                        $GLOBALS['db']->update('CubeCart_coupons', array('email_sent' => 1), array('coupon_id' => (int)$coupon_id));
+                        $GLOBALS['db']->update('CubeCart_coupons', ['email_sent' => 1], ['coupon_id' => (int)$coupon_id]);
                     } else {
                         if (isset($mailer->ErrorInfo) && !empty($mailer->ErrorInfo)) {
                             trigger_error($mailer->ErrorInfo, E_USER_WARNING);
@@ -1705,22 +1690,22 @@ class Order
     /**
      * Auto cancel orders over x seconds of age
      */
-    private function _tidyOrders()
+    private function _tidyOrders(): void
     {
         $expire = $GLOBALS['config']->get('config', 'basket_order_expire');
         if (!empty($expire) && is_numeric($expire)) {
-            $expire = time()-$expire;
-            if (($orders = $GLOBALS['db']->select('CubeCart_order_summary', array('cart_order_id'), array('status' => 1, 'order_date' => '<'.$expire), false, false, false, false)) !== false) {
+            $expire = time() - $expire;
+            if (($orders = $GLOBALS['db']->select('CubeCart_order_summary', ['cart_order_id'], ['status' => 1, 'order_date' => '<'.$expire], false, false, false, false)) !== false) {
                 foreach ($orders as $order) {
                     // Manage stock
                     $this->_manageStock(self::ORDER_CANCELLED, $order['cart_order_id']);
                     // Cancel the order
-                    $GLOBALS['db']->update('CubeCart_order_summary', array('status' => self::ORDER_CANCELLED), array('cart_order_id' => $order['cart_order_id']));
+                    $GLOBALS['db']->update('CubeCart_order_summary', ['status' => self::ORDER_CANCELLED], ['cart_order_id' => $order['cart_order_id']]);
 
-                    $log = array(
+                    $log = [
                         'notes' => 'Order cancelled automatically as it has been left in a pending state longer than allowed. See &quot;Time (in seconds) before expiring pending orders&quot; in the &quot;Features&quot; tab of the stores settings to adjust or disable this time limit.',
-                        'order_id' => $order['cart_order_id']
-                    );
+                        'order_id' => $order['cart_order_id'],
+                    ];
                     $this->logTransaction($log, true);
                     $this->_addHistory($order['cart_order_id'], self::ORDER_CANCELLED, 'E');
                 }
@@ -1730,22 +1715,20 @@ class Order
 
     /**
      * Update order inventory from basket changes
-     *
-     * @return bool
      */
-    private function _updateOrder()
+    private function _updateOrder(): bool
     {
         // Add new items to the order, as long as its only 'Pending'
         if (!isset($this->_basket['order_status']) || $this->_basket['order_status'] < self::ORDER_PROCESS) {
-            $order_items = $GLOBALS['db']->select('CubeCart_order_inventory', array('id', 'digital', 'hash', 'quantity'), array('cart_order_id' => $this->_order_id), false, false, false, false);
-            $digital = array();
+            $order_items = $GLOBALS['db']->select('CubeCart_order_inventory', ['id', 'digital', 'hash', 'quantity'], ['cart_order_id' => $this->_order_id], false, false, false, false);
+            $digital = [];
             if ($order_items) {
                 foreach ($order_items as $order_item) {
-                    $stored_items[$order_item['hash']] = array(
+                    $stored_items[$order_item['hash']] = [
                         'id'    => $order_item['id'],
                         'digital'   => $order_item['digital'],
-                        'quantity'   => $order_item['quantity']
-                    );
+                        'quantity'   => $order_item['quantity'],
+                    ];
                     if ($order_item['digital']) {
                         $digital[] = $order_item['hash'];
                     }
@@ -1755,10 +1738,12 @@ class Order
             // Add products
             foreach ($this->_basket['contents'] as $hash => $item) {
                 $basket_items[] = $hash;
-                if (is_array($stored_items[$hash]) && $stored_items[$hash]['quantity']!==$item['quantity']) {
-                    $record = array('quantity' => $item['quantity'], 'tax' => ($item['tax_each'] !== false ? $item['tax_each']['amount'] : 0));
-                    foreach ($GLOBALS['hooks']->load('class.order.products.update.pre') as $hook) include $hook;
-                    $GLOBALS['db']->update('CubeCart_order_inventory', $record, array('id' => $stored_items[$hash]['id'], 'cart_order_id' => $this->_order_id));
+                if (is_array($stored_items[$hash]) && $stored_items[$hash]['quantity'] !== $item['quantity']) {
+                    $record = ['quantity' => $item['quantity'], 'tax' => ($item['tax_each'] !== false ? $item['tax_each']['amount'] : 0)];
+                    foreach ($GLOBALS['hooks']->load('class.order.products.update.pre') as $hook) {
+                        include $hook;
+                    }
+                    $GLOBALS['db']->update('CubeCart_order_inventory', $record, ['id' => $stored_items[$hash]['id'], 'cart_order_id' => $this->_order_id]);
                 } elseif (!isset($stored_items[$hash])) {
                     $product = $this->_orderAddProduct($item, $hash);
                     $this->_basket['contents'][$hash] = (is_array($product)) ? array_merge($product, $item) : $item;
@@ -1769,10 +1754,10 @@ class Order
                 if (!in_array($hash, $basket_items)) {
                     if (in_array($hash, $digital)) {
                         ## Remove digital download record
-                        $GLOBALS['db']->delete('CubeCart_downloads', array('order_inv_id' => $data['id'], 'cart_order_id' => $this->_order_id));
+                        $GLOBALS['db']->delete('CubeCart_downloads', ['order_inv_id' => $data['id'], 'cart_order_id' => $this->_order_id]);
                     }
                     ## Remove product order record
-                    $GLOBALS['db']->delete('CubeCart_order_inventory', array('id' => $data['id'], 'cart_order_id' => $this->_order_id));
+                    $GLOBALS['db']->delete('CubeCart_order_inventory', ['id' => $data['id'], 'cart_order_id' => $this->_order_id]);
                 }
             }
             return true;

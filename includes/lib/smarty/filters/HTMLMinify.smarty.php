@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * HTMLMinify-Smarty: A simple Smarty filter to minify HTML
  * (C) 2017 Mark Hughes <m@rkhugh.es>
@@ -15,50 +17,57 @@ define('MINIFY_HTML_ENT', '&(?:[a-zA-Z\d]+|\#\d+|\#x[a-fA-F\d]+);');
 define('MINIFY_HTML_KEEP', '<pre(?:\s[^<>]*?)?>[\s\S]*?</pre>|<code(?:\s[^<>]*?)?>[\s\S]*?</code>|<script(?:\s[^<>]*?)?>[\s\S]*?</script>|<style(?:\s[^<>]*?)?>[\s\S]*?</style>|<textarea(?:\s[^<>]*?)?>[\s\S]*?</textarea>');
 
 // by default we minify URLs
-if ( ! defined("HTML_MINIFY_URL_ENABLED")) {
-	define("HTML_MINIFY_URL_ENABLED", true);
+if (! defined('HTML_MINIFY_URL_ENABLED')) {
+    define('HTML_MINIFY_URL_ENABLED', true);
 }
 
 // by default we minify inline CSS
-if ( ! defined("HTML_MINIFY_INLINE_CSS_ENABLED")) {
-	define("HTML_MINIFY_INLINE_CSS_ENABLED", true);
+if (! defined('HTML_MINIFY_INLINE_CSS_ENABLED')) {
+    define('HTML_MINIFY_INLINE_CSS_ENABLED', true);
 }
 
-
 // get URL
-if ( ! defined("HTML_MINIFY_URL")) {
-	$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] === 443 ? 'https' : 'http') . '://';
-	$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : "");
-	$url = $protocol . $host;
+if (! defined('HTML_MINIFY_URL')) {
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] === 443 ? 'https' : 'http') . '://';
+    $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '');
+    $url = $protocol . $host;
 } else {
-	$url = HTML_MINIFY_URL;
+    $url = HTML_MINIFY_URL;
 }
 
 // escape character
 define('X', "\x1A");
 
 // normalize line–break(s)
-function n($s) {
+function n($s)
+{
     return str_replace(["\r\n", "\r"], "\n", $s);
 }
 
 // trim once
-function t($a, $b) {
+function t($a, $b)
+{
     if ($a && strpos($a, $b) === 0 && substr($a, -strlen($b)) === $b) {
         return substr(substr($a, strlen($b)), 0, -strlen($b));
     }
     return $a;
 }
 
-function fn_minify($pattern, $input) {
+function fn_minify($pattern, $input)
+{
     return preg_split('#(' . implode('|', $pattern) . ')#', $input, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 }
 
-function fn_minify_css($input, $comment = 2, $quote = 2) {
-    if (!is_string($input) || !$input = n(trim($input))) return $input;
-    $output = $prev = "";
+function fn_minify_css($input, $comment = 2, $quote = 2)
+{
+    if (!is_string($input) || !$input = n(trim($input))) {
+        return $input;
+    }
+    $output = $prev = '';
     foreach (fn_minify([MINIFY_COMMENT_CSS, MINIFY_STRING], $input) as $part) {
-        if (trim($part) === "") continue;
+        if (trim($part) === '') {
+            continue;
+        }
         if ($comment !== 1 && strpos($part, '/*') === 0 && substr($part, -2) === '*/') {
             if (
                 $comment === 2 && (
@@ -96,10 +105,11 @@ function fn_minify_css($input, $comment = 2, $quote = 2) {
     return trim($output);
 }
 
-function fn_minify_css_union($input) {
+function fn_minify_css_union($input)
+{
     if (stripos($input, 'calc(') !== false) {
         // Keep important white–space(s) in `calc()`
-        $input = preg_replace_callback('#\b(calc\()\s*(.*?)\s*\)#i', function($m) {
+        $input = preg_replace_callback('#\b(calc\()\s*(.*?)\s*\)#i', function ($m) {
             return $m[1] . preg_replace('#\s+#', X, $m[2]) . ')';
         }, $input);
     }
@@ -127,7 +137,7 @@ function fn_minify_css_union($input) {
         // Remove the last semi–colon and replace multiple semi–colon(s) with a semi–colon [^11]
         '#;+([;\}])#',
         // Replace multiple white–space(s) with a space [^12]
-        '#\s+#'
+        '#\s+#',
     ], [
         // [^1]
         X . '$1',
@@ -152,17 +162,22 @@ function fn_minify_css_union($input) {
         // [^11]
         '$1',
         // [^12]
-        ' '
+        ' ',
     ], $input);
     return trim(str_replace(X, ' ', $input));
 }
 
-function fn_minify_html($input, $comment = 2, $quote = 1) {
-    if (!is_string($input) || !$input = n(trim($input))) return $input;
-    $output = $prev = "";
+function fn_minify_html($input, $comment = 2, $quote = 1)
+{
+    if (!is_string($input) || !$input = n(trim($input))) {
+        return $input;
+    }
+    $output = $prev = '';
     foreach (fn_minify([MINIFY_COMMENT_HTML, MINIFY_HTML_KEEP, MINIFY_HTML, MINIFY_HTML_ENT], $input) as $part) {
-        if ($part === "\n") continue;
-        if ($part !== ' ' && trim($part) === "" || $comment !== 1 && strpos($part, '<!--') === 0) {
+        if ($part === "\n") {
+            continue;
+        }
+        if ($part !== ' ' && trim($part) === '' || $comment !== 1 && strpos($part, '<!--') === 0) {
             // Detect IE conditional comment(s) by its closing tag …
             if ($comment === 2 && substr($part, -12) === '<![endif]-->') {
                 $output .= $part;
@@ -171,7 +186,7 @@ function fn_minify_html($input, $comment = 2, $quote = 1) {
         }
         if ($part[0] === '<' && substr($part, -1) === '>') {
             $output .= fn_minify_html_union($part, $quote);
-        } else if ($part[0] === '&' && substr($part, -1) === ';' && $part !== '<' && $part !== '>' && $part !== '&') {
+        } elseif ($part[0] === '&' && substr($part, -1) === ';' && $part !== '<' && $part !== '>' && $part !== '&') {
             $output .= html_entity_decode($part); // Evaluate HTML entit(y|ies)
         } else {
             $output .= preg_replace('#\s+#', ' ', $part);
@@ -185,18 +200,21 @@ function fn_minify_html($input, $comment = 2, $quote = 1) {
 '], [' ', ' ', "\n", "\n"], trim($output));
 }
 
-function fn_minify_html_union($input, $quote) {
+function fn_minify_html_union($input, $quote)
+{
     if (
         strpos($input, ' ') === false &&
         strpos($input, "\n") === false &&
         strpos($input, "\t") === false
-    ) return $input;
+    ) {
+        return $input;
+    }
     global $url;
-    return preg_replace_callback('#<\s*([^\/\s]+)\s*(?:>|(\s[^<>]+?)\s*>)#', function($m) use($quote, $url) {
+    return preg_replace_callback('#<\s*([^\/\s]+)\s*(?:>|(\s[^<>]+?)\s*>)#', function ($m) use ($quote, $url) {
         if (isset($m[2])) {
             // Minify inline CSS(s)
             if (stripos($m[2], ' style=') !== false && HTML_MINIFY_INLINE_CSS_ENABLED) {
-                $m[2] = preg_replace_callback('#( style=)([\'"]?)(.*?)\2#i', function($m) {
+                $m[2] = preg_replace_callback('#( style=)([\'"]?)(.*?)\2#i', function ($m) {
                     return $m[1] . $m[2] . fn_minify_css($m[3]) . $m[2];
                 }, $m[2]);
             }
@@ -208,14 +226,14 @@ function fn_minify_html_union($input, $quote) {
                     $url . '&',
                     $url . '#',
                     $url . '"',
-                    $url . "'"
+                    $url . "'",
                 ], [
                     '/',
                     '?',
                     '&',
                     '#',
                     '/"',
-                    "/'"
+                    "/'",
                 ], $m[2]);
             }
             $a = 'a(sync|uto(focus|play))|c(hecked|ontrols)|d(efer|isabled)|hidden|ismap|loop|multiple|open|re(adonly|quired)|s((cop|elect)ed|pellcheck)';
@@ -225,14 +243,14 @@ function fn_minify_html_union($input, $quote) {
                 // Remove extra white–space(s) between HTML attribute(s) [^2]
                 '#\s*([^\s=]+?)(=(?:\S+|([\'"]?).*?\3)|$)#',
                 // From `<img />` to `<img/>` [^3]
-                '#\s+\/$#'
+                '#\s+\/$#',
             ], [
                 // [^1]
                 ' $1',
                 // [^2]
                 ' $1$2',
                 // [^3]
-                '/'
+                '/',
             ], str_replace("\n", ' ', $m[2])) . '>';
             return $quote !== 1 ? fn_minify_html_union_attr($a) : $a;
         }
@@ -240,9 +258,12 @@ function fn_minify_html_union($input, $quote) {
     }, $input);
 }
 
-function fn_minify_html_union_attr($input) {
-    if (strpos($input, '=') === false) return $input;
-    return preg_replace_callback('#=(' . MINIFY_STRING . ')#', function($m) {
+function fn_minify_html_union_attr($input)
+{
+    if (strpos($input, '=') === false) {
+        return $input;
+    }
+    return preg_replace_callback('#=(' . MINIFY_STRING . ')#', function ($m) {
         $q = $m[1][0];
         if (strpos($m[1], ' ') === false && preg_match('#^' . $q . '[a-zA-Z_][\w-]*?' . $q . '$#', $m[1])) {
             return '=' . t($m[1], $q);
@@ -252,6 +273,7 @@ function fn_minify_html_union_attr($input) {
 }
 
 // used for smarty hook
-function minify_html($tpl_output, Smarty_Internal_Template $template) {
-	return fn_minify_html($tpl_output);
+function minify_html($tpl_output, Smarty_Internal_Template $template)
+{
+    return fn_minify_html($tpl_output);
 }

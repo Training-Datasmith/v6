@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -11,7 +13,7 @@
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
 $GLOBALS['main']->addTabControl($lang['settings']['release_notes'], 'general');
-$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(array('node')), true);
+$GLOBALS['gui']->addBreadcrumb($lang['settings']['release_notes'], currentPage(['node']), true);
 
 $list_view = <<<END
     <div>List view aded to filemanager.</div>
@@ -40,9 +42,9 @@ $emoji = <<<END
 
 END;
 
-$features = array( 
-	'3543' => $list_view,
-	'3544' => 'Sorter added to filemanager for name, date added and filesize (see screenshot above).',
+$features = [
+    '3543' => $list_view,
+    '3544' => 'Sorter added to filemanager for name, date added and filesize (see screenshot above).',
     '3536' => 'reCaptcha added to password recovery tool.',
     '3532' => 'Customer comments icon with link added to dashboard orders (unsettled orders) list.',
     '3525' => 'Bulk action to add/remove orders from dashboard (unsettled orders).',
@@ -57,7 +59,6 @@ $features = array(
     '3392' => $product_dates,
     '3385' => 'Switch off order email whilst in PayPal Sandbox mode (PayPal Commerce 1.9.5+ required).',
     '3420' => $emoji,
-);
+];
 $notes = '';
 $page_content = $GLOBALS['main']->newFeatures($_GET['node'], $features, 95, $notes);
-?>

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -18,7 +20,7 @@
  */
 function smarty_outputfilter_trimwhitespace($source)
 {
-    $store = array();
+    $store = [];
     $_store = 0;
     $_offset = 0;
     // Unify Line-Breaks to \n
@@ -61,7 +63,7 @@ function smarty_outputfilter_trimwhitespace($source)
             $_store++;
         }
     }
-    $expressions = array(// replace multiple spaces between tags by a single space
+    $expressions = [// replace multiple spaces between tags by a single space
                          // can't remove them entirely, becaue that might break poorly implemented CSS display:inline-block elements
                          '#(:SMARTY@!@|>)\s+(?=@!@SMARTY:|<)#s'                                    => '\1 \2',
                          // remove spaces between attributes (but not in attribute values!)
@@ -70,7 +72,7 @@ function smarty_outputfilter_trimwhitespace($source)
                          // maybe a \0 byte or something is interfering?
                          '#^\s+<#Ss'                                                               => '<',
                          '#>\s+$#Ss'                                                               => '>',
-    );
+    ];
     $source = preg_replace(array_keys($expressions), array_values($expressions), $source);
     // note: for some very weird reason trim() seems to remove spaces inside attributes.
     // maybe a \0 byte or something is interfering?

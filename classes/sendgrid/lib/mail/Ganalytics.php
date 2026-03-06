@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Ganalytics object for a /mail/send API call
  */
@@ -75,7 +77,7 @@ class Ganalytics implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable)
+    public function setEnable($enable): void
     {
         Assert::boolean($enable, 'enable');
 
@@ -100,7 +102,7 @@ class Ganalytics implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setCampaignSource($utm_source)
+    public function setCampaignSource($utm_source): void
     {
         Assert::string($utm_source, 'utm_source');
 
@@ -124,7 +126,7 @@ class Ganalytics implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setCampaignMedium($utm_medium)
+    public function setCampaignMedium($utm_medium): void
     {
         Assert::string($utm_medium, 'utm_medium');
 
@@ -148,7 +150,7 @@ class Ganalytics implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setCampaignTerm($utm_term)
+    public function setCampaignTerm($utm_term): void
     {
         Assert::string($utm_term, 'utm_term');
 
@@ -173,7 +175,7 @@ class Ganalytics implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setCampaignContent($utm_content)
+    public function setCampaignContent($utm_content): void
     {
         Assert::string($utm_content, 'utm_content');
 
@@ -197,7 +199,7 @@ class Ganalytics implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setCampaignName($utm_campaign)
+    public function setCampaignName($utm_campaign): void
     {
         Assert::string($utm_campaign, 'utm_campaign');
 
@@ -229,11 +231,9 @@ class Ganalytics implements \JsonSerializable
                 'utm_medium' => $this->getCampaignMedium(),
                 'utm_term' => $this->getCampaignTerm(),
                 'utm_content' => $this->getCampaignContent(),
-                'utm_campaign' => $this->getCampaignName()
+                'utm_campaign' => $this->getCampaignName(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (bool|string $value) => $value !== null
         ) ?: null;
     }
 }

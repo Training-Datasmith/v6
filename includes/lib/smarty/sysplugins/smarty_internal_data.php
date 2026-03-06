@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Plugin Data
  * This file contains the basic classes and methods for template and variable creation
@@ -50,7 +52,7 @@ abstract class Smarty_Internal_Data
      *
      * @var Smarty_Variable[]
      */
-    public $tpl_vars = array();
+    public $tpl_vars = [];
 
     /**
      * parent template (if any)
@@ -64,7 +66,7 @@ abstract class Smarty_Internal_Data
      *
      * @var string[]
      */
-    public $config_vars = array();
+    public $config_vars = [];
 
     /**
      * extension handler

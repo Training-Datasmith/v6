@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * TplFunction Runtime Methods callTemplateFunction
  *
@@ -131,10 +133,10 @@ class Smarty_Internal_Runtime_TplFunction
                                 $tplPtr,
                                 preg_replace('/\s*\?>\s*$/', "\n", $content) .
                                 "\n" . preg_replace(
-                                    array(
+                                    [
                                         '/^\s*<\?php\s+/',
                                         '/\s*\?>\s*$/',
-                                    ),
+                                    ],
                                     "\n",
                                     $match[ 0 ]
                                 )
@@ -157,7 +159,7 @@ class Smarty_Internal_Runtime_TplFunction
     public function saveTemplateVariables(Smarty_Internal_Template $tpl, $name)
     {
         $tpl->_cache[ 'varStack' ][] =
-            array('tpl' => $tpl->tpl_vars, 'config' => $tpl->config_vars, 'name' => "_tplFunction_{$name}");
+            ['tpl' => $tpl->tpl_vars, 'config' => $tpl->config_vars, 'name' => "_tplFunction_{$name}"];
     }
 
     /**

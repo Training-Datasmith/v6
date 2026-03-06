@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the SubscriptionTracking object for a /mail/send API call
  */
@@ -92,7 +94,7 @@ class SubscriptionTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable)
+    public function setEnable($enable): void
     {
         Assert::boolean($enable, 'enable');
 
@@ -119,7 +121,7 @@ class SubscriptionTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setText($text)
+    public function setText($text): void
     {
         Assert::string($text, 'text');
 
@@ -146,7 +148,7 @@ class SubscriptionTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setHtml($html)
+    public function setHtml($html): void
     {
         Assert::string($html, 'html');
 
@@ -176,7 +178,7 @@ class SubscriptionTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setSubstitutionTag($substitution_tag)
+    public function setSubstitutionTag($substitution_tag): void
     {
         Assert::string($substitution_tag, 'substitution_tag');
 
@@ -207,11 +209,9 @@ class SubscriptionTracking implements \JsonSerializable
                 'enable' => $this->getEnable(),
                 'text' => $this->getText(),
                 'html' => $this->getHtml(),
-                'substitution_tag' => $this->getSubstitutionTag()
+                'substitution_tag' => $this->getSubstitutionTag(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (bool|string $value) => $value !== null
         ) ?: null;
     }
 }

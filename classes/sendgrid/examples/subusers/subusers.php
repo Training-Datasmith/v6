@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -112,7 +114,7 @@ try {
 $request_body = json_decode('{
   "disabled": false
 }');
-$subuser_name = "test_url_param";
+$subuser_name = 'test_url_param';
 
 try {
     $response = $sg->client->subusers()->_($subuser_name)->patch($request_body);
@@ -127,7 +129,7 @@ try {
 // Delete a subuser #
 // DELETE /subusers/{subuser_name} #
 
-$subuser_name = "test_url_param";
+$subuser_name = 'test_url_param';
 
 try {
     $response = $sg->client->subusers()->_($subuser_name)->delete();
@@ -145,7 +147,7 @@ try {
 $request_body = json_decode('[
   "127.0.0.1"
 ]');
-$subuser_name = "test_url_param";
+$subuser_name = 'test_url_param';
 
 try {
     $response = $sg->client->subusers()->_($subuser_name)->ips()->put($request_body);
@@ -164,7 +166,7 @@ $request_body = json_decode('{
   "email": "example@example.com",
   "frequency": 500
 }');
-$subuser_name = "test_url_param";
+$subuser_name = 'test_url_param';
 
 try {
     $response = $sg->client->subusers()->_($subuser_name)->monitor()->put($request_body);
@@ -183,7 +185,7 @@ $request_body = json_decode('{
   "email": "example@example.com",
   "frequency": 50000
 }');
-$subuser_name = "test_url_param";
+$subuser_name = 'test_url_param';
 
 try {
     $response = $sg->client->subusers()->_($subuser_name)->monitor()->post($request_body);
@@ -198,7 +200,7 @@ try {
 // Retrieve monitor settings for a subuser #
 // GET /subusers/{subuser_name}/monitor #
 
-$subuser_name = "test_url_param";
+$subuser_name = 'test_url_param';
 
 try {
     $response = $sg->client->subusers()->_($subuser_name)->monitor()->get();
@@ -213,7 +215,7 @@ try {
 // Delete monitor settings #
 // DELETE /subusers/{subuser_name}/monitor #
 
-$subuser_name = "test_url_param";
+$subuser_name = 'test_url_param';
 
 try {
     $response = $sg->client->subusers()->_($subuser_name)->monitor()->delete();
@@ -229,7 +231,7 @@ try {
 // GET /subusers/{subuser_name}/stats/monthly #
 
 $query_params = json_decode('{"date": "test_string", "sort_by_direction": "asc", "limit": 1, "sort_by_metric": "test_string", "offset": 1}');
-$subuser_name = "test_url_param";
+$subuser_name = 'test_url_param';
 
 try {
     $response = $sg->client->subusers()->_($subuser_name)->stats()->monthly()->get(null, $query_params);

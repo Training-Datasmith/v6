@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -15,7 +17,6 @@ if (!defined('CC_INI_SET')) {
 }
 Admin::getInstance()->permissions('settings', CC_PERM_READ, true);
 
-
 $GLOBALS['gui']->addBreadcrumb($lang['settings']['title_currency']);
 
 ###########################################
@@ -26,7 +27,7 @@ if (isset($_POST['autoupdate']) && Admin::getInstance()->permissions('settings',
     }
     $cron = new Cron();
     $result = $cron->updateExchangeRates('', false);
-    if(!empty($result)) {
+    if (!empty($result)) {
         $GLOBALS['main']->successMessage($lang['settings']['notify_currency_rates_update']);
     } else {
         $GLOBALS['main']->errorMessage($lang['settings']['notify_currency_rates_update_fail']);
@@ -54,7 +55,7 @@ if (isset($_POST['update_manual']) && Admin::getInstance()->permissions('setting
                 $array['value']   = round((float)$array['value'], 6);
                 $array['updated'] = time();
             }
-            if ($GLOBALS['db']->update('CubeCart_currency', $array, array('code' => $code), true)) {
+            if ($GLOBALS['db']->update('CubeCart_currency', $array, ['code' => $code], true)) {
                 $updated = true;
             }
         }
@@ -68,7 +69,7 @@ if (isset($_POST['update_manual']) && Admin::getInstance()->permissions('setting
 }
 
 if (isset($_GET['delete'])) {
-    if (Admin::getInstance()->permissions('settings', CC_PERM_DELETE) && $GLOBALS['db']->delete('CubeCart_currency', array('code' => $_GET['delete']))) {
+    if (Admin::getInstance()->permissions('settings', CC_PERM_DELETE) && $GLOBALS['db']->delete('CubeCart_currency', ['code' => $_GET['delete']])) {
         $GLOBALS['main']->successMessage(sprintf($lang['settings']['error_currency_delete'], $_GET['delete']));
     } else {
         $GLOBALS['main']->errorMessage($lang['settings']['error_currency_delete']);
@@ -85,7 +86,7 @@ foreach ($GLOBALS['hooks']->load('admin.settings.currency.post_process') as $hoo
 $GLOBALS['main']->addTabControl($lang['settings']['tab_currency_rate'], 'exchange');
 $GLOBALS['main']->addTabControl($lang['settings']['tab_currency_add'], 'addrate');
 
-if (($currencies = $GLOBALS['db']->select('CubeCart_currency', false, false, array('active' => 'DESC', 'code' => 'ASC'))) !== false) {
+if (($currencies = $GLOBALS['db']->select('CubeCart_currency', false, false, ['active' => 'DESC', 'code' => 'ASC'])) !== false) {
     foreach ($currencies as $currency) {
         $currency['updated'] = formatTime($currency['updated']);
         $smarty_data['currencies'][] = $currency;

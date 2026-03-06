@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -10,7 +11,7 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Elastic\Elasticsearch\Response;
 
@@ -30,13 +31,12 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * Wraps a PSR-7 ResponseInterface offering helpers to deserialize the body response
  */
-class Elasticsearch implements ElasticsearchInterface, ResponseInterface, ArrayAccess
+class Elasticsearch implements ElasticsearchInterface, ResponseInterface, ArrayAccess, \Stringable
 {
-    const HEADER_CHECK = 'X-Elastic-Product';
-    const PRODUCT_NAME = 'Elasticsearch';
-
     use ProductCheckTrait;
     use MessageResponseTrait;
+    public const HEADER_CHECK = 'X-Elastic-Product';
+    public const PRODUCT_NAME = 'Elasticsearch';
 
     protected array $asArray;
     protected object $asObject;
@@ -63,13 +63,14 @@ class Elasticsearch implements ElasticsearchInterface, ResponseInterface, ArrayA
         $status = $response->getStatusCode();
         if ($throwException && $status > 399 && $status < 500) {
             $error = new ClientResponseException(
-                sprintf("%s %s: %s", $status, $response->getReasonPhrase(), (string) $response->getBody()),
+                sprintf('%s %s: %s', $status, $response->getReasonPhrase(), (string) $response->getBody()),
                 $status
             );
             throw $error->setResponse($response);
-        } elseif ($throwException && $status > 499 && $status < 600) {
+        }
+        if ($throwException && $status > 499 && $status < 600) {
             $error = new ServerResponseException(
-                sprintf("%s %s: %s", $status, $response->getReasonPhrase(), (string) $response->getBody()),
+                sprintf('%s %s: %s', $status, $response->getReasonPhrase(), (string) $response->getBody()),
                 $status
             );
             throw $error->setResponse($response);
@@ -81,14 +82,14 @@ class Elasticsearch implements ElasticsearchInterface, ResponseInterface, ArrayA
      */
     public function asBool(): bool
     {
-        return $this->response->getStatusCode() >=200 && $this->response->getStatusCode() < 300;
+        return $this->response->getStatusCode() >= 200 && $this->response->getStatusCode() < 300;
     }
 
     /**
      * Converts the body content to array, if possible.
      * Otherwise, it throws an UnknownContentTypeException
      * if Content-Type is not specified or unknown.
-     * 
+     *
      * @throws UnknownContentTypeException
      */
     public function asArray(): array
@@ -100,22 +101,22 @@ class Elasticsearch implements ElasticsearchInterface, ResponseInterface, ArrayA
             throw new UnknownContentTypeException('No Content-Type specified in the response');
         }
         $contentType = $this->response->getHeaderLine('Content-Type');
-        if (strpos($contentType, 'application/json') !== false ||
-            strpos($contentType, 'application/vnd.elasticsearch+json') !== false) {
+        if (str_contains($contentType, 'application/json') ||
+            str_contains($contentType, 'application/vnd.elasticsearch+json')) {
             $this->asArray = JsonSerializer::unserialize($this->asString());
             return $this->asArray;
         }
-        if (strpos($contentType, 'application/x-ndjson') !== false ||
-            strpos($contentType, 'application/vnd.elasticsearch+x-ndjson') !== false) {
+        if (str_contains($contentType, 'application/x-ndjson') ||
+            str_contains($contentType, 'application/vnd.elasticsearch+x-ndjson')) {
             $this->asArray = NDJsonSerializer::unserialize($this->asString());
             return $this->asArray;
         }
-        if (strpos($contentType, 'text/csv') !== false) {
+        if (str_contains($contentType, 'text/csv')) {
             $this->asArray = CsvSerializer::unserialize($this->asString());
             return $this->asArray;
         }
         throw new UnknownContentTypeException(sprintf(
-            "Cannot deserialize the reponse as array with Content-Type: %s",
+            'Cannot deserialize the reponse as array with Content-Type: %s',
             $contentType
         ));
     }
@@ -124,7 +125,7 @@ class Elasticsearch implements ElasticsearchInterface, ResponseInterface, ArrayA
      * Converts the body content to object, if possible.
      * Otherwise, it throws an UnknownContentTypeException
      * if Content-Type is not specified or unknown.
-     * 
+     *
      * @throws UnknownContentTypeException
      */
     public function asObject(): object
@@ -133,22 +134,22 @@ class Elasticsearch implements ElasticsearchInterface, ResponseInterface, ArrayA
             return $this->asObject;
         }
         $contentType = $this->response->getHeaderLine('Content-Type');
-        if (strpos($contentType, 'application/json') !== false ||
-            strpos($contentType, 'application/vnd.elasticsearch+json') !== false) {
+        if (str_contains($contentType, 'application/json') ||
+            str_contains($contentType, 'application/vnd.elasticsearch+json')) {
             $this->asObject = JsonSerializer::unserialize($this->asString(), ['type' => 'object']);
             return $this->asObject;
         }
-        if (strpos($contentType, 'application/x-ndjson') !== false ||
-            strpos($contentType, 'application/vnd.elasticsearch+x-ndjson') !== false) {
+        if (str_contains($contentType, 'application/x-ndjson') ||
+            str_contains($contentType, 'application/vnd.elasticsearch+x-ndjson')) {
             $this->asObject = NDJsonSerializer::unserialize($this->asString(), ['type' => 'object']);
             return $this->asObject;
         }
-        if (strpos($contentType, 'text/xml') !== false || strpos($contentType, 'application/xml') !== false) {
+        if (str_contains($contentType, 'text/xml') || str_contains($contentType, 'application/xml')) {
             $this->asObject = XmlSerializer::unserialize($this->asString());
             return $this->asObject;
         }
         throw new UnknownContentTypeException(sprintf(
-            "Cannot deserialize the reponse as object with Content-Type: %s",
+            'Cannot deserialize the reponse as object with Content-Type: %s',
             $contentType
         ));
     }
@@ -174,27 +175,27 @@ class Elasticsearch implements ElasticsearchInterface, ResponseInterface, ArrayA
 
     /**
      * Access the body content as object properties
-     * 
+     *
      * @see https://www.php.net/manual/en/language.oop5.overloading.php#object.get
      */
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         return $this->asObject()->$name ?? null;
     }
 
     /**
      * ArrayAccess interface
-     * 
+     *
      * @see https://www.php.net/manual/en/class.arrayaccess.php
      */
     public function offsetExists($offset): bool
     {
         return isset($this->asArray()[$offset]);
     }
- 
+
     /**
      * ArrayAccess interface
-     * 
+     *
      * @see https://www.php.net/manual/en/class.arrayaccess.php
      */
     #[\ReturnTypeWillChange]
@@ -205,7 +206,7 @@ class Elasticsearch implements ElasticsearchInterface, ResponseInterface, ArrayA
 
     /**
      * ArrayAccess interface
-     * 
+     *
      * @see https://www.php.net/manual/en/class.arrayaccess.php
      */
     public function offsetSet($offset, $value): void
@@ -215,7 +216,7 @@ class Elasticsearch implements ElasticsearchInterface, ResponseInterface, ArrayA
 
     /**
      * ArrayAccess interface
-     * 
+     *
      * @see https://www.php.net/manual/en/class.arrayaccess.php
      */
     public function offsetUnset($offset): void

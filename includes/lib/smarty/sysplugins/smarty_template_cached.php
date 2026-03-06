@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Created by PhpStorm.
  * User: Uwe Tews
@@ -70,7 +72,7 @@ class Smarty_Template_Cached extends Smarty_Template_Resource_Base
      *
      * @var array
      */
-    public $hashes = array();
+    public $hashes = [];
 
     /**
      * Flag if this is a cache resource

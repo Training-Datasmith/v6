@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elasticsearch PHP Client
  *
@@ -18,5 +19,4 @@ use InvalidArgumentException as InvalidArgument;
 
 class InvalidArgumentException extends InvalidArgument implements ElasticsearchException
 {
-
 }

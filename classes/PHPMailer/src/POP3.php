@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * PHPMailer POP-Before-SMTP Authentication Class.
  * PHP Version 5.5.
@@ -46,21 +48,21 @@ class POP3
      *
      * @var string
      */
-    const VERSION = '6.4.1';
+    public const VERSION = '6.4.1';
 
     /**
      * Default POP3 port number.
      *
      * @var int
      */
-    const DEFAULT_PORT = 110;
+    public const DEFAULT_PORT = 110;
 
     /**
      * Default timeout in seconds.
      *
      * @var int
      */
-    const DEFAULT_TIMEOUT = 30;
+    public const DEFAULT_TIMEOUT = 30;
 
     /**
      * POP3 class debug output mode.
@@ -133,14 +135,14 @@ class POP3
     /**
      * Line break constant.
      */
-    const LE = "\r\n";
+    public const LE = "\r\n";
 
     /**
      * Debug level for no output.
      *
      * @var int
      */
-    const DEBUG_OFF = 0;
+    public const DEBUG_OFF = 0;
 
     /**
      * Debug level to show server -> client messages
@@ -148,14 +150,14 @@ class POP3
      *
      * @var int
      */
-    const DEBUG_SERVER = 1;
+    public const DEBUG_SERVER = 1;
 
     /**
      * Debug level to show client -> server and server -> client messages.
      *
      * @var int
      */
-    const DEBUG_CLIENT = 2;
+    public const DEBUG_CLIENT = 2;
 
     /**
      * Simple static wrapper for all-in-one POP before SMTP.
@@ -193,10 +195,8 @@ class POP3
      * @param string   $username
      * @param string   $password
      * @param int      $debug_level
-     *
-     * @return bool
      */
-    public function authorise($host, $port = false, $timeout = false, $username = '', $password = '', $debug_level = 0)
+    public function authorise($host, $port = false, $timeout = false, $username = '', $password = '', $debug_level = 0): bool
     {
         $this->host = $host;
         //If no port value provided, use default
@@ -238,10 +238,8 @@ class POP3
      * @param string   $host
      * @param int|bool $port
      * @param int      $tval
-     *
-     * @return bool
      */
-    public function connect($host, $port = false, $tval = 30)
+    public function connect($host, $port = false, $tval = 30): bool
     {
         //Are we already connected?
         if ($this->connected) {
@@ -250,7 +248,7 @@ class POP3
 
         //On Windows this will raise a PHP Warning error if the hostname doesn't exist.
         //Rather than suppress it with @fsockopen, capture it cleanly instead
-        set_error_handler([$this, 'catchWarning']);
+        set_error_handler($this->catchWarning(...));
 
         if (false === $port) {
             $port = static::DEFAULT_PORT;
@@ -301,10 +299,8 @@ class POP3
      *
      * @param string $username
      * @param string $password
-     *
-     * @return bool
      */
-    public function login($username = '', $password = '')
+    public function login($username = '', $password = ''): bool
     {
         if (!$this->connected) {
             $this->setError('Not connected to POP3 server');
@@ -334,14 +330,14 @@ class POP3
     /**
      * Disconnect from the POP3 server.
      */
-    public function disconnect()
+    public function disconnect(): void
     {
         $this->sendString('QUIT');
         //The QUIT command may cause the daemon to exit, which will kill our connection
         //So ignore errors here
         try {
             @fclose($this->pop_conn);
-        } catch (Exception $e) {
+        } catch (Exception) {
             //Do nothing
         }
     }
@@ -353,7 +349,7 @@ class POP3
      *
      * @return string
      */
-    protected function getResponse($size = 128)
+    protected function getResponse($size = 128): string|false
     {
         $response = fgets($this->pop_conn, $size);
         if ($this->do_debug >= self::DEBUG_SERVER) {
@@ -370,7 +366,7 @@ class POP3
      *
      * @return int
      */
-    protected function sendString($string)
+    protected function sendString($string): int|false
     {
         if ($this->pop_conn) {
             if ($this->do_debug >= self::DEBUG_CLIENT) { //Show client messages when debug >= 2
@@ -388,12 +384,10 @@ class POP3
      * Looks for for +OK or -ERR.
      *
      * @param string $string
-     *
-     * @return bool
      */
-    protected function checkResponse($string)
+    protected function checkResponse($string): bool
     {
-        if (strpos($string, '+OK') !== 0) {
+        if (!str_starts_with($string, '+OK')) {
             $this->setError("Server reported an error: $string");
 
             return false;

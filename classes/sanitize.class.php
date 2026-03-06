@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -20,11 +22,10 @@
  */
 class Sanitize
 {
-
     /**
      * Checks GET & POSTs for valid security token
      */
-    public static function checkToken()
+    public static function checkToken(): void
     {
         // Check defined CSRF on speficfied GET
         if (ADMIN_CP) {
@@ -34,17 +35,17 @@ class Sanitize
                 require_once($csrf_path);
                 if (is_array($csrf_maps)) {
                     // All CRSF mappings are lowercase
-                    $g = array();
-                    if(is_array($_GET)) {
-                        foreach($_GET as $k => $v) {
-                            $g[strtolower($k)] = is_string($v) ? strtolower($v) : $v;
+                    $g = [];
+                    if (is_array($_GET)) {
+                        foreach ($_GET as $k => $v) {
+                            $g[strtolower((string) $k)] = is_string($v) ? strtolower($v) : $v;
                         }
                     }
                     foreach ($csrf_maps as $csrf_map) {
                         if (is_array($csrf_map)) {
                             $csrf_check = false;
                             foreach ($csrf_map as $key => $value) {
-                                if ((!$value && isset($g[$key])) || (isset($g[$key]) && $g[$key]==$value)) {
+                                if ((!$value && isset($g[$key])) || (isset($g[$key]) && $g[$key] == $value)) {
                                     $csrf_check = true;
                                 } else {
                                     $csrf_check = false;
@@ -69,9 +70,9 @@ class Sanitize
         if (!empty($_POST)) {
             $csrf_exception = false;
             // Exception for payment gateways
-            if (!isset($_GET['_a']) && isset($_GET['_g'], $_GET['type'], $_GET['cmd'], $_GET['module']) && in_array($_GET['_g'], array('remote','rm')) && $_GET['type']=='gateway' && in_array($_GET['cmd'], array('call', 'process')) && !empty($_GET['module'])) {
+            if (!isset($_GET['_a']) && isset($_GET['_g'], $_GET['type'], $_GET['cmd'], $_GET['module']) && in_array($_GET['_g'], ['remote','rm']) && $_GET['type'] == 'gateway' && in_array($_GET['cmd'], ['call', 'process']) && !empty($_GET['module'])) {
                 $csrf_exception = true;
-            } elseif (isset($_GET['_a']) && $_GET['_a']=='complete' && !isset($_GET['_g'])) {
+            } elseif (isset($_GET['_a']) && $_GET['_a'] == 'complete' && !isset($_GET['_g'])) {
                 $csrf_exception = true;
             }
 
@@ -87,14 +88,14 @@ class Sanitize
     /**
      * Clean all the global varaibles
      */
-    public static function cleanGlobals()
+    public static function cleanGlobals(): void
     {
-        $GLOBALS['RAW'] = array(
+        $GLOBALS['RAW'] = [
             'GET' 		=> $_GET,
             'POST' 		=> $_POST,
             'COOKIE' 	=> $_COOKIE,
-            'REQUEST' 	=> $_REQUEST
-        );
+            'REQUEST' 	=> $_REQUEST,
+        ];
 
         self::_clean($_GET);
         self::_clean($_POST);
@@ -109,7 +110,7 @@ class Sanitize
      *
      * @param array $data
      */
-    private static function _clean(&$data)
+    private static function _clean(&$data): void
     {
         if (empty($data)) {
             return;
@@ -117,17 +118,16 @@ class Sanitize
         if (is_array($data)) {
             foreach ($data as $key => $value) {
                 //Make sure the variable's key name is a valid one
-                if (preg_match('#([^a-z0-9\-\_\:\@\|])#i', urldecode($key))) {
-                    trigger_error('Security Warning: Illegal array key "'.htmlentities($key).'" was detected and was removed.', E_USER_WARNING);
+                if (preg_match('#([^a-z0-9\-\_\:\@\|])#i', urldecode((string) $key))) {
+                    trigger_error('Security Warning: Illegal array key "'.htmlentities((string) $key).'" was detected and was removed.', E_USER_WARNING);
                     unset($data[$key]);
                     continue;
+                }
+                if (is_array($value)) {
+                    self::_clean($data[$key]);
                 } else {
-                    if (is_array($value)) {
-                        self::_clean($data[$key]);
-                    } else {
-                        if (!empty($value)) {
-                            $data[$key] = self::_safety($value);
-                        }
+                    if (!empty($value)) {
+                        $data[$key] = self::_safety($value);
                     }
                 }
             }
@@ -140,9 +140,8 @@ class Sanitize
      * Sanitize a string for HTML
      *
      * @param string $value
-     * @return string
      */
-    private static function _safety($value)
+    private static function _safety($value): string
     {
         return htmlspecialchars(html_entity_decode($value));
     }
@@ -151,9 +150,9 @@ class Sanitize
      * Clears POST and triggers error
      * Used when the POST token is not valid
      */
-    private static function _stopToken()
+    private static function _stopToken(): void
     {
-        $_POST = $_GET = $_REQUEST = array();
+        $_POST = $_GET = $_REQUEST = [];
         $message = 'Security Alert: Possible Cross-Site Request Forgery (CSRF). <a href="https://support.cubecart.com/hc/en-gb/articles/360003831797">Learn more</a>.';
         $gui_message['error'][md5($message)] = $message;
         $GLOBALS['session']->set('GUI_MESSAGE', $gui_message);

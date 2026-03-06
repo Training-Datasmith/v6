@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Resource Data Object
  * Meta Data Container for Template Files

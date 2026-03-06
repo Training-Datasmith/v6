@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the Subject object for a /mail/send API call
  */
@@ -38,7 +40,7 @@ class Subject implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSubject($subject)
+    public function setSubject($subject): void
     {
         Assert::minLength($subject, 'subject', 1);
 
@@ -47,10 +49,8 @@ class Subject implements \JsonSerializable
 
     /**
      * Retrieve the subject from a Subject object
-     *
-     * @return string
      */
-    public function getSubject()
+    public function getSubject(): string
     {
         return mb_convert_encoding((string)$this->subject, 'UTF-8', 'UTF-8');
     }

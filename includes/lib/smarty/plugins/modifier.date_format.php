@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty plugin
  *
@@ -50,24 +52,24 @@ function smarty_modifier_date_format($string, $format = null, $default_date = ''
     }
     if ($formatter === 'strftime' || ($formatter === 'auto' && strpos($format, '%') !== false)) {
         if (Smarty::$_IS_WINDOWS) {
-            $_win_from = array(
+            $_win_from = [
                 '%D',
                 '%h',
                 '%n',
                 '%r',
                 '%R',
                 '%t',
-                '%T'
-            );
-            $_win_to = array(
+                '%T',
+            ];
+            $_win_to = [
                 '%m/%d/%y',
                 '%b',
                 "\n",
                 '%I:%M:%S %p',
                 '%H:%M',
                 "\t",
-                '%H:%M:%S'
-            );
+                '%H:%M:%S',
+            ];
             if (strpos($format, '%e') !== false) {
                 $_win_from[] = '%e';
                 $_win_to[] = sprintf('%\' 2d', date('j', $timestamp));

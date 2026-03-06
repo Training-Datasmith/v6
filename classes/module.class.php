@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -38,7 +40,7 @@ class Module
      *
      * @var array
      */
-    private $_info   = array();
+    private $_info   = [];
     /**
      * Module local name
      *
@@ -47,22 +49,16 @@ class Module
     private $_local_name;
     /**
      * Module name
-     *
-     * @var string
      */
-    private $_module_name;
+    private ?string $_module_name = null;
     /**
      * Module package file
-     *
-     * @var string
      */
-    private $_package_file = 'package.conf.inc';
+    private string $_package_file = 'package.conf.inc';
     /**
      * Module config dile
-     *
-     * @var string
      */
-    private $_package_xml = 'config.xml';
+    private string $_package_xml = 'config.xml';
     /**
      * Module path
      *
@@ -74,7 +70,7 @@ class Module
      *
      * @var array of strings
      */
-    private $_rawvarsout = array();
+    private array $_rawvarsout = [];
     /**
      * Module language strings
      *
@@ -88,23 +84,21 @@ class Module
      */
     private $_taxes;
     /**
-     * Template to load in the module
-     *
-     * @var string
-     */
-    private $_template;
-    /**
      * Template data
      *
      * @var array
      */
-    private $_template_data = array();
+    private $_template_data = [];
 
     ##############################################
-
-    public function __construct($path = false, $local_name = false, $template = 'index.tpl', $zones = false, $fetch = true)
+    /**
+     * @param string $template
+     */
+    public function __construct($path = false, $local_name = false, /**
+     * Template to load in the module
+     */
+        private $_template = 'index.tpl', $zones = false, $fetch = true)
     {
-        $this->_template = $template;
         if ($path) {
             // Load Package info
             $this->_module_data($path, $local_name);
@@ -116,7 +110,7 @@ class Module
                 $this->_info['name'] = str_replace('_', ' ', $this->_info['name']);
 
                 $this->_enumerateRawVars();
-                foreach ($this->_rawvarsout as $key => $key_name) {
+                foreach ($this->_rawvarsout as $key_name) {
                     $_POST['module'][$key_name] = $GLOBALS['RAW']['POST']['module'][$key_name];
                 }
                 if ($this->module_settings_save($_POST['module'])) {
@@ -143,21 +137,21 @@ class Module
             $GLOBALS['language']->loadLanguageXML($this->_module_name, '', $this->_path.'/language');
 
             // Enable this class as an ACP interface
-            if ($template) {
+            if ($this->_template) {
                 $GLOBALS['gui']->changeTemplateDir($this->_path.'/skin');
                 $module_lang_node = strtolower($this->_module_name);
                 $lang = $GLOBALS['language']->getStrings($module_lang_node);
-                $GLOBALS['smarty']->assign('TITLE', $this->module_fetch_logo($this->_info['type'], $this->_module_name, isset($lang['module_title']) ? $lang['module_title'] : str_replace('_',' ',$this->_module_name)));
+                $GLOBALS['smarty']->assign('TITLE', $this->module_fetch_logo($this->_info['type'], $this->_module_name, $lang['module_title'] ?? str_replace('_', ' ', $this->_module_name)));
 
                 // Get tax types for modules drop down box
-                if (($this->_taxes = $GLOBALS['db']->select('CubeCart_tax_class', array('id', 'tax_name'), false, array('tax_name' => 'ASC'))) !== false) {
-                    $inherited_tax[] = array(
+                if (($this->_taxes = $GLOBALS['db']->select('CubeCart_tax_class', ['id', 'tax_name'], false, ['tax_name' => 'ASC'])) !== false) {
+                    $inherited_tax[] = [
                         'id' => 999999,
-                        'tax_name' => $GLOBALS['language']->common['inherit']
-                    );
+                        'tax_name' => $GLOBALS['language']->common['inherit'],
+                    ];
                     $this->_taxes = array_merge($this->_taxes, $inherited_tax);
                     foreach ($this->_taxes as $tax) {
-                        $tax['selected'] = (isset($this->_settings['tax']) && $this->_settings['tax'] == $tax['id']) ? "selected='selected'" : "";
+                        $tax['selected'] = (isset($this->_settings['tax']) && $this->_settings['tax'] == $tax['id']) ? "selected='selected'" : '';
                         $taxes[] = $tax;
                     }
                     $GLOBALS['smarty']->assign('TAXES', $taxes);
@@ -175,7 +169,7 @@ class Module
                     // Allow for 3d arrays, key is subsistuted after MODULE_ in upper case
                     foreach ($this->_settings as $key => $value) {
                         if (is_array($value)) {
-                            $GLOBALS['smarty']->assign('MODULE_'.strtoupper($key), $value);
+                            $GLOBALS['smarty']->assign('MODULE_'.strtoupper((string) $key), $value);
                         } else {
                             $basesettings[$key] = $value;
                         }
@@ -183,9 +177,9 @@ class Module
                     $GLOBALS['smarty']->assign('MODULE', $basesettings);
                     // Assign checked & selects
                     if (is_array($this->_settings)) {
-                        $filter_result = array_filter($this->_settings, 'is_scalar');  // removes all NULLs
+                        $filter_result = array_filter($this->_settings, is_scalar(...));  // removes all NULLs
                         foreach ($filter_result as $setting => $value) {
-                            $value = str_replace(array('.', '-'), '_', $value);
+                            $value = str_replace(['.', '-'], '_', $value);
                             $GLOBALS['smarty']->assign('SELECT_'.$setting.'_'.$value, 'selected="selected"');
                             $GLOBALS['smarty']->assign('CHECKED_'.$setting.'_'.$value, 'checked="checked"');
                         }
@@ -208,18 +202,15 @@ class Module
                 }
             }
         }
-        return false;
     }
 
     //=====[ Public ]=======================================
-
     /**
      * Get a module value
      *
-     * @param string $key
      * @return string
      */
-    public function __get($key)
+    public function __get(string $key): mixed
     {
         return (array_key_exists($key, $this->_settings)) ? $this->_settings[$key] : false;
     }
@@ -229,37 +220,34 @@ class Module
      *
      * @param string $name
      * @param string $value
-     * @return bool
      */
-    public function assign_to_template($name, $value=null)
+    public function assign_to_template($name, $value = null): bool
     {
         if (is_array($name) && !empty($name)) {
             foreach ($name as $key => $value) {
                 $this->_template_data[$key] = $value;
             }
             return true;
-        } elseif (!empty($name) && !is_null($value)) {
+        }
+        if (!empty($name) && !is_null($value)) {
             $this->_template_data[$name] = $value;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
      * Generate URL
      *
      * @param string $method
-     * @return string
      */
-    public function communicateURL($method = 'process')
+    public function communicateURL($method = 'process'): string
     {
         // SSL is preferred
         if ($method == 'from') {
             return $GLOBALS['storeURL'].'/index.php?_a=gateway';
-        } else {
-            return $GLOBALS['storeURL'].'/index.php?_g=rm&type='.$this->_info['type'].'&cmd='.$method.'&module='.$this->_module_name;
         }
+        return $GLOBALS['storeURL'].'/index.php?_g=rm&type='.$this->_info['type'].'&cmd='.$method.'&module='.$this->_module_name;
     }
 
     /**
@@ -272,9 +260,8 @@ class Module
     {
         if ($return) {
             return $this->_content;
-        } else {
-            echo $this->_content;
         }
+        echo $this->_content;
     }
 
     /**
@@ -286,10 +273,8 @@ class Module
             return false;
         }
 
-        if (!empty($this->_template_data)) {
-            foreach ($this->_template_data as $key => $value) {
-                $GLOBALS['smarty']->assign($key, $value);
-            }
+        foreach ($this->_template_data as $key => $value) {
+            $GLOBALS['smarty']->assign($key, $value);
         }
         $this->_content = $GLOBALS['smarty']->fetch($this->_template);
         $GLOBALS['gui']->changeTemplateDir();
@@ -298,23 +283,22 @@ class Module
     /**
      * Get module logo
      *
-     * @param string $type
-     * @param string $name
      * @param string $module_title
      * @return string
      */
-    public function module_fetch_logo($type, $name, $module_title = '')
+    public function module_fetch_logo(string $type, string $name, $module_title = '')
     {
         $images = glob(CC_ROOT_DIR.'/modules/'.$type.'/'.$name.'/'.'admin/logo.{gif,jpg,png,svg}', GLOB_BRACE);
         // $name is the module folder name, $module_title is the title set in the module lang file which is preferable
         if (is_array($images) && isset($images[0])) {
             $title = (empty($module_title)) ? $name : $module_title;
             return '<img src="modules/'.$type.'/'.$name.'/admin/'.basename($images[0]).'" alt="'.$title.'" title="'.$title.'" width="114" />';
-        } elseif (!empty($module_title)) {
-            return $module_title;
-        } else {
-            return str_replace('_', ' ', $name);
         }
+        // $name is the module folder name, $module_title is the title set in the module lang file which is preferable
+        if (!empty($module_title)) {
+            return $module_title;
+        }
+        return str_replace('_', ' ', $name);
     }
 
     /**
@@ -323,7 +307,7 @@ class Module
      * @param string $label
      * @return serialized string/empty
      */
-    public function module_fetch_zones($label)
+    public function module_fetch_zones($label): string
     {
         if (!isset($_POST[$label]) || !is_array($_POST[$label])) {
             return '';
@@ -353,7 +337,7 @@ class Module
      * @param string $module_name
      * @return string
      */
-    public static function module_name(&$module_name)
+    public static function module_name(&$module_name): string|array|null
     {
         $module_name = preg_replace('#[^\w\-]#iU', '_', (string)$module_name);
         return $module_name;
@@ -375,23 +359,23 @@ class Module
 
             // Save packaging boxes to global config (shared across all shipping modules)
             if (isset($_POST['packaging_boxes'])) {
-                $boxes = array();
+                $boxes = [];
                 foreach ((array)$_POST['packaging_boxes'] as $box) {
                     if (!empty($box['name'])) {
-                        $boxes[] = array(
-                            'name' => trim($box['name']),
+                        $boxes[] = [
+                            'name' => trim((string) $box['name']),
                             'l'    => round((float)$box['l'], 4),
                             'w'    => round((float)$box['w'], 4),
                             'h'    => round((float)$box['h'], 4),
-                        );
+                        ];
                     }
                 }
                 $GLOBALS['config']->set('config', 'packaging_boxes', $boxes);
             }
-            $data = array(
+            $data = [
                 'status' => $settings['status'],
-                'position' => (isset($settings['position']) && $settings['position'] > 0) ? $settings['position'] : 0
-            );
+                'position' => (isset($settings['position']) && $settings['position'] > 0) ? $settings['position'] : 0,
+            ];
             if (isset($settings['default'])) {
                 $data['default'] = $settings['default'];
             }
@@ -401,16 +385,16 @@ class Module
             }
             if (isset($settings['default']) && $settings['default']) {
                 // If this is to be set as default then the others need to be unset
-                if ($GLOBALS['db']->update('CubeCart_modules', array('default' => 0), array('module' => $this->_info['type']))) {
+                if ($GLOBALS['db']->update('CubeCart_modules', ['default' => 0], ['module' => $this->_info['type']])) {
                     $updated = true;
                 }
             }
             // Delete to prevent potential duplicate nightmare
-            $GLOBALS['db']->delete('CubeCart_modules', array('module' => $this->_info['type'], 'folder' => $this->_local_name));
+            $GLOBALS['db']->delete('CubeCart_modules', ['module' => $this->_info['type'], 'folder' => $this->_local_name]);
             $data['folder'] = $this->_local_name;
             $data['module'] = $this->_info['type'];
             if ($GLOBALS['db']->insert('CubeCart_modules', $data)) {
-                $updated = true;
+                return true;
             }
             return $updated;
         }
@@ -422,7 +406,7 @@ class Module
     /**
      * Allow specified raw POST variables
      */
-    private function _enumerateRawVars()
+    private function _enumerateRawVars(): void
     {
         if (file_exists($this->_path.'/'.$this->_package_xml)) {
             try {
@@ -436,13 +420,11 @@ class Module
             }
         }
     }
-    
+
     /**
      * Load module classes
-     *
-     * @return bool
      */
-    private function _module_classes()
+    private function _module_classes(): bool
     {
         // Include all classes for the module
         if (is_dir($this->_path.'/'.'classes')) {
@@ -466,10 +448,10 @@ class Module
     {
         // Set Module Path
         if ($path) {
-            $drop = array( CC_DS.'admin',  CC_DS.'classes',  CC_DS.'skin',  CC_DS.'language');
+            $drop = [ CC_DS.'admin',  CC_DS.'classes',  CC_DS.'skin',  CC_DS.'language'];
             $this->_path = CC_ROOT_DIR.str_replace($drop, '', dirname(str_replace(CC_ROOT_DIR, '', $path)));
             // Drop trailing slashes
-            if (substr($this->_path, -1) == '/') {
+            if (str_ends_with($this->_path, '/')) {
                 $this->_path = substr($this->_path, 0, -1);
             }
         }
@@ -477,10 +459,10 @@ class Module
         if (file_exists($this->_path.'/'.$this->_package_xml)) {
             try {
                 $xml = new SimpleXMLElement($this->_path.'/'.$this->_package_xml, LIBXML_NOCDATA, true);
-                if(isset($xml->info)) {
+                if (isset($xml->info)) {
                     $config_array = json_decode(json_encode($xml->info), true);
                     ## Parse and handle XML data
-                    if(is_array($config_array)) {
+                    if (is_array($config_array)) {
                         foreach ($config_array as $key => $value) {
                             $this->_info[$key] = (string)$value;
                         }
@@ -493,21 +475,21 @@ class Module
             //$this->_module_name = (isset($this->_info['folder']) && !empty($this->_info['folder'])) ? $this->_info['folder'] : str_replace(' ', '_', $this->_info['name']);
         } elseif (file_exists($this->_path.'/'.$this->_package_file)) {
             $this->_info  = unserialize(file_get_contents($this->_path.'/'.$this->_package_file, true));
-        //$this->_module_name = str_replace(' ', '_', $this->_info['name']);
+            //$this->_module_name = str_replace(' ', '_', $this->_info['name']);
         } else {
             $pathFolders = explode('/', $this->_path);
             $noFolders = count($pathFolders);
-            $this->_info['type'] = $pathFolders[($noFolders-2)];
+            $this->_info['type'] = $pathFolders[($noFolders - 2)];
             //$this->_module_name = $pathFolders[($noFolders-1)];
         }
 
         $this->_module_name = str_replace(' ', '_', $local_name);
-        $this->_local_name  = ($local_name) ? $local_name : $this->_module_name;
+        $this->_local_name  = $local_name ?: $this->_module_name;
 
         // Load module configuration
         if (!empty($this->_module_name)) {
             $config = $GLOBALS['config']->get($this->_local_name);
-            $module = $GLOBALS['db']->select('CubeCart_modules', false, array('folder' => $this->_module_name));
+            $module = $GLOBALS['db']->select('CubeCart_modules', false, ['folder' => $this->_module_name]);
             //unset($config['status'], $config['default']);
             $this->_settings = ($module) ? array_merge($module[0], $config) : $config;
         }
@@ -516,19 +498,24 @@ class Module
     /**
      * Load packaging boxes tab (global, shared across all shipping modules)
      */
-    private function _module_packaging()
+    private function _module_packaging(): void
     {
         $boxes    = $GLOBALS['config']->get('config', 'packaging_boxes');
-        $boxes    = is_array($boxes) ? $boxes : array();
+        $boxes    = is_array($boxes) ? $boxes : [];
         $wunit    = $GLOBALS['config']->get('config', 'product_weight_unit');
         $dim_unit = ($wunit === 'Lb') ? 'in' : 'cm';
 
-        $GLOBALS['smarty']->assign('PACKAGING_BOXES',    $boxes);
+        $GLOBALS['smarty']->assign('PACKAGING_BOXES', $boxes);
         $GLOBALS['smarty']->assign('PACKAGING_DIM_UNIT', $dim_unit);
 
         $GLOBALS['main']->addTabControl(
             $GLOBALS['language']->settings['packaging_tab'],
-            'packaging-boxes', null, null, count($boxes), '', 999999
+            'packaging-boxes',
+            null,
+            null,
+            count($boxes),
+            '',
+            999999
         );
         $GLOBALS['gui']->changeTemplateDir();
         $GLOBALS['smarty']->assign('LANG', $GLOBALS['lang']);
@@ -542,12 +529,12 @@ class Module
     /**
      * Load module zones
      */
-    private function _module_zones()
+    private function _module_zones(): void
     {
-        if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', array('numcode', 'name', 'status'), 'status > 0', array('name' => 'ASC'))) !== false) {
-            $enabled_countries = array();
-            $disabled_countries = array();
-            
+        if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', ['numcode', 'name', 'status'], 'status > 0', ['name' => 'ASC'])) !== false) {
+            $enabled_countries = [];
+            $disabled_countries = [];
+
             $enabled = (!empty($this->_settings['countries'])) ? unserialize($this->_settings['countries']) : false;
             foreach ($countries as $country) {
                 $options[$country['numcode']] = $country;
@@ -558,7 +545,7 @@ class Module
             if (is_array($enabled)) {
                 sort($enabled);
                 foreach ($enabled as $country) {
-                    if(isset($options[$country]) && !empty($options[$country])) {
+                    if (isset($options[$country]) && !empty($options[$country])) {
                         $enabled_countries[] = $options[$country];
                     }
                 }
@@ -575,7 +562,7 @@ class Module
             if (is_array($disabled)) {
                 sort($disabled);
                 foreach ($disabled as $country) {
-                    if(isset($options[$country]) && !empty($options[$country])) {
+                    if (isset($options[$country]) && !empty($options[$country])) {
                         $disabled_countries[] = $options[$country];
                     }
                 }

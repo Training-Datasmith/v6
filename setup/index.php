@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -14,7 +16,7 @@ require_once preg_replace('/setup/', '', realpath(dirname(__FILE__))) . 'ini.inc
 require_once CC_INCLUDES_DIR . 'functions.inc.php';
 
 $error_log_path = ini_get('error_log');
-if(!strstr($error_log_path, '/')) {
+if (!strstr($error_log_path, '/')) {
     ini_set('error_log', '../'.$error_log_path);
 }
 
@@ -49,7 +51,7 @@ $setup_path  = CC_ROOT_DIR . '/setup' . '/';
  */
 function writeGlobalConfig($config_data, $file_path)
 {
-    $lines = array();
+    $lines = [];
     foreach ($config_data as $key => $value) {
         $value = is_array($value) ? var_export($value, true) : "'".addslashes($value)."'";
         $lines[] = sprintf("\$glob['%s'] = %s;", $key, $value);
@@ -66,7 +68,7 @@ function writeGlobalConfig($config_data, $file_path)
 session_start();
 
 if (isset($_GET['autoupdate']) && $_GET['autoupdate']) {
-    $_SESSION['setup'] = array(); // remove any past upgrade/install data
+    $_SESSION['setup'] = []; // remove any past upgrade/install data
     $_SESSION['setup']['method'] = 'upgrade';
     $_SESSION['setup']['autoupgrade'] = true;
     httpredir('index.php');
@@ -105,7 +107,7 @@ $restart   = true;
 $domain        = parse_url(CC_STORE_URL);
 $cookie_domain = strpos($domain['host'], '.') ? '.'.str_replace('www.', '', $domain['host']) : '';
 
-$default_config_settings = array(
+$default_config_settings = [
   'csrf' => '1',
   'update_main_stock' => '',
   'tax_number' => '',
@@ -185,7 +187,7 @@ $default_config_settings = array(
   'store_address' => '',
   'store_copyright' => '<p>&copy;'.date('Y').' '.$domain['host'].' -  All rights reserved.</p>',
   'store_postcode' => '',
-  'standard_url' => preg_replace(array('#^https#i','#/setup$#'), array('http',''), CC_STORE_URL),
+  'standard_url' => preg_replace(['#^https#i','#/setup$#'], ['http',''], CC_STORE_URL),
   'cookie_domain' => $cookie_domain,
   'show_basket_weight' => '1',
   'stock_change_time' => '1',
@@ -210,8 +212,8 @@ $default_config_settings = array(
   'admin_login_notify' => '1',
   'abandoned_cart_notify_cooldown' => '259200',
   'abandoned_cart_order_window' => '259200',
-  'abandoned_cart_coupon' => '0'
-);
+  'abandoned_cart_coupon' => '0',
+];
 
 ksort($default_config_settings);
 
@@ -222,7 +224,6 @@ $GLOBALS['smarty']->compile_dir  = CC_SKIN_CACHE_DIR;
 $GLOBALS['smarty']->config_dir   = CC_SKIN_CACHE_DIR;
 $GLOBALS['smarty']->cache_dir    = CC_SKIN_CACHE_DIR;
 $GLOBALS['smarty']->template_dir = dirname(__FILE__) . '/';
-
 
 $language  = Language::getInstance();
 $languages = $language->listLanguages();
@@ -304,7 +305,9 @@ if (isset($_POST['select_language'])) {
                             for ($i = 0; $i < $zip->numFiles; $i++) {
                                 $entry = $zip->getNameIndex($i);
                                 $file_data = $zip->getFromIndex($i);
-                                if ($file_data === false) continue;
+                                if ($file_data === false) {
+                                    continue;
+                                }
                                 if (preg_match('/\.png$/i', $entry)) {
                                     file_put_contents(CC_LANGUAGE_DIR . 'flags/' . basename($entry), $file_data);
                                 } else {
@@ -334,7 +337,7 @@ if (isset($_POST['select_language'])) {
 } elseif (isset($_POST['proceed'])) {
     $redir = true;
     if (!isset($_SESSION['setup'])) {
-        $_SESSION['setup'] = array();
+        $_SESSION['setup'] = [];
     } else {
         if (!isset($_POST['method']) && !isset($_SESSION['setup']['method'])) {
             $errors[] = $strings['setup']['error_action_required'];
@@ -358,7 +361,7 @@ if (isset($_POST['select_language'])) {
         httpredir('index.php');
     }
 } elseif (isset($_POST['cancel']) || isset($_GET['cancel'])) {
-    $_SESSION['setup'] = array();
+    $_SESSION['setup'] = [];
     httpredir('index.php', 'cancelled');
 }
 
@@ -378,13 +381,13 @@ if (!$is_upgrade && !isset($_SESSION['language_selected'])) {
     if ($json) {
         $api_data = json_decode($json, true);
         if ($api_data && !empty($api_data['languages'])) {
-            $api_lang_list = array();
+            $api_lang_list = [];
             foreach ($api_data['languages'] as $api_lang) {
-                $api_lang_list[] = array(
+                $api_lang_list[] = [
                     'code' => $api_lang['code'],
                     'name' => $api_lang['name'],
-                    'selected' => ($api_lang['code'] === 'en-GB') ? ' selected="selected"' : ''
-                );
+                    'selected' => ($api_lang['code'] === 'en-GB') ? ' selected="selected"' : '',
+                ];
             }
             $GLOBALS['smarty']->assign('API_LANGUAGES', $api_lang_list);
         }
@@ -399,69 +402,69 @@ if (!$is_upgrade && !isset($_SESSION['language_selected'])) {
     $restart = false;
     $step    = 1;
     // Compatibility Test
-    $checks  = array(
-    'PHP' => array(
+    $checks  = [
+    'PHP' => [
       'title' => 'PHP 7.4+ (8.3 Recommended)',
       'status' => version_compare(PHP_VERSION, '7.4', '>='),
       'pass' => PHP_VERSION,
-      'fail' => PHP_VERSION
-    ),
-    'MySQL' => array(
+      'fail' => PHP_VERSION,
+    ],
+    'MySQL' => [
       'title' => 'MySQL 5.7+ / MariaDB 10.3+',
       'status' => extension_loaded('mysqli'),
-      'pass' => (function_exists('mysqli_get_client_info')) ? mysqli_get_client_info() : "Bad database extension",
-      'fail' => "PHP mysqli extension not installed"
-    ),
-    'GD' => array(
+      'pass' => (function_exists('mysqli_get_client_info')) ? mysqli_get_client_info() : 'Bad database extension',
+      'fail' => 'PHP mysqli extension not installed',
+    ],
+    'GD' => [
       'title' => 'GD Image Library',
       'status' => detectGD(),
       'pass' => $strings['common']['installed'],
-      'fail' => $strings['common']['not_installed']
-    ),
-    'XML' => array(
+      'fail' => $strings['common']['not_installed'],
+    ],
+    'XML' => [
       'title' => 'Simple XML Parser',
       'status' => extension_loaded('simplexml'),
       'pass' => $strings['common']['installed'],
-      'fail' => $strings['common']['not_installed']
-    ),
-    'cURL' => array(
+      'fail' => $strings['common']['not_installed'],
+    ],
+    'cURL' => [
       'title' => 'cURL',
       'status' => extension_loaded('curl'),
       'pass' => $strings['common']['installed'],
-      'fail' => $strings['common']['not_installed']
-    ),
-    'Zip' => array(
+      'fail' => $strings['common']['not_installed'],
+    ],
+    'Zip' => [
       'title' => 'Zip (ZipArchive)',
       'status' => class_exists('ZipArchive'),
       'pass' => $strings['common']['installed'],
-      'fail' => $strings['common']['not_installed']
-    ),
-    'mbstring' => array(
+      'fail' => $strings['common']['not_installed'],
+    ],
+    'mbstring' => [
       'title' => 'mbstring (Multibyte String)',
       'status' => extension_loaded('mbstring'),
       'pass' => $strings['common']['installed'],
-      'fail' => $strings['common']['not_installed']
-    )
-  );
-  $status = true;
-  foreach($checks as $check_type => $data) {
-    foreach($data as $key => $value) {
-        if($key=='status') {
-            if(!$value) {
-                $status = false;
-                break;
+      'fail' => $strings['common']['not_installed'],
+    ],
+  ];
+    $status = true;
+    foreach ($checks as $check_type => $data) {
+        foreach ($data as $key => $value) {
+            if ($key == 'status') {
+                if (!$value) {
+                    $status = false;
+                    break;
+                }
             }
         }
     }
-  }
-  if(!$status) {
-    $errors[] = 'Hosting not compatible. Please rectify or setup a hosted CubeCart store instantly at <a href="https://hosted.cubecart.com" target="_blank">https://hosted.cubecart.com</a>.';
-    $retry = true;
-    $proceed = false;
-  }
-  
-  $GLOBALS['smarty']->assign('CHECKS', $checks);
-  $GLOBALS['smarty']->assign('MODE_COMPAT', true);
+    if (!$status) {
+        $errors[] = 'Hosting not compatible. Please rectify or setup a hosted CubeCart store instantly at <a href="https://hosted.cubecart.com" target="_blank">https://hosted.cubecart.com</a>.';
+        $retry = true;
+        $proceed = false;
+    }
+
+    $GLOBALS['smarty']->assign('CHECKS', $checks);
+    $GLOBALS['smarty']->assign('MODE_COMPAT', true);
 } else {
     if (!isset($_SESSION['setup']['method'])) {
         $step = 2;
@@ -484,8 +487,8 @@ if (!$is_upgrade && !isset($_SESSION['language_selected'])) {
         }
         $GLOBALS['smarty']->assign('MODE_LICENCE', true);
     } elseif (!isset($_SESSION['setup']['complete'])) {
-        if (in_array($_SESSION['setup']['method'], array(
-            'install', 'upgrade'))) {
+        if (in_array($_SESSION['setup']['method'], [
+            'install', 'upgrade'])) {
             require_once 'setup.' . $_SESSION['setup']['method'] . '.php';
         } else {
             require_once 'setup.install.php';
@@ -501,8 +504,8 @@ if (!$is_upgrade && !isset($_SESSION['language_selected'])) {
         $GLOBALS['db'] = Database::getInstance($glob);
 
         // Move to scripts folder?
-        $config_rows = $db->select('CubeCart_config', array('config_key', 'config_value'), array('name' => 'config'));
-        $main_config = array();
+        $config_rows = $db->select('CubeCart_config', ['config_key', 'config_value'], ['name' => 'config']);
+        $main_config = [];
         if ($config_rows) {
             foreach ($config_rows as $row) {
                 $main_config[$row['config_key']] = $row['config_value'];
@@ -511,7 +514,7 @@ if (!$is_upgrade && !isset($_SESSION['language_selected'])) {
 
         if ($_SESSION['setup']['config_update'] && is_array($main_config)) {
             // Remove unused keys
-            $dead_keys = array(
+            $dead_keys = [
         'cat_newest_first',
         'captcha_private',
         'captcha_public',
@@ -539,10 +542,10 @@ if (!$is_upgrade && !isset($_SESSION['language_selected'])) {
         'taxCountry',
         'taxCounty',
         'uploadSize',
-        'noRelatedProds'
-      );
+        'noRelatedProds',
+      ];
             // Rename existing keys
-            $remapped  = array(
+            $remapped  = [
         'dirSymbol' => 'defualt_directory_symbol',
         'installTime' => 'install_time',
         'defaultCurrency' => 'default_currency',
@@ -600,21 +603,21 @@ if (!$is_upgrade && !isset($_SESSION['language_selected'])) {
         'timeFormat' => 'time_format',
         'timeOffset' => 'time_offset',
         'timezone' => 'time_zone',
-        'floodControl' => 'recaptcha'
-      );
+        'floodControl' => 'recaptcha',
+      ];
 
             ## Remap store country from id to numcode
             if (isset($main_config['siteCountry']) && $main_config['siteCountry'] > 0) {
-                $country                    = $db->select('CubeCart_geo_country', array(
-          'numcode'
-        ), array(
-          'id' => $main_config['siteCountry']
-        ));
+                $country                    = $db->select('CubeCart_geo_country', [
+          'numcode',
+        ], [
+          'id' => $main_config['siteCountry'],
+        ]);
                 $main_config['siteCountry'] = $country[0]['numcode'];
             }
 
             ## Parse
-            $new_config = array();
+            $new_config = [];
             foreach ($main_config as $key => $value) {
                 if (in_array($key, $dead_keys)) {
                     unset($main_config[$key]);
@@ -647,29 +650,29 @@ if (!$is_upgrade && !isset($_SESSION['language_selected'])) {
             }
 
             ## Redefine the default skin
-            $reset      = array(
+            $reset      = [
         'skin_folder' => 'foundation',
         'skin_style' => 'default',
-        'default_language' => $default_language
-      );
+        'default_language' => $default_language,
+      ];
             $new_config = array_merge($main_config, $new_config, $reset);
             ## Set some defaults
-            $defaults   = array(
+            $defaults   = [
         'admin_skin' => 'default',
         'enable_reviews' => true,
-        'show_basket_weight' => true
-      );
+        'show_basket_weight' => true,
+      ];
             $new_config = array_merge($defaults, $new_config);
             ksort($new_config);
 
             // Write new config to database
-            $db->delete('CubeCart_config', array('name' => 'config'));
+            $db->delete('CubeCart_config', ['name' => 'config']);
             foreach ($new_config as $cfg_key => $cfg_value) {
-                $db->insert('CubeCart_config', array(
+                $db->insert('CubeCart_config', [
                     'name'         => 'config',
                     'config_key'   => $cfg_key,
-                    'config_value' => is_array($cfg_value) ? json_encode($cfg_value) : (string)$cfg_value
-                ));
+                    'config_value' => is_array($cfg_value) ? json_encode($cfg_value) : (string)$cfg_value,
+                ]);
             }
             $_SESSION['setup']['config_update'] = true;
         }
@@ -678,16 +681,16 @@ if (!$is_upgrade && !isset($_SESSION['language_selected'])) {
         $restart = true;
         $step    = 6;
         switch ($_SESSION['setup']['method']) {
-      case 'install':
-        $GLOBALS['smarty']->assign('MODE_COMPLETE_INSTALL', true);
-        break;
-      case 'upgrade':
-        $GLOBALS['smarty']->assign('MODE_COMPLETE_UPGRADE', true);
-        break;
-    }
+            case 'install':
+                $GLOBALS['smarty']->assign('MODE_COMPLETE_INSTALL', true);
+                break;
+            case 'upgrade':
+                $GLOBALS['smarty']->assign('MODE_COMPLETE_UPGRADE', true);
+                break;
+        }
         $GLOBALS['smarty']->assign('MODE_COMPLETE', true);
         // delete setup folder on admin login
-        $date = new Datetime(date('r',time()+7200));
+        $date = new Datetime(date('r', time() + 7200));
         $attributes = '';
         $attributes .= ';Expires='.$date->format(DateTime::COOKIE);
         $attributes .= ';SameSite=None';
@@ -718,17 +721,17 @@ if (!$is_upgrade && !isset($_SESSION['language_selected'])) {
 
             if ($update_config) {
                 $_SESSION['setup']['admin_rename'] = true;
-                if(is_array($glob) && !empty($glob)) {
+                if (is_array($glob) && !empty($glob)) {
                     $glob['adminFile'] = $adminFile;
                     $glob['adminFolder'] = $adminFolder;
                     writeGlobalConfig($glob, $global_file);
                 }
             }
             $adminURL = str_replace('/setup', '', CC_STORE_URL).'/'.$adminFile;
-            if ($admins = $db->select('CubeCart_admin_users', false, array('status'=> 1))) {
+            if ($admins = $db->select('CubeCart_admin_users', false, ['status' => 1])) {
                 $headers = 'From: nobody@'.parse_url(CC_STORE_URL, PHP_URL_HOST);
                 foreach ($admins as $admin) {
-                    mail($admin['email'], "Store Admin URL", "Hi ".html_entity_decode($admin['name'], ENT_QUOTES).",\r\n\r\nYour store has been setup to CubeCart version ".CC_VERSION.".\r\n\r\nFor security reasons the administrator URL has been obscured to divert any possible unwanted attention. Please set your bookmark to ".$adminURL."\r\n\r\n\r\nThis email was sent automatically by the CubeCart setup tool.", $headers);
+                    mail($admin['email'], 'Store Admin URL', 'Hi '.html_entity_decode($admin['name'], ENT_QUOTES).",\r\n\r\nYour store has been setup to CubeCart version ".CC_VERSION.".\r\n\r\nFor security reasons the administrator URL has been obscured to divert any possible unwanted attention. Please set your bookmark to ".$adminURL."\r\n\r\n\r\nThis email was sent automatically by the CubeCart setup tool.", $headers);
                 }
             }
             $GLOBALS['smarty']->assign('ADMIN_URL', $adminURL);
@@ -764,10 +767,10 @@ if (isset($errors) && is_array($errors)) {
 if (isset($step)) {
     $progress = (100 / 5) * ((int) $step - 1);
     $progress = ($progress >= 100) ? 100 : $progress;
-    $GLOBALS['smarty']->assign('PROGRESS', array(
+    $GLOBALS['smarty']->assign('PROGRESS', [
     'percent' => (int) $progress,
-    'message' => sprintf($strings['setup']['percent_complete'], (int) $progress)
-  ));
+    'message' => sprintf($strings['setup']['percent_complete'], (int) $progress),
+  ]);
 }
 
 ## Build Logos
@@ -777,18 +780,18 @@ function build_logos($image_name = '')
 
     $logo_path = empty($image_name) ? 'skins/foundation/images/default/logo/default.png' : 'images/logos/'.$image_name;
 
-    $logo_config = array(
+    $logo_config = [
     'foundationdefault' => $logo_path,
     'emails' => $logo_path,
-    'invoices' => $logo_path
-  );
+    'invoices' => $logo_path,
+  ];
 
     foreach ($logo_config as $key => $value) {
-        $db->insert('CubeCart_config', array(
+        $db->insert('CubeCart_config', [
             'name'         => 'logos',
             'config_key'   => $key,
-            'config_value' => $value
-        ));
+            'config_value' => $value,
+        ]);
     }
 }
 

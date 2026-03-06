@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -15,36 +17,36 @@ if (!defined('CC_INI_SET')) {
 }
 Admin::getInstance()->permissions('maintenance', CC_PERM_EDIT, true);
 
-
-function imagesToFolders() {
+function imagesToFolders()
+{
     $image_path = 'images/source/';
     $image_path_dest = $image_path.'a-z/';
     mkdir($image_path_dest);
-    if(file_exists($image_path_dest)) {
+    if (file_exists($image_path_dest)) {
         foreach (glob($image_path.'*') as $filename) {
-            if(is_file($filename)) {
+            if (is_file($filename)) {
                 $base_name = basename($filename);
-                $folder_name = strtoupper(substr($base_name,0,1));
+                $folder_name = strtoupper(substr($base_name, 0, 1));
                 $folder_path = $image_path_dest.$folder_name;
-                if(!file_exists($folder_path)) {
+                if (!file_exists($folder_path)) {
                     mkdir($folder_path);
                 }
                 echo $filename.' to '.$folder_path.'/'.$base_name.'<br>';
-                rename($filename,$folder_path.'/'.$base_name);
+                rename($filename, $folder_path.'/'.$base_name);
             }
         }
-        $files = $GLOBALS['db']->select('CubeCart_filemanager', false,array('filepath' => null));
-        foreach($files as $file) {
+        $files = $GLOBALS['db']->select('CubeCart_filemanager', false, ['filepath' => null]);
+        foreach ($files as $file) {
             $folder = strtoupper(substr($file['filename'], 0, 1));
-            $GLOBALS['db']->update('CubeCart_filemanager', array('filepath' => 'a-z/'.$folder.'/'), array('file_id' => $file['file_id'], 'filepath' => null));
+            $GLOBALS['db']->update('CubeCart_filemanager', ['filepath' => 'a-z/'.$folder.'/'], ['file_id' => $file['file_id'], 'filepath' => null]);
         }
     }
 }
 
 function crc_integrity_check($files, $mode = 'upgrade')
 {
-    $errors = array();
-    
+    $errors = [];
+
     $log_path = CC_BACKUP_DIR.$mode.'_error_log';
     if (file_exists($log_path)) {
         unlink($log_path);
@@ -55,7 +57,7 @@ function crc_integrity_check($files, $mode = 'upgrade')
             $errors[] = "$file - Missing but expected after extract";
         } elseif (is_file($file)) {
             ## Open the source file
-            if (($v_file = fopen($file, "rb")) == 0) {
+            if (($v_file = fopen($file, 'rb')) == 0) {
                 $errors[] = "$file - Unable to read in order to validate integrity";
             }
 
@@ -69,12 +71,12 @@ function crc_integrity_check($files, $mode = 'upgrade')
             }
         }
     }
-    if (count($errors)>0) {
+    if (count($errors) > 0) {
         $errors[] = '--';
         $errors[] = 'Errors were found which may indicate that the source archive has not been extracted successfully.';
         $errors[] = 'It is recommended that a manual '.$mode.' is performed.';
-            
-        $error_data = "### START ".strtoupper($mode)." LOG - (".date("d M Y - H:i:s").") ###\r\n";
+
+        $error_data = '### START '.strtoupper($mode).' LOG - ('.date('d M Y - H:i:s').") ###\r\n";
         $error_data .= implode("\r\n", $errors);
         $error_data .=  "\r\n### END RESTORE LOG ###";
 
@@ -87,32 +89,31 @@ function crc_integrity_check($files, $mode = 'upgrade')
 }
 
 $versions = $GLOBALS['db']->select('CubeCart_history');
-$version_history = array();
+$version_history = [];
 if ($versions) {
     foreach ($versions as $version) {
         $release_notes_path = CC_ROOT_DIR.'/'.$GLOBALS['config']->get('config', 'adminFolder').'/sources/release_notes/'.$version['version'].'.inc.php';
-        $version_history[$version['version']] = array(
+        $version_history[$version['version']] = [
             'time' => formatTime($version['time']),
-            'version' => file_exists($release_notes_path) ? '<a href="?_g=release_notes&node='.$version['version'].'">'.$version['version'].'</a>' : $version['version']
-        );
+            'version' => file_exists($release_notes_path) ? '<a href="?_g=release_notes&node='.$version['version'].'">'.$version['version'].'</a>' : $version['version'],
+        ];
     }
 }
 krsort($version_history, SORT_NATURAL);
 $GLOBALS['smarty']->assign('VERSIONS', $version_history);
 
-
 if (isset($_GET['compress']) && !empty($_GET['compress'])) {
     chdir(CC_BACKUP_DIR);
     $file_path = './'.basename($_GET['compress']);
-    $zip = new ZipArchive;
-    
-    if (file_exists($file_path) && $zip->open($file_path.'.zip', ZipArchive::CREATE)==true) {
+    $zip = new ZipArchive();
+
+    if (file_exists($file_path) && $zip->open($file_path.'.zip', ZipArchive::CREATE) == true) {
         $zip->addFile($file_path);
         $zip->close();
         $GLOBALS['main']->successMessage(sprintf($lang['maintain']['file_compressed'], basename($file_path)));
         httpredir('?_g=maintenance&node=index', 'backup');
     } else {
-        $GLOBALS['main']->errorMessage("Error reading file ".basename($file_path));
+        $GLOBALS['main']->errorMessage('Error reading file '.basename($file_path));
     }
 }
 
@@ -128,8 +129,8 @@ if (isset($_GET['restore']) && !empty($_GET['restore'])) {
     if (preg_match('/^database_full/', $file_name)) { // Restore database
         $delete_source = false;
         if (preg_match('/\.sql.zip$/', $file_name)) { // unzip first
-            
-            $zip = new ZipArchive;
+
+            $zip = new ZipArchive();
             if ($zip->open($file_path) === true) {
                 $file_path = rtrim($file_path, '.zip');
                 // Only delete if it diesn't exist before
@@ -137,12 +138,12 @@ if (isset($_GET['restore']) && !empty($_GET['restore'])) {
                 $zip->extractTo(CC_BACKUP_DIR);
                 $zip->close();
             } else {
-                $GLOBALS['main']->errorMessage("Error reading file ".$file_name);
+                $GLOBALS['main']->errorMessage('Error reading file '.$file_name);
                 httpredir('?_g=maintenance&node=index', 'backup');
             }
         }
-        
-        $handle = fopen($file_path, "r");
+
+        $handle = fopen($file_path, 'r');
         $import = false;
         $GLOBALS['debug']->status(false); // This prevents memory errors
         if ($handle) {
@@ -158,7 +159,7 @@ if (isset($_GET['restore']) && !empty($_GET['restore'])) {
             }
             fclose($handle);
         }
-        
+
         if ($delete_source) {
             unlink($file_path);
         }
@@ -169,11 +170,11 @@ if (isset($_GET['restore']) && !empty($_GET['restore'])) {
             httpredir('?_g=maintenance&node=index', 'backup');
         }
     } elseif (preg_match('/^files/', $file_name)) { // restore archive
-        
+
         $file_path = CC_BACKUP_DIR.$file_name;
-        $zip = new ZipArchive;
+        $zip = new ZipArchive();
         if ($zip->open($file_path) === true) {
-            $crc_check_list = array();
+            $crc_check_list = [];
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $stat = $zip->statIndex($i);
                 $crc_check_list[$stat['name']] = $stat['crc'];
@@ -183,8 +184,8 @@ if (isset($_GET['restore']) && !empty($_GET['restore'])) {
             $zip->close();
 
             $errors = crc_integrity_check($crc_check_list, 'restore');
-            
-            if ($errors!==false) {
+
+            if ($errors !== false) {
                 $GLOBALS['main']->errorMessage($lang['maintain']['files_restore_fail']);
                 httpredir('?_g=maintenance&node=index', 'backup');
             } else {
@@ -203,7 +204,7 @@ if (isset($_GET['restore']) && !empty($_GET['restore'])) {
 if (isset($_GET['upgrade']) && !empty($_GET['upgrade'])) {
     $contents = false;
     ## Download the version we want
-    $request = new Request('www.cubecart.com', '/download/'.$_GET['upgrade'].'.zip', 80, false, true, 10);#
+    $request = new Request('www.cubecart.com', '/download/'.$_GET['upgrade'].'.zip', 80, false, true, 10);
     $request->setMethod('get');
     $request->setSSL();
     $request->setUserAgent('CubeCart');
@@ -218,7 +219,7 @@ if (isset($_GET['upgrade']) && !empty($_GET['upgrade'])) {
         httpredir('?_g=maintenance&node=index', 'upgrade');
     } else {
         if (stristr($contents, 'DOCTYPE')) {
-            $GLOBALS['main']->errorMessage("Sorry. CubeCart-".$_GET['upgrade'].".zip was not found. Please try again later.");
+            $GLOBALS['main']->errorMessage('Sorry. CubeCart-'.$_GET['upgrade'].'.zip was not found. Please try again later.');
             httpredir('?_g=maintenance&node=index', 'upgrade');
         }
 
@@ -228,16 +229,16 @@ if (isset($_GET['upgrade']) && !empty($_GET['upgrade'])) {
         fclose($fp);
 
         if (file_exists($destination_path)) {
-            $zip = new ZipArchive;
+            $zip = new ZipArchive();
             if ($zip->open($destination_path) === true) {
-                $crc_check_list = array();
+                $crc_check_list = [];
 
                 for ($i = 0; $i < $zip->numFiles; $i++) {
                     $stat = $zip->statIndex($i);
 
-                    if (preg_match("#^admin/#", $stat['name'])) {
-                        $custom_file_name = preg_replace("#^admin#", $glob['adminFolder'], $stat['name']);
-                    } elseif ($stat['name']=='admin.php') {
+                    if (preg_match('#^admin/#', $stat['name'])) {
+                        $custom_file_name = preg_replace('#^admin#', $glob['adminFolder'], $stat['name']);
+                    } elseif ($stat['name'] == 'admin.php') {
                         $custom_file_name = $glob['adminFile'];
                     } else {
                         $custom_file_name = $stat['name'];
@@ -257,8 +258,8 @@ if (isset($_GET['upgrade']) && !empty($_GET['upgrade'])) {
                 recursiveDelete(CC_ROOT_DIR.'/'.$glob['adminFolder'].$suffix);
 
                 $errors = crc_integrity_check($crc_check_list, 'upgrade');
-                
-                if ($errors!==false) {
+
+                if ($errors !== false) {
                     $GLOBALS['main']->errorMessage($lang['maintain']['files_upgrade_fail']);
                     httpredir('?_g=maintenance&node=index', 'upgrade');
                 } elseif ($_POST['force']) {
@@ -274,7 +275,7 @@ if (isset($_GET['upgrade']) && !empty($_GET['upgrade'])) {
                     httpredir(CC_ROOT_REL.'setup/index.php?autoupdate=1');
                 }
             } else {
-                $GLOBALS['main']->errorMessage("Unable to read archive.");
+                $GLOBALS['main']->errorMessage('Unable to read archive.');
                 httpredir('?_g=maintenance&node=index', 'upgrade');
             }
         }
@@ -283,15 +284,15 @@ if (isset($_GET['upgrade']) && !empty($_GET['upgrade'])) {
 
 if (isset($_GET['delete'])) {
     $file = 'backup/'.basename($_GET['delete']);
-    if (in_array($_GET['delete'], array('restore_error_log','upgrade_error_log'))) {
+    if (in_array($_GET['delete'], ['restore_error_log','upgrade_error_log'])) {
         unlink($file);
         switch ($_GET['delete']) {
             case 'upgrade_error_log':
                 $anchor = 'upgrade';
-            break;
+                break;
             case 'restore_error_log':
                 $anchor = 'backup';
-            break;
+                break;
         }
         httpredir('?_g=maintenance&node=index', $anchor);
     } elseif (file_exists($file) && preg_match('/^.*\.(sql|zip)$/i', $file)) {
@@ -330,7 +331,7 @@ if (isset($_POST['clearCookieConsent'])) {
     $clear_post = true;
 }
 if (isset($_POST['truncate_seo_custom'])) {
-    if ($GLOBALS['db']->delete('CubeCart_seo_urls', array('custom' => 1))) {
+    if ($GLOBALS['db']->delete('CubeCart_seo_urls', ['custom' => 1])) {
         $GLOBALS['main']->successMessage($lang['maintain']['seo_urls_emptied']);
     } else {
         $GLOBALS['main']->errorMessage($lang['maintain']['seo_urls_not_emptied']);
@@ -338,7 +339,7 @@ if (isset($_POST['truncate_seo_custom'])) {
     $clear_post = true;
 }
 if (isset($_POST['truncate_seo_auto'])) {
-    if ($GLOBALS['db']->delete('CubeCart_seo_urls', array('custom' => 0))) {
+    if ($GLOBALS['db']->delete('CubeCart_seo_urls', ['custom' => 0])) {
         $GLOBALS['main']->successMessage($lang['maintain']['seo_urls_emptied']);
     } else {
         $GLOBALS['main']->errorMessage($lang['maintain']['seo_urls_not_emptied']);
@@ -365,7 +366,7 @@ if (isset($_POST['emptyTransLogs']) && Admin::getInstance()->permissions('mainte
 }
 
 if (isset($_REQUEST['emptyEmailLogs']) && Admin::getInstance()->permissions('maintenance', CC_PERM_DELETE)) {
-    if ($GLOBALS['db']->truncate(array('CubeCart_email_log'))) {
+    if ($GLOBALS['db']->truncate(['CubeCart_email_log'])) {
         $GLOBALS['main']->successMessage($lang['maintain']['notify_logs_email']);
     } else {
         $GLOBALS['main']->errorMessage($lang['maintain']['error_logs_email']);
@@ -374,14 +375,14 @@ if (isset($_REQUEST['emptyEmailLogs']) && Admin::getInstance()->permissions('mai
 }
 
 if (isset($_REQUEST['emptyErrorLogs']) && Admin::getInstance()->permissions('maintenance', CC_PERM_DELETE)) {
-    if ($GLOBALS['db']->truncate(array('CubeCart_system_error_log', 'CubeCart_admin_error_log'))) {
+    if ($GLOBALS['db']->truncate(['CubeCart_system_error_log', 'CubeCart_admin_error_log'])) {
         $GLOBALS['main']->successMessage($lang['maintain']['notify_logs_error']);
     } else {
         $GLOBALS['main']->errorMessage($lang['maintain']['error_logs_error']);
     }
     $clear_post = true;
-    if(isset($_GET['redir']) && $_GET['redir']=='viewlog') {
-        httpredir('?_g=settings&node=errorlog','system_error_log');
+    if (isset($_GET['redir']) && $_GET['redir'] == 'viewlog') {
+        httpredir('?_g=settings&node=errorlog', 'system_error_log');
         exit;
     }
 }
@@ -393,7 +394,7 @@ if (isset($_REQUEST['emptyRequestLogs']) && Admin::getInstance()->permissions('m
         $GLOBALS['main']->errorMessage($lang['maintain']['error_logs_request']);
     }
     $clear_post = true;
-    if(isset($_GET['redir']) && $_GET['redir']=='viewlog') {
+    if (isset($_GET['redir']) && $_GET['redir'] == 'viewlog') {
         httpredir('?_g=settings&node=requestlog');
         exit;
     }
@@ -416,7 +417,7 @@ if (isset($_POST['clearCache']) && Admin::getInstance()->permissions('maintenanc
 }
 
 if (isset($_POST['clearImageCache']) && Admin::getInstance()->permissions('maintenance', CC_PERM_DELETE)) {
-    function cleanImageCache($path = null, $failed = array())
+    function cleanImageCache($path = null, $failed = [])
     {
         $path = (isset($path) && is_dir($path)) ? $path : CC_ROOT_DIR.'/images/cache/';
         $scan = glob($path.'*', GLOB_MARK);
@@ -424,12 +425,12 @@ if (isset($_POST['clearImageCache']) && Admin::getInstance()->permissions('maint
             foreach ($scan as $result) {
                 if (is_dir($result)) {
                     cleanImageCache($result);
-                    if(!rmdir($result)) {
-                        $failed[] = str_replace(CC_ROOT_DIR.'/images/cache/','',$result);
+                    if (!rmdir($result)) {
+                        $failed[] = str_replace(CC_ROOT_DIR.'/images/cache/', '', $result);
                     }
                 } else {
-                    if(!unlink($result)) {
-                        $failed[] = str_replace(CC_ROOT_DIR.'/images/cache/','',$result);
+                    if (!unlink($result)) {
+                        $failed[] = str_replace(CC_ROOT_DIR.'/images/cache/', '', $result);
                     }
                 }
             }
@@ -438,17 +439,17 @@ if (isset($_POST['clearImageCache']) && Admin::getInstance()->permissions('maint
     }
     ## recursively delete the contents of the images/cache folder
     $clearImageCache = cleanImagecache();
-    if($clearImageCache===true) {
+    if ($clearImageCache === true) {
         $GLOBALS['main']->successMessage($lang['maintain']['notify_cache_image']);
-    } else if(is_array($clearImageCache)) {
-        foreach($clearImageCache as $file) {
+    } elseif (is_array($clearImageCache)) {
+        foreach ($clearImageCache as $file) {
             $GLOBALS['main']->errorMessage(sprintf($lang['maintain']['notify_failed_to_delete'], $file));
         }
     }
     $clear_post = true;
 }
 if (isset($_POST['prodViews'])) {
-    if ($GLOBALS['db']->update('CubeCart_inventory', array('popularity' => 0), '', true)) {
+    if ($GLOBALS['db']->update('CubeCart_inventory', ['popularity' => 0], '', true)) {
         $GLOBALS['main']->successMessage($lang['maintain']['notify_reset_product']);
     } else {
         $GLOBALS['main']->errorMessage($lang['maintain']['error_reset_product']);
@@ -457,13 +458,13 @@ if (isset($_POST['prodViews'])) {
 }
 
 if (isset($_REQUEST['clearLogs'])) {
-    if ($GLOBALS['db']->truncate(array('CubeCart_admin_log', 'CubeCart_access_log'))) {
+    if ($GLOBALS['db']->truncate(['CubeCart_admin_log', 'CubeCart_access_log'])) {
         $GLOBALS['main']->successMessage($lang['maintain']['notify_logs_admin']);
     } else {
         $GLOBALS['main']->errorMessage($lang['maintain']['error_logs_admin']);
     }
     $clear_post = true;
-    if(isset($_GET['redir']) && $_GET['redir']=='viewlog') {
+    if (isset($_GET['redir']) && $_GET['redir'] == 'viewlog') {
         httpredir('?_g=settings&node=errorlog');
         exit;
     }
@@ -475,15 +476,15 @@ if (!empty($_POST['database'])) {
         foreach ($_POST['tablename'] as $value) {
             $tableList[] = sprintf('`%s`', $value);
         }
-        if(in_array($_POST['action'], array('REBUILD','CHECK','ANALYZE'))) {
-        if ($_POST['action'] === 'REBUILD') {
-            foreach ($tableList as $table) {
-                $GLOBALS['db']->query(sprintf("ALTER TABLE %s ENGINE=InnoDB;", $table));
+        if (in_array($_POST['action'], ['REBUILD','CHECK','ANALYZE'])) {
+            if ($_POST['action'] === 'REBUILD') {
+                foreach ($tableList as $table) {
+                    $GLOBALS['db']->query(sprintf('ALTER TABLE %s ENGINE=InnoDB;', $table));
+                }
+            } else {
+                $GLOBALS['db']->query(sprintf('%s TABLE %s;', $_POST['action'], implode(',', $tableList)));
             }
-        } else {
-            $GLOBALS['db']->query(sprintf("%s TABLE %s;", $_POST['action'], implode(',', $tableList)));
-        }
-        $GLOBALS['main']->successMessage(sprintf($lang['maintain']['notify_db_action'], $_POST['action']));
+            $GLOBALS['main']->successMessage(sprintf($lang['maintain']['notify_db_action'], $_POST['action']));
         } else {
             die('Action not allowed.');
         }
@@ -505,7 +506,7 @@ if (isset($_GET['files_backup'])) {
     set_time_limit(3600);
 
     chdir(CC_ROOT_DIR);
-    $destination = CC_BACKUP_DIR.'files_'.CC_VERSION.'_'.date("dMy-His").'.zip';
+    $destination = CC_BACKUP_DIR.'files_'.CC_VERSION.'_'.date('dMy-His').'.zip';
 
     // Detect a PHP execution timeout (E_ERROR fatal) in the shutdown handler.
     // Web-server-level kills are not catchable, but the PHP-level timeout is.
@@ -522,11 +523,13 @@ if (isset($_GET['files_backup'])) {
     // so the user can navigate away while the backup continues.
     if ($is_ajax) {
         session_write_close();
-        $response = json_encode(array('status' => 'started'));
+        $response = json_encode(['status' => 'started']);
         header('Content-Type: application/json');
         header('Content-Length: ' . strlen($response));
         header('Connection: close');
-        while (ob_get_level()) ob_end_flush();
+        while (ob_get_level()) {
+            ob_end_flush();
+        }
         echo $response;
         flush();
         if (function_exists('fastcgi_finish_request')) {
@@ -538,15 +541,15 @@ if (isset($_GET['files_backup'])) {
 
     $zip = new ZipArchive();
 
-    if ($zip->open($destination, ZipArchive::CREATE)!==true) {
+    if ($zip->open($destination, ZipArchive::CREATE) !== true) {
         if ($is_ajax) {
             $mailer = new Mailer();
-            $mailer->sendEmail($GLOBALS['config']->get('config', 'email_address'), array(
+            $mailer->sendEmail($GLOBALS['config']->get('config', 'email_address'), [
                 'subject'      => sprintf($lang['maintain']['backup_failed_email_subject'], ucwords($lang['maintain']['title_files_backup'])),
                 'content_html' => '<p>'.sprintf($lang['maintain']['backup_failed_email_body'], strtolower($lang['maintain']['title_files_backup'])).'</p>',
-            ));
+            ]);
         } else {
-            $GLOBALS['main']->errorMessage("Error: Backup failed.");
+            $GLOBALS['main']->errorMessage('Error: Backup failed.');
         }
     } else {
         $cache_folder = basename(CC_CACHE_DIR);
@@ -554,11 +557,11 @@ if (isset($_GET['files_backup'])) {
         $files_folder = basename(CC_FILES_DIR);
 
         $skip_folders = $backup_folder.'|'.$cache_folder.'|images/cache|includes/extra/sess_';
-        if (isset($_POST['skip_images']) && $_POST['skip_images']=='1') {
+        if (isset($_POST['skip_images']) && $_POST['skip_images'] == '1') {
             $zip->addEmptyDir('./images/source');
             $skip_folders .= '|images/source';
         }
-        if (isset($_POST['skip_downloads']) && $_POST['skip_downloads']=='1') {
+        if (isset($_POST['skip_downloads']) && $_POST['skip_downloads'] == '1') {
             $zip->addEmptyDir('./'.$files_folder);
             if (file_exists('./'.$files_folder.'/.htaccess')) {
                 $zip->addFile('./'.$files_folder.'/.htaccess');
@@ -610,13 +613,13 @@ if (isset($_GET['files_backup'])) {
             $type_label  = strtolower($lang['maintain']['title_files_backup']);
             $type_label_uc = ucwords($lang['maintain']['title_files_backup']);
             $mailer = new Mailer();
-            $mailer->sendEmail($GLOBALS['config']->get('config', 'email_address'), array(
+            $mailer->sendEmail($GLOBALS['config']->get('config', 'email_address'), [
                 'subject'      => sprintf($lang['maintain']['backup_complete_email_subject'], $type_label_uc),
                 'content_html' => '<p>'.sprintf($lang['maintain']['backup_complete_email_body'], $type_label).'</p>'
                     .'<p>'.sprintf($lang['maintain']['backup_complete_email_filename'], $backup_file).'<br>'
                     .sprintf($lang['maintain']['backup_complete_email_size'], $backup_size).'</p>'
                     .'<p>'.sprintf($lang['maintain']['backup_complete_email_download'], '<a href="'.$backup_url.'">'.$backup_url.'</a>').'</p>',
-            ));
+            ]);
         } else {
             $GLOBALS['main']->successMessage($lang['maintain']['files_backup_complete']);
         }
@@ -641,7 +644,7 @@ if (isset($_POST['backup'])) {
     if (!$_POST['drop'] && !$_POST['structure'] && !$_POST['data']) {
         if ($is_ajax) {
             header('Content-Type: application/json');
-            echo json_encode(array('status' => 'error', 'message' => $lang['maintain']['error_db_backup_option']));
+            echo json_encode(['status' => 'error', 'message' => $lang['maintain']['error_db_backup_option']]);
             exit;
         }
         $GLOBALS['main']->errorMessage($lang['maintain']['error_db_backup_option']);
@@ -649,14 +652,14 @@ if (isset($_POST['backup'])) {
         if ($_POST['drop'] && !$_POST['structure']) {
             if ($is_ajax) {
                 header('Content-Type: application/json');
-                echo json_encode(array('status' => 'error', 'message' => $lang['maintain']['error_db_backup_conflict']));
+                echo json_encode(['status' => 'error', 'message' => $lang['maintain']['error_db_backup_conflict']]);
                 exit;
             }
             $GLOBALS['main']->errorMessage($lang['maintain']['error_db_backup_conflict']);
         } else {
             $full = ($_POST['drop'] && $_POST['structure'] && $_POST['data']) ? '_full' : '';
             chdir(CC_BACKUP_DIR);
-            $fileName 	= 'database'.$full.'_'.CC_VERSION.'_'.$glob['dbdatabase']."_".date("dMy-His").'.sql';
+            $fileName 	= 'database'.$full.'_'.CC_VERSION.'_'.$glob['dbdatabase'].'_'.date('dMy-His').'.sql';
             if (file_exists($fileName)) { // Keep file pointer at the start
                 unlink($fileName);
             }
@@ -678,11 +681,13 @@ if (isset($_POST['backup'])) {
             // so the user can navigate away while the backup continues.
             if ($is_ajax) {
                 session_write_close();
-                $response = json_encode(array('status' => 'started'));
+                $response = json_encode(['status' => 'started']);
                 header('Content-Type: application/json');
                 header('Content-Length: ' . strlen($response));
                 header('Connection: close');
-                while (ob_get_level()) ob_end_flush();
+                while (ob_get_level()) {
+                    ob_end_flush();
+                }
                 echo $response;
                 flush();
                 if (function_exists('fastcgi_finish_request')) {
@@ -701,18 +706,18 @@ if (isset($_POST['backup'])) {
                     $backup_url  = $GLOBALS['storeURL'].'/'.$GLOBALS['config']->get('config', 'adminFile').'?_g=maintenance&node=index#backup';
                     $type_label  = strtolower($lang['maintain']['title_db_backup']);
                     $type_label_uc = ucwords($lang['maintain']['title_db_backup']);
-                    $mailer->sendEmail($admin_email, array(
+                    $mailer->sendEmail($admin_email, [
                         'subject'      => sprintf($lang['maintain']['backup_complete_email_subject'], $type_label_uc),
                         'content_html' => '<p>'.sprintf($lang['maintain']['backup_complete_email_body'], $type_label).'</p>'
                             .'<p>'.sprintf($lang['maintain']['backup_complete_email_filename'], basename($actual_file)).'<br>'
                             .sprintf($lang['maintain']['backup_complete_email_size'], $backup_size).'</p>'
                             .'<p>'.sprintf($lang['maintain']['backup_complete_email_download'], '<a href="'.$backup_url.'">'.$backup_url.'</a>').'</p>',
-                    ));
+                    ]);
                 } else {
-                    $mailer->sendEmail($admin_email, array(
+                    $mailer->sendEmail($admin_email, [
                         'subject'      => sprintf($lang['maintain']['backup_failed_email_subject'], ucwords($lang['maintain']['title_db_backup'])),
                         'content_html' => '<p>'.sprintf($lang['maintain']['backup_failed_email_body'], strtolower($lang['maintain']['title_db_backup'])).'</p>',
-                    ));
+                    ]);
                 }
             } else {
                 if ($write) {
@@ -730,7 +735,7 @@ if (isset($_POST['backup'])) {
 }
 
 if ($clear_post) {
-    httpredir(currentPage(array('clearLogs', 'emptyErrorLogs')));
+    httpredir(currentPage(['clearLogs', 'emptyErrorLogs']));
     exit;
 }
 
@@ -740,8 +745,8 @@ $GLOBALS['main']->addTabControl($lang['maintain']['tab_backup'], 'backup');
 $GLOBALS['main']->addTabControl($lang['common']['upgrade'], 'upgrade');
 $GLOBALS['main']->addTabControl($lang['maintain']['tab_db'], 'database');
 $GLOBALS['main']->addTabControl($lang['maintain']['tab_elasticsearch'], 'elasticsearch');
-if($GLOBALS['config']->get('config', 'elasticsearch')=='1') {
-    $es = new ElasticsearchHandler;
+if ($GLOBALS['config']->get('config', 'elasticsearch') == '1') {
+    $es = new ElasticsearchHandler();
     $GLOBALS['smarty']->assign('ES_STATS', $es->getStats());
 }
 $GLOBALS['main']->addTabControl($lang['maintain']['tab_query_sql'], 'general', '?_g=maintenance&node=sql');
@@ -754,9 +759,9 @@ if (isset($database_result) && $database_result) {
 } elseif (($tables = $GLOBALS['db']->getRows()) !== false) {
 
     ## Parse structure.sql to build index map and column map (single source of truth)
-    $index_map = array();
-    $full_indexes = array();
-    $column_map = array();
+    $index_map = [];
+    $full_indexes = [];
+    $column_map = [];
     $structure_file = CC_ROOT_DIR.'/classes/db/schema/structure.sql';
     if (file_exists($structure_file)) {
         $sql = file_get_contents($structure_file);
@@ -767,7 +772,7 @@ if (isset($database_result) && $database_result) {
             if (preg_match('/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?/i', $stmt, $tbl_match)) {
                 $table_name = strtolower($tbl_match[1]);
                 if (!isset($index_map[$table_name])) {
-                    $index_map[$table_name] = array();
+                    $index_map[$table_name] = [];
                 }
                 ## Match index definitions including bare UNIQUE(...) and FULLTEXT(...) without KEY
                 if (preg_match_all('/^\s*(PRIMARY\s+KEY|UNIQUE\s+KEY|FULLTEXT\s+KEY|UNIQUE|FULLTEXT|KEY)\s*(?:`?(\w+)`?\s*)?\(((?:[^()]+|\([^)]*\))+)\)/im', $stmt, $idx_matches, PREG_SET_ORDER)) {
@@ -789,7 +794,7 @@ if (isset($database_result) && $database_result) {
                             $col = trim(preg_replace('/\(\d+\)/', '', $col));
                             if (!empty($col)) {
                                 if (!isset($index_map[$table_name][$col])) {
-                                    $index_map[$table_name][$col] = array();
+                                    $index_map[$table_name][$col] = [];
                                 }
                                 if (!in_array($key_type, $index_map[$table_name][$col])) {
                                     $index_map[$table_name][$col][] = $key_type;
@@ -799,12 +804,12 @@ if (isset($database_result) && $database_result) {
                         ## Store full index definition for fix SQL generation
                         $idx_key_name = ($key_type === 'PRIMARY') ? 'PRIMARY' : (!empty($idx[2]) ? $idx[2] : null);
                         if ($idx_key_name !== null) {
-                            $full_indexes[$table_name][$idx_key_name] = array('type' => $key_type, 'columns' => $idx[3]);
+                            $full_indexes[$table_name][$idx_key_name] = ['type' => $key_type, 'columns' => $idx[3]];
                         }
                     }
                 }
                 ## Parse column definitions
-                $column_map[$table_name] = array();
+                $column_map[$table_name] = [];
                 $stmt_lines = preg_split('/\r?\n/', $stmt);
                 foreach ($stmt_lines as $line) {
                     $line = trim($line);
@@ -819,7 +824,7 @@ if (isset($database_result) && $database_result) {
             if (preg_match('/ALTER\s+TABLE\s+`?(\w+)`?\s+ADD\s+(PRIMARY\s+KEY|UNIQUE\s+KEY|UNIQUE|FULLTEXT|INDEX|KEY)\s*(?:`?(\w+)`?\s*)?\(((?:[^()]+|\([^)]*\))+)\)/i', $stmt, $alt_match)) {
                 $table_name = strtolower($alt_match[1]);
                 if (!isset($index_map[$table_name])) {
-                    $index_map[$table_name] = array();
+                    $index_map[$table_name] = [];
                 }
                 $raw_type = strtoupper(trim($alt_match[2]));
                 if (strpos($raw_type, 'PRIMARY') !== false) {
@@ -837,7 +842,7 @@ if (isset($database_result) && $database_result) {
                     $col = trim(preg_replace('/\(\d+\)/', '', $col));
                     if (!empty($col)) {
                         if (!isset($index_map[$table_name][$col])) {
-                            $index_map[$table_name][$col] = array();
+                            $index_map[$table_name][$col] = [];
                         }
                         if (!in_array($key_type, $index_map[$table_name][$col])) {
                             $index_map[$table_name][$col][] = $key_type;
@@ -847,7 +852,7 @@ if (isset($database_result) && $database_result) {
                 ## Store full index definition for fix SQL generation
                 $alt_key_name = ($key_type === 'PRIMARY') ? 'PRIMARY' : (!empty($alt_match[3]) ? $alt_match[3] : null);
                 if ($alt_key_name !== null) {
-                    $full_indexes[$table_name][$alt_key_name] = array('type' => $key_type, 'columns' => $alt_match[4]);
+                    $full_indexes[$table_name][$alt_key_name] = ['type' => $key_type, 'columns' => $alt_match[4]];
                 }
             }
         }
@@ -855,9 +860,9 @@ if (isset($database_result) && $database_result) {
         $GLOBALS['main']->errorMessage('Unable to read classes/db/schema/structure.sql.');
     }
 
-    $actual_map = array();
-    $all_fix_sql = array();
-    $found_tables = array();
+    $actual_map = [];
+    $all_fix_sql = [];
+    $found_tables = [];
 
     foreach ($tables as $table) {
         if (!preg_match('/^'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_/i', $table['Name'])) {
@@ -866,12 +871,12 @@ if (isset($database_result) && $database_result) {
         $found_tables[] = strtolower(str_replace($GLOBALS['config']->get('config', 'dbprefix'), '', $table['Name']));
 
         // Get index and map them
-        $indexes = $GLOBALS['db']->misc("SHOW INDEX FROM `".$table['Name']."`");
-        $index_errors = array();
-        $actual_full_indexes = array();
+        $indexes = $GLOBALS['db']->misc('SHOW INDEX FROM `'.$table['Name'].'`');
+        $index_errors = [];
+        $actual_full_indexes = [];
 
         foreach ($indexes as $index) {
-            if ($index['Key_name']=='PRIMARY') {
+            if ($index['Key_name'] == 'PRIMARY') {
                 $key_type = 'PRIMARY';
             } elseif ($index['Index_type'] == 'FULLTEXT') {
                 $key_type = 'FULLTEXT';
@@ -886,14 +891,14 @@ if (isset($database_result) && $database_result) {
                 $duplicate = sprintf($lang['maintain']['duplicate_index'], $table_name.'.'.$index['Column_name'], $key_type);
             }
             if (!isset($actual_map[$index['Table']][$index['Column_name']])) {
-                $actual_map[$index['Table']][$index['Column_name']] = array();
+                $actual_map[$index['Table']][$index['Column_name']] = [];
             }
             if (!in_array($key_type, $actual_map[$index['Table']][$index['Column_name']])) {
                 $actual_map[$index['Table']][$index['Column_name']][] = $key_type;
             }
             // Build full index definitions grouped by key name
             if (!isset($actual_full_indexes[$index['Key_name']])) {
-                $actual_full_indexes[$index['Key_name']] = array('type' => $key_type, 'columns' => array());
+                $actual_full_indexes[$index['Key_name']] = ['type' => $key_type, 'columns' => []];
             }
             $actual_full_indexes[$index['Key_name']]['columns'][(int)$index['Seq_in_index']] = '`'.$index['Column_name'].'`';
         }
@@ -919,8 +924,8 @@ if (isset($database_result) && $database_result) {
         // Check for missing columns
         $table_key = strtolower(str_replace($GLOBALS['config']->get('config', 'dbprefix'), '', $table['Name']));
         if (isset($column_map[$table_key])) {
-            $actual_columns = $GLOBALS['db']->misc("SHOW COLUMNS FROM `".$table['Name']."`");
-            $actual_col_names = array();
+            $actual_columns = $GLOBALS['db']->misc('SHOW COLUMNS FROM `'.$table['Name'].'`');
+            $actual_col_names = [];
             if ($actual_columns) {
                 foreach ($actual_columns as $col) {
                     $actual_col_names[] = strtolower($col['Field']);
@@ -937,19 +942,19 @@ if (isset($database_result) && $database_result) {
         // Generate fix SQL by comparing full index definitions
         $table_lower = strtolower($index['Table']);
         if (!empty($full_indexes[$table_lower])) {
-            $renamed_indexes = array();
+            $renamed_indexes = [];
             foreach ($full_indexes[$table_lower] as $key_name => $expected_idx) {
                 $fix_table = '`'.$table['Name'].'`';
                 if (!isset($actual_full_indexes[$key_name])) {
                     // Index name missing - check if same type+columns exist under a different name
-                    $expected_cols_norm = array_map(function($c) {
+                    $expected_cols_norm = array_map(function ($c) {
                         return strtolower(trim(preg_replace('/\(\d+\)/', '', str_replace('`', '', trim($c)))));
                     }, explode(',', $expected_idx['columns']));
                     $old_name = null;
                     foreach ($actual_full_indexes as $act_name => $act_idx) {
                         if ($act_idx['type'] === $expected_idx['type']) {
                             ksort($act_idx['columns']);
-                            $act_cols_norm = array_map(function($c) {
+                            $act_cols_norm = array_map(function ($c) {
                                 return strtolower(trim(str_replace('`', '', $c)));
                             }, array_values($act_idx['columns']));
                             if ($expected_cols_norm === $act_cols_norm) {
@@ -981,11 +986,11 @@ if (isset($database_result) && $database_result) {
                     }
                 } else {
                     // Index exists with correct type - check columns match
-                    $expected_cols = array_map(function($c) {
+                    $expected_cols = array_map(function ($c) {
                         return strtolower(trim(preg_replace('/\(\d+\)/', '', str_replace('`', '', trim($c)))));
                     }, explode(',', $expected_idx['columns']));
                     ksort($actual_full_indexes[$key_name]['columns']);
-                    $actual_cols = array_map(function($c) {
+                    $actual_cols = array_map(function ($c) {
                         return strtolower(trim(str_replace('`', '', $c)));
                     }, array_values($actual_full_indexes[$key_name]['columns']));
                     if ($expected_cols !== $actual_cols) {
@@ -1005,14 +1010,14 @@ if (isset($database_result) && $database_result) {
                     continue; // Skip expected indexes, PRIMARY, and already-renamed indexes
                 }
                 ksort($act_idx['columns']);
-                $act_cols_norm = array_map(function($c) {
+                $act_cols_norm = array_map(function ($c) {
                     return strtolower(trim(str_replace('`', '', $c)));
                 }, array_values($act_idx['columns']));
                 foreach ($full_indexes[$table_lower] as $exp_name => $exp_idx) {
                     if ($act_idx['type'] !== $exp_idx['type']) {
                         continue;
                     }
-                    $exp_cols_norm = array_map(function($c) {
+                    $exp_cols_norm = array_map(function ($c) {
                         return strtolower(trim(preg_replace('/\(\d+\)/', '', str_replace('`', '', trim($c)))));
                     }, explode(',', $exp_idx['columns']));
                     if ($act_cols_norm === $exp_cols_norm) {
@@ -1024,15 +1029,15 @@ if (isset($database_result) && $database_result) {
         }
 
         $table['Data_free'] = ($table['Data_free'] > 0) ? formatBytes($table['Data_free'], true) : '-';
-        $table_size   = $table['Data_length']+$table['Index_length'];
+        $table_size   = $table['Data_length'] + $table['Index_length'];
         $data_length  = formatBytes($table_size);
-        $table['Data_length'] = ($table_size>0) ? $data_length['size'].' '.$data_length['suffix'] : '-';
+        $table['Data_length'] = ($table_size > 0) ? $data_length['size'].' '.$data_length['suffix'] : '-';
         $table['Name_Display'] = $GLOBALS['config']->get('config', 'dbdatabase').'.'.$table['Name'];
-        $table['errors'] = count($index_errors)>0 ? implode('<br>', $index_errors) : false;
+        $table['errors'] = count($index_errors) > 0 ? implode('<br>', $index_errors) : false;
         $smarty_data['tables'][] = $table;
     }
     // Check for missing tables
-    $missing_tables = array();
+    $missing_tables = [];
     $prefix = $GLOBALS['config']->get('config', 'dbprefix');
     foreach ($column_map as $expected_table => $cols) {
         if (!in_array($expected_table, $found_tables)) {
@@ -1063,11 +1068,10 @@ if (isset($database_result) && $database_result) {
     }
 }
 
-
 ## Existing Backups
 $files = glob('{backup/*.sql,backup/*.zip}', GLOB_BRACE);
-$existing_backups = array();
-if (count($files)>0) {
+$existing_backups = [];
+if (count($files) > 0) {
     foreach ($files as $file) {
         $sorted_files[filemtime($file)] = $file;
     }
@@ -1080,15 +1084,15 @@ if (count($files)>0) {
         $type = preg_match('/^database/', $filename) ? 'database' : 'files';
         $restore = preg_match('/^database_full|files/', $filename) ? '?_g=maintenance&node=index&restore='.$filename.'#backup' : false;
         $compress = (preg_match('/.zip$/', $filename) || file_exists($file.'.zip')) ? false : '?_g=maintenance&node=index&compress='.$filename.'#backup';
-        $existing_backups[] = array('filename' => $filename,
+        $existing_backups[] = ['filename' => $filename,
             'delete_link' => '?_g=maintenance&node=index&delete='.$filename.'#backup',
             'download_link' => '?_g=maintenance&node=index&download='.$filename.'#backup',
             'restore_link' => $restore,
             'compress' =>  $compress,
             'type' => $type,
-            'warning' => ($type=='database') ? $lang['maintain']['restore_db_confirm'] : $lang['maintain']['restore_files_confirm'],
-            'size' => formatBytes(filesize($file), true)
-        );
+            'warning' => ($type == 'database') ? $lang['maintain']['restore_db_confirm'] : $lang['maintain']['restore_files_confirm'],
+            'size' => formatBytes(filesize($file), true),
+        ];
     }
 }
 $GLOBALS['smarty']->assign('EXISTING_BACKUPS', $existing_backups);
@@ -1101,7 +1105,7 @@ if ($request = new Request('www.cubecart.com', '/version-check/'.CC_VERSION)) {
     $request->cache(true);
     $request->setSSL();
     $request->setUserAgent('CubeCart');
-    $request->setData(array('version' => CC_VERSION));
+    $request->setData(['version' => CC_VERSION]);
 
     if (($response = $request->send()) !== false) {
         $response_array = json_decode($response, true);

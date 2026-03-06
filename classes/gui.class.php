@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -21,13 +23,12 @@
  */
 class GUI
 {
-
     /**
      * Bread crumbs
      *
      * @var array of strings
      */
-    private $_breadcrumb = array();
+    private array $_breadcrumb = [];
 
     /**
      * Is useragent mobile or not
@@ -41,14 +42,12 @@ class GUI
      *
      * @var array
      */
-    public $_product_images = array();
-    
+    public $_product_images = [];
+
     /**
      * Do we have any sale items?
-     *
-     * @var bool
      */
-    private $_sale_items = false;
+    private bool $_sale_items = false;
 
     /**
      * Current skin
@@ -61,13 +60,13 @@ class GUI
      *
      * @var array
      */
-    private $_skin_data  = array();
+    private $_skin_data  = [];
     /**
      * Current available skins
      *
      * @var array
      */
-    private $_skins   = array();
+    private $_skins   = [];
     /**
      * Current style
      *
@@ -82,16 +81,12 @@ class GUI
     private $_logo   = '';
     /**
      * Document root relative path to the store logo
-     *
-     * @var string
      */
-    private $_template_dir = '';
+    private string $_template_dir = '';
     /**
      * Postfix string for mobile config variables
-     *
-     * @var string
      */
-    private $_skin_config_postfix = '';
+    private string $_skin_config_postfix = '';
 
     /**
      * Class instance
@@ -115,12 +110,12 @@ class GUI
             if ($GLOBALS['config']->get('config', 'skin_change')) {
                 // Switch Skins
                 if (isset($_POST['select_skin']) && !empty($_POST['select_skin']) && ($switch = $_POST['select_skin']) || isset($_GET['select_skin']) && !empty($_GET['select_skin']) && ($switch = $_GET['select_skin'])) {
-                    list($skin, $style) = explode('|', $switch);
+                    [$skin, $style] = explode('|', (string) $switch);
                     if (isset($this->_skins[$skin])) {
                         $GLOBALS['session']->set('skin', $skin, 'client');
                         $GLOBALS['session']->set('style', $style, 'client');
                     }
-                    httpredir(currentPage(array('select_skin')));
+                    httpredir(currentPage(['select_skin']));
                 }
             }
 
@@ -132,9 +127,9 @@ class GUI
             $this->_skin_data = $this->_skins[$this->_skin];
 
             // Make sure CSRF is enabled if skin has it enabled
-            if ($this->_skin_data['info']['csrf'] && $GLOBALS['config']->get('config', 'csrf')!=='1') {
+            if ($this->_skin_data['info']['csrf'] && $GLOBALS['config']->get('config', 'csrf') !== '1') {
                 $GLOBALS['config']->set('config', 'csrf', '1');
-            } elseif (!$this->_skin_data['info']['csrf'] && $GLOBALS['config']->get('config', 'csrf')=='1') {
+            } elseif (!$this->_skin_data['info']['csrf'] && $GLOBALS['config']->get('config', 'csrf') == '1') {
                 $GLOBALS['config']->set('config', 'csrf', '0');
             }
 
@@ -156,21 +151,21 @@ class GUI
              * The store URL gets appended to the beginning
              * ie $css[] = 'skins/test/syles/style.css';
              */
-            $css = array();
+            $css = [];
             foreach ($GLOBALS['hooks']->load('class.gui.css') as $hook) {
                 include $hook;
             }
             $GLOBALS['smarty']->assign('CSS', $css);
 
             // <head> JS
-            $head_js = array();
+            $head_js = [];
             foreach ($GLOBALS['hooks']->load('class.gui.head_js') as $hook) {
                 include $hook;
             }
             $GLOBALS['smarty']->assign('HEAD_JS', $head_js);
 
             // <body> JS (Top)
-            $body_js_top = array();
+            $body_js_top = [];
             foreach ($GLOBALS['hooks']->load('class.gui.body_js_top') as $hook) {
                 include $hook;
             }
@@ -184,7 +179,7 @@ class GUI
             $GLOBALS['smarty']->assign('BODY_JS_TOP', $body_js_top);
 
             // <body> JS
-            $body_js = array();
+            $body_js = [];
             foreach ($GLOBALS['hooks']->load('class.gui.body_js') as $hook) {
                 include $hook;
             }
@@ -199,8 +194,8 @@ class GUI
             $GLOBALS['smarty']->assign('JS_SCRIPTS', $js);
 
             //Put in the live help
-            if (($livehelp_plugins = $GLOBALS['db']->select('CubeCart_modules', array('folder'), array('module' => 'livehelp', 'status' => '1'))) !== false) {
-                $livehelp_html = array();
+            if (($livehelp_plugins = $GLOBALS['db']->select('CubeCart_modules', ['folder'], ['module' => 'livehelp', 'status' => '1'])) !== false) {
+                $livehelp_html = [];
                 foreach ($livehelp_plugins as $plugin) {
                     $file_path = CC_ROOT_DIR.'/modules/livehelp/'.$plugin['folder'].'/livehelp.class.php';
                     if (file_exists($file_path)) {
@@ -214,9 +209,8 @@ class GUI
                 $GLOBALS['smarty']->assign('LIVE_HELP', implode("\r\n", $livehelp_html));
             }
 
-
             //Setup copyright
-            $copyright = $GLOBALS['smarty']->fetch('string:'.stripslashes($GLOBALS['config']->get('config', 'store_copyright')));
+            $copyright = $GLOBALS['smarty']->fetch('string:'.stripslashes((string) $GLOBALS['config']->get('config', 'store_copyright')));
             $GLOBALS['smarty']->assign('COPYRIGHT', $copyright);
 
         } else {
@@ -224,7 +218,7 @@ class GUI
             $admin_folder  = (!$GLOBALS['config']->isEmpty('config', 'adminFolder')) ? $GLOBALS['config']->get('config', 'adminFolder') : 'admin';
             $admin_file  = (!$GLOBALS['config']->isEmpty('config', 'adminFile')) ? $GLOBALS['config']->get('config', 'adminFile') : 'admin.php';
             $skin_root  = $admin_folder.'/'.'skins';
-            if (strstr($skin_root, CC_ROOT_DIR)) {
+            if (strstr($skin_root, (string) CC_ROOT_DIR)) {
                 $skindir = $skin_root;
             } else {
                 if (!$GLOBALS['config']->isEmpty('config', 'admin_skin') && file_exists($skin_root.'/'.$skin_folder) && is_dir($skin_root.'/'.$skin_folder)) {
@@ -234,7 +228,7 @@ class GUI
                 }
             }
 
-            if (substr($skindir, -1) != '/' && substr($skindir, -1) != '\\') {
+            if (!str_ends_with($skindir, '/') && !str_ends_with($skindir, '\\')) {
                 $skindir .= '/';
             }
 
@@ -242,7 +236,7 @@ class GUI
             $skin_data['admin_folder']   = $admin_folder;
             $skin_data['admin_file']   = $admin_file;
             $skin_data['skin_folder']   = $skin_folder;
-            $skin_data['clear_cache_link']   = currentPage(null, array('clear_cache' => 'true'));
+            $skin_data['clear_cache_link']   = currentPage(null, ['clear_cache' => 'true']);
             $GLOBALS['smarty']->assign('SKIN_VARS', $skin_data);
             $GLOBALS['smarty']->template_dir = $this->_template_dir = $skindir;
         }
@@ -266,9 +260,8 @@ class GUI
      * Setup the instance (singleton)
      *
      * @param bool
-     * @return GUI
      */
-    public static function getInstance($admin = false)
+    public static function getInstance($admin = false): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self($admin);
@@ -285,22 +278,22 @@ class GUI
      * @param string $name
      * @param array $url
      */
-    public function addBreadcrumb($name, $url = array(), $replace = false)
+    public function addBreadcrumb($name, $url = [], $replace = false): void
     {
         if ($replace) {
-            $this->_breadcrumb = array();
+            $this->_breadcrumb = [];
         }
 
         if (is_array($url) && !empty($url)) {
             $href = '?'.http_build_query($url);
         } else {
             if (empty($url)) {
-                $url = array(
+                $url = [
                     '_g' => $_GET['_g'],
                     'node' => (!empty($this->_breadcrumb) && isset($_GET['node'])) ? $_GET['node'] : 'index',
-                );
+                ];
                 if (isset($_GET['mode'])) {
-                    $url = array_merge($url, array('mode' => $_GET['mode']));
+                    $url = array_merge($url, ['mode' => $_GET['mode']]);
                 }
                 $href = '?'.http_build_query($url);
             } else {
@@ -309,10 +302,10 @@ class GUI
         }
 
         if (!empty($name)) {
-            $this->_breadcrumb[] = array(
+            $this->_breadcrumb[] = [
                 'url' => $GLOBALS['seo']->SEOable($href),
-                'title' => ucfirst(strip_tags(str_replace('_', ' ', $name)))
-            );
+                'title' => ucfirst(strip_tags(str_replace('_', ' ', $name))),
+            ];
             foreach ($GLOBALS['hooks']->load('class.gui.add_breadcrumb_post') as $hook) {
                 include $hook;
             }
@@ -324,7 +317,7 @@ class GUI
      *
      * @param string $directory
      */
-    public function changeTemplateDir($directory = '')
+    public function changeTemplateDir($directory = ''): void
     {
         if (empty($directory)) {
             $GLOBALS['smarty']->template_dir = $this->_template_dir;
@@ -338,15 +331,14 @@ class GUI
      *
      * @param string $file
      */
-    public function display($file)
+    public function display($file): void
     {
         $this->_setCanonical();
         $GLOBALS['debug']->stream_into_session = false;
-        if ($GLOBALS['config']->get('config', 'csrf')=='1' || CC_IN_ADMIN) {
-            die(preg_replace('#</form>#i', '<input type="hidden" name="token" class="cc_session_token" value="'.SESSION_TOKEN.'"></form>', $GLOBALS['smarty']->fetch($file)));
-        } else {
-            $GLOBALS['smarty']->display($file);
+        if ($GLOBALS['config']->get('config', 'csrf') == '1' || CC_IN_ADMIN) {
+            die(preg_replace('#</form>#i', '<input type="hidden" name="token" class="cc_session_token" value="'.SESSION_TOKEN.'"></form>', (string) $GLOBALS['smarty']->fetch($file)));
         }
+        $GLOBALS['smarty']->display($file);
     }
 
     /**
@@ -355,14 +347,14 @@ class GUI
      * @param bool $admin
      * @param array $url
      */
-    public function displayCommon()
+    public function displayCommon(): void
     {
         if (!CC_IN_ADMIN) {
             if (!isset($_GET['_a']) || $_GET['_a'] != 'template') {
                 $this->_displayLanguageSwitch();
                 $this->_displayCurrencySwitch();
                 $this->_displaySessionBox();
-                if (!isset($_GET['_a']) || !in_array($_GET['_a'], array('basket', 'cart', 'complete', 'checkout', 'confirm', 'gateway')) && !$GLOBALS['config']->get('config', 'catalogue_mode')) {
+                if (!isset($_GET['_a']) || !in_array($_GET['_a'], ['basket', 'cart', 'complete', 'checkout', 'confirm', 'gateway']) && !$GLOBALS['config']->get('config', 'catalogue_mode')) {
                     $this->displaySideBasket();
                 }
             }
@@ -414,9 +406,9 @@ class GUI
 
         if (($contents = $GLOBALS['cart']->get()) !== false) {
             $gc = $GLOBALS['config']->get('gift_certs');
-            $vars = array();
+            $vars = [];
             foreach ($contents as $hash => $product) {
-                $product['name_abbrev'] = (strlen($product['name']) >= 15) ? substr($product['name'], 0, 15).'&hellip;' : $product['name'];
+                $product['name_abbrev'] = (strlen((string) $product['name']) >= 15) ? substr((string) $product['name'], 0, 15).'&hellip;' : $product['name'];
                 $product['total']  = $GLOBALS['tax']->priceFormat($product['price_display']);
                 if (isset($gc['product_code']) && $product['product_code'] == $gc['product_code']) {
                     $product['link'] = $GLOBALS['seo']->buildURL('certificates');
@@ -432,10 +424,10 @@ class GUI
             $GLOBALS['smarty']->assign('CART_ITEMS', $basket_items);
         }
         $GLOBALS['smarty']->assign('CART_TOTAL', isset($this->_total) ? Tax::getInstance()->priceFormat($this->_total) : $GLOBALS['tax']->priceFormat($basket_total));
-        $button = array(
+        $button = [
             'link'  => $GLOBALS['storeURL'].'/index.php?_a=basket',
-            'text'  => $GLOBALS['language']->basket['view_basket']
-        );
+            'text'  => $GLOBALS['language']->basket['view_basket'],
+        ];
         $GLOBALS['smarty']->assign('BUTTON', $button);
         foreach ($GLOBALS['hooks']->load('class.gui.display_side_basket') as $hook) {
             include $hook;
@@ -445,9 +437,8 @@ class GUI
 
         if (isset($_GET['_g']) && $_GET['_g'] == 'ajaxadd') {
             return $content;
-        } else {
-            return true;
         }
+        return true;
     }
 
     /**
@@ -462,13 +453,8 @@ class GUI
 
     /**
      * Get custom template for module from default skin
-     *
-     * @param string $type
-     * @param string $dirname
-     * @param string $file_name
-     * @return string
      */
-    public function getCustomModuleSkin($type = 'gateway', $dirname = '', $file_name = '')
+    public function getCustomModuleSkin(string $type = 'gateway', string $dirname = '', string $file_name = ''): string
     {
         $root_path  = CC_ROOT_DIR.'/skins/'.$GLOBALS['config']->get('config', 'skin_folder').'/'.'templates/modules/'.$type.'/'.basename($dirname);
         return file_exists($root_path.'/'.$file_name) ? $root_path : $dirname.'/'.'skin';
@@ -501,7 +487,7 @@ class GUI
      */
     public function getProductImage($product_id = false, $mode = 'small', $path_type = 'url')
     {
-        
+
         // If array take first key that exists (This is for backward compatibility to ensure old skins still work).
         if (is_array($mode)) {
             foreach ($mode as $mode_name) {
@@ -513,7 +499,7 @@ class GUI
         }
 
         if (is_numeric($product_id)) {
-            $this->_product_images[$product_id] = isset($this->_product_images[$product_id]) ? $this->_product_images[$product_id] : $GLOBALS['db']->select('CubeCart_image_index', false, array('product_id' => $product_id), array('main_img' => 'DESC'), 1);
+            $this->_product_images[$product_id] ??= $GLOBALS['db']->select('CubeCart_image_index', false, ['product_id' => $product_id], ['main_img' => 'DESC'], 1);
 
             if ($this->_product_images[$product_id]) {
                 return $GLOBALS['catalogue']->imagePath($this->_product_images[$product_id][0]['file_id'], $mode, $path_type);
@@ -522,7 +508,7 @@ class GUI
 
         if (isset($this->_skin_data['images'][$mode])) {
             $default = $this->_skin_data['images'][$mode]['default'];
-            
+
             if ($this->_style !== '' && $this->_skin_data['styles'][$this->_style]['images']) { // do we use a separate style folder for images?
                 $files = glob('skins/'.$this->_skin.'/'.'images/{common,'.$this->_style.'}/'.$default, GLOB_BRACE);
             } else {
@@ -530,7 +516,7 @@ class GUI
             }
             if ($files) {
                 //echo str_replace(array('//', '/'), '/', $files[0]);
-                return $GLOBALS['catalogue']->imagePath(str_replace(array('//', '/'), '/', $files[0]), $mode);
+                return $GLOBALS['catalogue']->imagePath(str_replace(['//', '/'], '/', $files[0]), $mode);
             }
         }
         return false;
@@ -558,14 +544,12 @@ class GUI
     {
         if ($this->_skin_data) {
             return $this->_skin_data;
-        } else {
-            //Setup skin and style
-            $this->_setSkin();
-            $this->_setStyle();
-
-            //Setup current skin data
-            return $this->_skin_data = $this->_skins[$this->_skin];
         }
+        //Setup skin and style
+        $this->_setSkin();
+        $this->_setStyle();
+        //Setup current skin data
+        return $this->_skin_data = $this->_skins[$this->_skin];
     }
 
     /**
@@ -580,7 +564,7 @@ class GUI
         }
         return $this->_style;
     }
-    
+
     /**
      * Get number items per page
      *
@@ -590,30 +574,35 @@ class GUI
      */
     public function itemsPerPage($list_id = 'products', $page_key = 'perpage', $list_amount = 'default')
     {
-        if (isset($_GET[$page_key]) && (int)$_GET[$page_key]>0) {
+        if (isset($_GET[$page_key]) && (int)$_GET[$page_key] > 0) {
             return (int)$_GET[$page_key];
         }
         if (isset($this->_skin_data['layout'][$list_id]['perpage'])) {
             ksort($this->_skin_data['layout'][$list_id]['perpage'], SORT_NUMERIC);
-            if($list_amount == 'default') {
+            if ($list_amount == 'default') {
                 foreach ($this->_skin_data['layout'][$list_id]['perpage'] as $amount => $default) {
-                    if ($default) return (int)$amount;
+                    if ($default) {
+                        return (int)$amount;
+                    }
                 }
-            } else if ($list_amount == "last") {
-                return (int)array_key_last($this->_skin_data['layout'][$list_id]['perpage']);
-            } else if ($list_amount == "first") { // for some future reason
-                return (int)array_key_first($this->_skin_data['layout'][$list_id]['perpage']);
+            } else {
+                if ($list_amount == 'last') {
+                    return (int)array_key_last($this->_skin_data['layout'][$list_id]['perpage']);
+                }
+                if ($list_amount == 'first') { // for some future reason
+                    return (int)array_key_first($this->_skin_data['layout'][$list_id]['perpage']);
+                }
             }
         }
 
         if (is_numeric($GLOBALS['config']->get('config', 'catalogue_products_per_page'))) {
             return $GLOBALS['config']->get('config', 'catalogue_products_per_page');
-        } else { // Last ditch ..
-            return 10;
         }
+        // Last ditch ..
+        return 10;
     }
 
-    public function getSkinConfig($path = '', $foldername = '')
+    public function getSkinConfig($path = '', ?string $foldername = ''): \SimpleXMLElement|false
     {
         if (!empty($foldername)) {
             $path = CC_ROOT_DIR.'/skins/'.$foldername.'/config.xml';
@@ -637,85 +626,77 @@ class GUI
      */
     public function listSkins()
     {
-        if ($skins = ($GLOBALS['cache']->read('info.skins.list'))?:array()) {
+        if ($skins = ($GLOBALS['cache']->read('info.skins.list')) ?: []) {
             return $skins;
-        } else {
-            $skins = array();
-            foreach (glob(CC_ROOT_DIR.'/skins/*/config.xml') as $data_file) {
-                $data = $this->getSkinConfig($data_file);
-                                
-                if ($data) {
-                    $skins[(string)$data->info->{'name'}]['info'] = array(
-                        'name'   	=> (string)$data->info->{'name'},
-                        'display'  	=> (string)$data->info->{'display'},
-                        'version'  	=> (string)$data->info->{'version'},
-                        'compatible'=> array(
-                            'min' => (string)$data->info->{'minVersion'},
-                            'max' => (string)$data->info->{'maxVersion'},
-                        ),
-                        'creator'  	=> (string)$data->info->{'creator'},
-                        'homepage'  => (string)$data->info->{'homepage'},
-                        'mobile'  	=> ((string)$data->info->{'mobile'}=='true') ? true : false,
-                        'responsive' => ((string)$data->info->{'responsive'}=='true') ? true : false,
-                        'csrf' => ((string)$data->info->{'csrf'}=='true') ? true : false,
-                        'newsletter_recaptcha' => ((string)$data->info->{'newsletter_recaptcha'}=='true') ? true : false,
-                        'gravatar_ajax' => ((string)$data->info->{'gravatar_ajax'}=='true') ? true : false
-                    );
-            
-                    if (is_object($data->layout)) {
-                        foreach ($data->layout as $layout) {
-                            foreach ($layout as $section => $v) {
-                                if (is_object($v)) {
-                                    foreach ($v->perpage as $attribs) {
-                                        $skins[(string)$data->info->{'name'}]['layout'][(string)$section]['perpage'][(string)$attribs['amount']] = (bool)$attribs->attributes()->{'default'};
-                                    }
+        }
+        $skins = [];
+        foreach (glob(CC_ROOT_DIR.'/skins/*/config.xml') as $data_file) {
+            $data = $this->getSkinConfig($data_file);
+
+            if ($data) {
+                $skins[(string)$data->info->{'name'}]['info'] = [
+                    'name'   	=> (string)$data->info->{'name'},
+                    'display'  	=> (string)$data->info->{'display'},
+                    'version'  	=> (string)$data->info->{'version'},
+                    'compatible' => [
+                        'min' => (string)$data->info->{'minVersion'},
+                        'max' => (string)$data->info->{'maxVersion'},
+                    ],
+                    'creator'  	=> (string)$data->info->{'creator'},
+                    'homepage'  => (string)$data->info->{'homepage'},
+                    'mobile'  	=> ((string)$data->info->{'mobile'} == 'true') ? true : false,
+                    'responsive' => ((string)$data->info->{'responsive'} == 'true') ? true : false,
+                    'csrf' => ((string)$data->info->{'csrf'} == 'true') ? true : false,
+                    'newsletter_recaptcha' => ((string)$data->info->{'newsletter_recaptcha'} == 'true') ? true : false,
+                    'gravatar_ajax' => ((string)$data->info->{'gravatar_ajax'} == 'true') ? true : false,
+                ];
+
+                if (is_object($data->layout)) {
+                    foreach ($data->layout as $layout) {
+                        foreach ($layout as $section => $v) {
+                            if (is_object($v)) {
+                                foreach ($v->perpage as $attribs) {
+                                    $skins[(string)$data->info->{'name'}]['layout'][(string)$section]['perpage'][(string)$attribs['amount']] = (bool)$attribs->attributes()->{'default'};
                                 }
                             }
                         }
                     }
-                    // Substyles
-                    if ($data->styles) {
-                        $i = 0;
-                        foreach ($data->styles->style as $style) {
-                            $name = (string)$style->{'directory'};
-                            $record = array(
-                                'name'   => (string)$style->{'name'},
-                                'description' => (string)$style->{'description'},
-                                'directory'  => $name,
-                                'images'  => (bool)($style->attributes()->{'images'} == 'true'),
-                                'default'  => (bool)($style->attributes()->{'default'} == 'true'),
-                            );
-                            $skins[(string)$data->info->{'name'}]['styles'][$name] = $record;
-                            $i++;
-                        }
-                    }
-                    // Image sizes
-                    if ($data->images) {
-                        foreach ($data->images->image as $key => $image) {
-                            $attrib = $image->attributes();
-                            $skins[(string)$data->info->{'name'}]['images'][(string)$attrib->{'reference'}] = array(
-                                'maximum' => (int)$attrib->{'maximum'},
-                                'quality' => (int)$attrib->{'quality'},
-                                'default' => (string)$attrib->default,
-                            );
-                        }
+                }
+                // Substyles
+                if ($data->styles) {
+                    $i = 0;
+                    foreach ($data->styles->style as $style) {
+                        $name = (string)$style->{'directory'};
+                        $record = [
+                            'name'   => (string)$style->{'name'},
+                            'description' => (string)$style->{'description'},
+                            'directory'  => $name,
+                            'images'  => $style->attributes()->{'images'} == 'true',
+                            'default'  => $style->attributes()->{'default'} == 'true',
+                        ];
+                        $skins[(string)$data->info->{'name'}]['styles'][$name] = $record;
+                        $i++;
                     }
                 }
-                foreach ($GLOBALS['hooks']->load('class.gui.skin_data') as $hook) {
-                    include $hook;
+                // Image sizes
+                if ($data->images) {
+                    foreach ($data->images->image as $image) {
+                        $attrib = $image->attributes();
+                        $skins[(string)$data->info->{'name'}]['images'][(string)$attrib->{'reference'}] = [
+                            'maximum' => (int)$attrib->{'maximum'},
+                            'quality' => (int)$attrib->{'quality'},
+                            'default' => (string)$attrib->default,
+                        ];
+                    }
                 }
             }
-            
-            if (isset($skins)) {
-                $GLOBALS['cache']->write($skins, 'info.skins.list');
+            foreach ($GLOBALS['hooks']->load('class.gui.skin_data') as $hook) {
+                include $hook;
             }
-
-            return $skins;
         }
-
-        return false;
+        $GLOBALS['cache']->write($skins, 'info.skins.list');
+        return $skins;
     }
-    
 
     /**
      * Get page splits
@@ -724,19 +705,19 @@ class GUI
      * @param string $page_key
      * @return int
      */
-    public function perPageSplits($list_id = 'products', $page_key = 'perpage')
+    public function perPageSplits($list_id = 'products', $page_key = 'perpage'): array|false
     {
         if (isset($this->_skin_data['layout'][$list_id]['perpage'])) {
             foreach ($this->_skin_data['layout'][$list_id]['perpage'] as $amount => $default) {
                 if (!isset($_GET[$page_key]) && $default) {
                     $selected = true;
-                } elseif (isset($_GET[$page_key]) && $_GET[$page_key]==$amount) {
+                } elseif (isset($_GET[$page_key]) && $_GET[$page_key] == $amount) {
                     $selected = true;
                 } else {
                     $selected = false;
                 }
-                    
-                $page_splits[] = array('selected' => $selected ,'url' => currentPage(null, array($page_key => $amount)), 'amount' => $amount);
+
+                $page_splits[] = ['selected' => $selected ,'url' => currentPage(null, [$page_key => $amount]), 'amount' => $amount];
             }
             return $page_splits;
         }
@@ -746,7 +727,7 @@ class GUI
     /**
      * Do we require Recaptcha check?
      */
-    public function recaptchaRequired()
+    public function recaptchaRequired(): bool
     {
         if ($GLOBALS['config']->get('config', 'recaptcha') && !$GLOBALS['session']->get('confirmed', 'recaptcha')) {
             $GLOBALS['smarty']->assign('RECAPTCHA', $GLOBALS['config']->get('config', 'recaptcha'));
@@ -758,19 +739,19 @@ class GUI
     /**
      * Validate recaptcha response
      */
-    public function recaptchaValidate()
+    public function recaptchaValidate(): void
     {
         if ($this->recaptchaRequired()) {
             $recaptcha['error'] = null;
             $recaptcha['confirmed'] = false;
-            if($GLOBALS['config']->get('config', 'recaptcha')=='5') {
+            if ($GLOBALS['config']->get('config', 'recaptcha') == '5') {
                 if (empty($_POST['cf-turnstile-response'])) {
                     $recaptcha['error'] = $GLOBALS['language']->form['verify_human_fail'];
                 } else {
-                    $data = array(
+                    $data = [
                         'secret' => $GLOBALS['config']->get('config', 'recaptcha_secret_key'),
-                        'response' => $_POST['cf-turnstile-response']
-                    );
+                        'response' => $_POST['cf-turnstile-response'],
+                    ];
                     $request = new Request('challenges.cloudflare.com', '/turnstile/v0/siteverify');
                     $request->setMethod('post');
                     $request->cache(false);
@@ -778,22 +759,22 @@ class GUI
                     $request->setData($data);
 
                     $response = $request->send();
-                    
-                    $result = json_decode($response);
+
+                    $result = json_decode((string) $response);
                     if ($result->success) {
                         $recaptcha['confirmed'] = true;
                     } else {
                         $recaptcha['error'] = $GLOBALS['language']->form['verify_human_fail'];
                     }
                 }
-            } elseif($GLOBALS['config']->get('config', 'recaptcha')=='4') {
+            } elseif ($GLOBALS['config']->get('config', 'recaptcha') == '4') {
                 if (empty($_POST['h-captcha-response'])) {
                     $recaptcha['error'] = $GLOBALS['language']->form['verify_human_fail'];
                 } else {
-                    $data = array(
+                    $data = [
                         'secret' => $GLOBALS['config']->get('config', 'recaptcha_secret_key'),
-                        'response' => $_POST['g-recaptcha-response']
-                    );
+                        'response' => $_POST['g-recaptcha-response'],
+                    ];
                     $request = new Request('hcaptcha.com', '/siteverify');
                     $request->setMethod('get');
                     $request->cache(false);
@@ -801,7 +782,7 @@ class GUI
                     $request->setData($data);
 
                     $response = $request->send();
-                    $result = json_decode($response);
+                    $result = json_decode((string) $response);
 
                     if ($result->success) {
                         $recaptcha['confirmed'] = true;
@@ -813,11 +794,11 @@ class GUI
                 if (empty($_POST['g-recaptcha-response'])) {
                     $recaptcha['error'] = $GLOBALS['language']->form['verify_human_fail'];
                 } else {
-                    $data = array(
+                    $data = [
                         'secret' => $GLOBALS['config']->get('config', 'recaptcha_secret_key'),
                         'response' => $_POST['g-recaptcha-response'],
-                        'remoteip' => get_ip_address()
-                    );
+                        'remoteip' => get_ip_address(),
+                    ];
                     $request = new Request('www.google.com', '/recaptcha/api/siteverify');
                     $request->setMethod('get');
                     $request->cache(false);
@@ -825,8 +806,8 @@ class GUI
                     $request->setData($data);
 
                     $response = $request->send();
-                    $result = json_decode($response);
-                    
+                    $result = json_decode((string) $response);
+
                     if ($result->success) {
                         $recaptcha['confirmed'] = true;
                     } else {
@@ -843,9 +824,9 @@ class GUI
     /**
      * Rebuild logo
      */
-    public function rebuildLogos()
+    public function rebuildLogos(): void
     {
-        if ($logos = $GLOBALS['db']->select('CubeCart_logo', false, array('status' => 1))) {
+        if ($logos = $GLOBALS['db']->select('CubeCart_logo', false, ['status' => 1])) {
             foreach ($logos as $logo) {
                 $skin = (!empty($logo['skin'])) ? $logo['skin'] : 'all';
                 $style = (!empty($logo['style'])) ? $logo['style'] : 'all';
@@ -858,7 +839,7 @@ class GUI
         $skins = glob(CC_ROOT_DIR.'/skins/*/config.xml');
 
         /* Add logos for extra templates */
-        $extra_templates = array('emails', 'invoices');
+        $extra_templates = ['emails', 'invoices'];
 
         if ($skins) {
             foreach ($skins as $skin) {
@@ -989,7 +970,7 @@ class GUI
             $mobile = $GLOBALS['session']->get('display_mobile');
         } else {
             $useragent = empty($useragent) ? $_SERVER['HTTP_USER_AGENT'] : $useragent;
-            if (preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i', $useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i', substr($useragent, 0, 4))) {
+            if (preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i', (string) $useragent) || preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i', substr((string) $useragent, 0, 4))) {
                 $mobile = true;
             } else {
                 $mobile = false;
@@ -1007,29 +988,32 @@ class GUI
         return $this->mobile;
     }
 
-    private function _displayAdminToolBar() {
-        
-        if(!Admin::getInstance()->is()) return false;
-        
+    private function _displayAdminToolBar()
+    {
+
+        if (!Admin::getInstance()->is()) {
+            return false;
+        }
+
         $acp_path = CC_ROOT_REL.$GLOBALS['config']->get('config', 'adminFile');
-        $acp_data = array('acp_path' => $acp_path);
-        if(isset($_GET['_a']) && !empty($_GET['_a'])) {
-            switch($_GET['_a']) {
+        $acp_data = ['acp_path' => $acp_path];
+        if (isset($_GET['_a']) && !empty($_GET['_a'])) {
+            switch ($_GET['_a']) {
                 case 'product':
                     $acp_data['edit_url'] = $acp_path.'?_g=products&node=index&action=edit&product_id='.$_GET['product_id'];
                     $acp_data['url_text'] = $GLOBALS['language']->catalogue['title_product_update'];
-                break;
+                    break;
                 case 'category':
                     $acp_data['edit_url'] = $acp_path.'?_g=categories&node=index&action=edit&cat_id='.($_GET['cat_id'] ?? '');
                     $acp_data['url_text'] = $GLOBALS['language']->category['edit_category'];
-                break;
+                    break;
                 case 'document':
                     $acp_data['edit_url'] = $acp_path.'?_g=documents&node=index&action=edit&cat_id='.$_GET['doc_id'];
                     $acp_data['url_text'] = $GLOBALS['language']->documents['document_edit'];
-                break;
+                    break;
             }
         } else {
-            if($home = $GLOBALS['db']->select('CubeCart_documents', array('doc_id'), array('doc_home' => '1'))) {
+            if ($home = $GLOBALS['db']->select('CubeCart_documents', ['doc_id'], ['doc_home' => '1'])) {
                 $acp_data['edit_url'] = $acp_path.'?_g=documents&node=index&action=edit&doc_id='.$home[0]['doc_id'];
                 $acp_data['url_text'] = $GLOBALS['language']->documents['edit_homepage'];
             }
@@ -1053,16 +1037,16 @@ class GUI
             $accept = (isset($_POST['accept_cookies'])) ? true : false;
             $dialogue = ($accept) ? 'Accepted chosen.' : 'Blocked chosen.';
             $GLOBALS['user']->logConsent($dialogue);
-            $GLOBALS['session']->set_cookie('cc_accept_cookies', true, time()+31536000);
+            $GLOBALS['session']->set_cookie('cc_accept_cookies', true, time() + 31536000);
             httpredir();
         }
         if (Config::getInstance()->get('config', 'cookie_dialogue') && !isset($_COOKIE['cc_accept_cookies'])) {
-            if ($privacy = $GLOBALS['db']->select('CubeCart_documents', 'doc_id', array('doc_privacy' => '1'))) {
+            if ($privacy = $GLOBALS['db']->select('CubeCart_documents', 'doc_id', ['doc_privacy' => '1'])) {
                 $dialogue = str_replace('%1$s', $GLOBALS['config']->get('config', 'store_name'), $GLOBALS['language']->notification['cookie_dialogue']);
                 $dialogue = str_replace('%s', $GLOBALS['config']->get('config', 'store_name'), $dialogue);
                 $dialogue = str_replace('%PRIVACY_URL%', $GLOBALS['seo']->buildURL('doc', $privacy[0]['doc_id']), $dialogue);
             } else {
-                $dialogue = str_replace(array('%s','%1$s'), $GLOBALS['config']->get('config', 'store_name'), $GLOBALS['language']->notification['cookie_dialogue']);
+                $dialogue = str_replace(['%s','%1$s'], $GLOBALS['config']->get('config', 'store_name'), $GLOBALS['language']->notification['cookie_dialogue']);
                 $dialogue = preg_replace('/<\/?a[^>]*>/', '', $dialogue);
             }
             $GLOBALS['smarty']->assign('COOKIE_DIALOGUE_TEXT', $dialogue);
@@ -1073,7 +1057,6 @@ class GUI
         }
     }
 
-
     /**
      * Display currency switch box
      */
@@ -1083,12 +1066,12 @@ class GUI
             return false;
         }
 
-        if (($currencies = $GLOBALS['db']->select('CubeCart_currency', false, array('active' => '1'))) !== false) {
+        if (($currencies = $GLOBALS['db']->select('CubeCart_currency', false, ['active' => '1'])) !== false) {
             if (count($currencies) > 0) {
-                $vars = array();
+                $vars = [];
                 foreach ($currencies as $offset => $currency) {
                     $currency['selected']  = ($GLOBALS['session']->has('currency', 'client') && $GLOBALS['session']->get('currency', 'client') == $currency['code'] || !$GLOBALS['session']->has('currency', 'client') && $GLOBALS['config']->get('config', 'default_currency') == $currency['code']) ? 'selected="selected"' : '';
-                    $currency['url']   = currentPage(null, array('set_currency' => $currency['code']));
+                    $currency['url']   = currentPage(null, ['set_currency' => $currency['code']]);
                     $currency['css']   = ($currency['selected']) ? 'current' : '';
                     $vars[]      = $currency;
                     if ($currency['selected']) {
@@ -1114,8 +1097,8 @@ class GUI
             return false;
         }
 
-        $vars = array();
-        if (($docs = $GLOBALS['db']->select('CubeCart_documents', false, array('doc_parent_id' => '0', 'doc_status' => '1', 'navigation_link' => 1), '`doc_order` ASC')) !== false) {
+        $vars = [];
+        if (($docs = $GLOBALS['db']->select('CubeCart_documents', false, ['doc_parent_id' => '0', 'doc_status' => '1', 'navigation_link' => 1], '`doc_order` ASC')) !== false) {
             foreach ($docs as $doc) {
                 if ($doc['doc_home']) {
                     continue;
@@ -1142,7 +1125,7 @@ class GUI
             include $hook;
         }
         $GLOBALS['smarty']->assign('DOCUMENTS', $vars);
-        $documents_list_hooks = array();
+        $documents_list_hooks = [];
         foreach ($GLOBALS['hooks']->load('class.gui.documents.list') as $hook) {
             include $hook;
         }
@@ -1154,7 +1137,7 @@ class GUI
     /**
      * Display errors
      */
-    private function _displayErrors()
+    private function _displayErrors(): void
     {
         if ($GLOBALS['session']->has('GUI_MESSAGE')) {
             $GLOBALS['smarty']->assign('GUI_MESSAGE', $GLOBALS['session']->get('GUI_MESSAGE'));
@@ -1175,8 +1158,10 @@ class GUI
         $enabled = $GLOBALS['config']->get('languages');
         if (is_array($lang_list)) {
             foreach ($lang_list as $language) {
-                if(!isset($language['code'])) continue;
-                if (preg_match(Language::LANG_REGEX, $language['code'], $match) && isset($match[2])) {
+                if (!isset($language['code'])) {
+                    continue;
+                }
+                if (preg_match(Language::LANG_REGEX, (string) $language['code'], $match) && isset($match[2])) {
                     if (isset($enabled[$language['code']]) && !$enabled[$language['code']]) {
                         unset($lang_list[$language['code']]);
                     } elseif (isset($language['override']) && isset($lang_list[$match[1]]) && $match[1] != $GLOBALS['config']->get('config', 'default_language')) {
@@ -1186,14 +1171,16 @@ class GUI
             }
             if (count($lang_list) > 1) {
                 foreach ($lang_list as $language) {
-                    if(!isset($language['code'])) continue;
+                    if (!isset($language['code'])) {
+                        continue;
+                    }
                     $url = '';
-                    if(!empty($language['domain'])) {
+                    if (!empty($language['domain'])) {
                         $url = currentPage();
                         $url = parse_url($url);
                         $language['url'] = $url['scheme'].'://'.$language['domain'].$url['path'];
                     } else {
-                        $language['url'] = currentPage(null, array('set_language' => $language['code']));
+                        $language['url'] = currentPage(null, ['set_language' => $language['code']]);
                     }
                     if ($GLOBALS['language']->current() == $language['code']) {
                         $language['selected'] = 'selected="selected"';
@@ -1204,7 +1191,7 @@ class GUI
                     $language['css'] = ($language['selected']) ? 'current' : '';
                     $languages[] = $language;
                 }
-                
+
                 foreach ($GLOBALS['hooks']->load('class.gui.display_language_switch') as $hook) {
                     include $hook;
                 }
@@ -1226,7 +1213,7 @@ class GUI
         }
 
         if ($GLOBALS['user']->is()) {
-            $where = array('email' => $GLOBALS['user']->get('email'));
+            $where = ['email' => $GLOBALS['user']->get('email')];
             if ((bool)$GLOBALS['config']->get('config', 'dbl_opt')) {
                 $where['dbl_opt'] = '1';
             }
@@ -1245,12 +1232,12 @@ class GUI
                 exit;
             }
             $newsletter = Newsletter::getInstance();
-            if (isset($_POST['force_unsubscribe']) && $_POST['force_unsubscribe']=='1') {
+            if (isset($_POST['force_unsubscribe']) && $_POST['force_unsubscribe'] == '1') {
                 $newsletter->unsubscribe($_POST['subscribe'], $GLOBALS['user']->getId());
             } elseif ($newsletter->subscribe($_POST['subscribe'], $GLOBALS['user']->getId())) {
                 httpredir(currentPage());
             } else {
-                httpredir(currentPage(null, array('_a' => 'newsletter')));
+                httpredir(currentPage(null, ['_a' => 'newsletter']));
             }
         }
 
@@ -1275,7 +1262,7 @@ class GUI
         if (isset($GLOBALS['user']) && $GLOBALS['user']->is()) {
             $memberships = $GLOBALS['user']->getMemberships();
             if ($memberships) {
-                $gids = array();
+                $gids = [];
                 foreach ($memberships as $m) {
                     $gids[] = (int)$m['group_id'];
                 }
@@ -1288,7 +1275,7 @@ class GUI
         $cache_id = 'html.'.$this->_skin.'.menu.'.$GLOBALS['language']->current().'.'.$group_key;
         $serialize = false;
         if (($content = $GLOBALS['cache']->read($cache_id, $serialize)) == false) {
-            
+
             //Get the navigation tree data
             $tree_data = $GLOBALS['catalogue']->getCategoryTree();
             //Make the navigation tree
@@ -1299,16 +1286,16 @@ class GUI
             $GLOBALS['smarty']->assign('CTRL_SALE', $this->_sale_items);
 
             //Check for gift certs
-            if (in_array($GLOBALS['config']->get('gift_certs', 'status'), array('1', '2'))) {
+            if (in_array($GLOBALS['config']->get('gift_certs', 'status'), ['1', '2'])) {
                 $GLOBALS['smarty']->assign('CTRL_CERTIFICATES', true);
             } else {
                 $GLOBALS['smarty']->assign('CTRL_CERTIFICATES', false);
             }
 
-            $url = array(
+            $url = [
                 'saleitems' => $GLOBALS['seo']->buildURL('saleitems', false, '&', false),
-                'certificates' => $GLOBALS['seo']->buildURL('certificates', false, '&', false)
-            );
+                'certificates' => $GLOBALS['seo']->buildURL('certificates', false, '&', false),
+            ];
             $GLOBALS['smarty']->assign('URL', $url);
             //Fetch the navigation so we can cache it
             foreach ($GLOBALS['hooks']->load('class.gui.display_navigation.pre_cache') as $hook) {
@@ -1316,21 +1303,23 @@ class GUI
             }
             $content = $GLOBALS['smarty']->fetch('templates/box.navigation.php');
             $content = str_replace('/index.php/', '/', $content);
-            
+
             // Prevent cache if domain seems wrong
-            $url_parts = parse_url($GLOBALS['config']->get('config', 'standard_url'));
+            $url_parts = parse_url((string) $GLOBALS['config']->get('config', 'standard_url'));
             $cache = false;
-            if($url_parts) {
+            if ($url_parts) {
                 $defined_host = trim($url_parts['host'], 'www.');
-                $url_parts = parse_url($GLOBALS['storeURL']);
-                if($url_parts) {
+                $url_parts = parse_url((string) $GLOBALS['storeURL']);
+                if ($url_parts) {
                     $detected_host = trim($url_parts['host'], 'www.');
-                    if($defined_host===$detected_host) {
+                    if ($defined_host === $detected_host) {
                         $cache = true;
                     }
                 }
             }
-            if($cache) $GLOBALS['cache']->write($content, $cache_id, '', $serialize);
+            if ($cache) {
+                $GLOBALS['cache']->write($content, $cache_id, '', $serialize);
+            }
         }
 
         foreach ($GLOBALS['hooks']->load('class.gui.display_navigation') as $hook) {
@@ -1354,31 +1343,31 @@ class GUI
         if ((int)$GLOBALS['config']->get('config', 'catalogue_popular_products_count') < 1) {
             return false;
         };
-        $cache_id = 'popular_products.'.(string)$GLOBALS['config']->get('config', 'catalogue_hide_prices').$GLOBALS['language']->current();
+        $cache_id = 'popular_products.'.$GLOBALS['config']->get('config', 'catalogue_hide_prices').$GLOBALS['language']->current();
         $vars = $GLOBALS['cache']->read($cache_id);
-        if($vars && is_array($vars)) {
+        if ($vars && is_array($vars)) {
             $GLOBALS['smarty']->assign('POPULAR', $vars);
-            $content = $GLOBALS['smarty']->fetch('templates/box.popular.php');    
+            $content = $GLOBALS['smarty']->fetch('templates/box.popular.php');
             $GLOBALS['smarty']->assign('POPULAR_PRODUCTS', $content);
-        } elseif($vars !=='none') {
+        } elseif ($vars !== 'none') {
             $limit = (is_numeric($GLOBALS['config']->get('config', 'catalogue_popular_products_count'))) ? $GLOBALS['config']->get('config', 'catalogue_popular_products_count') : 10;
             switch ((int)$GLOBALS['config']->get('config', 'catalogue_popular_products_source')) {
                 case 1:  // sale-based
                     $whereStr   = $GLOBALS['catalogue']->outOfStockWhere(false, 'i', true);
-                    $query  = "SELECT `oi`.`product_id`, `i`.`name`, `i`.`price`, `i`.`sale_price`, `i`.`tax_type`, `i`.`tax_inclusive`, SUM(`oi`.`quantity`) as `quantity` FROM `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_order_inventory` as `oi` JOIN `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_inventory` as `i` WHERE `oi`.`product_id` = `i`.`product_id` AND `i`.`status` = 1 $whereStr GROUP BY `oi`.`product_id` ORDER BY `quantity` DESC LIMIT ".$limit.";";
+                    $query  = 'SELECT `oi`.`product_id`, `i`.`name`, `i`.`price`, `i`.`sale_price`, `i`.`tax_type`, `i`.`tax_inclusive`, SUM(`oi`.`quantity`) as `quantity` FROM `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_inventory` as `oi` JOIN `'.$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_inventory` as `i` WHERE `oi`.`product_id` = `i`.`product_id` AND `i`.`status` = 1 $whereStr GROUP BY `oi`.`product_id` ORDER BY `quantity` DESC LIMIT ".$limit.';';
                     $products = $GLOBALS['db']->query($query);
-                break;
+                    break;
                 default: // view-based
-                    $where      = $GLOBALS['catalogue']->outOfStockWhere(array('status' => '1'));
-                    $products = $GLOBALS['db']->select('CubeCart_inventory', array('name', 'product_id', 'quantity', 'price', 'sale_price', 'tax_type', 'tax_inclusive','cat_id'), $where, 'popularity DESC', $limit);
+                    $where      = $GLOBALS['catalogue']->outOfStockWhere(['status' => '1']);
+                    $products = $GLOBALS['db']->select('CubeCart_inventory', ['name', 'product_id', 'quantity', 'price', 'sale_price', 'tax_type', 'tax_inclusive','cat_id'], $where, 'popularity DESC', $limit);
             }
-            $vars = array();
+            $vars = [];
             if ($products) {
                 foreach ($products as $product) {
                     $category_data = $GLOBALS['catalogue']->getCategoryStatusByProductID($product['product_id']);
                     $category_status = false;
                     if (is_array($category_data)) {
-                        foreach ($category_data as $trash => $data) {
+                        foreach ($category_data as $data) {
                             if ($data['status'] == 1) {
                                 $category_status = true;
                             }
@@ -1408,7 +1397,7 @@ class GUI
             }
             $GLOBALS['cache']->write($vars, $cache_id);
             $GLOBALS['smarty']->assign('POPULAR', $vars);
-            $content = $GLOBALS['smarty']->fetch('templates/box.popular.php');    
+            $content = $GLOBALS['smarty']->fetch('templates/box.popular.php');
             $GLOBALS['smarty']->assign('POPULAR_PRODUCTS', $content);
         }
     }
@@ -1425,7 +1414,7 @@ class GUI
         foreach ($GLOBALS['hooks']->load('class.gui.display_random_product_pre') as $hook) {
             include $hook;
         }
-        $featured_products  = $GLOBALS['db']->select('CubeCart_inventory', array('product_id'), $GLOBALS['catalogue']->outOfStockWhere(array('status' => '1', 'featured' => '1')), 'RAND()', 15, false, false);
+        $featured_products  = $GLOBALS['db']->select('CubeCart_inventory', ['product_id'], $GLOBALS['catalogue']->outOfStockWhere(['status' => '1', 'featured' => '1']), 'RAND()', 15, false, false);
         $n = ($featured_products ? count($featured_products) : 0);
         if ($n > 0) {
             $tries = 0;
@@ -1434,7 +1423,7 @@ class GUI
                 $category_data = $GLOBALS['catalogue']->getCategoryStatusByProductID($random_id);
                 $category_status = false;
                 if (is_array($category_data)) {
-                    foreach ($category_data as $trash => $data) {
+                    foreach ($category_data as $data) {
                         if ($data['status'] == 1 && $data['primary'] == 1) {
                             $category_status = true;
                             break;
@@ -1442,7 +1431,7 @@ class GUI
                     }
                 }
                 if ($category_status) {
-                    $random_product = $GLOBALS['db']->select('CubeCart_inventory', false, array('product_id' => $random_id), false, 1);
+                    $random_product = $GLOBALS['db']->select('CubeCart_inventory', false, ['product_id' => $random_id], false, 1);
                 }
                 ++$tries;
             }
@@ -1455,7 +1444,7 @@ class GUI
             $GLOBALS['language']->translateProduct($product);
 
             $product['image'] = $image;
-            if(isset($GLOBALS['catalogue']->image_tags[$image])) {
+            if (isset($GLOBALS['catalogue']->image_tags[$image])) {
                 $product['image_tags'] = $GLOBALS['catalogue']->image_tags[$image];
             }
 
@@ -1493,19 +1482,19 @@ class GUI
     /**
      * Display sale items box
      */
-    private function _displaySaleItems()
+    private function _displaySaleItems(): bool
     {
         if (!$GLOBALS['smarty']->templateExists('templates/box.sale_items.php')) {
             return false;
         }
 
-        if ($GLOBALS['config']->get('config', 'catalogue_sale_mode')=='1') {
+        if ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == '1') {
             $sale_sql_group_select = '`G`.`price`-`G`.`sale_price`';
             $sale_sql_standard_select = '`price`-`sale_price`';
             $sale_sql_group_where = '`G`.`price` > `G`.`sale_price` AND `G`.`sale_price` > 0';
             $sale_sql_standard_where = '`price` > `sale_price` AND `sale_price` > 0';
-        } elseif ($GLOBALS['config']->get('config', 'catalogue_sale_mode')=='2' && $GLOBALS['config']->get('config', 'catalogue_sale_percentage')>0) {
-            $decimal_percent = ($GLOBALS['config']->get('config', 'catalogue_sale_percentage')/100);
+        } elseif ($GLOBALS['config']->get('config', 'catalogue_sale_mode') == '2' && $GLOBALS['config']->get('config', 'catalogue_sale_percentage') > 0) {
+            $decimal_percent = ($GLOBALS['config']->get('config', 'catalogue_sale_percentage') / 100);
             $sale_sql_group_select = '`G`.`price` * '.$decimal_percent;
             $sale_sql_standard_select = '`price` * '.$decimal_percent;
             $sale_sql_group_where = '`G`.`price` > 0';
@@ -1519,7 +1508,7 @@ class GUI
 
         // Check for group pricing
         if ($GLOBALS['user']->is() && ($memberships = $GLOBALS['user']->getMemberships()) !== false) {
-            $group_id = array();
+            $group_id = [];
             foreach ($memberships as $membership) {
                 $group_id[] = $membership['group_id'];
             }
@@ -1536,7 +1525,7 @@ class GUI
         }
 
         if (isset($group_pricing) && is_array($group_pricing) && !empty($group_pricing)) {
-            $group_products = array();
+            $group_products = [];
             foreach ($group_pricing as $product) {
                 $group_products[$product['product_id']] = $product;
             }
@@ -1555,12 +1544,11 @@ class GUI
         }
         $not_on_sale = isset($not_on_sale) ? 'AND `product_id` NOT IN ('.implode(',', $not_on_sale).') ' : '';
 
-
         // Get Retail Prices second
         $no_sale_items = (is_numeric($GLOBALS['config']->get('config', 'catalogue_sale_items'))) ? (int)$GLOBALS['config']->get('config', 'catalogue_sale_items') : 10;
 
         if ($no_sale_items && isset($sale_sql_standard_select) && ($standard_pricing = $GLOBALS['db']->query('SELECT `price`, `sale_price`, `product_id`,`description`,`name`, `cat_id`, '.$sale_sql_standard_select.' AS `saving` FROM `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_inventory` WHERE '.$sale_sql_standard_where.' AND `status` = \'1\' '.$not_on_sale.' LIMIT '.$no_sale_items)) !== false && is_array($standard_pricing)) {
-            $unsorted_products = array();
+            $unsorted_products = [];
             foreach ($standard_pricing as $product) {
                 if (isset($group_products) && is_array($group_products) && isset($group_products[$product['product_id']])) {
                     $unsorted_products[$product['product_id']] = $group_products[$product['product_id']];
@@ -1571,8 +1559,8 @@ class GUI
         }
 
         // Loop and merge group price into Retail Prices
-        $sorted_products = array();
-        if (is_array($unsorted_products) && !empty($unsorted_products)) {
+        $sorted_products = [];
+        if (!empty($unsorted_products)) {
             foreach ($unsorted_products as $product) {
                 $sorted_products[$product['saving'].$product['product_id']] = $product;
             }
@@ -1580,30 +1568,28 @@ class GUI
         }
         unset($group_pricing, $standard_pricing, $group_products, $unsorted_products, $product, $not_on_sale);
 
-        $vars = array();
-        if (!empty($sorted_products)) {
-            foreach ($sorted_products as $product) {
-                $GLOBALS['language']->translateProduct($product);
-                $product['name'] = validHTML($product['name']);
-                $product['url']  = $GLOBALS['seo']->buildURL('prod', $product['product_id']);
-                $product['saving_unformatted']  = $product['saving'];
-                $product['saving']  = $GLOBALS['tax']->priceFormat($product['saving']);
+        $vars = [];
+        foreach ($sorted_products as $product) {
+            $GLOBALS['language']->translateProduct($product);
+            $product['name'] = validHTML($product['name']);
+            $product['url']  = $GLOBALS['seo']->buildURL('prod', $product['product_id']);
+            $product['saving_unformatted']  = $product['saving'];
+            $product['saving']  = $GLOBALS['tax']->priceFormat($product['saving']);
 
-                $GLOBALS['catalogue']->getProductPrice($product);
-                $sale = $GLOBALS['tax']->salePrice($product['price'], $product['sale_price']);
-                $product['price_unformatted'] = $product['price'];
-                $product['sale_price_unformatted'] = ($sale) ? $product['sale_price'] : null;
-                $product['price'] = $GLOBALS['tax']->priceFormat($product['price']);
-                $product['sale_price'] = ($sale) ? $GLOBALS['tax']->priceFormat($product['sale_price']) : null;
+            $GLOBALS['catalogue']->getProductPrice($product);
+            $sale = $GLOBALS['tax']->salePrice($product['price'], $product['sale_price']);
+            $product['price_unformatted'] = $product['price'];
+            $product['sale_price_unformatted'] = ($sale) ? $product['sale_price'] : null;
+            $product['price'] = $GLOBALS['tax']->priceFormat($product['price']);
+            $product['sale_price'] = ($sale) ? $GLOBALS['tax']->priceFormat($product['sale_price']) : null;
 
-                $vars[] = $product;
-            }
+            $vars[] = $product;
         }
 
         foreach ($GLOBALS['hooks']->load('class.gui.display_sale_items') as $hook) {
             include $hook;
         }
-        if(count($vars)>0) {
+        if (count($vars) > 0) {
             $GLOBALS['smarty']->assign('SALE_PRODUCTS', $vars);
             $GLOBALS['smarty']->assign('SALE_ITEMS_URL', $GLOBALS['seo']->buildURL('saleitems'));
             $content = $GLOBALS['smarty']->fetch('templates/box.sale_items.php');
@@ -1612,7 +1598,7 @@ class GUI
             return true;
         }
         return false;
-        
+
     }
 
     /**
@@ -1642,9 +1628,9 @@ class GUI
 
         if ($GLOBALS['user']->is()) {
             $customer = $GLOBALS['user']->get();
-            
+
             $GLOBALS['smarty']->assign('CUSTOMER', $customer);
-            
+
             // Account may be made but name may not be known yet e.g. Yahoo login
             if (empty($customer['first_name'])) {
                 $GLOBALS['smarty']->assign('LANG_WELCOME_BACK', $GLOBALS['language']->account['welcome_back_guest']);
@@ -1652,7 +1638,7 @@ class GUI
                 $GLOBALS['smarty']->assign('LANG_WELCOME_BACK', sprintf($GLOBALS['language']->account['welcome_back'], $customer['first_name'], ''));
             }
         }
-        $session_list_hooks = array();
+        $session_list_hooks = [];
         foreach ($GLOBALS['hooks']->load('class.gui.session.list') as $hook) {
             include $hook;
         }
@@ -1660,7 +1646,7 @@ class GUI
         foreach ($GLOBALS['hooks']->load('class.gui.display_session_box') as $hook) {
             include $hook;
         }
-        $GLOBALS['smarty']->assign('URL', array('login' => $GLOBALS['seo']->buildURL('login'), 'register' => $GLOBALS['seo']->buildURL('register')));
+        $GLOBALS['smarty']->assign('URL', ['login' => $GLOBALS['seo']->buildURL('login'), 'register' => $GLOBALS['seo']->buildURL('register')]);
         $content = $GLOBALS['smarty']->fetch('templates/box.session.php');
         $GLOBALS['smarty']->assign('SESSION', $content);
     }
@@ -1707,93 +1693,93 @@ class GUI
             return false;
         }
 
-        $vars = array();
-        
+        $vars = [];
+
         $config = $GLOBALS['config']->get('config');
-        
+
         if (!empty($config['facebook'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['facebook'], FILTER_VALIDATE_URL)) ? $config['facebook'] : 'https://www.facebook.com/'.$config['facebook'],
                 'name' => 'Facebook',
-                'icon'	=> 'facebook-square'
-            );
+                'icon'	=> 'facebook-square',
+            ];
         }
         if (!empty($config['flickr'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['flickr'], FILTER_VALIDATE_URL)) ? $config['flickr'] : 'https://www.flickr.com/photos/'.$config['flickr'],
                 'name' => 'Flickr',
-                'icon'	=> 'flickr'
-            );
+                'icon'	=> 'flickr',
+            ];
         }
         if (!empty($config['bsky'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['bsky'], FILTER_VALIDATE_URL)) ? $config['bsky'] : 'https://bsky.app/profile/'.$config['bsky'],
                 'name' => 'Bluesky',
-                'icon'	=> 'bsky'
-            );
+                'icon'	=> 'bsky',
+            ];
         }
         if (!empty($config['instagram'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['instagram'], FILTER_VALIDATE_URL)) ? $config['instagram'] : 'https://www.instagram.com/'.$config['instagram'],
                 'name' => 'Instagram',
-                'icon'	=> 'instagram'
-            );
+                'icon'	=> 'instagram',
+            ];
         }
         if (!empty($config['linkedin'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['linkedin'], FILTER_VALIDATE_URL)) ? $config['linkedin'] : 'https://www.linkedin.com/company/'.$config['linkedin'],
                 'name' => 'Linkedin',
-                'icon'	=> 'linkedin-square'
-            );
+                'icon'	=> 'linkedin-square',
+            ];
         }
         if (!empty($config['pinterest'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['pinterest'], FILTER_VALIDATE_URL)) ? $config['pinterest'] : 'https://www.pinterest.com/'.$config['pinterest'],
                 'name' => 'Pinterest',
-                'icon'	=> 'pinterest-square'
-            );
+                'icon'	=> 'pinterest-square',
+            ];
         }
         if (!empty($config['twitter'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['twitter'], FILTER_VALIDATE_URL)) ? $config['twitter'] : 'https://x.com/'.$config['twitter'],
                 'name' => 'Twitter',
-                'icon'	=> 'twitter-square'
-            );
+                'icon'	=> 'twitter-square',
+            ];
         }
         if (!empty($config['vimeo'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['vimeo'], FILTER_VALIDATE_URL)) ? $config['vimeo'] : 'https://vimeo.com/'.$config['vimeo'],
                 'name' => 'Vimeo',
-                'icon'	=> 'vimeo-square'
-            );
+                'icon'	=> 'vimeo-square',
+            ];
         }
         if (!empty($config['wordpress'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['wordpress'], FILTER_VALIDATE_URL)) ? $config['wordpress'] : 'https://'.$config['wordpress'].'.wordpress.com',
                 'name' => 'WordPress',
-                'icon'	=> 'wordpress'
-            );
+                'icon'	=> 'wordpress',
+            ];
         }
         if (!empty($config['youtube'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['youtube'], FILTER_VALIDATE_URL)) ? $config['youtube'] : 'https://www.youtube.com/user/'.$config['youtube'],
                 'name' => 'YouTube',
-                'icon'	=> 'youtube-square'
-            );
+                'icon'	=> 'youtube-square',
+            ];
         }
         if (!empty($config['reddit'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['reddit'], FILTER_VALIDATE_URL)) ? $config['reddit'] : 'https://www.reddit.com/r/'.$config['reddit'],
                 'name' => 'Reddit',
-                'icon'	=> 'reddit-square'
-            );
+                'icon'	=> 'reddit-square',
+            ];
         }
         if (!empty($config['tumblr'])) {
-            $vars[] = array(
+            $vars[] = [
                 'url' => (filter_var($config['tumblr'], FILTER_VALIDATE_URL)) ? $config['tumblr'] : 'https://www.tumblr.com/'.$config['tumblr'],
                 'name' => 'Tumblr',
-                'icon'	=> 'tumblr-square'
-            );
+                'icon'	=> 'tumblr-square',
+            ];
         }
         foreach ($GLOBALS['hooks']->load('class.gui.display_social') as $hook) {
             include $hook;
@@ -1806,10 +1792,9 @@ class GUI
 
     /**
      * Setup error messages
-     * @param string $type
      * @param string $message
      */
-    private function _errorMessage($type, $message)
+    private function _errorMessage(string $type, $message): void
     {
         if (!empty($message)) {
             if (is_array($message)) {
@@ -1825,10 +1810,8 @@ class GUI
 
     /**
      * Get default skin logo
-     * @param string $skin
-     * @param string $style
      */
-    private function _getLogoDefault($skin = '', $style = '')
+    private function _getLogoDefault(string $skin = '', string $style = ''): ?string
     {
         if (empty($skin)) {
             $skin = $GLOBALS['config']->get('config', 'skin_folder');
@@ -1846,12 +1829,12 @@ class GUI
      * @param array $tree_data
      * @return string
      */
-    private function _makeTree($tree_data)
+    private function _makeTree($tree_data): false|string
     {
         if (!$GLOBALS['smarty']->templateExists('templates/element.navigation_tree.php')) {
             return false;
         }
-        
+
         $out = '';
         if (is_array($tree_data)) {
             foreach ($tree_data as $branch) {
@@ -1872,11 +1855,11 @@ class GUI
     /**
      * Set canonical
      */
-    private function _setCanonical()
+    private function _setCanonical(): bool
     {
         $canonical = $GLOBALS['smarty']->getTemplateVars('CANONICAL');
         if (empty($canonical) && !is_numeric($canonical)) {
-            $excluded = array('review','sort','perpage','set_currency','set_language');
+            $excluded = ['review','sort','perpage','set_currency','set_language'];
             if (is_array($GLOBALS['db']->page_one)) {
                 $excluded = array_merge($excluded, $GLOBALS['db']->page_one);
             }
@@ -1891,7 +1874,7 @@ class GUI
      *
      * @param string $type
      */
-    private function _setLogo($type = '')
+    private function _setLogo($type = ''): void
     {
         if (!empty($type)) {
             $this->_logo = $GLOBALS['config']->get('logos', $type);
@@ -1906,16 +1889,15 @@ class GUI
         }
     }
 
-
     /**
      * Set the correct skin
      */
-    private function _setSkin()
+    private function _setSkin(): void
     {
         //Try the session (only when skin switching is enabled)
         if ($GLOBALS['config']->get('config', 'skin_change') && $GLOBALS['session']->has('skin', 'client') && isset($this->_skins[$GLOBALS['session']->get('skin', 'client')])) {
             $this->_skin = $GLOBALS['session']->get('skin', 'client');
-        //Try the config
+            //Try the config
         } elseif ($GLOBALS['config']->has('config', 'skin_folder'.$this->_skin_config_postfix) && isset($this->_skins[$GLOBALS['config']->get('config', 'skin_folder'.$this->_skin_config_postfix)])) {
             $this->_skin = $GLOBALS['config']->get('config', 'skin_folder'.$this->_skin_config_postfix);
         } else {
@@ -1940,7 +1922,7 @@ class GUI
 
         if (($custom = $GLOBALS['cache']->read('skin.'.$this->_skin.'.custom')) === false && file_exists(CC_ROOT_DIR.'/skins/'.$this->_skin.'/'.'config.xml')) {
             $xml = $this->getSkinConfig('', $this->_skin);
-            $custom = array();
+            $custom = [];
             if (isset($xml->custom)) {
                 foreach ($xml->custom->children() as $element) {
                     $custom[$element->getName()] = (string)$element;
@@ -1959,7 +1941,7 @@ class GUI
     /**
      * Set the correct style
      */
-    private function _setStyle()
+    private function _setStyle(): void
     {
         if ($GLOBALS['config']->get('config', 'skin_change') && $GLOBALS['session']->has('style', 'client') && isset($this->_skins[$this->_skin]['styles'][$GLOBALS['session']->get('style', 'client')])) {
             $this->_style = $GLOBALS['session']->get('style', 'client');

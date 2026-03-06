@@ -1,10 +1,13 @@
 <?php
+
+declare(strict_types=1);
 // index.php
 require_once __DIR__ . '/../../sendgrid-php.php';
 
 use SendGrid\Mail\Mail;
 use SendGrid\Mail\Personalization;
 use SendGrid\Mail\To;
+
 $exceptionMessage = 'Caught exception: ';
 
 ////////////////////////////////////////////////////
@@ -12,7 +15,7 @@ $exceptionMessage = 'Caught exception: ';
 // sending to global data residency
 
 $email = buildHelloEmail();
-$sendgrid = buildSendgridObject("global");
+$sendgrid = buildSendgridObject('global');
 
 try {
     $response = $sendgrid->client->mail()->send()->post($email);
@@ -26,7 +29,7 @@ try {
 ////////////////////////////////////////////////////
 // sending to EU data residency
 
-$sendgrid_eu = buildSendgridObject("eu");
+$sendgrid_eu = buildSendgridObject('eu');
 
 try {
     $response = $sendgrid_eu->client->mail()->send()->post($email);
@@ -52,12 +55,13 @@ try {
 function buildHelloEmail(): Mail
 {
     $email = new Mail();
-    $email->setFrom("test@example.com", "test");
-    $email->setSubject("Sending with Twilio SendGrid is Fun");
-    $email->addTo("test@example.co", "test");
-    $email->addContent("text/plain", "and easy to do anywhere, even with PHP");
+    $email->setFrom('test@example.com', 'test');
+    $email->setSubject('Sending with Twilio SendGrid is Fun');
+    $email->addTo('test@example.co', 'test');
+    $email->addContent('text/plain', 'and easy to do anywhere, even with PHP');
     $email->addContent(
-        "text/html", "<strong>and easy to do anywhere, even with PHP</strong>"
+        'text/html',
+        '<strong>and easy to do anywhere, even with PHP</strong>'
     );
     $objPersonalization = new Personalization();
 

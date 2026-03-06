@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -42,7 +44,7 @@ try {
 // Retrieve a Custom Field #
 // GET /contactdb/custom_fields/{custom_field_id} #
 
-$custom_field_id = "test_url_param";
+$custom_field_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->custom_fields()->_($custom_field_id)->get();
@@ -57,7 +59,7 @@ try {
 // Delete a Custom Field #
 // DELETE /contactdb/custom_fields/{custom_field_id} #
 
-$custom_field_id = "test_url_param";
+$custom_field_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->custom_fields()->_($custom_field_id)->delete();
@@ -126,7 +128,7 @@ $request_body = json_decode('{
   "name": "newlistname"
 }');
 $query_params = json_decode('{"list_id": 1}');
-$list_id = "test_url_param";
+$list_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->lists()->_($list_id)->patch($request_body, $query_params);
@@ -142,7 +144,7 @@ try {
 // GET /contactdb/lists/{list_id} #
 
 $query_params = json_decode('{"list_id": 1}');
-$list_id = "test_url_param";
+$list_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->lists()->_($list_id)->get(null, $query_params);
@@ -158,7 +160,7 @@ try {
 // DELETE /contactdb/lists/{list_id} #
 
 $query_params = json_decode('{"delete_contacts": "true"}');
-$list_id = "test_url_param";
+$list_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->lists()->_($list_id)->delete(null, $query_params);
@@ -177,7 +179,7 @@ $request_body = json_decode('[
   "recipient_id1",
   "recipient_id2"
 ]');
-$list_id = "test_url_param";
+$list_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->lists()->_($list_id)->recipients()->post($request_body);
@@ -193,7 +195,7 @@ try {
 // GET /contactdb/lists/{list_id}/recipients #
 
 $query_params = json_decode('{"page": 1, "page_size": 1, "list_id": 1}');
-$list_id = "test_url_param";
+$list_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->lists()->_($list_id)->recipients()->get(null, $query_params);
@@ -208,8 +210,8 @@ try {
 // Add a Single Recipient to a List #
 // POST /contactdb/lists/{list_id}/recipients/{recipient_id} #
 
-$list_id = "test_url_param";
-$recipient_id = "test_url_param";
+$list_id = 'test_url_param';
+$recipient_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->lists()->_($list_id)->recipients()->_($recipient_id)->post();
@@ -225,8 +227,8 @@ try {
 // DELETE /contactdb/lists/{list_id}/recipients/{recipient_id} #
 
 $query_params = json_decode('{"recipient_id": 1, "list_id": 1}');
-$list_id = "test_url_param";
-$recipient_id = "test_url_param";
+$list_id = 'test_url_param';
+$recipient_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->lists()->_($list_id)->recipients()->_($recipient_id)->delete(null, $query_params);
@@ -364,7 +366,7 @@ try {
 // Retrieve a single recipient #
 // GET /contactdb/recipients/{recipient_id} #
 
-$recipient_id = "test_url_param";
+$recipient_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->recipients()->_($recipient_id)->get();
@@ -379,7 +381,7 @@ try {
 // Delete a Recipient #
 // DELETE /contactdb/recipients/{recipient_id} #
 
-$recipient_id = "test_url_param";
+$recipient_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->recipients()->_($recipient_id)->delete();
@@ -394,7 +396,7 @@ try {
 // Retrieve the lists that a recipient is on #
 // GET /contactdb/recipients/{recipient_id}/lists #
 
-$recipient_id = "test_url_param";
+$recipient_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->recipients()->_($recipient_id)->lists()->get();
@@ -486,7 +488,7 @@ $request_body = json_decode('{
   "name": "The Millers"
 }');
 $query_params = json_decode('{"segment_id": "test_string"}');
-$segment_id = "test_url_param";
+$segment_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->segments()->_($segment_id)->patch($request_body, $query_params);
@@ -502,7 +504,7 @@ try {
 // GET /contactdb/segments/{segment_id} #
 
 $query_params = json_decode('{"segment_id": 1}');
-$segment_id = "test_url_param";
+$segment_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->segments()->_($segment_id)->get(null, $query_params);
@@ -518,7 +520,7 @@ try {
 // DELETE /contactdb/segments/{segment_id} #
 
 $query_params = json_decode('{"delete_contacts": "true"}');
-$segment_id = "test_url_param";
+$segment_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->segments()->_($segment_id)->delete(null, $query_params);
@@ -534,7 +536,7 @@ try {
 // GET /contactdb/segments/{segment_id}/recipients #
 
 $query_params = json_decode('{"page": 1, "page_size": 1}');
-$segment_id = "test_url_param";
+$segment_id = 'test_url_param';
 
 try {
     $response = $sg->client->contactdb()->segments()->_($segment_id)->recipients()->get(null, $query_params);

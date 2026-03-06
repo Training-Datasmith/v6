@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the SpamCheck object for a /mail/send API call
  */
@@ -63,7 +65,7 @@ class SpamCheck implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable)
+    public function setEnable($enable): void
     {
         Assert::boolean($enable, 'enable');
 
@@ -90,7 +92,7 @@ class SpamCheck implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setThreshold($threshold)
+    public function setThreshold($threshold): void
     {
         Assert::minValue($threshold, 'threshold', 1);
         Assert::maxValue($threshold, 'threshold', 10);
@@ -117,7 +119,7 @@ class SpamCheck implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setPostToUrl($post_to_url)
+    public function setPostToUrl($post_to_url): void
     {
         Assert::string($post_to_url, 'post_to_url');
 
@@ -146,11 +148,9 @@ class SpamCheck implements \JsonSerializable
             [
                 'enable' => $this->getEnable(),
                 'threshold' => $this->getThreshold(),
-                'post_to_url' => $this->getPostToUrl()
+                'post_to_url' => $this->getPostToUrl(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (bool|int|string $value) => $value !== null
         ) ?: null;
     }
 }

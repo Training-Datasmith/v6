@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -17,12 +19,12 @@ header('X-Frame-Options: SAMEORIGIN'); // do not allow iframes
 
 global $config_default;
 // Include external controllers
-$allowed_ec = array('es'); // Only Elastic Search right now
-if(isset($_GET['_e']) && in_array($_GET['_e'],$allowed_ec)) {
+$allowed_ec = ['es']; // Only Elastic Search right now
+if (isset($_GET['_e']) && in_array($_GET['_e'], $allowed_ec)) {
     $ec_path = CC_ROOT_DIR.'/controllers/controller.'.$_GET['_e'].'.inc.php';
-    if(file_exists($ec_path)) {
+    if (file_exists($ec_path)) {
         require_once($ec_path);
     }
-} 
+}
 include CC_ROOT_DIR.CC_DS.'controllers'.CC_DS.'controller.index.inc.php';
 $GLOBALS['gui']->display('templates/'.$global_template_file);

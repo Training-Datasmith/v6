@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the ClickTracking object for a /mail/send API call
  */
@@ -45,7 +47,7 @@ class ClickTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable)
+    public function setEnable($enable): void
     {
         Assert::boolean($enable, 'enable');
 
@@ -69,7 +71,7 @@ class ClickTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnableText($enable_text)
+    public function setEnableText($enable_text): void
     {
         Assert::boolean($enable_text, 'enable_text');
 
@@ -97,11 +99,9 @@ class ClickTracking implements \JsonSerializable
         return array_filter(
             [
                 'enable' => $this->getEnable(),
-                'enable_text' => $this->getEnableText()
+                'enable_text' => $this->getEnableText(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (bool $value) => $value !== null
         ) ?: null;
     }
 }

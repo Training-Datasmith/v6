@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -15,10 +17,9 @@ if (!defined('CC_INI_SET')) {
 }
 Admin::getInstance()->permissions('settings', CC_PERM_READ, true);
 
-
 ## Delete Coupon
 if (isset($_GET['delete']) && is_numeric($_GET['delete']) && Admin::getInstance()->permissions('settings', CC_PERM_DELETE)) {
-    if ($GLOBALS['db']->delete('CubeCart_coupons', array('coupon_id' => (int)$_GET['delete']))) {
+    if ($GLOBALS['db']->delete('CubeCart_coupons', ['coupon_id' => (int)$_GET['delete']])) {
         $GLOBALS['main']->successMessage($lang['catalogue']['notify_coupon_deleted']);
     } else {
         $GLOBALS['main']->errorMessage($lang['catalogue']['error_coupon_delete']);
@@ -26,13 +27,13 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete']) && Admin::getInstance(
     foreach ($GLOBALS['hooks']->load('admin.product.coupons.delete') as $hook) {
         include $hook;
     }
-    httpredir(currentPage(array('delete')));
+    httpredir(currentPage(['delete']));
 }
 
 if (isset($_POST['status']) && is_array($_POST['status'])) {
     Admin::getInstance()->permissions('settings', CC_PERM_EDIT, true);
     foreach ($_POST['status'] as $id => $status) {
-        $GLOBALS['db']->update('CubeCart_coupons', array('status' => $status), array('coupon_id' => $id));
+        $GLOBALS['db']->update('CubeCart_coupons', ['status' => $status], ['coupon_id' => $id]);
     }
     $GLOBALS['main']->successMessage($lang['catalogue']['notify_coupon_update']);
     foreach ($GLOBALS['hooks']->load('admin.product.coupons.status') as $hook) {
@@ -50,7 +51,7 @@ if (isset($_POST['coupon']) && is_array($_POST['coupon'])) {
 
     $coupon_id = (isset($_POST['coupon']['coupon_id'])) ? (int)$_POST['coupon']['coupon_id'] : null;
 
-    $record  = array(
+    $record  = [
         'code'   => preg_replace('/[^\w\-\_]/u', '', $_POST['coupon']['code']),
         'product_id' => null,
         'manufacturer_id' => serialize($_POST['coupon']['manufacturer']),
@@ -68,22 +69,22 @@ if (isset($_POST['coupon']) && is_array($_POST['coupon'])) {
         'coupon_per_customer' => empty($_POST['coupon']['coupon_per_customer']) ? 'NULL' : $_POST['coupon']['coupon_per_customer'],
         ## Temporary reset
         'discount_percent' => 0,
-        'discount_price' => 0
-    );
+        'discount_price' => 0,
+    ];
     $continue = true;
     if (!empty($_POST['coupon']['cart_order_id'])) {
-        if(preg_match(Order::TRADITIONAL_ORDER_FORMAT, $_POST['coupon']['cart_order_id'])) {
+        if (preg_match(Order::TRADITIONAL_ORDER_FORMAT, $_POST['coupon']['cart_order_id'])) {
             $oid_col = 'cart_order_id';
         } else {
             $oid_col = 'custom_oid';
         }
-        $existing_oid = $GLOBALS['db']->select('CubeCart_order_summary', false, array($oid_col => $_POST['coupon']['cart_order_id']));
+        $existing_oid = $GLOBALS['db']->select('CubeCart_order_summary', false, [$oid_col => $_POST['coupon']['cart_order_id']]);
         if (!$existing_oid) {
             $GLOBALS['main']->errorMessage(sprintf($lang['orders']['order_not_found'], $_POST['coupon']['cart_order_id']));
             $_POST['coupon']['cart_order_id'] = null;
             $continue = false;
         } else {
-            if ($_POST['discount_type']=='fixed') {
+            if ($_POST['discount_type'] == 'fixed') {
                 $record['cart_order_id'] = $existing_oid[0]['cart_order_id']; // Traditional order ID required
             } else {
                 $GLOBALS['main']->errorMessage($lang['catalogue']['notify_gc_not_fixed']);
@@ -102,16 +103,16 @@ if (isset($_POST['coupon']) && is_array($_POST['coupon'])) {
             $record['product_id'] = serialize($_POST['product']);
         }
         switch (strtolower($_POST['discount_type'])) {
-        case 'fixed':
-            $record['discount_price'] = $_POST['discount_value'];
-            break;
-        case 'percent':
-        default:
-            $record['discount_percent'] = $_POST['discount_value'];
+            case 'fixed':
+                $record['discount_price'] = $_POST['discount_value'];
+                break;
+            case 'percent':
+            default:
+                $record['discount_percent'] = $_POST['discount_value'];
         }
 
         if (!empty($coupon_id) && is_numeric($coupon_id)) {
-            if ($GLOBALS['db']->update('CubeCart_coupons', $record, array('coupon_id' => (int)$coupon_id))) {
+            if ($GLOBALS['db']->update('CubeCart_coupons', $record, ['coupon_id' => (int)$coupon_id])) {
                 $GLOBALS['main']->successMessage($lang['catalogue']['notify_coupon_update']);
             }
         } else {
@@ -138,7 +139,7 @@ if (isset($_GET['action'])) {
     $GLOBALS['main']->addTabControl($lang['common']['general'], 'edit-coupon');
     $GLOBALS['main']->addTabControl($lang['catalogue']['title_products_assigned'], 'edit-products');
     if ($_GET['action'] == 'edit' && isset($_GET['coupon_id']) && is_numeric($_GET['coupon_id'])) {
-        if (($coupon = $GLOBALS['db']->select('CubeCart_coupons', false, array('coupon_id' => (int)$_GET['coupon_id']), array('archived' => 'ASC'))) !== false) {
+        if (($coupon = $GLOBALS['db']->select('CubeCart_coupons', false, ['coupon_id' => (int)$_GET['coupon_id']], ['archived' => 'ASC'])) !== false) {
             $GLOBALS['gui']->addBreadcrumb($coupon[0]['code'], currentPage());
             $coupon[0]['discount_value'] = ($coupon[0]['discount_price'] > 0) ? $coupon[0]['discount_price'] : $coupon[0]['discount_percent'];
             $GLOBALS['smarty']->assign('COUPON', $coupon[0]);
@@ -153,7 +154,7 @@ if (isset($_GET['action'])) {
                     $incexc = 'include';
                 }
 
-                if ($product_id && ($products = $GLOBALS['db']->select('CubeCart_inventory', array('name', 'product_id'), array('product_id' => $product_id))) !== false) {
+                if ($product_id && ($products = $GLOBALS['db']->select('CubeCart_inventory', ['name', 'product_id'], ['product_id' => $product_id])) !== false) {
                     $smarty_data['products'] = $products;
                 }
             }
@@ -169,26 +170,26 @@ if (isset($_GET['action'])) {
         $select_type = 'percent';
     }
 
-    $discounts = array('fixed' => 'discount_price', 'percent' => 'discount_percent');
+    $discounts = ['fixed' => 'discount_price', 'percent' => 'discount_percent'];
     foreach ($discounts as $index => $discount_type) {
-        $smarty_data['discounts'][] = array(
+        $smarty_data['discounts'][] = [
             'index'  => $index,
             'selected' => ($select_type == $index) ? 'selected="selected"' : '',
-            'title'  => $lang['catalogue'][$discount_type]
-        );
+            'title'  => $lang['catalogue'][$discount_type],
+        ];
     }
     $GLOBALS['smarty']->assign('DISCOUNTS', $smarty_data['discounts']);
 
-    $incexc_choices = array('include' => 'coupon_include', 'exclude' => 'coupon_exclude', 'shipping_only' => 'coupon_shipping_only');
+    $incexc_choices = ['include' => 'coupon_include', 'exclude' => 'coupon_exclude', 'shipping_only' => 'coupon_shipping_only'];
     foreach ($incexc_choices as $index => $incexc_type) {
-        $smarty_data['incexc'][] = array(
+        $smarty_data['incexc'][] = [
             'index'  => $index,
             'selected' => (isset($incexc) && $incexc == $index) ? 'selected="selected"' : '',
-            'title'  => $lang['catalogue'][$incexc_type]
-        );
+            'title'  => $lang['catalogue'][$incexc_type],
+        ];
     }
     // List Manufacturers
-    if (($manufacturers = $GLOBALS['db']->select('CubeCart_manufacturers', false, false, array('name' => 'ASC'))) !== false) {
+    if (($manufacturers = $GLOBALS['db']->select('CubeCart_manufacturers', false, false, ['name' => 'ASC'])) !== false) {
         if (isset($coupon[0]['manufacturer_id']) && is_array(unserialize($coupon[0]['manufacturer_id']))) {
             $manufacturer_assigned = array_flip(unserialize($coupon[0]['manufacturer_id']));
         }
@@ -199,13 +200,13 @@ if (isset($_GET['action'])) {
         $GLOBALS['smarty']->assign('MANUFACTURERS', $smarty_data['list_manufacturers']);
     }
     $GLOBALS['smarty']->assign('INCEXC', $smarty_data['incexc']);
-    
+
     // List Categories
     if (isset($coupon[0]['category_id']) && is_array(unserialize($coupon[0]['category_id']))) {
         $category_assigned = array_flip(unserialize($coupon[0]['category_id']));
     }
 
-    $categoryArray = $GLOBALS['db']->select('CubeCart_category', array('cat_name', 'cat_parent_id', 'cat_id'));
+    $categoryArray = $GLOBALS['db']->select('CubeCart_category', ['cat_name', 'cat_parent_id', 'cat_id']);
 
     if ($categoryArray) {
         $cat_list[] = '/';
@@ -221,49 +222,49 @@ if (isset($_GET['action'])) {
             if (empty($cat_name)) {
                 continue;
             }
-            $data = array(
+            $data = [
                 'id'  => $cat_id,
                 'name'  => $cat_name,
-                'selected' => isset($category_assigned[$cat_id]) ? true : false
-            );
+                'selected' => isset($category_assigned[$cat_id]) ? true : false,
+            ];
             $smarty_data['categories'][] = $data;
         }
         $GLOBALS['smarty']->assign('CATEGORIES', $smarty_data['categories']);
     }
-    if($shipping = $GLOBALS['db']->select('CubeCart_modules', array('folder'), array('module' => 'shipping', 'status' => 1))) {
+    if ($shipping = $GLOBALS['db']->select('CubeCart_modules', ['folder'], ['module' => 'shipping', 'status' => 1])) {
         // List shipping methods
         if (isset($coupon[0]['shipping_id']) && is_array(unserialize($coupon[0]['shipping_id']))) {
             $shipping_assigned = array_flip(unserialize($coupon[0]['shipping_id']));
         }
-        $shipping_data = array();
-        foreach($shipping as $s) {
+        $shipping_data = [];
+        foreach ($shipping as $s) {
             $shipping_data[$s['folder']] = isset($shipping_assigned[$s['folder']]);
         }
     } else {
-        $shipping_data = array();
+        $shipping_data = [];
     }
     $GLOBALS['smarty']->assign('SHIPPING', $shipping_data);
-    
+
     $GLOBALS['smarty']->assign('DISPLAY_FORM', true);
 } else {
     $GLOBALS['main']->addTabControl($lang['catalogue']['title_coupons'], 'coupons', null, 'C');
-    $GLOBALS['main']->addTabControl($lang['catalogue']['title_coupon_create'], null, currentPage(null, array('action' => 'add')), 'A');
+    $GLOBALS['main']->addTabControl($lang['catalogue']['title_coupon_create'], null, currentPage(null, ['action' => 'add']), 'A');
     $GLOBALS['main']->addTabControl($lang['catalogue']['gift_certificates'], 'certificates', null, 'G');
 
     $certificate_sort_key = 'gc_sort';
     $coupon_sort_key = 'c_sort';
 
     if (!isset($_GET[$certificate_sort_key]) || !is_array($_GET[$certificate_sort_key])) {
-        $_GET[$certificate_sort_key] = array('order_date' => 'DESC');
+        $_GET[$certificate_sort_key] = ['order_date' => 'DESC'];
     }
-    $current_page = currentPage(array($coupon_sort_key, $certificate_sort_key));
-    $thead_sort = array(
+    $current_page = currentPage([$coupon_sort_key, $certificate_sort_key]);
+    $thead_sort = [
         'status'   => $GLOBALS['db']->column_sort('status', $lang['common']['status'], $certificate_sort_key, $current_page, $_GET[$certificate_sort_key], 'certificates'),
         'code'    => $GLOBALS['db']->column_sort('code', $lang['catalogue']['title_coupon_code'], $certificate_sort_key, $current_page, $_GET[$certificate_sort_key], 'certificates'),
         'value'   => $GLOBALS['db']->column_sort('discount_price', $lang['catalogue']['title_value_remaining'], $certificate_sort_key, $current_page, $_GET[$certificate_sort_key], 'certificates'),
         'expires'   => $GLOBALS['db']->column_sort('expires', $lang['catalogue']['title_coupon_expires'], $certificate_sort_key, $current_page, $_GET[$certificate_sort_key], 'certificates'),
         'cart_order_id' => $GLOBALS['db']->column_sort('cart_order_id', $lang['orders']['order_number'], $certificate_sort_key, $current_page, $_GET[$certificate_sort_key], 'certificates'),
-    );
+    ];
     $GLOBALS['smarty']->assign('THEAD_CERTIFICATE', $thead_sort);
     unset($thead_sort);
 
@@ -273,10 +274,10 @@ if (isset($_GET['action'])) {
     $certificates = $GLOBALS['db']->select('`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_coupons` AS `C` INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_summary` AS `S` ON `C`.`cart_order_id` = `S`.`cart_order_id`', '`C`.*, `S`.`id`, `S`.`custom_oid`', '`C`.`cart_order_id` IS NOT NULL', $_GET[$certificate_sort_key], $per_page, $page);
     $pagination = $GLOBALS['db']->pagination(false, $per_page, $page, 5, $page_var, 'certificates');
     if ($certificates) {
-        $config_oid_col = $GLOBALS['config']->get('config','oid_col');
-        $config_oid_mode = $GLOBALS['config']->get('config','oid_mode');
+        $config_oid_col = $GLOBALS['config']->get('config', 'oid_col');
+        $config_oid_mode = $GLOBALS['config']->get('config', 'oid_mode');
         foreach ($certificates as $certificate) {
-            $certificate['expires'] = ($certificate['expires']>0) ? formatTime(strtotime($certificate['expires'])) : $GLOBALS['lang']['common']['never'];
+            $certificate['expires'] = ($certificate['expires'] > 0) ? formatTime(strtotime($certificate['expires'])) : $GLOBALS['lang']['common']['never'];
             if ($certificate['allowed_uses'] == 0) {
                 $certificate['allowed_uses'] = '&infin;';
             } else {
@@ -284,10 +285,10 @@ if (isset($_GET['action'])) {
             }
             $certificate['value']  = ($certificate['discount_percent'] > 0) ? $certificate['discount_percent'].'%' : Tax::getInstance()->priceFormat($certificate['discount_price']);
 
-            $certificate['link_edit'] = currentPage(null, array('action' => 'edit', 'coupon_id' => $certificate['coupon_id']));
-            $certificate['link_delete'] = currentPage(null, array('delete' => $certificate['coupon_id'], 'token'=>SESSION_TOKEN));
+            $certificate['link_edit'] = currentPage(null, ['action' => 'edit', 'coupon_id' => $certificate['coupon_id']]);
+            $certificate['link_delete'] = currentPage(null, ['delete' => $certificate['coupon_id'], 'token' => SESSION_TOKEN]);
 
-            $certificate['display_oid'] = ($config_oid_mode=='i' && !empty($certificate[$config_oid_col])) ? $certificate[$config_oid_col] : $certificate['cart_order_id'];
+            $certificate['display_oid'] = ($config_oid_mode == 'i' && !empty($certificate[$config_oid_col])) ? $certificate[$config_oid_col] : $certificate['cart_order_id'];
             $smarty_data['list_cert'][] = $certificate;
         }
         $GLOBALS['smarty']->assign('CERTIFICATES', $smarty_data['list_cert']);
@@ -295,19 +296,18 @@ if (isset($_GET['action'])) {
     }
 
     if (!isset($_GET[$coupon_sort_key]) || !is_array($_GET[$coupon_sort_key])) {
-        $_GET[$coupon_sort_key] = array('expires' => 'DESC');
+        $_GET[$coupon_sort_key] = ['expires' => 'DESC'];
     }
-    $current_page = currentPage(array($coupon_sort_key, $certificate_sort_key));
-    $thead_sort = array(
+    $current_page = currentPage([$coupon_sort_key, $certificate_sort_key]);
+    $thead_sort = [
         'status'  => $GLOBALS['db']->column_sort('status', $lang['common']['status'], $coupon_sort_key, $current_page, $_GET[$coupon_sort_key], 'coupons'),
         'code'   => $GLOBALS['db']->column_sort('code', $lang['catalogue']['title_coupon_code'], $coupon_sort_key, $current_page, $_GET[$coupon_sort_key], 'coupons'),
         'value'  => $GLOBALS['db']->column_sort('discount_price', $lang['catalogue']['discount_value'], $coupon_sort_key, $current_page, $_GET[$coupon_sort_key], 'coupons'),
         'starts'  => $GLOBALS['db']->column_sort('starts', $lang['catalogue']['title_coupon_starts'], $coupon_sort_key, $current_page, $_GET[$coupon_sort_key], 'coupons'),
         'expires'  => $GLOBALS['db']->column_sort('expires', $lang['catalogue']['title_coupon_expires'], $coupon_sort_key, $current_page, $_GET[$coupon_sort_key], 'coupons'),
         'time_used' => $GLOBALS['db']->column_sort('count', $lang['catalogue']['title_coupon_count'], $coupon_sort_key, $current_page, $_GET[$coupon_sort_key], 'coupons'),
-    );
+    ];
     $GLOBALS['smarty']->assign('THEAD_COUPON', $thead_sort);
-
 
     $per_page = 20;
     $page_var  = 'c_page';
@@ -316,16 +316,16 @@ if (isset($_GET['action'])) {
     $pagination = $GLOBALS['db']->pagination(false, $per_page, $page, 5, $page_var, 'coupons');
     if ($coupons) {
         foreach ($coupons as $coupon) {
-            $coupon['expires'] = (strcmp($coupon['expires'], "1") > 0) ? formatTime(strtotime($coupon['expires'])) : $GLOBALS['lang']['common']['never'];
-            $coupon['starts'] = (strcmp($coupon['starts'], "1") > 0) ? formatTime(strtotime($coupon['starts'])) : '-';
+            $coupon['expires'] = (strcmp($coupon['expires'], '1') > 0) ? formatTime(strtotime($coupon['expires'])) : $GLOBALS['lang']['common']['never'];
+            $coupon['starts'] = (strcmp($coupon['starts'], '1') > 0) ? formatTime(strtotime($coupon['starts'])) : '-';
             if ($coupon['allowed_uses'] == 0) {
                 $coupon['allowed_uses'] = '&infin;';
             } else {
                 $coupon['allowed_uses'] = $coupon['allowed_uses'];
             }
             $coupon['value']  = ($coupon['discount_percent'] > 0) ? $coupon['discount_percent'].'%' : Tax::getInstance()->priceFormat($coupon['discount_price']);
-            $coupon['link_edit'] = currentPage(null, array('action' => 'edit', 'coupon_id' => $coupon['coupon_id']));
-            $coupon['link_delete'] = currentPage(null, array('delete' => $coupon['coupon_id'], 'token'=>SESSION_TOKEN));
+            $coupon['link_edit'] = currentPage(null, ['action' => 'edit', 'coupon_id' => $coupon['coupon_id']]);
+            $coupon['link_delete'] = currentPage(null, ['delete' => $coupon['coupon_id'], 'token' => SESSION_TOKEN]);
             $smarty_data['list_coupon'][] = $coupon;
         }
         $GLOBALS['smarty']->assign('COUPONS', $smarty_data['list_coupon']);

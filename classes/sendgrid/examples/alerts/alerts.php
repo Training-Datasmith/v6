@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
@@ -46,7 +48,7 @@ try {
 $request_body = json_decode('{
   "email_to": "example@example.com"
 }');
-$alert_id = "test_url_param";
+$alert_id = 'test_url_param';
 
 try {
     $response = $sg->client->alerts()->_($alert_id)->patch($request_body);
@@ -61,7 +63,7 @@ try {
 // Retrieve a specific alert #
 // GET /alerts/{alert_id} #
 
-$alert_id = "test_url_param";
+$alert_id = 'test_url_param';
 
 try {
     $response = $sg->client->alerts()->_($alert_id)->get();
@@ -76,7 +78,7 @@ try {
 // Delete an alert #
 // DELETE /alerts/{alert_id} #
 
-$alert_id = "test_url_param";
+$alert_id = 'test_url_param';
 
 try {
     $response = $sg->client->alerts()->_($alert_id)->delete();

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -18,19 +20,19 @@ if (isset($_GET['clear_cache']) && $_GET['clear_cache'] == 'true') {
     $GLOBALS['cache']->clear();
     $GLOBALS['session']->delete('CLEAR_CACHE');
     $GLOBALS['main']->successMessage($GLOBALS['language']->maintain['notify_cache_cleared'], false);
-    httpredir(currentPage(array('clear_cache')));
+    httpredir(currentPage(['clear_cache']));
 }
 
 // Load admin user details
-if (!isset($_GET['_g']) || !in_array(strtolower($_GET['_g']), array('login', 'logout', 'password', 'recovery'))) {
+if (!isset($_GET['_g']) || !in_array(strtolower($_GET['_g']), ['login', 'logout', 'password', 'recovery'])) {
     $GLOBALS['main']->setTemplate();
 }
 
-if (isset($_GET['_g']) && in_array($_GET['_g'], array('login', 'password', 'recovery'))) {
+if (isset($_GET['_g']) && in_array($_GET['_g'], ['login', 'password', 'recovery'])) {
     httpredir('?');
 }
 // Backard compatibility for links to v5 modules
-if (isset($_GET['_g']) && $_GET['_g']=='modules') {
+if (isset($_GET['_g']) && $_GET['_g'] == 'modules') {
     $_GET['_g'] = 'plugins';
     unset($_GET['type']);
 }
@@ -40,35 +42,35 @@ if (isset($_GET['_g']) && !empty($_GET['_g']) && $_GET['_g'] != 'plugins') {
 }
 
 if (!empty($_GET['_g'])) {
-    $module_type = (isset($_GET['type']) && preg_match("/[a-z]/i", $_GET['type'])) ? $_GET['type'] : '';
+    $module_type = (isset($_GET['type']) && preg_match('/[a-z]/i', $_GET['type'])) ? $_GET['type'] : '';
 
     $node = (!empty($_GET['node'])) ? strtolower($_GET['node']) : 'index';
     $node = preg_replace('/[^a-z0-9._-]/', '', $node);
     $_g = preg_replace('/[^a-z0-9_-]/', '', $_GET['_g']);
-    
+
     if (!isset($_GET['delete']) && strtolower($_g) == 'plugins' && !empty($module_type)) {
-        $module_type = preg_match("/[a-z]/i", $_GET['type']) ? $_GET['type'] : '';
+        $module_type = preg_match('/[a-z]/i', $_GET['type']) ? $_GET['type'] : '';
         $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->navigation['nav_plugins'], '?_g=plugins');
         // Display Modules
         $GLOBALS['main']->wikiNamespace('Modules');
-        
+
         if (!empty($_GET['module'])) {
             // Load Module
             $GLOBALS['main']->wikiPage($_GET['module']);
             // Load additional data from XML
             $config_xml = CC_ROOT_DIR.'/modules/'.$module_type.'/'.$_GET['module'].'/config.xml';
-            
+
             if (file_exists($config_xml)) {
                 try {
                     $xml   = new SimpleXMLElement(file_get_contents($config_xml));
-                    $module_info = array(
+                    $module_info = [
                         'name' => (string)$xml->info->name,
-                    );
-                    
-                    $module = array(
+                    ];
+
+                    $module = [
                         'type' => strtolower($module_type),
-                        'module'=> ($module_type == 'installer') ? '' : $_GET['module'],
-                    );
+                        'module' => ($module_type == 'installer') ? '' : $_GET['module'],
+                    ];
                     $GLOBALS['gui']->addBreadcrumb((isset($_GET['variant']) ? $_GET['variant'] : $module_info['name']), $_GET);
 
                     $module_admin = CC_ROOT_DIR.'/modules/'.$module['type'].'/'.$module['module'].'/admin/'.$node.'.inc.php';
@@ -82,8 +84,8 @@ if (!empty($_GET['_g'])) {
                     trigger_error($e, E_USER_WARNING);
                 }
             } else {
-                $GLOBALS['main']->errorMessage("Extension has missing or corrupt config.xml file.");
-                trigger_error("Extension config.xml file doesn't exist. (".$config_xml.")", E_USER_WARNING);
+                $GLOBALS['main']->errorMessage('Extension has missing or corrupt config.xml file.');
+                trigger_error("Extension config.xml file doesn't exist. (".$config_xml.')', E_USER_WARNING);
             }
         }
     } elseif (strtolower($_g) == 'plugin' && isset($_GET['name'])) {
@@ -110,7 +112,7 @@ if (!empty($_GET['_g'])) {
             if (file_exists($include)) {
                 require $include;
             } else {
-                $page_content = str_replace(CC_ROOT_DIR, '', $include)." - not found.";
+                $page_content = str_replace(CC_ROOT_DIR, '', $include).' - not found.';
                 trigger_error(sprintf('Unable to load content for %s:%s', $_GET['_g'], $node), E_USER_WARNING);
             }
         }
@@ -140,19 +142,19 @@ if (!empty($page_content)) {
     $GLOBALS['smarty']->assign('DISPLAY_CONTENT', $page_content);
 }
 
-$body_js = array();
+$body_js = [];
 foreach ($GLOBALS['hooks']->load('admin.body_js') as $hook) {
     include $hook;
 }
 $GLOBALS['smarty']->assign('BODY_JS', $body_js);
 
-$head_js = array();
+$head_js = [];
 foreach ($GLOBALS['hooks']->load('admin.head_js') as $hook) {
     include $hook;
 }
 $GLOBALS['smarty']->assign('HEAD_JS', $head_js);
 
-$head_css = array();
+$head_css = [];
 foreach ($GLOBALS['hooks']->load('admin.head_css') as $hook) {
     include $hook;
 }

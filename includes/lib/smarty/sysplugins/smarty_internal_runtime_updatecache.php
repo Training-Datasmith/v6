@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Inline Runtime Methods render, setSourceByUid, setupSubTemplate
  *

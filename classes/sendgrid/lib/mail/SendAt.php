@@ -1,7 +1,10 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the SendAt object for a /mail/send API call
  */
+
 namespace SendGrid\Mail;
 
 use SendGrid\Helper\Assert;
@@ -65,7 +68,7 @@ class SendAt implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setSendAt($send_at)
+    public function setSendAt($send_at): void
     {
         Assert::integer($send_at, 'send_at');
 

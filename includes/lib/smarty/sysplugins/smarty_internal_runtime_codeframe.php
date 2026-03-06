@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Smarty Internal Extension
  * This file contains the Smarty template extension to create a code frame
@@ -34,7 +36,7 @@ class Smarty_Internal_Runtime_CodeFrame
     ) {
         // build property code
         $properties[ 'version' ] = Smarty::SMARTY_VERSION;
-        $properties[ 'unifunc' ] = 'content_' . str_replace(array('.', ','), '_', uniqid('', true));
+        $properties[ 'unifunc' ] = 'content_' . str_replace(['.', ','], '_', uniqid('', true));
         if (!$cache) {
             $properties[ 'has_nocache_code' ] = $_template->compiled->has_nocache_code;
             $properties[ 'file_dependency' ] = $_template->compiled->file_dependency;
@@ -45,13 +47,13 @@ class Smarty_Internal_Runtime_CodeFrame
             $properties[ 'cache_lifetime' ] = $_template->cache_lifetime;
         }
         $output = sprintf(
-			"<?php\n/* Smarty version %s, created on %s\n  from '%s' */\n\n",
+            "<?php\n/* Smarty version %s, created on %s\n  from '%s' */\n\n",
             $properties[ 'version' ],
-	        date("Y-m-d H:i:s"),
-	        str_replace('*/', '* /', $_template->source->filepath)
+            date('Y-m-d H:i:s'),
+            str_replace('*/', '* /', $_template->source->filepath)
         );
         $output .= "/* @var Smarty_Internal_Template \$_smarty_tpl */\n";
-        $dec = "\$_smarty_tpl->_decodeProperties(\$_smarty_tpl, " . var_export($properties, true) . ',' .
+        $dec = '$_smarty_tpl->_decodeProperties($_smarty_tpl, ' . var_export($properties, true) . ',' .
                ($cache ? 'true' : 'false') . ')';
         $output .= "if ({$dec}) {\n";
         $output .= "function {$properties['unifunc']} (Smarty_Internal_Template \$_smarty_tpl) {\n";
@@ -61,10 +63,10 @@ class Smarty_Internal_Runtime_CodeFrame
             $output .= ");\n";
         }
         if ($cache && isset($_template->smarty->ext->_tplFunction)) {
-            $output .= "\$_smarty_tpl->smarty->ext->_tplFunction->registerTplFunctions(\$_smarty_tpl, " .
+            $output .= '$_smarty_tpl->smarty->ext->_tplFunction->registerTplFunctions($_smarty_tpl, ' .
                        var_export($_template->smarty->ext->_tplFunction->getTplFunction($_template), true) . ");\n";
         }
-        $output .= "?>";
+        $output .= '?>';
         $output .= $content;
         $output .= "<?php }\n?>";
         $output .= $functions;

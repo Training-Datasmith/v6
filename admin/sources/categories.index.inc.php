@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -15,7 +17,6 @@ if (!defined('CC_INI_SET')) {
     die('Access Denied');
 }
 Admin::getInstance()->permissions('categories', CC_PERM_READ, true);
-
 
 ###########################################
 ## Update/Insert a category
@@ -35,7 +36,7 @@ if (isset($_POST['cat']) && is_array($_POST['cat']) && Admin::getInstance()->per
         }
     }
     foreach ($_POST['cat'] as $key => $value) {
-        if (!in_array($key, array('cat_name'))) {
+        if (!in_array($key, ['cat_name'])) {
             continue;
         }
         $_POST['cat'][$key] = html_entity_decode($value);
@@ -48,7 +49,7 @@ if (isset($_POST['cat']) && is_array($_POST['cat']) && Admin::getInstance()->per
 
     if (is_numeric($_POST['cat']['cat_id'])) {
         $cat_id = $_POST['cat']['cat_id'];
-        $old_image = $GLOBALS['db']->select('CubeCart_category', array('cat_image'), array('cat_id' => $_POST['cat']['cat_id']));
+        $old_image = $GLOBALS['db']->select('CubeCart_category', ['cat_image'], ['cat_id' => $_POST['cat']['cat_id']]);
         $_POST['cat']['cat_image'] = $old_image[0]['cat_image'];
         if (isset($_POST['imageset']) && is_array($_POST['imageset'])) {
             foreach ($_POST['imageset'] as $image_id => $enabled) {
@@ -63,14 +64,14 @@ if (isset($_POST['cat']) && is_array($_POST['cat']) && Admin::getInstance()->per
             }
         }
 
-        if ((!empty($_POST['cat']['cat_name']) && $GLOBALS['db']->update('CubeCart_category', $_POST['cat'], array('cat_id' => $_POST['cat']['cat_id']), true))) {
+        if ((!empty($_POST['cat']['cat_name']) && $GLOBALS['db']->update('CubeCart_category', $_POST['cat'], ['cat_id' => $_POST['cat']['cat_id']], true))) {
             if (isset($_POST['gen_seo']) && $_POST['gen_seo'] == 1) {
                 $GLOBALS['seo']->delete('cat', $cat_id);
                 $GLOBALS['seo']->rebuildCategoryList();
                 $GLOBALS['seo']->setdbPath('cat', $cat_id, '', false, false);
             }
             $GLOBALS['main']->successMessage($lang['settings']['notify_category_update']);
-            $keys_remove = array('action', 'cat_id');
+            $keys_remove = ['action', 'cat_id'];
         } elseif (!isset($_POST['seo_path'])) {
             $GLOBALS['main']->errorMessage($lang['settings']['error_category_update']);
             $redirect = false;
@@ -104,31 +105,31 @@ if (isset($_POST['cat']) && is_array($_POST['cat']) && Admin::getInstance()->per
             $GLOBALS['seo']->setdbPath('cat', $cat_id, $path);
             $GLOBALS['seo']->rebuildCategoryList();
             $GLOBALS['main']->successMessage($lang['settings']['notify_category_create']);
-            $keys_remove = array('action', 'cat_id');
+            $keys_remove = ['action', 'cat_id'];
         } else {
             $GLOBALS['main']->errorMessage($lang['settings']['error_category_create']);
             $redirect = false;
         }
     }
 
-    if(isset($_POST['group_discount']) && is_array($_POST['group_discount'])) {
-        foreach($_POST['group_discount'] as $group_id => $percent) {
+    if (isset($_POST['group_discount']) && is_array($_POST['group_discount'])) {
+        foreach ($_POST['group_discount'] as $group_id => $percent) {
             $percent = (empty($percent) || !is_numeric($percent)) ? 0.00 : $percent;
-            $where = array('group_id' => $group_id, 'cat_id' => $cat_id);
-            if($GLOBALS['db']->select('CubeCart_category_discount', false, $where)) {
-                $GLOBALS['db']->update('CubeCart_category_discount', array('percent' => (float)$percent), $where);
+            $where = ['group_id' => $group_id, 'cat_id' => $cat_id];
+            if ($GLOBALS['db']->select('CubeCart_category_discount', false, $where)) {
+                $GLOBALS['db']->update('CubeCart_category_discount', ['percent' => (float)$percent], $where);
             } else {
-                $GLOBALS['db']->insert('CubeCart_category_discount', array_merge($where, array('percent' => (float)$percent)));
+                $GLOBALS['db']->insert('CubeCart_category_discount', array_merge($where, ['percent' => (float)$percent]));
             }
         }
 
     }
 
     // Save group access restrictions
-    $GLOBALS['db']->delete('CubeCart_category_group', array('cat_id' => (int)$cat_id));
+    $GLOBALS['db']->delete('CubeCart_category_group', ['cat_id' => (int)$cat_id]);
     if (isset($_POST['group_access']) && is_array($_POST['group_access'])) {
         foreach ($_POST['group_access'] as $group_id) {
-            $GLOBALS['db']->insert('CubeCart_category_group', array('cat_id' => (int)$cat_id, 'group_id' => (int)$group_id));
+            $GLOBALS['db']->insert('CubeCart_category_group', ['cat_id' => (int)$cat_id, 'group_id' => (int)$group_id]);
         }
     }
 
@@ -136,26 +137,27 @@ if (isset($_POST['cat']) && is_array($_POST['cat']) && Admin::getInstance()->per
         include $hook;
     }
 
-    function updateCatsWithHierPosition($cat_id = 0, $position = 0){
-        if($cat_id == 0){
-            $GLOBALS['db']->update('CubeCart_category', array('cat_hier_position' => 0));
-            $cats = $GLOBALS['db']->select('CubeCart_category', array('cat_id'), array('cat_parent_id' => 0), array('priority' => 'ASC'));
+    function updateCatsWithHierPosition($cat_id = 0, $position = 0)
+    {
+        if ($cat_id == 0) {
+            $GLOBALS['db']->update('CubeCart_category', ['cat_hier_position' => 0]);
+            $cats = $GLOBALS['db']->select('CubeCart_category', ['cat_id'], ['cat_parent_id' => 0], ['priority' => 'ASC']);
         } else {
-            $cats = $GLOBALS['db']->select('CubeCart_category', array('cat_id'), array('cat_parent_id' => $cat_id), array('priority' => 'ASC'));
+            $cats = $GLOBALS['db']->select('CubeCart_category', ['cat_id'], ['cat_parent_id' => $cat_id], ['priority' => 'ASC']);
         }
-        if(isset($cats) && is_array($cats) && !empty($cats)){
-            foreach($cats as $cat){
-                if($position > 0){
-                    $GLOBALS['db']->update('CubeCart_category', array('cat_hier_position' => $position), array('cat_id' => $cat['cat_id']));
+        if (isset($cats) && is_array($cats) && !empty($cats)) {
+            foreach ($cats as $cat) {
+                if ($position > 0) {
+                    $GLOBALS['db']->update('CubeCart_category', ['cat_hier_position' => $position], ['cat_id' => $cat['cat_id']]);
                 }
-                updateCatsWithHierPosition($cat['cat_id'], ($position+1));
+                updateCatsWithHierPosition($cat['cat_id'], ($position + 1));
             }
         }
     }
     updateCatsWithHierPosition();
     if (isset($_POST['submit_cont'])) {
-        httpredir(currentPage(null, array('action' => 'edit', 'cat_id' => (int)$cat_id)));
-    } else if ($redirect) {
+        httpredir(currentPage(null, ['action' => 'edit', 'cat_id' => (int)$cat_id]));
+    } elseif ($redirect) {
         httpredir(currentPage($keys_remove, $keys_add));
     }
 }
@@ -166,14 +168,14 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete']) && Admin::getInstance(
         include $hook;
     }
     // Get category name for informative messages
-    $category = $GLOBALS['db']->select('CubeCart_category', 'cat_name', array('cat_id' => $_GET['delete']));
+    $category = $GLOBALS['db']->select('CubeCart_category', 'cat_name', ['cat_id' => $_GET['delete']]);
     // Detect sub categories
-    if (!$subcats = $GLOBALS['db']->select('CubeCart_category', array('cat_id'), array('cat_parent_id' => (int)$_GET['delete']))) {
+    if (!$subcats = $GLOBALS['db']->select('CubeCart_category', ['cat_id'], ['cat_parent_id' => (int)$_GET['delete']])) {
         // Detect products
-        if (!$products = $GLOBALS['db']->select('CubeCart_category_index', array('id'), array('cat_id' => (int)$_GET['delete']))) {
-            if ($GLOBALS['db']->delete('CubeCart_category', array('cat_id' => (int)$_GET['delete']))) {
-                $GLOBALS['db']->delete('CubeCart_category_language', array('cat_id' => (int)$_GET['delete']));
-                $GLOBALS['db']->delete('CubeCart_category_discount', array('cat_id' => (int)$_GET['delete']));
+        if (!$products = $GLOBALS['db']->select('CubeCart_category_index', ['id'], ['cat_id' => (int)$_GET['delete']])) {
+            if ($GLOBALS['db']->delete('CubeCart_category', ['cat_id' => (int)$_GET['delete']])) {
+                $GLOBALS['db']->delete('CubeCart_category_language', ['cat_id' => (int)$_GET['delete']]);
+                $GLOBALS['db']->delete('CubeCart_category_discount', ['cat_id' => (int)$_GET['delete']]);
                 $GLOBALS['seo']->delete('cat', $_GET['delete']);
                 $GLOBALS['main']->successMessage($lang['settings']['notify_category_delete']);
             } else {
@@ -185,8 +187,8 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete']) && Admin::getInstance(
     } else {
         $GLOBALS['main']->errorMessage($lang['settings']['error_category_delete_cats']);
     }
-    
-    httpredir(currentPage(array('delete')));
+
+    httpredir(currentPage(['delete']));
 }
 
 if (isset($_POST['translate']) && isset($_POST['cat_id']) && is_numeric($_POST['cat_id']) && Admin::getInstance()->permissions('categories', CC_PERM_EDIT)) {
@@ -201,17 +203,17 @@ if (isset($_POST['translate']) && isset($_POST['cat_id']) && is_numeric($_POST['
     $anchor  = false;
 
     // Check for existing translations and replace if doing more than once
-    if (($duplicates = $GLOBALS['db']->select('CubeCart_category_language', array('translation_id'), array('language' => $_POST['translate']['language'], 'cat_id' => (int)$_POST['cat_id']))) !== false) {
+    if (($duplicates = $GLOBALS['db']->select('CubeCart_category_language', ['translation_id'], ['language' => $_POST['translate']['language'], 'cat_id' => (int)$_POST['cat_id']])) !== false) {
         $_POST['translation_id'] = $duplicates[0]['translation_id'];
     }
 
     // Get original category name
-    $master_cat_name = $GLOBALS['db']->select('CubeCart_category', array('cat_name'), array('cat_id' => (int)$_POST['cat_id']));
+    $master_cat_name = $GLOBALS['db']->select('CubeCart_category', ['cat_name'], ['cat_id' => (int)$_POST['cat_id']]);
 
     if (!empty($_POST['translation_id']) && is_numeric($_POST['translation_id'])) {
-        if ($GLOBALS['db']->update('CubeCart_category_language', $_POST['translate'], array('translation_id' => (int)$_POST['translation_id'], 'cat_id' => (int)$_POST['cat_id']))) {
+        if ($GLOBALS['db']->update('CubeCart_category_language', $_POST['translate'], ['translation_id' => (int)$_POST['translation_id'], 'cat_id' => (int)$_POST['cat_id']])) {
             $GLOBALS['main']->successMessage($lang['translate']['notify_translation_update']);
-            $remarray = array('action', 'cat_id', 'translation_id');
+            $remarray = ['action', 'cat_id', 'translation_id'];
         } else {
             $GLOBALS['main']->errorMessage($lang['translate']['error_translation_update']);
         }
@@ -219,7 +221,7 @@ if (isset($_POST['translate']) && isset($_POST['cat_id']) && is_numeric($_POST['
         $_POST['translate']['cat_id'] = $_POST['cat_id'];
         if ($GLOBALS['db']->insert('CubeCart_category_language', $_POST['translate'])) {
             $GLOBALS['main']->successMessage($lang['translate']['notify_translation_create']);
-            $remarray = array('action', 'cat_id', 'translation_id');
+            $remarray = ['action', 'cat_id', 'translation_id'];
         } else {
             $GLOBALS['main']->errorMessage($lang['translate']['error_translation_create']);
         }
@@ -229,13 +231,12 @@ if (isset($_POST['translate']) && isset($_POST['cat_id']) && is_numeric($_POST['
         include $hook;
     }
 
-    
     httpredir(currentPage($remarray, $addarray, $anchor));
 }
 
 ###########################################
 ## Update stuff from the list page
-$update = array();
+$update = [];
 if (isset($_POST['status']) && is_array($_POST['status'])) {
     // Update category status
     foreach ($_POST['status'] as $cat_id => $status) {
@@ -245,13 +246,13 @@ if (isset($_POST['status']) && is_array($_POST['status'])) {
 if (isset($_POST['order']) && is_array($_POST['order'])) {
     // Update category order
     foreach ($_POST['order'] as $key => $cat_id) {
-        $update[$cat_id]['priority'] = $key+1;
+        $update[$cat_id]['priority'] = $key + 1;
     }
 }
 if (isset($_POST['visible']) && is_array($_POST['visible'])) {
     // Update category visibility only
     foreach ($_POST['visible'] as $cat_id => $visible) {
-        $update[$cat_id]['hide'] = $visible && $_POST['status'][$cat_id]  ? 0 : 1;
+        $update[$cat_id]['hide'] = $visible && $_POST['status'][$cat_id] ? 0 : 1;
     }
 }
 
@@ -263,7 +264,7 @@ if (!empty($update) && is_array($update) && Admin::getInstance()->permissions('c
     // Put changes into the database
     $updated = false;
     foreach ($update as $cat_id => $array) {
-        if ($GLOBALS['db']->update('CubeCart_category', $array, array('cat_id' => $cat_id), true)) {
+        if ($GLOBALS['db']->update('CubeCart_category', $array, ['cat_id' => $cat_id], true)) {
             $updated = true;
         }
     }
@@ -272,7 +273,7 @@ if (!empty($update) && is_array($update) && Admin::getInstance()->permissions('c
     } else {
         $GLOBALS['main']->errorMessage($lang['settings']['error_category_status']);
     }
-    
+
     httpredir(currentPage());
 }
 
@@ -284,7 +285,7 @@ if (isset($_GET['parent'])) {
     $cats = $GLOBALS['main']->getCategoryPath($_GET['parent']);
     if (is_array($cats)) {
         foreach ($cats as $cat) {
-            $GLOBALS['gui']->addBreadcrumb($cat['cat_name'], array('_g' => $_GET['_g'], 'parent' => $cat['cat_id']));
+            $GLOBALS['gui']->addBreadcrumb($cat['cat_name'], ['_g' => $_GET['_g'], 'parent' => $cat['cat_id']]);
         }
     }
 }
@@ -299,24 +300,23 @@ foreach ($GLOBALS['hooks']->load('admin.category.pre_display') as $hook) {
 if (isset($_GET['action'])) {
     if (strtolower($_GET['action']) == 'delete') {
         if (isset($_GET['translation_id']) && is_numeric($_GET['translation_id'])) {
-            if (Admin::getInstance()->permissions('categories', CC_PERM_DELETE) && $GLOBALS['db']->delete('CubeCart_category_language', array('translation_id' => (int)$_GET['translation_id'], 'cat_id' => (int)$_GET['cat_id']))) {
+            if (Admin::getInstance()->permissions('categories', CC_PERM_DELETE) && $GLOBALS['db']->delete('CubeCart_category_language', ['translation_id' => (int)$_GET['translation_id'], 'cat_id' => (int)$_GET['cat_id']])) {
                 $GLOBALS['main']->successMessage($lang['translate']['notify_translation_delete']);
             } else {
                 $GLOBALS['main']->errorMessage($lang['translate']['error_translation_delete']);
             }
         }
-        httpredir(currentPage(array('translation_id'), array('action' =>'edit')), 'cat_translate');
+        httpredir(currentPage(['translation_id'], ['action' => 'edit']), 'cat_translate');
     } elseif (strtolower($_GET['action']) == 'translate') {
 
-            // Check to see if translation space is available
+        // Check to see if translation space is available
         if (!isset($_GET['translation_id']) && $GLOBALS['language']->fullyTranslated('category', (int)$_GET['cat_id'])) {
             $GLOBALS['main']->errorMessage($lang['common']['all_translated']);
             httpredir('?_g=categories');
         }
 
-
-        if (($category = $GLOBALS['db']->select('CubeCart_category', array('cat_name'), array('cat_id' => (int)$_GET['cat_id']))) !== false) {
-            $GLOBALS['gui']->addBreadcrumb($category[0]['cat_name'], currentPage(array('translate_id'), array('action' => 'edit')));
+        if (($category = $GLOBALS['db']->select('CubeCart_category', ['cat_name'], ['cat_id' => (int)$_GET['cat_id']])) !== false) {
+            $GLOBALS['gui']->addBreadcrumb($category[0]['cat_name'], currentPage(['translate_id'], ['action' => 'edit']));
         }
         $GLOBALS['gui']->addBreadcrumb($lang['translate']['title_translate'], currentPage());
         $GLOBALS['main']->addTabControl($lang['common']['general'], 'general');
@@ -324,14 +324,14 @@ if (isset($_GET['action'])) {
         $GLOBALS['main']->addTabControl($lang['settings']['tab_seo'], 'seo');
 
         if (isset($_GET['translation_id'])) {
-            if (($translation = $GLOBALS['db']->select('CubeCart_category_language', false, array('translation_id' => (int)$_GET['translation_id'], 'cat_id' => (int)$_GET['cat_id']), array('language' => 'ASC'))) !== false) {
+            if (($translation = $GLOBALS['db']->select('CubeCart_category_language', false, ['translation_id' => (int)$_GET['translation_id'], 'cat_id' => (int)$_GET['cat_id']], ['language' => 'ASC'])) !== false) {
                 $GLOBALS['smarty']->assign('TRANS', $translation[0]);
             } else {
-                httpredir(currentPage(array('translation_id'), array('action' => 'edit')), 'translate');
+                httpredir(currentPage(['translation_id'], ['action' => 'edit']), 'translate');
             }
         } else {
-            $translation[0] = array('language' => '');
-            $GLOBALS['smarty']->assign('TRANS', array('cat_id' => (int)$_GET['cat_id']));
+            $translation[0] = ['language' => ''];
+            $GLOBALS['smarty']->assign('TRANS', ['cat_id' => (int)$_GET['cat_id']]);
         }
         if (($languages = $GLOBALS['language']->listLanguages()) !== false) {
             foreach ($languages as $option) {
@@ -344,7 +344,7 @@ if (isset($_GET['action'])) {
         }
         $GLOBALS['smarty']->assign('LANGUAGES', $smarty_data['languages']);
         $GLOBALS['smarty']->assign('MODE_TRANSLATE', true);
-    } elseif (in_array(strtolower($_GET['action']), array('edit', 'add'))) {
+    } elseif (in_array(strtolower($_GET['action']), ['edit', 'add'])) {
         // Display the add/edit category page
         $GLOBALS['main']->addTabControl($lang['common']['general'], 'cat_general', null, 'G');
         $GLOBALS['main']->addTabControl($lang['common']['description'], 'cat_description', null, 'D');
@@ -356,12 +356,12 @@ if (isset($_GET['action'])) {
 
         // Access Control tab
         $GLOBALS['main']->addTabControl($lang['settings']['access_control'], 'access_control');
-        $access_groups = $GLOBALS['db']->select('CubeCart_customer_group', false, false, array('group_name' => 'ASC'));
+        $access_groups = $GLOBALS['db']->select('CubeCart_customer_group', false, false, ['group_name' => 'ASC']);
         if ($access_groups) {
             $cat_id_for_access = (isset($_GET['cat_id']) && is_numeric($_GET['cat_id'])) ? (int)$_GET['cat_id'] : 0;
-            $allowed_groups = array();
+            $allowed_groups = [];
             if ($cat_id_for_access > 0) {
-                $existing = $GLOBALS['db']->select('CubeCart_category_group', array('group_id'), array('cat_id' => $cat_id_for_access));
+                $existing = $GLOBALS['db']->select('CubeCart_category_group', ['group_id'], ['cat_id' => $cat_id_for_access]);
                 if ($existing) {
                     foreach ($existing as $eg) {
                         $allowed_groups[] = (int)$eg['group_id'];
@@ -374,7 +374,7 @@ if (isset($_GET['action'])) {
             unset($ag);
             $GLOBALS['smarty']->assign('ACCESS_GROUPS', $access_groups);
         }
-        
+
         // Add shipping tab if shipping by category is enabled
         $ship_by_cat = $GLOBALS['config']->get('Per_Category');
         if (isset($ship_by_cat['status']) && $ship_by_cat['status']) {
@@ -382,22 +382,22 @@ if (isset($_GET['action'])) {
             $GLOBALS['smarty']->assign('DISPLAY_SHIPPING', true);
         }
         if (isset($_GET['cat_id']) && is_numeric($_GET['cat_id'])) {
-            $GLOBALS['smarty']->assign("REDIRECTS", $GLOBALS['seo']->getRedirects('cat', $_GET['cat_id']));
+            $GLOBALS['smarty']->assign('REDIRECTS', $GLOBALS['seo']->getRedirects('cat', $_GET['cat_id']));
             // Load from db, and assign
-            if (($category = $GLOBALS['db']->select('CubeCart_category', false, array('cat_id' => (int)$_GET['cat_id']))) !== false) {
+            if (($category = $GLOBALS['db']->select('CubeCart_category', false, ['cat_id' => (int)$_GET['cat_id']])) !== false) {
                 $catData = $category[0];
                 $category[0]['visible'] = $category[0]['hide'] ? 0 : 1;
                 $GLOBALS['gui']->addBreadcrumb($category[0]['cat_name'], currentPage());
                 // Translations
                 $GLOBALS['main']->addTabControl($lang['translate']['title_translate'], 'cat_translate', null, 'T');
-                if (($translations = $GLOBALS['db']->select('CubeCart_category_language', array('translation_id', 'language', 'cat_name'), array('cat_id' => $category[0]['cat_id']), array('language' => 'ASC'))) !== false) {
+                if (($translations = $GLOBALS['db']->select('CubeCart_category_language', ['translation_id', 'language', 'cat_name'], ['cat_id' => $category[0]['cat_id']], ['language' => 'ASC'])) !== false) {
                     foreach ($translations as $translation) {
-                        $translation['edit'] = currentPage(null, array('action' => 'translate', 'translation_id' => $translation['translation_id']));
-                        $translation['delete'] = currentPage(null, array('action' => 'delete', 'translation_id' => $translation['translation_id']));
+                        $translation['edit'] = currentPage(null, ['action' => 'translate', 'translation_id' => $translation['translation_id']]);
+                        $translation['delete'] = currentPage(null, ['action' => 'delete', 'translation_id' => $translation['translation_id']]);
                         $category_translations[] = $translation;
                     }
                 }
-                $GLOBALS['smarty']->assign('TRANSLATE', currentPage(null, array('action' => 'translate')));
+                $GLOBALS['smarty']->assign('TRANSLATE', currentPage(null, ['action' => 'translate']));
                 $GLOBALS['smarty']->assign('TRANSLATIONS', (isset($category_translations)) ? $category_translations : null);
                 $GLOBALS['smarty']->assign('DISPLAY_TRANSLATIONS', true);
             }
@@ -409,10 +409,10 @@ if (isset($_GET['action'])) {
             }
         }
 
-        $cat_display_data = (isset($_POST['cat'])) ? $_POST['cat'] : ((isset($category[0]))? $category[0] : '');
+        $cat_display_data = (isset($_POST['cat'])) ? $_POST['cat'] : ((isset($category[0])) ? $category[0] : '');
         if (is_array($cat_display_data)) {
             foreach ($cat_display_data as $key => $value) {
-                if (!in_array($key, array('cat_name'))) {
+                if (!in_array($key, ['cat_name'])) {
                     continue;
                 }
                 $cat_display_data[$key] = htmlentities($value, ENT_COMPAT, 'UTF-8');
@@ -428,7 +428,7 @@ if (isset($_GET['action'])) {
 
         // Add parent category here before query
         $catList[0] = '/';
-        if (($categories = $GLOBALS['db']->select('CubeCart_category', array('cat_name', 'cat_parent_id', 'cat_id'))) !== false) {
+        if (($categories = $GLOBALS['db']->select('CubeCart_category', ['cat_name', 'cat_parent_id', 'cat_id'])) !== false) {
             $seo = SEO::getInstance();
             foreach ($categories as $category) {
                 // Prevent adding to self, or a child
@@ -451,7 +451,7 @@ if (isset($_GET['action'])) {
         natcasesort($catList);
         foreach ($catList as $id => $display) {
             $selected = (isset($catData['cat_parent_id']) && $catData['cat_parent_id'] == $id) ? ' selected="selected"' : '';
-            $select_categories[] = array('id' => $id, 'display' => $display, 'selected' => $selected);
+            $select_categories[] = ['id' => $id, 'display' => $display, 'selected' => $selected];
         }
 
         // Stuff
@@ -459,7 +459,7 @@ if (isset($_GET['action'])) {
             include $hook;
         }
         $GLOBALS['smarty']->assign('PLUGIN_TABS', ($smarty_data['plugin_tabs'] ?? false));
-            
+
         $GLOBALS['smarty']->assign('SELECT_CATEGORIES', $select_categories);
         $GLOBALS['smarty']->assign('MODE_ADDEDIT', true);
         foreach ($GLOBALS['hooks']->load('admin.category.addedit_display') as $hook) {
@@ -473,33 +473,33 @@ if (isset($_GET['action'])) {
     }
     $GLOBALS['smarty']->assign('PLUGIN_TABS', ($smarty_data['plugin_tabs'] ?? false));
     $GLOBALS['main']->addTabControl($lang['settings']['title_category'], 'categories');
-    $GLOBALS['main']->addTabControl($lang['settings']['title_category_add'], null, currentPage(null, array('action' => 'add')));
-    if (($categories = $GLOBALS['db']->select('CubeCart_category', false, array('cat_parent_id' => (isset($_GET['parent'])) ? (int)$_GET['parent'] : 0), array('priority' => 'ASC'))) !== false) {
+    $GLOBALS['main']->addTabControl($lang['settings']['title_category_add'], null, currentPage(null, ['action' => 'add']));
+    if (($categories = $GLOBALS['db']->select('CubeCart_category', false, ['cat_parent_id' => (isset($_GET['parent'])) ? (int)$_GET['parent'] : 0], ['priority' => 'ASC'])) !== false) {
         $i = 1;
         foreach ($categories as $category) {
             if ($category['priority'] != $i) {
                 // Automatically update the priority
-                $GLOBALS['db']->update('CubeCart_category', array('priority' => $i), array('cat_id' => $category['cat_id']), true);
+                $GLOBALS['db']->update('CubeCart_category', ['priority' => $i], ['cat_id' => $category['cat_id']], true);
             }
             // Check for translations
-            if (($translations = $GLOBALS['db']->select('CubeCart_category_language', array('translation_id', 'language'), array('cat_id' => $category['cat_id']))) !== false) {
+            if (($translations = $GLOBALS['db']->select('CubeCart_category_language', ['translation_id', 'language'], ['cat_id' => $category['cat_id']])) !== false) {
                 foreach ($translations as $translation) {
                     // Display translation icons
-                    $translation['edit'] = currentPage(false, array('action' => 'translate', 'cat_id' => $category['cat_id'], 'translation_id' => $translation['translation_id']));
+                    $translation['edit'] = currentPage(false, ['action' => 'translate', 'cat_id' => $category['cat_id'], 'translation_id' => $translation['translation_id']]);
                     $category['translations'][] = $translation;
                 }
             }
-            
-            $cat_sel = $GLOBALS['db']->select('CubeCart_category_index', array('primary'), array('cat_id' => $category['cat_id'])) ?: array();
+
+            $cat_sel = $GLOBALS['db']->select('CubeCart_category_index', ['primary'], ['cat_id' => $category['cat_id']]) ?: [];
             $category['primary_count'] = (array_count_values(array_column($cat_sel, 'primary'))['1'] ?? 0);
             $category['additional_count'] = (array_count_values(array_column($cat_sel, 'primary'))['0'] ?? 0);
             $category['total_count'] = $category['primary_count'] + $category['additional_count'];
-            $category['children'] = currentPage(null, array('parent' => $category['cat_id']));
-            $category['translate'] = currentPage(null, array('action' => 'translate', 'cat_id' => $category['cat_id']));
-            $category['edit']  = currentPage(null, array('action' => 'edit', 'cat_id' => $category['cat_id']));
-            $category['delete']  = currentPage(null, array('delete' => $category['cat_id'], 'token' => SESSION_TOKEN));
+            $category['children'] = currentPage(null, ['parent' => $category['cat_id']]);
+            $category['translate'] = currentPage(null, ['action' => 'translate', 'cat_id' => $category['cat_id']]);
+            $category['edit']  = currentPage(null, ['action' => 'edit', 'cat_id' => $category['cat_id']]);
+            $category['delete']  = currentPage(null, ['delete' => $category['cat_id'], 'token' => SESSION_TOKEN]);
             $children = false;
-            $children = $GLOBALS['db']->count('CubeCart_category', 'cat_id', array('cat_parent_id' => $category['cat_id']));
+            $children = $GLOBALS['db']->count('CubeCart_category', 'cat_id', ['cat_parent_id' => $category['cat_id']]);
             $category['no_children'] = $children;
             $category['alt_text'] = sprintf(((int)$children == 1) ? $lang['settings']['category_has_subcat'] : $lang['settings']['category_has_subcats'], (int)$children);
             $category['visible'] = $category['hide'] ? 0 : 1;
@@ -509,16 +509,16 @@ if (isset($_GET['action'])) {
     }
 
     // If no categories exist but parent is set redirect back to next level up
-    if(isset($_GET['parent']) && (int)$_GET['parent'] > 0) {
+    if (isset($_GET['parent']) && (int)$_GET['parent'] > 0) {
         if (!isset($category_list)) {
-            $parent_cat = $GLOBALS['db']->select('CubeCart_category', array('cat_parent_id'), array('cat_id' => $_GET['parent']));
-            if ($parent_cat && $parent_cat[0]['cat_parent_id']>0) {
+            $parent_cat = $GLOBALS['db']->select('CubeCart_category', ['cat_parent_id'], ['cat_id' => $_GET['parent']]);
+            if ($parent_cat && $parent_cat[0]['cat_parent_id'] > 0) {
                 httpredir('?_g=categories&parent='.$parent_cat[0]['cat_parent_id']);
             } else {
                 httpredir('?_g=categories');
             }
         } else {
-            $parent_cat = $GLOBALS['db']->select('CubeCart_category', array('cat_id','cat_name','cat_parent_id'), array('cat_id' => $_GET['parent']));
+            $parent_cat = $GLOBALS['db']->select('CubeCart_category', ['cat_id','cat_name','cat_parent_id'], ['cat_id' => $_GET['parent']]);
             if ($parent_cat) {
                 $GLOBALS['smarty']->assign('PARENT_CATEGORY', $parent_cat[0]);
             }
@@ -530,7 +530,7 @@ if (isset($_GET['action'])) {
     $GLOBALS['smarty']->assign('LIST_CATEGORIES', true);
     $GLOBALS['smarty']->assign('CATEGORIES', $category_list);
 }
-if($GLOBALS['config']->get('config', 'catalogue_show_empty')=='0' && (int)$GLOBALS['session']->get('logins','admin_data') <= 3) {
+if ($GLOBALS['config']->get('config', 'catalogue_show_empty') == '0' && (int)$GLOBALS['session']->get('logins', 'admin_data') <= 3) {
     $GLOBALS['main']->successMessage($lang['catalogue']['empty_notice']);
 }
 $page_content = $GLOBALS['smarty']->fetch('templates/categories.index.php');

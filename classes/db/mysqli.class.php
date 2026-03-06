@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -24,7 +26,6 @@ require CC_ROOT_DIR.'/classes/db/database.class.php';
  */
 class Database extends Database_Contoller
 {
-
     ##############################################
 
     final protected function __construct($config)
@@ -56,9 +57,8 @@ class Database extends Database_Contoller
      * Setup the instance (singleton)
      *
      * @param $config array
-     * @return Database
      */
-    public static function getInstance($config = '')
+    public static function getInstance($config = ''): self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self($config);
@@ -89,10 +89,8 @@ class Database extends Database_Contoller
 
     /**
      * Is there an error?
-     *
-     * @return bool
      */
-    public function error()
+    public function error(): bool
     {
         $this->_errorno = (int)$this->_db_connect_id->errno;
         return ((bool)$this->_errorno) ? true : false;
@@ -100,10 +98,8 @@ class Database extends Database_Contoller
 
     /**
      * Error info
-     *
-     * @return bool
      */
-    public function errorInfo()
+    public function errorInfo(): string
     {
         return (string)$this->_db_connect_id->error;
     }
@@ -129,7 +125,7 @@ class Database extends Database_Contoller
             return $return;
         }
 
-        $return = array();
+        $return = [];
         if (($result = $this->_db_connect_id->query($query)) !== false) {
             while (($row = $result->fetch_assoc()) !== null) {
                 $return[$row['Field']] = $row['Field'];
@@ -148,7 +144,7 @@ class Database extends Database_Contoller
      *
      * @return id
      */
-    public function insertid()
+    public function insertid(): int
     {
         return (int)$this->_db_connect_id->insert_id;
     }
@@ -189,12 +185,12 @@ class Database extends Database_Contoller
      */
     protected function _execute($cache = true, $fetch = true, $log = true)
     {
-        $cache = $cache && !preg_match('#\b('.$this->_cache_block_functions.')\b#', $this->_query) ?: false;
+        $cache = $cache && !preg_match('#\b('.$this->_cache_block_functions.')\b#', (string) $this->_query) ?: false;
 
         $this->_found_rows = null;
 
         if (!empty($this->_query)) {
-            $this->_result = array();
+            $this->_result = [];
             // Don't read from cache in admin CP but write only for front end
             $cache = (defined('ADMIN_CP') && ADMIN_CP) ? false : $cache;
             if ($cache) {
@@ -205,7 +201,8 @@ class Database extends Database_Contoller
                     $this->_found_rows = sizeof($this->_result);
                     $this->_sqlDebug($cache, true);
                     return true;
-                } elseif ($cache_check) {
+                }
+                if ($cache_check) {
                     $this->_result = $cache_check;
                     $this->_found_rows = sizeof($this->_result);
                     $this->_sqlDebug($cache, true);
@@ -222,7 +219,7 @@ class Database extends Database_Contoller
                     $this->_result = $result;
                 } else {
                     $this->_found_rows = $result->num_rows;
-                    $this->_result = array();
+                    $this->_result = [];
                     while ($row = $result->fetch_assoc()) {
                         $this->_result[] = $row;
                     }
@@ -232,7 +229,7 @@ class Database extends Database_Contoller
             $this->_stopTimer();
 
             //If there is an error and its not because of system error
-            if ($log && $this->error() && (strpos($this->errorInfo(), 'CubeCart_system_error_log') === false)) {
+            if ($log && $this->error() && (!str_contains($this->errorInfo(), 'CubeCart_system_error_log'))) {
                 $this->_logError();
             }
 
@@ -240,7 +237,7 @@ class Database extends Database_Contoller
             if ($cache && ($this->_writeCache($this->_result, $this->_query)) === false) {
                 $cache = false; // Query not cached for some reason. Check error log and cache status.
             }
-             
+
             return (!$this->_sqlDebug($cache, false)) ? true : false;
         }
 
@@ -257,13 +254,13 @@ class Database extends Database_Contoller
         if (defined('CC_IN_SETUP') && CC_IN_SETUP) {
             // check MySQL Strict mode on upgrade/install
             $mysql_mode = $this->misc('SELECT @@sql_mode;');
-            if (stristr($mysql_mode[0]['@@sql_mode'], 'strict')) {
+            if (stristr((string) $mysql_mode[0]['@@sql_mode'], 'strict')) {
                 die($GLOBALS['language']->setup['error_strict_mode']);
             }
             return false;
         }
 
         //Force UTF-8
-        $this->_db_connect_id->set_charset("utf8mb4");
+        $this->_db_connect_id->set_charset('utf8mb4');
     }
 }

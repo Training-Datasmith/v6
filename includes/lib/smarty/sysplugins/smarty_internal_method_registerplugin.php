@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Smarty Method RegisterPlugin
  *
@@ -51,7 +53,7 @@ class Smarty_Internal_Method_RegisterPlugin
         } elseif ($cacheable && $cache_attr) {
             throw new SmartyException("Cannot set caching attributes for plugin '{$name}' when it is cacheable.");
         } else {
-            $smarty->registered_plugins[ $type ][ $name ] = array($callback, (bool)$cacheable, (array)$cache_attr);
+            $smarty->registered_plugins[ $type ][ $name ] = [$callback, (bool)$cacheable, (array)$cache_attr];
         }
         return $obj;
     }

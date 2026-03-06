@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This helper builds the EmailAddress object for a /mail/send API call
  */
@@ -23,7 +25,7 @@ class EmailAddress implements \JsonSerializable
      */
     private $substitutions;
     /** @var $subject Subject The personalized subject of the email */
-    private $subject;
+    private ?\SendGrid\Mail\Subject $subject = null;
 
     /**
      * Optional constructor
@@ -64,7 +66,7 @@ class EmailAddress implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setEmailAddress($emailAddress)
+    public function setEmailAddress($emailAddress): void
     {
         Assert::email($emailAddress, 'emailAddress');
 
@@ -98,7 +100,7 @@ class EmailAddress implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setName($name)
+    public function setName($name): void
     {
         Assert::string($name, 'name');
 
@@ -124,7 +126,7 @@ class EmailAddress implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSubstitutions($substitutions)
+    public function setSubstitutions($substitutions): void
     {
         Assert::maxItems($substitutions, 'substitutions', 10000);
 
@@ -146,7 +148,7 @@ class EmailAddress implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSubject($subject)
+    public function setSubject($subject): void
     {
         Assert::string($subject, 'subject');
 
@@ -167,12 +169,13 @@ class EmailAddress implements \JsonSerializable
     /**
      * Determine if this EmailAddress object is personalized by either
      * containing substitutions or a specific subject.
-     *
-     * @return bool
      */
-    public function isPersonalized()
+    public function isPersonalized(): bool
     {
-        return $this->getSubstitutions() || $this->getSubject();
+        if ($this->getSubstitutions()) {
+            return true;
+        }
+        return (bool) $this->getSubject();
     }
 
     /**
@@ -186,11 +189,9 @@ class EmailAddress implements \JsonSerializable
         return array_filter(
             [
                 'name' => $this->getName(),
-                'email' => $this->getEmail()
+                'email' => $this->getEmail(),
             ],
-            function ($value) {
-                return $value !== null;
-            }
+            fn (string $value) => $value !== null
         ) ?: null;
     }
 }
