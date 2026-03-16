@@ -64,6 +64,11 @@ class Ajax
 
     public static function doneToggle()
     {
+        $allowed_tables = ['404_log'];
+        $table = isset($_POST['table']) && in_array($_POST['table'], $allowed_tables, true) ? $_POST['table'] : null;
+        if ($table === null) {
+            return json_encode(['success' => '0', 'id' => 0, 'status' => '0']);
+        }
         if ($_POST['status'] == 'warn') {
             $update = ['warn' => 0];
         } else {
@@ -73,7 +78,7 @@ class Ajax
                 $update['warn'] = 0;
             }
         }
-        if ($GLOBALS['db']->update('CubeCart_'.$_POST['table'], $update, ['id' => (int)$_POST['id']])) {
+        if ($GLOBALS['db']->update('CubeCart_'.$table, $update, ['id' => (int)$_POST['id']])) {
             return json_encode(['success' => '1', 'id' => (int)$_POST['id'], 'status' => (string)$_POST['status']]);
         }
         return json_encode(['success' => '0', 'id' => (int)$_POST['id'], 'status' => (string)$_POST['status']]);

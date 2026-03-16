@@ -1439,7 +1439,7 @@ class Cubecart
                 foreach ($GLOBALS['hooks']->load('class.cubecart.order_summary') as $hook) {
                     include $hook;
                 }
-                $order['basket'] = unserialize($order['basket']);
+                $order['basket'] = unserialize($order['basket'], ['allowed_classes' => false]);
 
                 $GLOBALS['smarty']->assign('SUM', $order);
 
@@ -2197,8 +2197,8 @@ class Cubecart
                     }
                     $module = (isset($gateway['plugin']) && $gateway['plugin']) ? $gateway : $GLOBALS['config']->get($gateway['folder']);
 
-                    $countries = (!empty($module['countries'])) ? unserialize($module['countries']) : false;
-                    $disabled_countries = (!empty($module['disabled_countries'])) ? unserialize($module['disabled_countries']) : false;
+                    $countries = (!empty($module['countries'])) ? unserialize($module['countries'], ['allowed_classes' => false]) : false;
+                    $disabled_countries = (!empty($module['disabled_countries'])) ? unserialize($module['disabled_countries'], ['allowed_classes' => false]) : false;
                     // Check module isn't set for mobile / main only!
                     if (isset($module['scope']) && !empty($module['scope']) && ($module['scope'] == 'main' && $GLOBALS['gui']->mobile)) {
                         continue;
@@ -2796,7 +2796,7 @@ class Cubecart
                     foreach ($GLOBALS['hooks']->load('class.cubecart.order_summary') as $hook) {
                         include $hook;
                     }
-                    $order['basket'] = unserialize($order['basket']);
+                    $order['basket'] = unserialize($order['basket'], ['allowed_classes' => false]);
                     $GLOBALS['smarty']->assign('SUM', $order);
                     $GLOBALS['smarty']->assign('ORDER', $order);
                     $GLOBALS['session']->delete('ghost_customer_id');
@@ -2858,7 +2858,7 @@ class Cubecart
                     httpredir(currentPage(['cancel']));
                 } elseif (isset($_GET['reorder']) && Order::validOrderId(trim((string) $_GET['reorder']))) {
                     $basket = $GLOBALS['db']->select('CubeCart_order_summary', ['basket'], ['cart_order_id' => $_GET['reorder'], 'customer_id' => $GLOBALS['user']->get('customer_id')]);
-                    $past_data = unserialize($basket[0]['basket']);
+                    $past_data = unserialize($basket[0]['basket'], ['allowed_classes' => false]);
                     $GLOBALS['cart']->basket['contents'] = $past_data['contents'];
                     $GLOBALS['cart']->save();
                     httpredir('?_a=basket');
@@ -2951,7 +2951,7 @@ class Cubecart
                     foreach ($GLOBALS['hooks']->load('class.cubecart.order_summary') as $hook) {
                         include $hook;
                     }
-                    $order['basket'] = unserialize($order['basket']);
+                    $order['basket'] = unserialize($order['basket'], ['allowed_classes' => false]);
                     $GLOBALS['smarty']->assign('SUM', $order);
                     $GLOBALS['smarty']->assign('ORDER', $order);
                 } else {

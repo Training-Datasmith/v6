@@ -106,8 +106,8 @@ if (isset($_POST['twofa_action']) && isset($_POST['admin_id']) && is_numeric($_P
 }
 
 if (isset($_GET['tour_shown']) && is_numeric($_GET['tour_shown'])) {
-    $query = 'UPDATE `'.$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_admin_users` SET `tour_shown` = '1' WHERE `admin_id` = ".$_GET['tour_shown'];
-    $GLOBALS['db']->misc($query);
+    $GLOBALS['db']->update('CubeCart_admin_users', ['tour_shown' => 1], ['admin_id' => (int)$_GET['tour_shown']]);
+
     $data = $GLOBALS['session']->set('tour_shown', 1, 'admin_data');
     exit;
 }

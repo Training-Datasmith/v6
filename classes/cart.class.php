@@ -443,7 +443,7 @@ class Cart
         if ($result = $GLOBALS['db']->select('CubeCart_saved_cart', ['basket'], ['customer_id' => $GLOBALS['user']->getId()], false, false, false, false)) {
             $basket = $GLOBALS['session']->get('', 'basket');
             if (empty($basket) || !isset($basket['contents'])) {
-                $this->basket['contents'] = unserialize($result[0]['basket']);
+                $this->basket['contents'] = unserialize($result[0]['basket'], ['allowed_classes' => false]);
                 $this->save();
             }
         }
@@ -583,7 +583,7 @@ class Cart
 
                 // Check shipping is allowed
                 if (!empty($coupon['shipping_id'])) {
-                    $qualifying_shipping = unserialize($coupon['shipping_id']);
+                    $qualifying_shipping = unserialize($coupon['shipping_id'], ['allowed_classes' => false]);
                     if (is_array($qualifying_shipping) && count($qualifying_shipping) > 0) {
                         $proceed = false;
                         if (in_array($this->basket['shipping']['folder'], $qualifying_shipping)) {
@@ -598,7 +598,7 @@ class Cart
 
                 // Check manufacturer is allowed
                 if (!empty($coupon['manufacturer_id'])) {
-                    $qualifying_manufacturers = unserialize($coupon['manufacturer_id']);
+                    $qualifying_manufacturers = unserialize($coupon['manufacturer_id'], ['allowed_classes' => false]);
                     if (is_array($qualifying_manufacturers) && count($qualifying_manufacturers) > 0) {
                         $proceed = false;
                         $qualifying_manufacturers = array_flip($qualifying_manufacturers);
@@ -617,7 +617,7 @@ class Cart
 
                 // Check category is allowed
                 if (!empty($coupon['category_id'])) {
-                    $qualifying_categories = unserialize($coupon['category_id']);
+                    $qualifying_categories = unserialize($coupon['category_id'], ['allowed_classes' => false]);
                     if (is_array($qualifying_categories) && count($qualifying_categories) > 0) {
                         $proceed = false;
                         foreach ($this->basket['contents'] as $data) {
@@ -637,7 +637,7 @@ class Cart
                 }
 
                 if (!empty($coupon['product_id'])) {
-                    $qualifying_products = unserialize($coupon['product_id']);
+                    $qualifying_products = unserialize($coupon['product_id'], ['allowed_classes' => false]);
 
                     // pull the first item off as it's our orders to be inclusive or exclusive
                     $incexc = array_shift($qualifying_products);
@@ -1147,10 +1147,10 @@ class Cart
             if (!empty($basket_data['contents']) && $block == false) {
                 foreach ($shipping as $module) {
                     $module['countries'] = Config::getInstance()->get($module['folder'], 'countries');
-                    $countries = (!empty($module['countries'])) ? unserialize($module['countries']) : false;
+                    $countries = (!empty($module['countries'])) ? unserialize($module['countries'], ['allowed_classes' => false]) : false;
 
                     $module['disabled_countries'] = Config::getInstance()->get($module['folder'], 'disabled_countries');
-                    $disabled_countries = (!empty($module['disabled_countries'])) ? unserialize($module['disabled_countries']) : false;
+                    $disabled_countries = (!empty($module['disabled_countries'])) ? unserialize($module['disabled_countries'], ['allowed_classes' => false]) : false;
                     if ($this->checkShippingModuleCountry($countries, 'enabled')) {
                         continue;
                     }

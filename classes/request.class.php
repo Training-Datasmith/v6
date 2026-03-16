@@ -479,7 +479,7 @@ class Request
      * @param string $username
      * @param string $password
      */
-    public function setSSL($verify_peer = false, $verify_host = false, $cert = null): void
+    public function setSSL($verify_peer = true, $verify_host = 2, $cert = null): void
     {
 
         ## Some systems use custom ports, so only redefine it if not already specified e.g. https://dev.psigate.com:7989

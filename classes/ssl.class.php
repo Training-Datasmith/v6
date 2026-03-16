@@ -50,8 +50,12 @@ class SSL
     public function validRedirect($redir): string|bool
     {
         if (preg_match('#^http#iU', $redir)) {
-            $standard_domain = preg_replace('#^https?://|^www.#', '', (string) $GLOBALS['config']->get('config', 'standard_url'));
-            return stristr($redir, (string) $standard_domain);
+            $standard_domain = preg_replace('#^https?://|^www\.#i', '', (string) $GLOBALS['config']->get('config', 'standard_url'));
+            $standard_domain = strtolower(rtrim($standard_domain, '/'));
+            $redir_host = strtolower(parse_url($redir, PHP_URL_HOST) ?? '');
+            // Strip leading www. for comparison
+            $redir_host = preg_replace('#^www\.#i', '', $redir_host);
+            return ($redir_host === $standard_domain || str_ends_with($redir_host, '.'.$standard_domain)) ? $redir : false;
         }
         return true;
     }

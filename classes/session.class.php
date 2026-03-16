@@ -744,7 +744,7 @@ class Session
      */
     private function _createToken(): string
     {
-        return md5(session_name().time().mt_rand(0, mt_getrandmax()));
+        return bin2hex(random_bytes(16));
     }
 
     /**
