@@ -1,24 +1,21 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the GroupId object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a GroupId object for the /mail/send API call
  *
  * @package SendGrid\Mail
  */
-class GroupId implements \JsonSerializable
+class Group_Id implements \JsonSerializable
 {
     /** @var $group_id int The unsubscribe group to associate with this email */
     private $group_id;
-
     /**
      * Optional constructor
      *
@@ -28,10 +25,9 @@ class GroupId implements \JsonSerializable
     public function __construct($group_id = null)
     {
         if (isset($group_id)) {
-            $this->setGroupId($group_id);
+            $this->set_group_id($group_id);
         }
     }
-
     /**
      * Add the group id to a GroupId object
      *
@@ -39,31 +35,28 @@ class GroupId implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setGroupId($group_id): void
+    public function set_group_id($group_id): void
     {
         Assert::integer($group_id, 'group_id');
-
         $this->group_id = $group_id;
     }
-
     /**
      * Retrieve the group id from a GroupId object
      *
      * @return int
      */
-    public function getGroupId()
+    public function get_group_id()
     {
         return $this->group_id;
     }
-
     /**
      * Return an array representing a GroupId object for the Twilio SendGrid API
      *
      * @return int
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return $this->getGroupId();
+        return $this->get_group_id();
     }
 }

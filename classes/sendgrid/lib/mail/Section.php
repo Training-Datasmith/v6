@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the Section object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a Section object for the /mail/send API call
  *
@@ -23,7 +21,6 @@ class Section implements \JsonSerializable
     private $key;
     /** @var $value string Section value */
     private $value;
-
     /**
      * Optional constructor
      *
@@ -34,13 +31,12 @@ class Section implements \JsonSerializable
     public function __construct($key = null, $value = null)
     {
         if (isset($key)) {
-            $this->setKey($key);
+            $this->set_key($key);
         }
         if (isset($value)) {
-            $this->setValue($value);
+            $this->set_value($value);
         }
     }
-
     /**
      * Add the key on a Section object
      *
@@ -48,23 +44,20 @@ class Section implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setKey($key): void
+    public function set_key($key): void
     {
         Assert::string($key, 'key');
-
         $this->key = $key;
     }
-
     /**
      * Retrieve the key from a Section object
      *
      * @return string
      */
-    public function getKey()
+    public function get_key()
     {
         return $this->key;
     }
-
     /**
      * Add the value on a Section object
      *
@@ -72,37 +65,28 @@ class Section implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setValue($value): void
+    public function set_value($value): void
     {
         Assert::string($value, 'value');
-
         $this->value = $value;
     }
-
     /**
      * Retrieve the value from a Section object
      *
      * @return string
      */
-    public function getValue()
+    public function get_value()
     {
         return $this->value;
     }
-
     /**
      * Return an array representing a Section object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'key' => $this->getKey(),
-                'value' => $this->getValue(),
-            ],
-            fn (string $value) => $value !== null
-        ) ?: null;
+        return array_filter(['key' => $this->get_key(), 'value' => $this->get_value()], fn(string $value) => $value !== null) ?: null;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Resource Eval
  *
@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @author     Uwe Tews
  * @author     Rodney Rehm
  */
-
 /**
  * Smarty Internal Plugin Resource Eval
  * Implements the strings as resource for Smarty template
@@ -33,7 +32,6 @@ class Smarty_Internal_Resource_Eval extends Smarty_Resource_Recompiled
         $source->uid = $source->filepath = sha1($source->name);
         $source->timestamp = $source->exists = true;
     }
-
     /**
      * Load template's source from $resource_name into current template object
      *
@@ -43,11 +41,10 @@ class Smarty_Internal_Resource_Eval extends Smarty_Resource_Recompiled
      *
      * @return string                 template source
      */
-    public function getContent(Smarty_Template_Source $source)
+    public function get_content(Smarty_Template_Source $source)
     {
         return $this->decode($source->name);
     }
-
     /**
      * decode base64 and urlencode
      *
@@ -67,7 +64,6 @@ class Smarty_Internal_Resource_Eval extends Smarty_Resource_Recompiled
         }
         return $string;
     }
-
     /**
      * modify resource_name according to resource handlers specifications
      *
@@ -77,11 +73,10 @@ class Smarty_Internal_Resource_Eval extends Smarty_Resource_Recompiled
      *
      * @return string unique resource name
      */
-    public function buildUniqueResourceName(Smarty $smarty, $resource_name, $isConfig = false)
+    public function build_unique_resource_name(Smarty $smarty, $resource_name, $is_config = false)
     {
         return get_class($this) . '#' . $this->decode($resource_name);
     }
-
     /**
      * Determine basename for compiled filename
      *
@@ -89,7 +84,7 @@ class Smarty_Internal_Resource_Eval extends Smarty_Resource_Recompiled
      *
      * @return string                 resource's basename
      */
-    public function getBasename(Smarty_Template_Source $source)
+    public function get_basename(Smarty_Template_Source $source)
     {
         return '';
     }

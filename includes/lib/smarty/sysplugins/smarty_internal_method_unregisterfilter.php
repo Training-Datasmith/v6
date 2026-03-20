@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method UnregisterFilter
  *
@@ -11,7 +10,7 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_UnregisterFilter extends Smarty_Internal_Method_RegisterFilter
+class Smarty_internal_method_unregister_Filter extends Smarty_internal_method_register_Filter
 {
     /**
      * Unregisters a filter function
@@ -27,16 +26,16 @@ class Smarty_Internal_Method_UnregisterFilter extends Smarty_Internal_Method_Reg
      * @return \Smarty|\Smarty_Internal_Template
      * @throws \SmartyException
      */
-    public function unregisterFilter(Smarty_Internal_TemplateBase $obj, $type, $callback)
+    public function unregister_filter(Smarty_internal_template_Base $obj, $type, $callback)
     {
-        $smarty = $obj->_getSmartyObj();
-        $this->_checkFilterType($type);
-        if (isset($smarty->registered_filters[ $type ])) {
-            $name = is_string($callback) ? $callback : $this->_getFilterName($callback);
-            if (isset($smarty->registered_filters[ $type ][ $name ])) {
-                unset($smarty->registered_filters[ $type ][ $name ]);
-                if (empty($smarty->registered_filters[ $type ])) {
-                    unset($smarty->registered_filters[ $type ]);
+        $smarty = $obj->_get_smarty_obj();
+        $this->_check_filter_type($type);
+        if (isset($smarty->registered_filters[$type])) {
+            $name = is_string($callback) ? $callback : $this->_get_filter_name($callback);
+            if (isset($smarty->registered_filters[$type][$name])) {
+                unset($smarty->registered_filters[$type][$name]);
+                if (empty($smarty->registered_filters[$type])) {
+                    unset($smarty->registered_filters[$type]);
                 }
             }
         }

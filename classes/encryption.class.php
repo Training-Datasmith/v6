@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 /**
  * Encryption controller
  *
@@ -31,7 +30,7 @@ class Encryption
     /**
      * Initialisation for encryption
      */
-    private string $_iv  = null;
+    private string $_iv = null;
     /**
      * Encryption key
      *
@@ -41,17 +40,14 @@ class Encryption
     /**
      * Encryption method
      */
-    private string|bool $_method  = 'openssl';
-
+    private string|bool $_method = 'openssl';
     /**
      * Class instance
      *
      * @var instance
      */
     protected static $_instance;
-
     ##############################################
-
     final protected function __construct()
     {
         if (function_exists('openssl_encrypt')) {
@@ -60,22 +56,18 @@ class Encryption
             $this->_method = false;
         }
     }
-
     /**
      * Setup the instance (singleton)
      */
-    public static function getInstance(): self
+    public static function get_instance(): self
     {
-        if (!(self::$_instance instanceof self)) {
+        if (!self::$_instance instanceof self) {
             self::$_instance = new self();
         }
         self::$_instance->setup();
-
         return self::$_instance;
     }
-
     //=====[ Public ]=======================================
-
     /**
      * Decrypt data
      *
@@ -90,7 +82,6 @@ class Encryption
         }
         return false;
     }
-
     /**
      * Decrypt CC3/CC4 data (deprecated)
      *
@@ -98,11 +89,10 @@ class Encryption
      * @param string $cart_order_id
      * @return string/false
      */
-    public function decryptDepreciated($data, $cart_order_id): bool
+    public function decrypt_depreciated($data, $cart_order_id): bool
     {
         return false;
     }
-
     /**
      * Encrypt data
      *
@@ -111,64 +101,58 @@ class Encryption
     public function encrypt($data): string|false
     {
         if (!empty($data)) {
-            return $this->_iv.':iv:'.openssl_encrypt($data, $this->_cipher, $this->_key, 0, $this->_iv);
+            return $this->_iv . ':iv:' . openssl_encrypt($data, $this->_cipher, $this->_key, 0, $this->_iv);
         }
         return false;
     }
-
     /**
      * Get encryption key
      *
      * @return string
      */
-    public function getEncryptKey()
+    public function get_encrypt_key()
     {
         if ($GLOBALS['config']->has('config', 'enc_key')) {
             $enc_key = $GLOBALS['config']->get('config', 'enc_key');
             if (empty($enc_key)) {
-                return $this->setEncryptKey();
+                return $this->set_encrypt_key();
             }
             return $enc_key;
         }
-        return $this->setEncryptKey();
+        return $this->set_encrypt_key();
     }
-
     /**
      * Get encryption method
      *
      * @return string/false
      */
-    public function getEncryptionMethod()
+    public function get_encryption_method()
     {
         return $this->_method;
     }
-
     /**
      * Set encryption key
      *
      * @return string
      */
-    public function setEncryptKey()
+    public function set_encrypt_key()
     {
-
         // Older stores used the software license key so lets keep using that if it exists
         $key = $GLOBALS['config']->get('config', 'license_key');
-
         // If license_key isn't set and we don't have an "enc_key".. make one
         if ((!$key || empty($key)) && !$GLOBALS['config']->has('config', 'enc_key')) {
-            $key = randomString();
+            $key = random_string();
             $GLOBALS['config']->set('config', 'enc_key', $key);
         } else {
             // Get enc_key
             $key = $GLOBALS['config']->get('config', 'enc_key');
             if (!$key || empty($key)) {
-                $key = randomString();
+                $key = random_string();
                 $GLOBALS['config']->set('config', 'enc_key', $key);
             }
         }
         return $key;
     }
-
     /**
      * Setup encryption
      *
@@ -180,7 +164,7 @@ class Encryption
      */
     public function setup($key = '', $iv = '', $cipher = '', $mode = '', $method = ''): void
     {
-        $key = (!empty($key)) ? $key : $this->getEncryptKey();
+        $key = !empty($key) ? $key : $this->get_encrypt_key();
         $this->_method = 'openssl';
         $this->_key = $key;
         $this->_cipher = empty($cipher) ? 'AES-128-CBC' : $cipher;

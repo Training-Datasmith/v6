@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty plugin to format text blocks
  *
@@ -40,14 +40,7 @@ function smarty_block_textformat($params, $content, Smarty_Internal_Template $te
         return;
     }
     if (Smarty::$_MBSTRING) {
-        $template->_checkPlugins(
-            [
-                [
-                    'function' => 'smarty_modifier_mb_wordwrap',
-                    'file'     => SMARTY_PLUGINS_DIR . 'modifier.mb_wordwrap.php',
-                ],
-            ]
-        );
+        $template->_check_plugins([['function' => 'smarty_modifier_mb_wordwrap', 'file' => SMARTY_PLUGINS_DIR . 'modifier.mb_wordwrap.php']]);
     }
     $style = null;
     $indent = 0;
@@ -63,15 +56,15 @@ function smarty_block_textformat($params, $content, Smarty_Internal_Template $te
             case 'indent_char':
             case 'wrap_char':
             case 'assign':
-                $$_key = (string)$_val;
+                ${$_key} = (string) $_val;
                 break;
             case 'indent':
             case 'indent_first':
             case 'wrap':
-                $$_key = (int)$_val;
+                ${$_key} = (int) $_val;
                 break;
             case 'wrap_cut':
-                $$_key = (bool)$_val;
+                ${$_key} = (bool) $_val;
                 break;
             default:
                 trigger_error("textformat: unknown attribute '{$_key}'");
@@ -87,18 +80,7 @@ function smarty_block_textformat($params, $content, Smarty_Internal_Template $te
             continue;
         }
         // convert mult. spaces & special chars to single space
-        $_paragraph =
-            preg_replace(
-                [
-                    '!\s+!' . Smarty::$_UTF8_MODIFIER,
-                    '!(^\s+)|(\s+$)!' . Smarty::$_UTF8_MODIFIER,
-                ],
-                [
-                    ' ',
-                    '',
-                ],
-                $_paragraph
-            );
+        $_paragraph = preg_replace(['!\s+!' . Smarty::$_UTF8_MODIFIER, '!(^\s+)|(\s+$)!' . Smarty::$_UTF8_MODIFIER], [' ', ''], $_paragraph);
         // indent first line
         if ($indent_first > 0) {
             $_paragraph = str_repeat($indent_char, $indent_first) . $_paragraph;

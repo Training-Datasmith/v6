@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Resource Extends
  *
@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @author     Uwe Tews
  * @author     Rodney Rehm
  */
-
 /**
  * Smarty Internal Plugin Resource Extends
  * Implements the file system as resource for Smarty which {extend}s a chain of template files templates
@@ -25,7 +24,6 @@ class Smarty_Internal_Resource_Extends extends Smarty_Resource
      * @var int
      */
     public $mbstring_overload = 0;
-
     /**
      * populate Source Object with meta data from Resource
      *
@@ -39,15 +37,15 @@ class Smarty_Internal_Resource_Extends extends Smarty_Resource
         $uid = '';
         $sources = [];
         $components = explode('|', $source->name);
-        $smarty = &$source->smarty;
+        $smarty =& $source->smarty;
         $exists = true;
         foreach ($components as $component) {
             /* @var \Smarty_Template_Source $_s */
             $_s = Smarty_Template_Source::load(null, $smarty, $component);
             if ($_s->type === 'php') {
-                throw new SmartyException("Resource type {$_s->type} cannot be used with the extends resource type");
+                throw new Smarty_Exception("Resource type {$_s->type} cannot be used with the extends resource type");
             }
-            $sources[ $_s->uid ] = $_s;
+            $sources[$_s->uid] = $_s;
             $uid .= $_s->filepath;
             if ($_template) {
                 $exists = $exists && $_s->exists;
@@ -61,22 +59,20 @@ class Smarty_Internal_Resource_Extends extends Smarty_Resource
             $source->timestamp = $_s->timestamp;
         }
     }
-
     /**
      * populate Source Object with timestamp and exists from Resource
      *
      * @param Smarty_Template_Source $source source object
      */
-    public function populateTimestamp(Smarty_Template_Source $source)
+    public function populate_timestamp(Smarty_Template_Source $source)
     {
         $source->exists = true;
         /* @var \Smarty_Template_Source $_s */
         foreach ($source->components as $_s) {
             $source->exists = $source->exists && $_s->exists;
         }
-        $source->timestamp = $source->exists ? $_s->getTimeStamp() : false;
+        $source->timestamp = $source->exists ? $_s->get_time_stamp() : false;
     }
-
     /**
      * Load template's source from files into current template object
      *
@@ -85,21 +81,20 @@ class Smarty_Internal_Resource_Extends extends Smarty_Resource
      * @return string template source
      * @throws SmartyException if source cannot be loaded
      */
-    public function getContent(Smarty_Template_Source $source)
+    public function get_content(Smarty_Template_Source $source)
     {
         if (!$source->exists) {
-            throw new SmartyException("Unable to load template '{$source->type}:{$source->name}'");
+            throw new Smarty_Exception("Unable to load template '{$source->type}:{$source->name}'");
         }
         $_components = array_reverse($source->components);
         $_content = '';
         /* @var \Smarty_Template_Source $_s */
         foreach ($_components as $_s) {
             // read content
-            $_content .= $_s->getContent();
+            $_content .= $_s->get_content();
         }
         return $_content;
     }
-
     /**
      * Determine basename for compiled filename
      *
@@ -107,21 +102,20 @@ class Smarty_Internal_Resource_Extends extends Smarty_Resource
      *
      * @return string resource's basename
      */
-    public function getBasename(Smarty_Template_Source $source)
+    public function get_basename(Smarty_Template_Source $source)
     {
         return str_replace(':', '.', basename($source->filepath));
     }
-
     /*
-      * Disable timestamp checks for extends resource.
-      * The individual source components will be checked.
-      *
-      * @return bool
-      */
+     * Disable timestamp checks for extends resource.
+     * The individual source components will be checked.
+     *
+     * @return bool
+     */
     /**
      * @return bool
      */
-    public function checkTimestamps()
+    public function check_timestamps()
     {
         return false;
     }

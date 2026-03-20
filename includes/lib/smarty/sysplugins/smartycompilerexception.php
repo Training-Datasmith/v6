@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty compiler exception class
  *
  * @package Smarty
  */
-class SmartyCompilerException extends SmartyException
+class Smarty_Compiler_Exception extends Smarty_Exception
 {
     /**
      * The constructor of the exception
@@ -18,15 +17,9 @@ class SmartyCompilerException extends SmartyException
      * @param int|null       $line     The line number where the exception is thrown.
      * @param Throwable|null $previous The previous exception used for the exception chaining.
      */
-    public function __construct(
-        string $message = '',
-        int $code = 0,
-        ?string $filename = null,
-        ?int $line = null,
-        Throwable $previous = null
-    ) {
+    public function __construct(string $message = '', int $code = 0, ?string $filename = null, ?int $line = null, Throwable $previous = null)
+    {
         parent::__construct($message, $code, $previous);
-
         // These are optional parameters, should be be overridden only when present!
         if ($filename) {
             $this->file = $filename;
@@ -35,7 +28,6 @@ class SmartyCompilerException extends SmartyException
             $this->line = $line;
         }
     }
-
     /**
      * @return string
      */
@@ -43,29 +35,25 @@ class SmartyCompilerException extends SmartyException
     {
         return ' --> Smarty Compiler: ' . $this->message . ' <-- ';
     }
-
     /**
      * @param int $line
      */
-    public function setLine($line)
+    public function set_line($line)
     {
         $this->line = $line;
     }
-
     /**
      * The template source snippet relating to the error
      *
      * @type string|null
      */
     public $source = null;
-
     /**
      * The raw text of the error message
      *
      * @type string|null
      */
     public $desc = null;
-
     /**
      * The resource identifier or template name
      *

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -27,36 +27,35 @@ class Cart
      *
      * @var array
      */
-    public $basket    = [];
+    public $basket = [];
     /**
      * Basket data
      *
      * @var array
      */
-    public $basket_data   = [];
+    public $basket_data = [];
     /**
      * Digital basket
      *
      * @var bool
      */
-    public $basket_digital  = false;
-
+    public $basket_digital = false;
     /**
      * Cart discount
      *
      * @var float
      */
-    private $_discount   = 0;
+    private $_discount = 0;
     /**
      * Cart item discount flag
      */
-    private bool $_item_discount  = false;
+    private bool $_item_discount = false;
     /**
      * Shipping cost
      *
      * @var float
      */
-    private $_shipping   = 0;
+    private $_shipping = 0;
     /**
      * Gross inclusive subtotal (original inc-tax prices × qty, before tax stripping)
      * Used to reconstruct an accurate total for tax-inclusive baskets.
@@ -65,27 +64,24 @@ class Cart
     /**
      * Cart subtotal
      */
-    private int $_subtotal   = 0;
+    private int $_subtotal = 0;
     /**
      * Cart total
      *
      * @var float
      */
-    private $_total    = 0;
+    private $_total = 0;
     /**
      * Cart weight
      */
-    private int $_weight   = 0;
-
+    private int $_weight = 0;
     /**
      * Class instance
      *
      * @var instance
      */
     protected static $_instance;
-
     ##############################################
-
     final protected function __construct()
     {
     }
@@ -98,101 +94,89 @@ class Cart
             $currency = $GLOBALS['user']->get('currency');
             $default_currency = $GLOBALS['config']->get('config', 'default_currency');
             if (!empty($currency) && strlen((string) $currency) == 3 && $currency != $default_currency) {
-                $GLOBALS['tax']->loadCurrencyVars($currency);
+                $GLOBALS['tax']->load_currency_vars($currency);
             }
         }
-
         //If the user just logged in try to autoload the cart
         if ($GLOBALS['session']->get('check_autoload')) {
             $GLOBALS['session']->delete('check_autoload');
             $this->autoload();
         }
-
-        $tax_on = ($GLOBALS['config']->get('config', 'basket_tax_by_delivery')) ? 'delivery_address' : 'billing_address';
+        $tax_on = $GLOBALS['config']->get('config', 'basket_tax_by_delivery') ? 'delivery_address' : 'billing_address';
         if (isset($this->basket[$tax_on])) {
-            $tax_country = (int)$this->basket[$tax_on]['country_id'];
+            $tax_country = (int) $this->basket[$tax_on]['country_id'];
         } else {
             $tax_country = $GLOBALS['config']->get('config', 'store_country');
         }
-
         // Load Basket contents
         $this->load();
-
         if (!$GLOBALS['config']->get('config', 'basket_allow_non_invoice_address') && isset($_POST['delivery_address']) && is_numeric($_POST['delivery_address'])) {
-            $this->basket['delivery_address'] = $GLOBALS['user']->getAddress((int)$_POST['delivery_address']);
+            $this->basket['delivery_address'] = $GLOBALS['user']->get_address((int) $_POST['delivery_address']);
         }
-
         if (isset($_POST['add'])) {
             // Check if productOptions SHOULD be present. i.e. add from category page
             if (!isset($_POST['productOptions'])) {
                 if (is_array($_POST['add'])) {
                     foreach ($_POST['add'] as $key => $value) {
-                        $required_options = $GLOBALS['catalogue']->getOptionRequired();
-                        if ($GLOBALS['catalogue']->getProductOptions($key) && $required_options) {
+                        $required_options = $GLOBALS['catalogue']->get_option_required();
+                        if ($GLOBALS['catalogue']->get_product_options($key) && $required_options) {
                             if (is_array($required_options)) {
                                 $_POST['productOptions'] = $required_options;
                             } else {
-                                $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_option_required']);
-                                $this->redirectToProductPage($key);
+                                $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_option_required']);
+                                $this->redirect_to_product_page($key);
                             }
                         }
                     }
                 }
                 if (is_int($_POST['add'])) {
                     $key = $_POST['add'];
-                    $required_options = $GLOBALS['catalogue']->getOptionRequired();
-                    if ($GLOBALS['catalogue']->getProductOptions($key) && $required_options) {
+                    $required_options = $GLOBALS['catalogue']->get_option_required();
+                    if ($GLOBALS['catalogue']->get_product_options($key) && $required_options) {
                         if (is_array($required_options)) {
                             $_POST['productOptions'] = $required_options;
                         } else {
-                            $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_option_required']);
-                            $this->redirectToProductPage($key);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_option_required']);
+                            $this->redirect_to_product_page($key);
                         }
                     }
                 }
             }
-
             // Add item to basket
             if (is_array($_POST['add'])) {
                 foreach ($_POST['add'] as $key => $value) {
                     // Multi-product adding from category page
                     if (is_numeric($value['quantity']) && $value['quantity'] > 1) {
-                        $quantity = (int)$value['quantity'];
+                        $quantity = (int) $value['quantity'];
                     } else {
                         $quantity = 1;
                     }
-
-                    $this->add((is_numeric($value)) ? $value : $key, null, $quantity);
+                    $this->add(is_numeric($value) ? $value : $key, null, $quantity);
                 }
             } else {
-                $this->add((int)$_POST['add'], $_POST['productOptions'] ?? null, (int)$_POST['quantity']);
+                $this->add((int) $_POST['add'], $_POST['productOptions'] ?? null, (int) $_POST['quantity']);
             }
         }
-
         if (isset($_GET['remove-item']) && !empty($_GET['remove-item'])) {
             // Remove item from basket
             $this->remove($_GET['remove-item']);
-            httpredir(currentPage(['remove-item']));
+            httpredir(current_page(['remove-item']));
         }
     }
-
     public function __destruct()
     {
         $this->save();
     }
-
     /**
      * Setup the instance (singleton)
      */
-    public static function getInstance(): self
+    public static function get_instance(): self
     {
-        if (!(self::$_instance instanceof self)) {
+        if (!self::$_instance instanceof self) {
             self::$_instance = new self();
         }
-
         return self::$_instance;
     }
-
     //=====[ Public ]=======================================
     /**
      * Add item to the basket
@@ -201,7 +185,7 @@ class Cart
      * @param array $optionsArray
      * @param int $quantity
      */
-    public function add($product_id, $optionsArray = null, $quantity = 1, $redirect_enabled = true): bool
+    public function add($product_id, $options_array = null, $quantity = 1, $redirect_enabled = true): bool
     {
         foreach ($GLOBALS['hooks']->load('class.cart.add.pre') as $hook) {
             include $hook;
@@ -210,81 +194,60 @@ class Cart
         if (!is_numeric($quantity) || $quantity < 1 || $quantity > 999) {
             $quantity = 1;
         }
-
         // Don't allow products to be added to the basket if prices are hidden AND they're not logged in
         if ($GLOBALS['session']->get('hide_prices')) {
             if (isset($_GET['_g']) && $_GET['_g'] == 'ajaxadd') {
-                $path = $GLOBALS['seo']->buildURL('prod', $_POST['add']);
+                $path = $GLOBALS['seo']->build_url('prod', $_POST['add']);
                 $GLOBALS['debug']->supress();
-                die('Redir:'.$path);
+                die('Redir:' . $path);
             }
-            httpredir(currentPage());
+            httpredir(current_page());
         }
         // Handle gift certs
         $gc = $GLOBALS['config']->get('gift_certs');
-
-        if (isset($gc['product_code']) && $product_id == $gc['product_code'] && !empty($optionsArray)) {
-            $hash = md5(json_encode($optionsArray));
+        if (isset($gc['product_code']) && $product_id == $gc['product_code'] && !empty($options_array)) {
+            $hash = md5(json_encode($options_array));
             if (isset($this->basket['contents'][$hash])) {
                 // Increment quantity
                 $this->basket['contents'][$hash]['quantity'] += $quantity;
-
-                $product = $GLOBALS['catalogue']->getProductData($this->basket['contents'][$hash]['id']);
-                $this->basket['contents'][$hash]['total_price_each'] = ($product['price'] + $this->basket['contents'][$hash]['option_line_price']);
+                $product = $GLOBALS['catalogue']->get_product_data($this->basket['contents'][$hash]['id']);
+                $this->basket['contents'][$hash]['total_price_each'] = $product['price'] + $this->basket['contents'][$hash]['option_line_price'];
             } else {
                 // Add to basket
-                $this->basket['contents'][$hash] = [
-                    'id'   => $product_id,
-                    'quantity'  => $quantity,
-                    'digital'  => ($optionsArray['method'] == 'e') ? true : false,
-                    'certificate' => [
-                        'value'   => $optionsArray['value'],
-                        'name'   => $optionsArray['name'],
-                        'email'   => $optionsArray['email'],
-                        'message'  => $optionsArray['message'],
-                        'method' => $optionsArray['method'],
-                    ],
-                ];
-                $GLOBALS['gui']->setNotify($GLOBALS['language']->catalogue['success_gc_added']);
+                $this->basket['contents'][$hash] = ['id' => $product_id, 'quantity' => $quantity, 'digital' => $options_array['method'] == 'e' ? true : false, 'certificate' => ['value' => $options_array['value'], 'name' => $options_array['name'], 'email' => $options_array['email'], 'message' => $options_array['message'], 'method' => $options_array['method']]];
+                $GLOBALS['gui']->set_notify($GLOBALS['language']->catalogue['success_gc_added']);
             }
             $this->save();
             if ($redirect_enabled === true) {
-                httpredir(($GLOBALS['config']->get('config', 'basket_jump_to')) ? $GLOBALS['rootRel'].'index.php?_a=basket' : currentPage(null));
+                httpredir($GLOBALS['config']->get('config', 'basket_jump_to') ? $GLOBALS['rootRel'] . 'index.php?_a=basket' : current_page(null));
                 return true;
             }
         } elseif (!is_null($product_id) && is_numeric($product_id)) {
             $proceed = true;
-
-            $options_identifier_string = $GLOBALS['catalogue']->defineOptionsIdentifier($optionsArray);
-
-            $product = $GLOBALS['catalogue']->getProductData($product_id, 1, false, 10, 1, false, $options_identifier_string);
-
+            $options_identifier_string = $GLOBALS['catalogue']->define_options_identifier($options_array);
+            $product = $GLOBALS['catalogue']->get_product_data($product_id, 1, false, 10, 1, false, $options_identifier_string);
             if ($product) {
                 foreach ($GLOBALS['hooks']->load('class.cart.add.check') as $hook) {
                     include $hook;
                 }
                 // Check for options
-                $options = $GLOBALS['catalogue']->getProductOptions($product_id);
-
-                $required_options = $GLOBALS['catalogue']->getOptionRequired();
-
-                if ($required_options && ($options && empty($optionsArray))) {
+                $options = $GLOBALS['catalogue']->get_product_options($product_id);
+                $required_options = $GLOBALS['catalogue']->get_option_required();
+                if ($required_options && ($options && empty($options_array))) {
                     // Options needed - Redirect to product page
                     // Set GUI_MESSAGE error, then redirect
                     if (is_array($required_options)) {
                         $this->add($product_id, $required_options, $quantity);
                     } else {
-                        $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_option_required']);
-                        $this->redirectToProductPage($product_id);
+                        $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_option_required']);
+                        $this->redirect_to_product_page($product_id);
                         return true;
                     }
                 } else {
-
                     // Check required options have a value!
-                    $quantity = (is_numeric($quantity) && $quantity > 0) ? $quantity : 1;
+                    $quantity = is_numeric($quantity) && $quantity > 0 ? $quantity : 1;
                     $stock_warning = false;
-                    $stock_level = $GLOBALS['catalogue']->getProductStock($product['product_id'], $options_identifier_string, false, ((isset($this->basket['contents']) && is_array($this->basket['contents'])) ? $this->basket['contents'] : false), $quantity);
-
+                    $stock_level = $GLOBALS['catalogue']->get_product_stock($product['product_id'], $options_identifier_string, false, isset($this->basket['contents']) && is_array($this->basket['contents']) ? $this->basket['contents'] : false, $quantity);
                     // Check stock level
                     if ($product['use_stock_level'] && !$GLOBALS['config']->get('config', 'basket_out_of_stock_purchase')) {
                         if ($stock_level <= 0) {
@@ -293,36 +256,31 @@ class Cart
                             $max_stock = $stock_level;
                         }
                     }
-
                     foreach ($GLOBALS['hooks']->load('class.cart.add.max_stock') as $hook) {
                         include $hook;
                     }
-
                     if (isset($max_stock) && $max_stock <= 0) {
-                        if (is_array($optionsArray)) {
+                        if (is_array($options_array)) {
                             $stock_note = $GLOBALS['session']->has('restock_note') ? $GLOBALS['session']->get('restock_note') : '';
                             $GLOBALS['session']->delete('restock_note');
-                            $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_no_stock_available_options'].' '.$stock_note);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_no_stock_available_options'] . ' ' . $stock_note);
                         } else {
-                            $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_no_stock_available']);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_no_stock_available']);
                         }
-
-                        $this->redirectToProductPage($product_id);
+                        $this->redirect_to_product_page($product_id);
                         return false;
                     }
-
-                    $this->checkMinimumProductQuantity($product_id, $quantity, true);
-
+                    $this->check_minimum_product_quantity($product_id, $quantity, true);
                     // Add item to basket
-                    $hash = md5($product['product_id'].json_encode($optionsArray));
+                    $hash = md5($product['product_id'] . json_encode($options_array));
                     if (isset($this->basket['contents'][$hash])) {
                         // Update quantity
                         if (isset($max_stock)) {
                             $current = $this->basket['contents'][$hash]['quantity'];
                             $request = $current + $quantity;
                             if ($request > $max_stock + 1) {
-                                $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_too_many_added']);
-                                $quantity = ($max_stock + 1) - $current;
+                                $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_too_many_added']);
+                                $quantity = $max_stock + 1 - $current;
                                 $stock_warning = true;
                             }
                         }
@@ -330,30 +288,25 @@ class Cart
                     } else {
                         // Add to basket
                         if (isset($max_stock) && $quantity > $max_stock) {
-                            $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_too_many_added']);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_too_many_added']);
                             $quantity = $max_stock;
                             $stock_warning = true;
                         }
                         if (!$this->basket) {
                             $this->basket = [];
                         }
-                        $this->basket['contents'][$hash] = [
-                            'id'  => $product_id,
-                            'quantity' => $quantity,
-                            'digital' => $product['digital'],
-                        ];
-                        if ($options && !empty($optionsArray)) {
+                        $this->basket['contents'][$hash] = ['id' => $product_id, 'quantity' => $quantity, 'digital' => $product['digital']];
+                        if ($options && !empty($options_array)) {
                             // Add options to the basket item
-
-                            foreach ($optionsArray as $option_id => $option_value) {
-                                $required = $GLOBALS['db']->select('CubeCart_option_group', ['option_type', 'option_required'], ['option_id' => (int)$option_id]);
-                                $require = $required && (bool)$required[0]['option_required'];
+                            foreach ($options_array as $option_id => $option_value) {
+                                $required = $GLOBALS['db']->select('CubeCart_option_group', ['option_type', 'option_required'], ['option_id' => (int) $option_id]);
+                                $require = $required && (bool) $required[0]['option_required'];
                                 $add_option = true;
                                 if (is_array($option_value)) {
                                     foreach (array_values($option_value) as $value) {
-                                        if ($add_option && !$this->_checkOption($value, $require)) {
+                                        if ($add_option && !$this->_check_option($value, $require)) {
                                             $add_option = false;
-                                            $proceed  = false;
+                                            $proceed = false;
                                         } elseif (empty($option_value)) {
                                             $add_option = false;
                                         } else {
@@ -363,13 +316,11 @@ class Cart
                                             }
                                         }
                                     }
-                                } else {
-                                    if (!$this->_checkOption($option_value, $require)) {
-                                        $add_option = false;
-                                        $proceed  = false;
-                                    } elseif (empty($option_value) && !is_numeric($option_value)) {
-                                        $add_option = false;
-                                    }
+                                } else if (!$this->_check_option($option_value, $require)) {
+                                    $add_option = false;
+                                    $proceed = false;
+                                } elseif (empty($option_value) && !is_numeric($option_value)) {
+                                    $add_option = false;
                                 }
                                 if ($add_option) {
                                     $this->basket['contents'][$hash]['options'][$option_id] = $option_value;
@@ -379,59 +330,50 @@ class Cart
                                     break;
                                 }
                             }
-
                             $this->basket['contents'][$hash]['options_identifier'] = $options_identifier_string;
-
                             if (!$proceed) {
                                 // No required options selected
                                 if (isset($_GET['_g']) && $_GET['_g'] == 'ajaxadd') {
-                                    $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_option_required']);
-                                    $this->redirectToProductPage($product_id);
+                                    $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_option_required']);
+                                    $this->redirect_to_product_page($product_id);
                                 } else {
-                                    httpredir(currentPage(null, ['error' => 'option']));
+                                    httpredir(current_page(null, ['error' => 'option']));
                                 }
-
                                 return false;
                             }
                         }
                     }
-
                     foreach ($GLOBALS['hooks']->load('class.cart.add.save') as $hook) {
                         include $hook;
                     }
-
                     //Save before the jump
                     $this->save();
-
                     foreach ($GLOBALS['hooks']->load('class.cart.add.preredirect') as $hook) {
                         include $hook;
                     }
-
                     // Jump to basket, or return to product page?
-                    $jumpto = ($GLOBALS['config']->get('config', 'basket_jump_to')) ? $GLOBALS['rootRel'].'index.php?_a=basket' : currentPage(null);
+                    $jumpto = $GLOBALS['config']->get('config', 'basket_jump_to') ? $GLOBALS['rootRel'] . 'index.php?_a=basket' : current_page(null);
                     foreach ($GLOBALS['hooks']->load('class.cart.add.postredirect') as $hook) {
                         include $hook;
                     }
                     if (isset($_GET['_g']) && $_GET['_g'] == 'ajaxadd' && $GLOBALS['config']->get('config', 'basket_jump_to') && $redirect_enabled === true) {
                         $GLOBALS['debug']->supress();
-                        die($GLOBALS['seo']->rewriteUrls('Redir:'.$jumpto, true));
+                        die($GLOBALS['seo']->rewrite_urls('Redir:' . $jumpto, true));
                     }
                     if (isset($_GET['_g']) && $_GET['_g'] == 'ajaxadd' && $redirect_enabled === true) {
                         $GLOBALS['debug']->supress();
                         if ($stock_warning) {
-                            die('Redir:'.$GLOBALS['rootRel'].'index.php?_a=basket');
+                            die('Redir:' . $GLOBALS['rootRel'] . 'index.php?_a=basket');
                         }
                     } elseif ($redirect_enabled === true) {
                         httpredir($jumpto);
                     }
-
                     return true;
                 }
             }
         }
         return false;
     }
-
     /**
      * Autoload saved cart
      *
@@ -440,7 +382,7 @@ class Cart
      */
     public function autoload(): void
     {
-        if ($result = $GLOBALS['db']->select('CubeCart_saved_cart', ['basket'], ['customer_id' => $GLOBALS['user']->getId()], false, false, false, false)) {
+        if ($result = $GLOBALS['db']->select('CubeCart_saved_cart', ['basket'], ['customer_id' => $GLOBALS['user']->get_id()], false, false, false, false)) {
             $basket = $GLOBALS['session']->get('', 'basket');
             if (empty($basket) || !isset($basket['contents'])) {
                 $this->basket['contents'] = unserialize($result[0]['basket'], ['allowed_classes' => false]);
@@ -448,55 +390,46 @@ class Cart
             }
         }
     }
-
     /**
      * Check - Minimum Quantity
      */
-    public function checkMinimumProductQuantity($productID, $quantity, $redirect = true): bool
+    public function check_minimum_product_quantity($product_id, $quantity, $redirect = true): bool
     {
-        $data = $GLOBALS['catalogue']->getProductData($productID);
-        $min_q = (int)$data['minimum_quantity'];
-        $max_q = (int)$data['maximum_quantity'];
-
+        $data = $GLOBALS['catalogue']->get_product_data($product_id);
+        $min_q = (int) $data['minimum_quantity'];
+        $max_q = (int) $data['maximum_quantity'];
         if ($min_q && $min_q > $quantity) {
-            $GLOBALS['gui']->setError(sprintf($GLOBALS['language']->catalogue['error_minimum_quantity'], $min_q));
-
+            $GLOBALS['gui']->set_error(sprintf($GLOBALS['language']->catalogue['error_minimum_quantity'], $min_q));
             if ($redirect) {
-                $this->redirectToProductPage($productID);
+                $this->redirect_to_product_page($product_id);
             }
         }
         if ($max_q && $max_q < $quantity) {
-            $GLOBALS['gui']->setError(sprintf($GLOBALS['language']->catalogue['error_maximum_quantity'], $max_q));
-
+            $GLOBALS['gui']->set_error(sprintf($GLOBALS['language']->catalogue['error_maximum_quantity'], $max_q));
             if ($redirect) {
-                $this->redirectToProductPage($productID);
+                $this->redirect_to_product_page($product_id);
             }
         }
-
         return false;
     }
-
     /**
      * Check shipping method is allowed for country
      *
      * @return bool
      */
-    public function checkShippingModuleCountry($countries, $zone)
+    public function check_shipping_module_country($countries, $zone)
     {
         $_country = $country_match = false;
-
         if (is_array($countries)) {
             foreach ($countries as $country) {
                 if ($this->basket['delivery_address']['country_id'] == $country || $this->basket['delivery_address']['country'] == $country) {
                     $country_match = true;
                 }
             }
-            $_country = (($zone == 'enabled' && !$country_match) || ($zone == 'disabled' && $country_match)) ? true : false;
+            $_country = $zone == 'enabled' && !$country_match || $zone == 'disabled' && $country_match ? true : false;
         }
-
         return $_country;
     }
-
     /**
      * Clear basket
      */
@@ -504,83 +437,74 @@ class Cart
     {
         $this->basket = [];
         $GLOBALS['session']->delete('', 'basket');
-
-        $GLOBALS['db']->delete('CubeCart_saved_cart', ['customer_id' => $GLOBALS['user']->getId()]);
+        $GLOBALS['db']->delete('CubeCart_saved_cart', ['customer_id' => $GLOBALS['user']->get_id()]);
         foreach ($GLOBALS['hooks']->load('class.cart.clear') as $hook) {
             include $hook;
         }
         return true;
     }
-
     /**
      * Add a discount to the cart
      *
      * @param int $code
      */
-    public function discountAdd($code): bool
+    public function discount_add($code): bool
     {
         if (!is_null($code) && !empty($code)) {
-            if (($coupon = $GLOBALS['db']->select('CubeCart_coupons', '*', "`code` = '".preg_replace('/[^\w\-\_]/u', '', (string) $code)."' AND `status` = 1", false, 1, false, false)) !== false) {
+            if (($coupon = $GLOBALS['db']->select('CubeCart_coupons', '*', "`code` = '" . preg_replace('/[^\w\-\_]/u', '', (string) $code) . "' AND `status` = 1", false, 1, false, false)) !== false) {
                 if (!empty($coupon[0]['cart_order_id'])) {
                     $order = $GLOBALS['db']->select('CubeCart_order_summary', 'status', ['cart_order_id' => $coupon[0]['cart_order_id']]);
                 } else {
                     $order = false;
                 }
-
                 $coupon = $coupon[0];
-
                 $customer_id = $this->basket['customer']['customer_id'] ?? $this->basket['billing_address']['customer_id'];
                 $email = $this->basket['customer']['email'] ?? $GLOBALS['user']->get('email');
-
                 if ($coupon['coupon_per_customer'] > 0) {
                     if (!empty($customer_id) || !empty($email)) {
-                        $usage = $GLOBALS['db']->select('CubeCart_customer_coupon', ['used'], "`coupon` = '$code' AND (`email` = '$email' OR `customer_id` =  ".(int)$customer_id.')', false, 1, false, false);
+                        $usage = $GLOBALS['db']->select('CubeCart_customer_coupon', ['used'], "`coupon` = '{$code}' AND (`email` = '{$email}' OR `customer_id` =  " . (int) $customer_id . ')', false, 1, false, false);
                         if ($usage && $usage[0]['used'] >= $coupon['coupon_per_customer']) {
                             // Coupon is no longer valid
-                            $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_used_already']);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_used_already']);
                             return false;
                         }
                     }
                 }
                 if ($coupon['free_shipping_excluded'] == '1' && (!isset($this->basket['shipping']) || floatval($this->basket['shipping']['value']) == 0)) {
                     // Minimum subtotal for voucher has not been met
-                    $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_free_shipping']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_free_shipping']);
                     return false;
                 }
-                if ($coupon['starts'] !== '0000-00-00' && (strtotime((string) $coupon['starts']) > time())) {
+                if ($coupon['starts'] !== '0000-00-00' && strtotime((string) $coupon['starts']) > time()) {
                     // Coupon is not yet valid
-                    $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_not_ready']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_not_ready']);
                     return false;
                 }
-                if ($coupon['expires'] !== '0000-00-00' && (strtotime((string) $coupon['expires']) < time())) {
+                if ($coupon['expires'] !== '0000-00-00' && strtotime((string) $coupon['expires']) < time()) {
                     // Coupon is no longer valid
-                    $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_expired']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_expired']);
                     return false;
                 }
                 if ($order && !in_array($order[0]['status'], [2, 3])) {
                     // Check order is still valid!
-                    $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_order_status']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_order_status']);
                     return false;
                 }
-                if ($coupon['allowed_uses'] > 0 && ($coupon['count'] >= $coupon['allowed_uses'])) {
+                if ($coupon['allowed_uses'] > 0 && $coupon['count'] >= $coupon['allowed_uses']) {
                     // Coupon is no longer valid
-                    $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_exceeded']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_exceeded']);
                     return false;
                 }
-                if ((float)$coupon['min_subtotal'] > 0 && $this->basket['subtotal'] < (float)$coupon['min_subtotal']) {
+                if ((float) $coupon['min_subtotal'] > 0 && $this->basket['subtotal'] < (float) $coupon['min_subtotal']) {
                     // Minimum subtotal for voucher has not been met
-                    $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_product']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_product']);
                     return false;
                 }
-
                 $proceed = false;
-
                 foreach ($GLOBALS['hooks']->load('class.cart.discount_preadd') as $hook) {
                     include $hook;
                 }
-
                 $include = [];
-
                 // Check shipping is allowed
                 if (!empty($coupon['shipping_id'])) {
                     $qualifying_shipping = unserialize($coupon['shipping_id'], ['allowed_classes' => false]);
@@ -590,12 +514,11 @@ class Cart
                             $proceed = true;
                         }
                         if (!$proceed) {
-                            $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_shipping']);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_shipping']);
                             return false;
                         }
                     }
                 }
-
                 // Check manufacturer is allowed
                 if (!empty($coupon['manufacturer_id'])) {
                     $qualifying_manufacturers = unserialize($coupon['manufacturer_id'], ['allowed_classes' => false]);
@@ -610,11 +533,10 @@ class Cart
                             }
                         }
                         if (!$proceed) {
-                            $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_manufacturer']);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_manufacturer']);
                         }
                     }
                 }
-
                 // Check category is allowed
                 if (!empty($coupon['category_id'])) {
                     $qualifying_categories = unserialize($coupon['category_id'], ['allowed_classes' => false]);
@@ -631,14 +553,12 @@ class Cart
                             }
                         }
                         if (!$proceed) {
-                            $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_category']);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_category']);
                         }
                     }
                 }
-
                 if (!empty($coupon['product_id'])) {
                     $qualifying_products = unserialize($coupon['product_id'], ['allowed_classes' => false]);
-
                     // pull the first item off as it's our orders to be inclusive or exclusive
                     $incexc = array_shift($qualifying_products);
                     // this will handle legacy coupons so we don't lose any products from them
@@ -647,13 +567,11 @@ class Cart
                         $incexc = 'include';
                     }
                 }
-
                 if ($incexc !== 'shipping_only' && is_array($qualifying_products) && count($qualifying_products) > 0) {
                     $product_ids = [];
                     foreach ($qualifying_products as $id) {
                         $product_ids[$id] = true;
                     }
-
                     if ($incexc == 'include') {
                         // If product IS in qualifying ids coupon is allowed
                         foreach ($this->basket['contents'] as $data) {
@@ -674,16 +592,14 @@ class Cart
                             }
                         }
                     }
-
                     if (!$proceed || count($include) == 0) {
-                        $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_wrong_product']);
+                        $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_wrong_product']);
                         return false;
                     }
                 } else {
                     $proceed = true;
                 }
-
-                if ((bool)$coupon['exclude_sale_items']) {
+                if ((bool) $coupon['exclude_sale_items']) {
                     $proceed = false;
                     $add_to_include = [];
                     $has_restriction = isset($include) && is_array($include) && count($include) > 0;
@@ -693,30 +609,27 @@ class Cart
                             continue;
                         }
                         // If we have a specific list of product already we ignore this
-                        if (isset($include[$data['id']]) && (bool)$data['in_sale']) {
+                        if (isset($include[$data['id']]) && (bool) $data['in_sale']) {
                             unset($include[$data['id']]);
-                        } elseif (!(bool)$data['in_sale']) {
+                        } elseif (!(bool) $data['in_sale']) {
                             $proceed = true;
                             $add_to_include[$data['id']] = true;
-
                         }
                     }
                     foreach ($add_to_include as $k => $v) {
                         $include[$k] = $v;
                     }
-
                     if (!$proceed) {
-                        $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_sales_items_excluded']);
+                        $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_sales_items_excluded']);
                     }
                 }
                 foreach ($GLOBALS['hooks']->load('class.cart.discount_add') as $hook) {
                     include $hook;
                 }
                 if ($proceed) {
-
                     // only allow multiple discount codes for gift certificates!
                     if (empty($coupon['cart_order_id'])) {
-                        if (isset(($this->basket['coupons'])) && is_array($this->basket['coupons'])) {
+                        if (isset($this->basket['coupons']) && is_array($this->basket['coupons'])) {
                             foreach ($this->basket['coupons'] as $key => $item) {
                                 if (!$item['gc']) {
                                     unset($this->basket['coupons'][$key]);
@@ -724,46 +637,33 @@ class Cart
                             }
                         }
                     }
-
                     // Add a coupon to the array
-                    $type = ($coupon['discount_percent'] > 0) ? 'percent' : 'fixed';
-                    $value = ($coupon['discount_percent'] > 0) ? $coupon['discount_percent'] : $coupon['discount_price'];
-                    if ($value > 0 || (bool)$coupon['free_shipping']) {
-                        $this->basket['coupons'][strtoupper((string) $coupon['code'])] = [
-                            'voucher' => $coupon['code'],
-                            'gc'  => (!empty($coupon['cart_order_id'])) ? true : false,
-                            'type'  => $type,
-                            'value'  => $value,
-                            'available' => ($coupon['allowed_uses'] > 0) ? $coupon['allowed_uses'] - $coupon['count'] : 0,
-                            'include' => $include,
-                            'shipping_only' => $incexc == 'shipping_only' ? true : false,
-                            'shipping' => (bool)$coupon['shipping'],
-                            'free_shipping' => (bool)$coupon['free_shipping'],
-                        ];
-                        if ((bool)$coupon['free_shipping']) {
+                    $type = $coupon['discount_percent'] > 0 ? 'percent' : 'fixed';
+                    $value = $coupon['discount_percent'] > 0 ? $coupon['discount_percent'] : $coupon['discount_price'];
+                    if ($value > 0 || (bool) $coupon['free_shipping']) {
+                        $this->basket['coupons'][strtoupper((string) $coupon['code'])] = ['voucher' => $coupon['code'], 'gc' => !empty($coupon['cart_order_id']) ? true : false, 'type' => $type, 'value' => $value, 'available' => $coupon['allowed_uses'] > 0 ? $coupon['allowed_uses'] - $coupon['count'] : 0, 'include' => $include, 'shipping_only' => $incexc == 'shipping_only' ? true : false, 'shipping' => (bool) $coupon['shipping'], 'free_shipping' => (bool) $coupon['free_shipping']];
+                        if ((bool) $coupon['free_shipping']) {
                             // Unset shipping so that free shipping is selected
                             unset($this->basket['shipping'], $this->basket['default_shipping_set']);
                         }
-                        $this->basket['free_coupon_shipping'] = (bool)$coupon['free_shipping'];
+                        $this->basket['free_coupon_shipping'] = (bool) $coupon['free_shipping'];
                         return true;
                     }
-                    $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_expired']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_expired']);
                     return false;
                 }
             } else {
-                $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_voucher_none']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_voucher_none']);
             }
         }
-
         return false;
     }
-
     /**
      * Remove discount from cart
      *
      * @param int $code
      */
-    public function discountRemove($code): bool
+    public function discount_remove($code): bool
     {
         if ($code && isset($this->basket['coupons'][strtoupper((string) $code)])) {
             unset($this->basket['coupons'][strtoupper((string) $code)], $this->basket['discount_type']);
@@ -774,10 +674,8 @@ class Cart
             $this->save();
             return true;
         }
-
         return false;
     }
-
     /**
      * Get the current basket
      *
@@ -788,72 +686,65 @@ class Cart
         if ($GLOBALS['session']->get('hide_prices')) {
             return false;
         }
-
         if (!empty($this->basket['contents']) && is_array($this->basket['contents'])) {
             $this->_discount = $this->_subtotal = $this->_subtotal_inc_gross = $this->_weight = 0;
             $this->basket['has_inclusive_tax'] = false;
             // Include inline shipping maths for Per Category Shipping
             $ship_by_cat = $GLOBALS['config']->get('Per_Category');
-
-            $sbc_path = CC_ROOT_DIR.'/modules/shipping/Per_Category/line.inc.php';
+            $sbc_path = CC_ROOT_DIR . '/modules/shipping/Per_Category/line.inc.php';
             if (isset($this->basket['delivery_address']) && file_exists($sbc_path) && isset($ship_by_cat['status']) && $ship_by_cat['status']) {
                 require_once $sbc_path;
                 $line_shipping = new Per_Category_Line($ship_by_cat, $this->basket);
             } else {
                 $ship_by_cat = ['status' => false];
             }
-
-            $tax_on = ($GLOBALS['config']->get('config', 'basket_tax_by_delivery')) ? 'delivery_address' : 'billing_address';
+            $tax_on = $GLOBALS['config']->get('config', 'basket_tax_by_delivery') ? 'delivery_address' : 'billing_address';
             $tax_country = 0;
-
             if (isset($this->basket[$tax_on])) {
-                $tax_country = (int)$this->basket[$tax_on]['country_id'];
+                $tax_country = (int) $this->basket[$tax_on]['country_id'];
             }
-
             if (empty($tax_country)) {
                 $tax_country = $GLOBALS['config']->get('config', 'store_country');
             }
-
-            $GLOBALS['tax']->loadTaxes($tax_country);
-
+            $GLOBALS['tax']->load_taxes($tax_country);
             foreach ($this->basket['contents'] as $hash => $item) {
-                if (empty($item) || !is_array($item)) {  ## Keep things tidy
+                if (empty($item) || !is_array($item)) {
+                    ## Keep things tidy
                     unset($this->basket['contents'][$hash]);
                     continue;
                 }
                 // Basket Contents
-                $inc_unit_price_pre_strip = 0; // reset each iteration; set only for tax-inclusive products
+                $inc_unit_price_pre_strip = 0;
+                // reset each iteration; set only for tax-inclusive products
                 if (is_numeric($item['id'])) {
                     $item['options_identifier'] ??= '';
-                    $product = $GLOBALS['catalogue']->getProductData($item['id'], $item['quantity'], false, 10, 1, false, $item['options_identifier']);
-
+                    $product = $GLOBALS['catalogue']->get_product_data($item['id'], $item['quantity'], false, 10, 1, false, $item['options_identifier']);
                     foreach ($GLOBALS['hooks']->load('class.cart.get.product_prices') as $hook) {
                         include $hook;
                     }
-
                     if (!$product) {
                         // Warn that the product has been removed
                         if (!empty($item['name'])) {
-                            $GLOBALS['gui']->setError(sprintf($GLOBALS['language']->checkout['error_item_not_available'], $item['name']));
+                            $GLOBALS['gui']->set_error(sprintf($GLOBALS['language']->checkout['error_item_not_available'], $item['name']));
                         }
                         unset($this->basket['contents'][$hash]);
                         continue;
                     }
-
                     $product['quantity'] = $item['quantity'];
                     $product['in_sale'] = 0;
-                    if ($GLOBALS['tax']->salePrice($product['price'], $product['sale_price'])) {
+                    if ($GLOBALS['tax']->sale_price($product['price'], $product['sale_price'])) {
                         $product['price'] = $product['sale_price'];
                         $product['in_sale'] = 1;
                     }
                     $product['price_display'] = $product['price'];
-                    $product['base_price_display'] = $GLOBALS['tax']->priceFormat($product['price'], true);
+                    $product['base_price_display'] = $GLOBALS['tax']->price_format($product['price'], true);
                     $product['remove_options_tax'] = false;
                     $inc_unit_price_pre_strip = 0;
                     if ($product['tax_inclusive']) {
                         // Remove tax from the items by default, everything internally should be sans-tax
-                        $inc_unit_price_pre_strip = $product['price']; // save original inclusive unit price
-                        $GLOBALS['tax']->inclusiveTaxRemove($product['price'], $product['tax_type']);
+                        $inc_unit_price_pre_strip = $product['price'];
+                        // save original inclusive unit price
+                        $GLOBALS['tax']->inclusive_tax_remove($product['price'], $product['tax_type']);
                         $product['tax_inclusive'] = false;
                         $product['remove_options_tax'] = true;
                         $this->basket['has_inclusive_tax'] = true;
@@ -864,29 +755,29 @@ class Cart
                             if (is_array($option_data)) {
                                 // Text option
                                 foreach ($option_data as $trash => $option_value) {
-                                    if (($assign_id = $GLOBALS['db']->select('CubeCart_option_assign', false, ['product' => (int)$item['id'], 'option_id' => $option_id])) !== false) {
+                                    if (($assign_id = $GLOBALS['db']->select('CubeCart_option_assign', false, ['product' => (int) $item['id'], 'option_id' => $option_id])) !== false) {
                                         $assign_id = $assign_id[0]['assign_id'];
                                     } else {
                                         $assign_id = 0;
                                     }
-                                    $value = $GLOBALS['catalogue']->getOptionData((int)$option_id, $assign_id);
+                                    $value = $GLOBALS['catalogue']->get_option_data((int) $option_id, $assign_id);
                                     foreach ($GLOBALS['hooks']->load('class.cart.get.product_option_prices') as $hook) {
                                         include $hook;
                                     }
                                     if ($value) {
-                                        Cart::updateProductDataWithOption($product, $value);
+                                        Cart::update_product_data_with_option($product, $value);
                                         $value['value_name'] = $option_value;
                                         $product['options'][] = $value;
                                     }
                                 }
                             } elseif (is_numeric($option_data)) {
                                 // Select option
-                                $value = $GLOBALS['catalogue']->getOptionData((int)$option_id, (int)$option_data);
+                                $value = $GLOBALS['catalogue']->get_option_data((int) $option_id, (int) $option_data);
                                 foreach ($GLOBALS['hooks']->load('class.cart.get.product_option_prices') as $hook) {
                                     include $hook;
                                 }
                                 if ($value) {
-                                    Cart::updateProductDataWithOption($product, $value);
+                                    Cart::update_product_data_with_option($product, $value);
                                     $product['options'][] = $value;
                                 }
                             }
@@ -894,21 +785,20 @@ class Cart
                     } else {
                         $product['options'] = false;
                     }
-
                     $this->basket['contents'][$hash]['digital'] = $product['digital'];
                     $this->basket['contents'][$hash]['in_sale'] = $product['in_sale'];
                     // Add the total product price inc options etc for payment gateways
                     $this->basket['contents'][$hash]['cost_price'] = round($product['cost_price'] * $item['quantity'], 2);
                     $this->basket['contents'][$hash]['option_line_price'] = $product['option_line_price'];
                     $this->basket['contents'][$hash]['total_price_each'] = $product['price'];
-                    $this->basket['contents'][$hash]['description']   = substr(strip_tags((string) $product['description']), 0, 255);
-                    $this->basket['contents'][$hash]['name']     = $product['name'];
-                    $this->basket['contents'][$hash]['dimension_unit']   = $product['dimension_unit'];
-                    $this->basket['contents'][$hash]['product_code']   = $product['product_code'];
-                    $this->basket['contents'][$hash]['product_weight']   = $product['product_weight'];
-                    $this->basket['contents'][$hash]['product_width']   = $product['product_width'];
-                    $this->basket['contents'][$hash]['product_height']   = $product['product_height'];
-                    $this->basket['contents'][$hash]['product_depth']   = $product['product_depth'];
+                    $this->basket['contents'][$hash]['description'] = substr(strip_tags((string) $product['description']), 0, 255);
+                    $this->basket['contents'][$hash]['name'] = $product['name'];
+                    $this->basket['contents'][$hash]['dimension_unit'] = $product['dimension_unit'];
+                    $this->basket['contents'][$hash]['product_code'] = $product['product_code'];
+                    $this->basket['contents'][$hash]['product_weight'] = $product['product_weight'];
+                    $this->basket['contents'][$hash]['product_width'] = $product['product_width'];
+                    $this->basket['contents'][$hash]['product_height'] = $product['product_height'];
+                    $this->basket['contents'][$hash]['product_depth'] = $product['product_depth'];
                 } else {
                     if (!isset($item['certificate'])) {
                         continue;
@@ -922,14 +812,15 @@ class Cart
                         };
                     }
                     $product = [
-                        'quantity'  => $item['quantity'],
+                        'quantity' => $item['quantity'],
                         'product_code' => $gc['product_code'],
-                        'price'   => $item['certificate']['value'],
-                        'name'   => sprintf('%s %s (%s)', $method, $GLOBALS['language']->catalogue['gift_certificate'], $GLOBALS['tax']->priceFormat($item['certificate']['value'], true)),
-                        'digital'  => (bool)$item['digital'],
-                        'tax_type'  => 0, // Gift certificates are MPV - no VAT at point of sale
+                        'price' => $item['certificate']['value'],
+                        'name' => sprintf('%s %s (%s)', $method, $GLOBALS['language']->catalogue['gift_certificate'], $GLOBALS['tax']->price_format($item['certificate']['value'], true)),
+                        'digital' => (bool) $item['digital'],
+                        'tax_type' => 0,
+                        // Gift certificates are MPV - no VAT at point of sale
                         'tax_inclusive' => 0,
-                        'options'  => [],
+                        'options' => [],
                         'option_price_ignoring_tax' => 0,
                     ];
                     $product['price_display'] = $product['price'];
@@ -937,38 +828,32 @@ class Cart
                 if ($product['digital']) {
                     $this->basket_digital = true;
                 }
-
                 if (!empty($product['absolute_price'])) {
                     $product['line_price_display'] = $product['option_price_ignoring_tax'];
-                    $product['price_display']  = $product['option_price_ignoring_tax'] * $item['quantity'];
+                    $product['price_display'] = $product['option_price_ignoring_tax'] * $item['quantity'];
                 } else {
                     $product['line_price_display'] = $product['price_display'] + $product['option_price_ignoring_tax'];
-                    $product['price_display']  = ($product['price_display'] + $product['option_price_ignoring_tax']) * $item['quantity'];
+                    $product['price_display'] = ($product['price_display'] + $product['option_price_ignoring_tax']) * $item['quantity'];
                 }
-
                 ## Update Subtotals
                 if ($product['price'] < 0) {
                     $product['price'] = 0;
                 }
                 $product['line_price'] = $product['price'];
-                $product['price']  = $product['price'] * $item['quantity'];
-
-                $this->_weight   += $product['quantity'] * $product['product_weight'];
-
+                $product['price'] = $product['price'] * $item['quantity'];
+                $this->_weight += $product['quantity'] * $product['product_weight'];
                 $this->basket_data[$hash] = $product;
-
                 // Calculate Taxes
                 if (isset($this->basket[$tax_on])) {
-                    $tax_state_id = is_numeric($this->basket[$tax_on]['state_id']) ? $this->basket[$tax_on]['state_id'] : getStateFormat($this->basket[$tax_on]['state_id'], 'name', 'id');
+                    $tax_state_id = is_numeric($this->basket[$tax_on]['state_id']) ? $this->basket[$tax_on]['state_id'] : get_state_format($this->basket[$tax_on]['state_id'], 'name', 'id');
                 }
                 if (isset($tax_state_id)) {
-                    $product_tax =  $GLOBALS['tax']->productTax($product['price'], ['tax_type' => (int)$product['tax_type'], 'manufacture' => $product['manufacture_country']], (bool)$product['tax_inclusive'], $tax_state_id, 'goods', true, $product['digital']);
+                    $product_tax = $GLOBALS['tax']->product_tax($product['price'], ['tax_type' => (int) $product['tax_type'], 'manufacture' => $product['manufacture_country']], (bool) $product['tax_inclusive'], $tax_state_id, 'goods', true, $product['digital']);
                 } else {
-                    $product_tax =  $GLOBALS['tax']->productTax($product['price'], ['tax_type' => (int)$product['tax_type'], 'manufacture' => $product['manufacture_country']], (bool)$product['tax_inclusive'], 0, 'goods', true, $product['digital']);
+                    $product_tax = $GLOBALS['tax']->product_tax($product['price'], ['tax_type' => (int) $product['tax_type'], 'manufacture' => $product['manufacture_country']], (bool) $product['tax_inclusive'], 0, 'goods', true, $product['digital']);
                 }
                 $this->basket['contents'][$hash]['tax_each'] = $product_tax;
                 $this->basket['contents'][$hash]['option_absolute_price'] = isset($product['absolute_price']) ? true : false;
-
                 // Accumulate subtotal. For originally tax-inclusive products without option
                 // price adjustments, use (inc_line - rounded_tax) instead of the raw ex-tax
                 // line price to prevent floating-point drift from inclusiveTaxRemove's division
@@ -977,52 +862,47 @@ class Cart
                 if ($inc_unit_price_pre_strip > 0 && $product_tax !== false && $product['option_line_price'] == 0) {
                     $inc_line = $inc_unit_price_pre_strip * $item['quantity'];
                     $this->_subtotal_inc_gross += $inc_line;
-                    $this->_subtotal += $inc_line - (float)$product_tax['amount'];
+                    $this->_subtotal += $inc_line - (float) $product_tax['amount'];
                 } else {
                     $this->_subtotal_inc_gross += $product['price'];
-                    $this->_subtotal  += $product['price'];
+                    $this->_subtotal += $product['price'];
                 }
-
                 // Calculate Line Shipping Price if enabled
-                if (isset($product['product_id']) && !empty($product['product_id']) && isset($ship_by_cat['status']) && (bool)$ship_by_cat['status']) {
-                    $assigned_categories = $GLOBALS['catalogue']->getCategoryStatusByProductID($product['product_id']);
+                if (isset($product['product_id']) && !empty($product['product_id']) && isset($ship_by_cat['status']) && (bool) $ship_by_cat['status']) {
+                    $assigned_categories = $GLOBALS['catalogue']->get_category_status_by_product_id($product['product_id']);
                     foreach ($assigned_categories as $assigned_category) {
                         if ($assigned_category['primary']) {
                             $assigned_category_id = $assigned_category['cat_id'];
                             continue;
                         }
                     }
-                    $category = $GLOBALS['catalogue']->getCategoryData($assigned_category_id);
-                    $line_shipping->lineCalc($product, $category);
+                    $category = $GLOBALS['catalogue']->get_category_data($assigned_category_id);
+                    $line_shipping->line_calc($product, $category);
                 }
             }
             // Put By_Cat shipping prices into basket for calc class
-            if (isset($product['product_id']) && !empty($product['product_id']) && isset($ship_by_cat['status']) && (bool)$ship_by_cat['status']) {
-                $this->basket['By_Category_Shipping'] =  $line_shipping->_lineShip + $line_shipping->_perShipPrice;
+            if (isset($product['product_id']) && !empty($product['product_id']) && isset($ship_by_cat['status']) && (bool) $ship_by_cat['status']) {
+                $this->basket['By_Category_Shipping'] = $line_shipping->_line_ship + $line_shipping->_per_ship_price;
             }
             // Shipping
-            $this->_shipping = (isset($this->basket['shipping']) && !empty($this->basket['shipping'])) ? $this->basket['shipping']['value'] : 0;
-
+            $this->_shipping = isset($this->basket['shipping']) && !empty($this->basket['shipping']) ? $this->basket['shipping']['value'] : 0;
             if (isset($this->basket[$tax_on]['state_id']) && ($this->basket['shipping']['tax_id'] ?? false)) {
-                $GLOBALS['tax']->productTax($this->_shipping, $this->basket['shipping']['tax_id'], false, $this->basket[$tax_on]['state_id'], 'shipping');
+                $GLOBALS['tax']->product_tax($this->_shipping, $this->basket['shipping']['tax_id'], false, $this->basket[$tax_on]['state_id'], 'shipping');
             }
-
             // Apply Discounts
-            $this->_applyDiscounts();
-
-            $this->basket['weight']  = sprintf('%.4F', $this->_weight);
+            $this->_apply_discounts();
+            $this->basket['weight'] = sprintf('%.4F', $this->_weight);
             $this->basket['discount'] = sprintf('%.2F', $this->_discount);
             $this->basket['subtotal'] = sprintf('%.2F', $this->_subtotal);
-            $this->basket['available_credit'] = $available_credit = (float)$GLOBALS['user']->get('credit');
+            $this->basket['available_credit'] = $available_credit = (float) $GLOBALS['user']->get('credit');
             $GLOBALS['smarty']->assign('CREDIT_AVAILABLE', $available_credit);
-            $GLOBALS['smarty']->assign('AVAILABLE_CREDIT', $GLOBALS['tax']->priceFormat($available_credit));
-            $taxes = $GLOBALS['tax']->fetchTaxAmounts();
+            $GLOBALS['smarty']->assign('AVAILABLE_CREDIT', $GLOBALS['tax']->price_format($available_credit));
+            $taxes = $GLOBALS['tax']->fetch_tax_amounts();
             foreach ($GLOBALS['hooks']->load('class.cart.get.fetchtaxes') as $hook) {
                 include $hook;
             }
             $this->basket['total_tax'] = sprintf('%.2F', $taxes['applied']);
-
-            $this->_total = (($this->_subtotal + $this->_shipping) + $this->basket['total_tax']);
+            $this->_total = $this->_subtotal + $this->_shipping + $this->basket['total_tax'];
             if (isset($this->basket['use_credit']) && $this->basket['use_credit'] == 1) {
                 $total_balance = $this->_total - $available_credit;
                 if ($total_balance < 0) {
@@ -1033,13 +913,12 @@ class Cart
                     $this->_total = $total_balance;
                     $this->basket['credit_used'] = $available_credit;
                 }
-                $GLOBALS['smarty']->assign('CREDIT_USED', $GLOBALS['tax']->priceFormat($this->basket['credit_used']));
+                $GLOBALS['smarty']->assign('CREDIT_USED', $GLOBALS['tax']->price_format($this->basket['credit_used']));
             }
             // if we are using per-product coupon, the prices are already reduced, so the total is fine
             if (!$this->_item_discount) {
                 $this->_total -= $this->_discount;
             }
-
             if ($this->_total < 0) {
                 $this->_total = 0;
             }
@@ -1047,59 +926,50 @@ class Cart
                 $GLOBALS['smarty']->assign('DISABLE_GATEWAYS', true);
             }
             $this->basket['total'] = sprintf('%.2F', $this->_total);
-
             foreach ($GLOBALS['hooks']->load('class.cart.get') as $hook) {
                 include $hook;
             }
-
             $this->save();
-
             return $this->basket_data;
         }
-
         return false;
     }
-
     /**
      * Is it a digital basket
      *
      * @return bool
      */
-    public function getBasketDigital()
+    public function get_basket_digital()
     {
         return $this->basket_digital;
     }
-
     /**
      * Current subtotal
      *
      * @return float
      */
-    public function getSubTotal()
+    public function get_sub_total()
     {
         return $this->_subtotal;
     }
-
     /**
      * Current total
      *
      * @return float
      */
-    public function getTotal()
+    public function get_total()
     {
         return $this->_total;
     }
-
     /**
      * Current weight
      *
      * @return float
      */
-    public function getWeight()
+    public function get_weight()
     {
         return $this->_weight;
     }
-
     /**
      * Load current basket
      */
@@ -1109,24 +979,21 @@ class Cart
         if (is_array($this->basket = $GLOBALS['session']->get('', 'basket'))) {
             return true;
         }
-
         return false;
     }
-
     /**
      * Load shipping modules
      *
      * @return array / false
      */
-    public function loadShippingModules(): array|false
+    public function load_shipping_modules(): array|false
     {
         if (($shipping = $GLOBALS['db']->select('CubeCart_modules', ['folder', 'countries', 'position'], ['module' => 'shipping', 'status' => '1'], ['position' => 'asc'])) !== false) {
-            $tax_on = ($GLOBALS['config']->get('config', 'basket_tax_by_delivery')) ? 'delivery_address' : 'billing_address';
-
+            $tax_on = $GLOBALS['config']->get('config', 'basket_tax_by_delivery') ? 'delivery_address' : 'billing_address';
             // Fetch the basket data
             $basket_data = $this->basket ?: [];
             if (!isset($basket_data['delivery_address'])) {
-                $basket_data['delivery_address'] = $GLOBALS['user']->formatAddress('', false);
+                $basket_data['delivery_address'] = $GLOBALS['user']->format_address('', false);
                 $this->basket['delivery_address'] = $basket_data['delivery_address'];
             }
             // Is this delivery address allowed?
@@ -1136,7 +1003,7 @@ class Cart
                 $block = true;
             }
             if (!isset($basket_data['billing_address'])) {
-                $basket_data['billing_address'] = $GLOBALS['user']->formatAddress('', false);
+                $basket_data['billing_address'] = $GLOBALS['user']->format_address('', false);
                 $this->basket['billing_address'] = $basket_data['billing_address'];
             }
             foreach ($basket_data['contents'] as $hash => $item) {
@@ -1146,72 +1013,51 @@ class Cart
             }
             if (!empty($basket_data['contents']) && $block == false) {
                 foreach ($shipping as $module) {
-                    $module['countries'] = Config::getInstance()->get($module['folder'], 'countries');
-                    $countries = (!empty($module['countries'])) ? unserialize($module['countries'], ['allowed_classes' => false]) : false;
-
-                    $module['disabled_countries'] = Config::getInstance()->get($module['folder'], 'disabled_countries');
-                    $disabled_countries = (!empty($module['disabled_countries'])) ? unserialize($module['disabled_countries'], ['allowed_classes' => false]) : false;
-                    if ($this->checkShippingModuleCountry($countries, 'enabled')) {
+                    $module['countries'] = Config::get_instance()->get($module['folder'], 'countries');
+                    $countries = !empty($module['countries']) ? unserialize($module['countries'], ['allowed_classes' => false]) : false;
+                    $module['disabled_countries'] = Config::get_instance()->get($module['folder'], 'disabled_countries');
+                    $disabled_countries = !empty($module['disabled_countries']) ? unserialize($module['disabled_countries'], ['allowed_classes' => false]) : false;
+                    if ($this->check_shipping_module_country($countries, 'enabled')) {
                         continue;
                     }
-                    if ($this->checkShippingModuleCountry($disabled_countries, 'disabled')) {
+                    if ($this->check_shipping_module_country($disabled_countries, 'disabled')) {
                         continue;
                     }
-
-                    $class = CC_ROOT_DIR.'/modules/shipping/'.$module['folder'].'/shipping.class.php';
+                    $class = CC_ROOT_DIR . '/modules/shipping/' . $module['folder'] . '/shipping.class.php';
                     if (file_exists($class)) {
                         if (!class_exists($module['folder'])) {
                             include $class;
                         }
-
                         if (class_exists($module['folder']) && method_exists($module['folder'], 'calculate')) {
-                            $shippingClass[$module['folder']] = new $module['folder']($basket_data);
-                            $packages = $shippingClass[$module['folder']]->calculate();
+                            $shipping_class[$module['folder']] = new $module['folder']($basket_data);
+                            $packages = $shipping_class[$module['folder']]->calculate();
                             // $group_name will overwrite the folder name to make the shipping group on the dropdown configurable
-                            $group_name = method_exists($shippingClass[$module['folder']], 'groupName') ? $shippingClass[$module['folder']]->groupName() : $module['folder'];
+                            $group_name = method_exists($shipping_class[$module['folder']], 'groupName') ? $shipping_class[$module['folder']]->group_name() : $module['folder'];
                             if ($packages) {
                                 uasort($packages, price_sort(...));
                                 // work out tax amount on shipping
                                 foreach ($packages as $package) {
                                     $package['value'] = sprintf('%.2F', $package['value']);
-                                    $packages_with_tax[] = array_merge(
-                                        $package,
-                                        [
-                                            'tax' => $GLOBALS['tax']->productTax(
-                                                $package['value'],
-                                                $package['tax_id'],
-                                                (bool)($package['tax_inclusive'] ?? false),
-                                                $this->basket[$tax_on]['state_id'],
-                                                'shipping',
-                                                false
-                                            ),
-                                            'position' => $module['position'],
-                                            'module_folder' => $module['folder'],
-                                        ]
-                                    );
-
+                                    $packages_with_tax[] = array_merge($package, ['tax' => $GLOBALS['tax']->product_tax($package['value'], $package['tax_id'], (bool) ($package['tax_inclusive'] ?? false), $this->basket[$tax_on]['state_id'], 'shipping', false), 'position' => $module['position'], 'module_folder' => $module['folder']]);
                                 }
-
-                                $shipArray[$group_name]	= $packages_with_tax;
+                                $ship_array[$group_name] = $packages_with_tax;
                                 unset($packages_with_tax);
                             }
                         }
                     } else {
                         // Version 4 Shipping Calculators
-                        $calculator = CC_ROOT_DIR.'/modules/shipping/'.$module['folder'].'/calc.php';
+                        $calculator = CC_ROOT_DIR . '/modules/shipping/' . $module['folder'] . '/calc.php';
                         if (file_exists($calculator)) {
                             include $calculator;
                         }
                     }
                 }
-
                 foreach ($GLOBALS['hooks']->load('class.cart.load_shipping') as $hook) {
                     include $hook;
                 }
-
-                if (isset($shipArray) && is_array($shipArray)) {
+                if (isset($ship_array) && is_array($ship_array)) {
                     $this->save();
-                    return $shipArray;
+                    return $ship_array;
                 }
                 // No shipping option is available due to Allowed/Disabled zones restriction
                 $this->save();
@@ -1225,7 +1071,6 @@ class Cart
         $this->save();
         return false;
     }
-
     /**
      * Remove an item from the basket
      *
@@ -1242,31 +1087,29 @@ class Cart
         }
         return false;
     }
-
     /**
      * Save basket
      */
     public function save(): void
     {
-        Session::getInstance()->set('', $this->basket, 'basket', true);
+        Session::get_instance()->set('', $this->basket, 'basket', true);
         //Only care about auto saving the cart if there is something in there
         if (!empty($this->basket) && isset($this->basket['contents'])) {
-            if (User::getInstance()->is()) {
+            if (User::get_instance()->is()) {
                 static $old_basket = null;
-                $id = User::getInstance()->getId();
+                $id = User::get_instance()->get_id();
                 $basket = serialize($this->basket['contents']);
                 if (empty($old_basket) || $old_basket != $basket) {
                     $old_basket = $basket;
-                    if (Database::getInstance()->select('CubeCart_saved_cart', ['basket'], ['customer_id' => $id], false, false, false, false) !== false) {
-                        Database::getInstance()->update('CubeCart_saved_cart', ['basket' => $basket], ['customer_id' => $id]);
+                    if (Database::get_instance()->select('CubeCart_saved_cart', ['basket'], ['customer_id' => $id], false, false, false, false) !== false) {
+                        Database::get_instance()->update('CubeCart_saved_cart', ['basket' => $basket], ['customer_id' => $id]);
                     } else {
-                        Database::getInstance()->insert('CubeCart_saved_cart', ['customer_id' => $id, 'basket' => $basket]);
+                        Database::get_instance()->insert('CubeCart_saved_cart', ['customer_id' => $id, 'basket' => $basket]);
                     }
                 }
             }
         }
     }
-
     /**
      * Set basket item
      *
@@ -1278,7 +1121,6 @@ class Cart
         $this->basket[$identifier] = $value;
         $this->save();
     }
-
     /**
      * Update basket
      */
@@ -1289,19 +1131,15 @@ class Cart
         if (count($quantities) > 0) {
             $this->_subtotal = 0;
             foreach ($quantities as $hash => $quantity) {
-
                 // We can't update an item that doesn't exist or set imcomplete data
                 if (!isset($this->basket['contents'][$hash]['id'])) {
                     continue;
                 }
-
                 if ($quantity <= 0) {
                     unset($this->basket['contents'][$hash]);
-                } elseif (($product = $GLOBALS['catalogue']->getProductData($this->basket['contents'][$hash]['id'])) !== false) {
-
-                    $this->checkMinimumProductQuantity($product['product_id'], $quantity, false);
-
-                    $stock_level = $GLOBALS['catalogue']->getProductStock($product['product_id'], $this->basket['contents'][$hash]['options_identifier'] ?? null);
+                } elseif (($product = $GLOBALS['catalogue']->get_product_data($this->basket['contents'][$hash]['id'])) !== false) {
+                    $this->check_minimum_product_quantity($product['product_id'], $quantity, false);
+                    $stock_level = $GLOBALS['catalogue']->get_product_stock($product['product_id'], $this->basket['contents'][$hash]['options_identifier'] ?? null);
                     if ($product['use_stock_level'] && !$GLOBALS['config']->get('config', 'basket_out_of_stock_purchase')) {
                         if ($stock_level <= 0) {
                             $max_stock = 0;
@@ -1313,25 +1151,25 @@ class Cart
                         }
                         if ($quantity > $max_stock) {
                             if (count($verify) > 0) {
-                                $GLOBALS['gui']->setError($GLOBALS['language']->checkout['stock_availability_changed']);
+                                $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['stock_availability_changed']);
                             }
                             if ($max_stock <= 0) {
-                                $GLOBALS['gui']->setError(sprintf($GLOBALS['language']->checkout['error_item_not_available'], $this->basket['contents'][$hash]['name']));
+                                $GLOBALS['gui']->set_error(sprintf($GLOBALS['language']->checkout['error_item_not_available'], $this->basket['contents'][$hash]['name']));
                                 $this->remove($hash);
                                 continue;
                             }
-                            $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_too_many_added']);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_too_many_added']);
                             $quantity = $max_stock;
                         }
                     }
                     foreach ($GLOBALS['hooks']->load('class.cart.update.post_max_stock') as $hook) {
                         include $hook;
                     }
-                    $this->basket['contents'][$hash]['quantity'] = (int)$quantity; // or ceil($quantity);
-                    $product_data['product_id'] = (int)$this->basket['contents'][$hash]['id'];
-
+                    $this->basket['contents'][$hash]['quantity'] = (int) $quantity;
+                    // or ceil($quantity);
+                    $product_data['product_id'] = (int) $this->basket['contents'][$hash]['id'];
                     $pprice = $product['ctrl_sale'] ? $product['sale_price'] : $product['price'];
-                    $this->basket['contents'][$hash]['total_price_each'] = ($pprice + $this->basket['contents'][$hash]['option_line_price']);
+                    $this->basket['contents'][$hash]['total_price_each'] = $pprice + $this->basket['contents'][$hash]['option_line_price'];
                 }
                 $this->_subtotal += $this->basket['contents'][$hash]['total_price_each'] * $quantity;
                 $this->basket['subtotal'] = $this->_subtotal;
@@ -1340,78 +1178,67 @@ class Cart
                 include $hook;
             }
             $this->save();
-
-            $this->_applyDiscounts();
+            $this->_apply_discounts();
         }
-
         //We need to check the coupons to make sure they are still valid
         if (isset($this->basket['coupons']) && is_array($this->basket['coupons'])) {
             foreach ($this->basket['coupons'] as $key => $data) {
-                $this->discountRemove($key);
-                $this->discountAdd($key);
+                $this->discount_remove($key);
+                $this->discount_add($key);
             }
             $this->save();
         }
-
         //If the cart is empty
         if (isset($this->basket['contents']) && is_array($this->basket['contents']) && count($this->basket['contents']) == 0) {
             $this->clear();
         }
     }
-
     /**
      * Redirect to product page
      */
-    public function redirectToProductPage($productID): void
+    public function redirect_to_product_page($product_id): void
     {
         if (isset($_GET['_g']) && $_GET['_g'] == 'ajaxadd') {
             $GLOBALS['debug']->supress();
-            die('Redir:'.$GLOBALS['seo']->buildURL('prod', $productID));
+            die('Redir:' . $GLOBALS['seo']->build_url('prod', $product_id));
         }
-        httpredir("index.php?_a=product&product_id=$productID");
+        httpredir("index.php?_a=product&product_id={$product_id}");
     }
-
     //=====[ Private ]=======================================
     /**
      * Apply a discount to the cart
      */
-    private function _applyDiscounts(): bool
+    private function _apply_discounts(): bool
     {
         foreach ($GLOBALS['hooks']->load('class.cart.applydiscounts.pre') as $hook) {
             include $hook;
         }
-
         if (isset($this->basket['coupons']) && is_array($this->basket['coupons']) && count($this->basket['coupons']) > 0) {
             $subtotal = 0;
             $coupon = false;
-
             // COUPONS FIRST!!
             foreach ($this->basket['coupons'] as $key => $data) {
                 if (!$data['gc']) {
                     $coupon = true;
-
-                    $all = (count($data['include']) == 0) ? true : false;
-
+                    $all = count($data['include']) == 0 ? true : false;
                     if (!$data['shipping_only']) {
                         foreach ($this->basket['contents'] as $hash => $item) {
                             if ($all || isset($data['include'][$item['id']])) {
                                 if ($item['total_price_each'] > 0) {
-                                    $subtotal += ($item['total_price_each'] * $item['quantity']);
+                                    $subtotal += $item['total_price_each'] * $item['quantity'];
                                 }
-                            } elseif ($item['total_price_each'] > 0) { // excluded items CAN be used against gift certificates!!
+                            } elseif ($item['total_price_each'] > 0) {
+                                // excluded items CAN be used against gift certificates!!
                                 $excluded_products[$hash] = $item;
                             }
                         }
                     }
-
                     if (isset($this->basket['shipping']) && $data['shipping'] && $this->basket['shipping']['value'] > 0) {
                         $subtotal += $this->basket['shipping']['value'];
                     } elseif (isset($this->basket['shipping']) && $this->basket['shipping']['value'] > 0) {
                         $excluded_shipping = $this->basket['shipping'];
                     }
-
-                    $discount = ($data['type'] == 'percent') ? $subtotal * ($data['value'] / 100) : $data['value'];
-
+                    $discount = $data['type'] == 'percent' ? $subtotal * ($data['value'] / 100) : $data['value'];
                     if ($discount < $subtotal) {
                         $subtotal -= $discount;
                         $this->_discount = $discount;
@@ -1420,61 +1247,54 @@ class Cart
                         $this->_discount = $subtotal;
                         $this->basket['coupons'][$key]['value_display'] = sprintf('%.2F', $subtotal);
                         $subtotal = 0;
-                        if ((!is_array($excluded_products) && !is_array($excluded_shipping))) {
-                            $GLOBALS['tax']->adjustTax(0);
+                        if (!is_array($excluded_products) && !is_array($excluded_shipping)) {
+                            $GLOBALS['tax']->adjust_tax(0);
                             foreach ($this->basket['coupons'] as $key => $data) {
                                 if ($data['gc']) {
                                     unset($this->basket['coupons'][$key]);
                                 }
                             }
                             $this->save();
-                            return true; // nothing else to check.. return
+                            return true;
+                            // nothing else to check.. return
                         }
                     }
                 }
             }
-
             $excluded_subtotal = 0;
             $excluded_tax = 0;
-
             if (!$coupon) {
                 foreach ($this->basket['contents'] as $item) {
                     if ($item['total_price_each'] > 0) {
-                        $subtotal += ($item['total_price_each'] * $item['quantity']);
+                        $subtotal += $item['total_price_each'] * $item['quantity'];
                     }
                 }
-
                 if (isset($this->basket['shipping']) && $this->basket['shipping']['value'] > 0) {
                     $subtotal += $this->basket['shipping']['value'];
                 }
-            } else {
-                if ((is_array($excluded_products) || is_array($excluded_shipping))) {
-                    if (is_array($excluded_products)) {
-                        foreach ($excluded_products as $item) {
-                            if ($item['total_price_each'] > 0) {
-                                $excluded_subtotal += ($item['total_price_each'] * $item['quantity']);
-                            }
-                            if ($item['tax_each']['amount'] > 0) {
-                                $excluded_tax += $item['tax_each']['amount_raw'] ?? $item['tax_each']['amount'];
-                            }
+            } else if (is_array($excluded_products) || is_array($excluded_shipping)) {
+                if (is_array($excluded_products)) {
+                    foreach ($excluded_products as $item) {
+                        if ($item['total_price_each'] > 0) {
+                            $excluded_subtotal += $item['total_price_each'] * $item['quantity'];
+                        }
+                        if ($item['tax_each']['amount'] > 0) {
+                            $excluded_tax += $item['tax_each']['amount_raw'] ?? $item['tax_each']['amount'];
                         }
                     }
-                    if (is_array($excluded_shipping) && $excluded_shipping['value'] > 0) {
-                        $excluded_subtotal += $excluded_shipping['value'];
-                        if ($excluded_shipping['tax']['amount'] > 0) {
-                            $excluded_tax += $excluded_shipping['tax']['amount_raw'] ?? $excluded_shipping['tax']['amount'];
-                        }
-                    }
-                    $subtotal += $excluded_subtotal;
                 }
+                if (is_array($excluded_shipping) && $excluded_shipping['value'] > 0) {
+                    $excluded_subtotal += $excluded_shipping['value'];
+                    if ($excluded_shipping['tax']['amount'] > 0) {
+                        $excluded_tax += $excluded_shipping['tax']['amount_raw'] ?? $excluded_shipping['tax']['amount'];
+                    }
+                }
+                $subtotal += $excluded_subtotal;
             }
-
             // Full subtotal = remaining + discount (i.e. original before coupon)
             $full_subtotal = $subtotal + $this->_discount;
-
             // Weighted blended tax rate from totalTax (only needed for GC face-value conversion)
-            $ave_tax_rate = ($full_subtotal > 0) ? $GLOBALS['tax']->totalTax() / $full_subtotal : 0;
-
+            $ave_tax_rate = $full_subtotal > 0 ? $GLOBALS['tax']->total_tax() / $full_subtotal : 0;
             // GIFT CERTS SECOND!!
             foreach ($this->basket['coupons'] as $key => $data) {
                 if ($data['gc'] && $subtotal == 0) {
@@ -1483,15 +1303,16 @@ class Cart
                 } elseif ($data['gc'] && $subtotal > 0) {
                     // GC face value is tax-inclusive; convert to ex-tax equivalent for internal calculation
                     $inclusive_subtotal = $subtotal * (1 + $ave_tax_rate);
-                    $discount = ($inclusive_subtotal > 0) ? ($data['value'] * $subtotal / $inclusive_subtotal) : $data['value'];
-
+                    $discount = $inclusive_subtotal > 0 ? $data['value'] * $subtotal / $inclusive_subtotal : $data['value'];
                     if ($discount < $subtotal) {
                         $subtotal -= $discount;
                         $this->_discount += $discount;
-                        $this->basket['coupons'][$key]['value_display'] = sprintf('%.2F', $data['value']); // face value
+                        $this->basket['coupons'][$key]['value_display'] = sprintf('%.2F', $data['value']);
+                        // face value
                         $remainder = 0;
                     } elseif ($discount >= $subtotal) {
-                        $remainder = max(0, $data['value'] - $inclusive_subtotal); // remaining balance in face-value terms
+                        $remainder = max(0, $data['value'] - $inclusive_subtotal);
+                        // remaining balance in face-value terms
                         $this->basket['coupons'][$key]['value_display'] = sprintf('%.2F', $inclusive_subtotal);
                         $this->_discount += $subtotal;
                         $subtotal = 0;
@@ -1504,24 +1325,20 @@ class Cart
             if ($subtotal > 0 && $full_subtotal > 0) {
                 $discounted_remaining = $subtotal - $excluded_subtotal;
                 $discounted_original = $discounted_remaining + $this->_discount;
-                $discounted_ratio = ($discounted_original > 0) ? $discounted_remaining / $discounted_original : 0;
-                $adjusted_tax = ($GLOBALS['tax']->totalTax() - $excluded_tax) * $discounted_ratio + $excluded_tax;
-                $GLOBALS['tax']->adjustTax($adjusted_tax);
+                $discounted_ratio = $discounted_original > 0 ? $discounted_remaining / $discounted_original : 0;
+                $adjusted_tax = ($GLOBALS['tax']->total_tax() - $excluded_tax) * $discounted_ratio + $excluded_tax;
+                $GLOBALS['tax']->adjust_tax($adjusted_tax);
             } else {
-                $GLOBALS['tax']->adjustTax(0);
+                $GLOBALS['tax']->adjust_tax(0);
             }
-
             foreach ($GLOBALS['hooks']->load('class.cart.apply_discounts') as $hook) {
                 include $hook;
             }
-
             $this->save();
             return true;
         }
-
         return false;
     }
-
     /**
      * Check option choice
      *
@@ -1529,7 +1346,7 @@ class Cart
      * @param bool $require
      * return bool
      */
-    private function _checkOption($value, bool $require): bool
+    private function _check_option($value, bool $require): bool
     {
         if (!empty($value)) {
             return true;
@@ -1539,7 +1356,6 @@ class Cart
         }
         return true;
     }
-
     /**
      * Applies option modifiers (e.g. to price, weight, etc) to the product's data array.
      *
@@ -1555,39 +1371,38 @@ class Cart
      *        Elements modified:
      *        'price_display' => formatted string containing the price of this option, e.g. '-$1.00' or '$5.00'
      */
-    public static function updateProductDataWithOption(array &$product, array &$option): void
+    public static function update_product_data_with_option(array &$product, array &$option): void
     {
         if ($option['option_price'] > 0) {
             $option['price_display'] = '';
             $display_option_tax = $option['option_price'];
             if (!empty($product['remove_options_tax'])) {
-                $exTax = $GLOBALS['tax']->inclusiveTaxRemove($option['option_price'], $product['tax_type']);
+                $ex_tax = $GLOBALS['tax']->inclusive_tax_remove($option['option_price'], $product['tax_type']);
             }
             $price_value = $option['option_price'] * (isset($option['option_negative']) && $option['option_negative'] ? -1 : 1);
-            $display_option_tax *= (isset($option['option_negative']) && $option['option_negative'] ? -1 : 1);
+            $display_option_tax *= isset($option['option_negative']) && $option['option_negative'] ? -1 : 1;
             $product['price'] += $price_value;
             $product['option_line_price'] += $price_value;
             $product['option_price_ignoring_tax'] += $display_option_tax;
             if ($option['absolute_price'] && !empty($product['remove_options_tax'])) {
-                $product['price'] = $exTax;
-                $product['option_line_price'] = $exTax;
+                $product['price'] = $ex_tax;
+                $product['option_line_price'] = $ex_tax;
                 $product['absolute_price'] = true;
             } elseif ($option['absolute_price']) {
                 $product['price'] -= $product['price_to_pay'];
                 $product['option_line_price'] -= $product['price_to_pay'];
                 $product['absolute_price'] = true;
             } else {
-                $option['price_display'] = ($price_value < 0 ? '-' : '+');
+                $option['price_display'] = $price_value < 0 ? '-' : '+';
             }
-            $option['price_display'] .= $GLOBALS['tax']->priceFormat(abs($display_option_tax), true);
+            $option['price_display'] .= $GLOBALS['tax']->price_format(abs($display_option_tax), true);
         }
         $product['product_weight'] += $option['option_weight'] ?? 0;
         if ($option['option_weight'] > 0) {
             $product['digital'] = false;
         }
     }
-
-    public function verifyBasket()
+    public function verify_basket()
     {
         if (isset($_POST['quan'])) {
             return false;

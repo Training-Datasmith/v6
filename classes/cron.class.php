@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -14,48 +14,43 @@ declare(strict_types=1);
  */
 class Cron
 {
-    public function updateExchangeRates($currency = '', $echo = true)
+    public function update_exchange_rates($currency = '', $echo = true)
     {
         ## European Central Bank
         $output = [];
         if (($request = new Request('www.ecb.europa.eu', '/stats/eurofxref/eurofxref-daily.xml')) !== false) {
-            $request->setMethod('get');
-            $request->setSSL();
+            $request->set_method('get');
+            $request->set_ssl();
             if (defined('CC_IN_SETUP')) {
                 $request->skiplog(true);
             }
             $rates_xml = $request->send();
-
             if (!empty($rates_xml)) {
                 try {
-                    $xml  = new SimpleXMLElement($rates_xml);
+                    $xml = new Simple_Xml_Element($rates_xml);
                     foreach ($xml->Cube->Cube->Cube as $c) {
                         $rate = $c->attributes();
-                        $fx[(string)$rate['currency']] = (float)$rate['rate'];
+                        $fx[(string) $rate['currency']] = (float) $rate['rate'];
                     }
                     $fx['EUR'] = 1;
-                    $updated = strtotime((string)$xml->Cube->Cube->attributes()->time);
+                    $updated = strtotime((string) $xml->Cube->Cube->attributes()->time);
                     # Get the divisor
                     if (empty($currency)) {
                         $currency = $GLOBALS['config']->get('config', 'default_currency');
                     }
                     $currency = strtoupper((string) $currency);
                     if (!isset($fx[$currency])) {
-                        trigger_error('Default currency '.$currency.' is not available from the ECB exchange rate feed.', E_USER_WARNING);
-                        throw new Exception('Default currency '.$currency.' not in ECB feed');
+                        trigger_error('Default currency ' . $currency . ' is not available from the ECB exchange rate feed.', E_USER_WARNING);
+                        throw new Exception('Default currency ' . $currency . ' not in ECB feed');
                     }
-                    $base  = (1 / $fx[$currency]);
+                    $base = 1 / $fx[$currency];
                     foreach ($fx as $code => $rate) {
-                        $value = ($base / (1 / $rate));
-                        $output[] = [
-                            'currency' => $code,
-                            'rate' => $value,
-                            'time' => $updated,
-                        ];
+                        $value = $base / (1 / $rate);
+                        $output[] = ['currency' => $code, 'rate' => $value, 'time' => $updated];
                         $GLOBALS['db']->update('CubeCart_currency', ['value' => $value, 'updated' => $updated], ['code' => $code], true);
                     }
                 } catch (Exception $e) {
-                    trigger_error($e->getMessage());
+                    trigger_error($e->get_message());
                 }
             }
         }
@@ -65,90 +60,67 @@ class Cron
             return $output;
         }
     }
-    public function clearCache()
+    public function clear_cache()
     {
         return $GLOBALS['cache']->clear();
     }
-    public function runSnippets(): void
+    public function run_snippets(): void
     {
         foreach ($GLOBALS['hooks']->load('cron') as $hook) {
             include $hook;
         }
     }
-
     /**
      * Send cart abandonment notification emails
      */
-    public function sendAbandonmentEmails(): string
+    public function send_abandonment_emails(): string
     {
         if (!$GLOBALS['config']->get('config', 'abandoned_cart_enabled')) {
             return 'Disabled';
         }
-
-        $delay = (int)$GLOBALS['config']->get('config', 'abandoned_cart_delay');
+        $delay = (int) $GLOBALS['config']->get('config', 'abandoned_cart_delay');
         if ($delay < 3600) {
-            $delay = 86400; // Default 24 hours
+            $delay = 86400;
+            // Default 24 hours
         }
-
         $cutoff = time() - $delay;
-
-        $notify_cooldown = (int)$GLOBALS['config']->get('config', 'abandoned_cart_notify_cooldown');
+        $notify_cooldown = (int) $GLOBALS['config']->get('config', 'abandoned_cart_notify_cooldown');
         if ($notify_cooldown < 3600) {
             $notify_cooldown = 259200;
         }
-        $order_window = (int)$GLOBALS['config']->get('config', 'abandoned_cart_order_window');
+        $order_window = (int) $GLOBALS['config']->get('config', 'abandoned_cart_order_window');
         if ($order_window < 3600) {
             $order_window = 259200;
         }
         $notify_cutoff = time() - $notify_cooldown;
         $order_cutoff = time() - $order_window;
-
         // Find customers with saved carts who have abandoned
         $pfx = $GLOBALS['config']->get('config', 'dbprefix');
-        $query = "SELECT sc.customer_id, sc.basket, c.email, c.first_name, c.last_name, c.language
-            FROM `{$pfx}CubeCart_saved_cart` sc
-            JOIN `{$pfx}CubeCart_customer` c ON sc.customer_id = c.customer_id
-            WHERE c.abandon_optout = 0
-              AND c.status = 1
-              AND NOT EXISTS (
-                SELECT 1 FROM `{$pfx}CubeCart_sessions` s
-                WHERE s.customer_id = sc.customer_id AND s.session_last >= ".$cutoff."
-              )
-              AND NOT EXISTS (
-                SELECT 1 FROM `{$pfx}CubeCart_cart_abandonment` ca
-                WHERE ca.customer_id = sc.customer_id AND ca.notified_at > '".date('Y-m-d H:i:s', $notify_cutoff)."'
-              )
-              AND NOT EXISTS (
-                SELECT 1 FROM `{$pfx}CubeCart_order_summary` os
-                WHERE os.customer_id = sc.customer_id AND os.order_date > ".$order_cutoff.'
+        $query = "SELECT sc.customer_id, sc.basket, c.email, c.first_name, c.last_name, c.language\n            FROM `{$pfx}CubeCart_saved_cart` sc\n            JOIN `{$pfx}CubeCart_customer` c ON sc.customer_id = c.customer_id\n            WHERE c.abandon_optout = 0\n              AND c.status = 1\n              AND NOT EXISTS (\n                SELECT 1 FROM `{$pfx}CubeCart_sessions` s\n                WHERE s.customer_id = sc.customer_id AND s.session_last >= " . $cutoff . "\n              )\n              AND NOT EXISTS (\n                SELECT 1 FROM `{$pfx}CubeCart_cart_abandonment` ca\n                WHERE ca.customer_id = sc.customer_id AND ca.notified_at > '" . date('Y-m-d H:i:s', $notify_cutoff) . "'\n              )\n              AND NOT EXISTS (\n                SELECT 1 FROM `{$pfx}CubeCart_order_summary` os\n                WHERE os.customer_id = sc.customer_id AND os.order_date > " . $order_cutoff . '
                   AND os.status IN (2, 3)
               )';
-
         $results = $GLOBALS['db']->query($query);
         if (!$results) {
             return '0 emails sent';
         }
-
         $sent = 0;
-        $mailer = Mailer::getInstance();
+        $mailer = Mailer::get_instance();
         $store_name = $GLOBALS['config']->get('config', 'store_name');
-
         // Look up configured discount coupon for abandoned cart emails
         $coupon_code = '';
         $coupon_description = '';
-        $coupon_id = (int)$GLOBALS['config']->get('config', 'abandoned_cart_coupon');
+        $coupon_id = (int) $GLOBALS['config']->get('config', 'abandoned_cart_coupon');
         if ($coupon_id > 0) {
-            $coupon_row = $GLOBALS['db']->select('CubeCart_coupons', ['code', 'discount_percent', 'discount_price'], '`coupon_id` = '.$coupon_id." AND `status` = 1 AND `archived` = 0 AND (`expires` = '0000-00-00' OR `expires` >= CURDATE())", false, 1, false, false);
+            $coupon_row = $GLOBALS['db']->select('CubeCart_coupons', ['code', 'discount_percent', 'discount_price'], '`coupon_id` = ' . $coupon_id . " AND `status` = 1 AND `archived` = 0 AND (`expires` = '0000-00-00' OR `expires` >= CURDATE())", false, 1, false, false);
             if ($coupon_row) {
                 $coupon_code = $coupon_row[0]['code'];
                 if ($coupon_row[0]['discount_percent'] > 0) {
-                    $coupon_description = $coupon_row[0]['discount_percent'].'% off your order';
+                    $coupon_description = $coupon_row[0]['discount_percent'] . '% off your order';
                 } else {
-                    $coupon_description = Tax::getInstance()->priceFormat($coupon_row[0]['discount_price']).' off your order';
+                    $coupon_description = Tax::get_instance()->price_format($coupon_row[0]['discount_price']) . ' off your order';
                 }
             }
         }
-
         foreach ($results as $row) {
             $contents = @unserialize($row['basket']);
             if (empty($contents)) {
@@ -157,7 +129,6 @@ class Cron
             if (!is_array($contents)) {
                 continue;
             }
-
             // Build product list for email
             $products = [];
             $item_count = 0;
@@ -165,106 +136,69 @@ class Cron
                 if (!isset($item['id'])) {
                     continue;
                 }
-                $product = $GLOBALS['db']->select('CubeCart_inventory', ['name', 'price', 'sale_price', 'product_id'], ['product_id' => (int)$item['id']], false, 1, false, false);
+                $product = $GLOBALS['db']->select('CubeCart_inventory', ['name', 'price', 'sale_price', 'product_id'], ['product_id' => (int) $item['id']], false, 1, false, false);
                 if (!$product) {
                     continue;
                 }
                 $p = $product[0];
-                $price = ($p['sale_price'] > 0 && $p['sale_price'] < $p['price']) ? $p['sale_price'] : $p['price'];
-                $qty = isset($item['quantity']) ? (int)$item['quantity'] : 1;
+                $price = $p['sale_price'] > 0 && $p['sale_price'] < $p['price'] ? $p['sale_price'] : $p['price'];
+                $qty = isset($item['quantity']) ? (int) $item['quantity'] : 1;
                 $item_count += $qty;
-
                 // Get product options text
                 $options_text = '';
                 if (!empty($item['options']) && is_array($item['options'])) {
                     $opt_parts = [];
                     foreach ($item['options'] as $opt_val) {
-                        $opt_data = $GLOBALS['db']->select('CubeCart_option_value', ['value_name'], ['value_id' => (int)$opt_val], false, 1, false, false);
+                        $opt_data = $GLOBALS['db']->select('CubeCart_option_value', ['value_name'], ['value_id' => (int) $opt_val], false, 1, false, false);
                         if ($opt_data) {
                             $opt_parts[] = $opt_data[0]['value_name'];
                         }
                     }
                     $options_text = implode(', ', $opt_parts);
                 }
-
                 // Get product thumbnail
                 $image_url = '';
-                $img = $GLOBALS['db']->select('CubeCart_image_index', ['file_id'], ['product_id' => (int)$item['id']], ['main_img' => 'DESC'], 1, false, false);
+                $img = $GLOBALS['db']->select('CubeCart_image_index', ['file_id'], ['product_id' => (int) $item['id']], ['main_img' => 'DESC'], 1, false, false);
                 if ($img) {
-                    $file = $GLOBALS['db']->select('CubeCart_filemanager', ['filepath', 'filename'], ['file_id' => (int)$img[0]['file_id']], false, 1, false, false);
+                    $file = $GLOBALS['db']->select('CubeCart_filemanager', ['filepath', 'filename'], ['file_id' => (int) $img[0]['file_id']], false, 1, false, false);
                     if ($file) {
-                        $image_url = $GLOBALS['storeURL'].'/images/source/'.$file[0]['filepath'].$file[0]['filename'];
+                        $image_url = $GLOBALS['storeURL'] . '/images/source/' . $file[0]['filepath'] . $file[0]['filename'];
                     }
                 }
-
-                $products[] = [
-                    'name' => $p['name'],
-                    'price' => Tax::getInstance()->priceFormat($price),
-                    'raw_price' => $price,
-                    'quantity' => $qty,
-                    'options' => $options_text,
-                    'image' => $image_url,
-                ];
+                $products[] = ['name' => $p['name'], 'price' => Tax::get_instance()->price_format($price), 'raw_price' => $price, 'quantity' => $qty, 'options' => $options_text, 'image' => $image_url];
             }
-
             if (empty($products)) {
                 continue;
             }
-
             // Generate recovery token
             $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', time() + 604800); // 7 days
-
-            $abandon_data = [
-                'customer_id' => (int)$row['customer_id'],
-                'token' => $token,
-                'notified_at' => date('Y-m-d H:i:s'),
-                'expires_at' => $expires,
-            ];
+            $expires = date('Y-m-d H:i:s', time() + 604800);
+            // 7 days
+            $abandon_data = ['customer_id' => (int) $row['customer_id'], 'token' => $token, 'notified_at' => date('Y-m-d H:i:s'), 'expires_at' => $expires];
             if (!empty($coupon_code)) {
                 $abandon_data['coupon_code'] = $coupon_code;
             }
             $GLOBALS['db']->insert('CubeCart_cart_abandonment', $abandon_data);
-
-            $recovery_link = $GLOBALS['storeURL'].'/index.php?_a=recover&token='.$token;
-            $optout_link = $GLOBALS['storeURL'].'/index.php?_a=recover&action=optout&token='.$token;
-
-            $data = [
-                'first_name' => $row['first_name'],
-                'last_name' => $row['last_name'],
-                'store_name' => $store_name,
-                'item_count' => $item_count,
-                'recovery_link' => $recovery_link,
-                'optout_link' => $optout_link,
-                'coupon_code' => $coupon_code,
-                'coupon_description' => $coupon_description,
-            ];
-
+            $recovery_link = $GLOBALS['storeURL'] . '/index.php?_a=recover&token=' . $token;
+            $optout_link = $GLOBALS['storeURL'] . '/index.php?_a=recover&action=optout&token=' . $token;
+            $data = ['first_name' => $row['first_name'], 'last_name' => $row['last_name'], 'store_name' => $store_name, 'item_count' => $item_count, 'recovery_link' => $recovery_link, 'optout_link' => $optout_link, 'coupon_code' => $coupon_code, 'coupon_description' => $coupon_description];
             $GLOBALS['smarty']->assign('PRODUCTS', $products);
-
             $language = !empty($row['language']) ? $row['language'] : $GLOBALS['config']->get('config', 'default_language');
-            $email_content = $mailer->loadContent('cart.abandoned', $language, $data);
+            $email_content = $mailer->load_content('cart.abandoned', $language, $data);
             if ($email_content) {
-                if ($mailer->sendEmail($row['email'], $email_content)) {
+                if ($mailer->send_email($row['email'], $email_content)) {
                     $sent++;
                 }
             }
         }
-
-        return $sent.' email(s) sent';
+        return $sent . ' email(s) sent';
     }
-
     /**
      * Ensure default cron tasks exist in the database
      */
-    public static function ensureDefaults(): void
+    public static function ensure_defaults(): void
     {
-        $defaults = [
-            ['method' => 'updateExchangeRates', 'label' => 'Update Exchange Rates', 'enabled' => 1, 'frequency' => 86400],
-            ['method' => 'clearCache', 'label' => 'Clear Cache*', 'enabled' => 0, 'frequency' => 21600],
-            ['method' => 'runSnippets', 'label' => 'Run Code Snippets / Hooks**', 'enabled' => 0, 'frequency' => 3600],
-            ['method' => 'sendAbandonmentEmails', 'label' => 'Send Cart Abandonment Emails', 'enabled' => 0, 'frequency' => 3600],
-        ];
+        $defaults = [['method' => 'updateExchangeRates', 'label' => 'Update Exchange Rates', 'enabled' => 1, 'frequency' => 86400], ['method' => 'clearCache', 'label' => 'Clear Cache*', 'enabled' => 0, 'frequency' => 21600], ['method' => 'runSnippets', 'label' => 'Run Code Snippets / Hooks**', 'enabled' => 0, 'frequency' => 3600], ['method' => 'sendAbandonmentEmails', 'label' => 'Send Cart Abandonment Emails', 'enabled' => 0, 'frequency' => 3600]];
         foreach ($defaults as $task) {
             $exists = $GLOBALS['db']->select('CubeCart_cron_tasks', 'id', ['method' => $task['method']], false, false, false, false);
             if (!$exists) {
@@ -272,7 +206,6 @@ class Cron
             }
         }
     }
-
     /**
      * Unified cron entry point - runs all enabled tasks that are due
      */
@@ -291,20 +224,20 @@ class Cron
                     $due = true;
                 } else {
                     $elapsed = time() - strtotime((string) $task['last_run']);
-                    if ($elapsed >= (int)$task['frequency']) {
+                    if ($elapsed >= (int) $task['frequency']) {
                         $due = true;
                     }
                 }
                 if ($due) {
                     try {
                         if ($method === 'updateExchangeRates') {
-                            $ret = $this->$method('', false);
+                            $ret = $this->{$method}('', false);
                         } else {
-                            $ret = $this->$method();
+                            $ret = $this->{$method}();
                         }
                         $result = is_string($ret) ? $ret : 'OK';
                     } catch (Exception $e) {
-                        $result = substr($e->getMessage(), 0, 255);
+                        $result = substr($e->get_message(), 0, 255);
                     }
                     $GLOBALS['db']->update('CubeCart_cron_tasks', ['last_run' => date('Y-m-d H:i:s'), 'last_result' => $result], ['id' => $task['id']]);
                     $output[] = $task['label'] . ': ' . $result;

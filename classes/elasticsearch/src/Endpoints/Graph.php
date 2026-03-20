@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Graph extends AbstractEndpoint
+class Graph extends Abstract_Endpoint
 {
     /**
      * Explore extracted and summarized information about the documents and terms in an index.
@@ -54,15 +51,11 @@ class Graph extends AbstractEndpoint
      */
     public function explore(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_graph/explore';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['routing','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['routing', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

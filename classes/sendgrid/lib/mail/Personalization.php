@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the Personalization object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a Personalization object for
  * the /mail/send API call
@@ -29,7 +27,7 @@ class Personalization implements \JsonSerializable
     /** @var $bccs Bcc[] objects */
     private $bccs;
     /** @var $subject Subject object */
-    private ?\SendGrid\Mail\Subject $subject = null;
+    private ?\Send_Grid\Mail\Subject $subject = null;
     /** @var $headers Header[] array of header key values */
     private ?array $headers = null;
     /** @var $substitutions Substitution[] array of substitution key values, used for legacy templates */
@@ -40,87 +38,78 @@ class Personalization implements \JsonSerializable
     private ?array $custom_args = null;
     /** @var $send_at SendAt object */
     private $send_at;
-
     /**
      * Add a To object to a Personalization object
      *
      * @param To $email To object
      */
-    public function addTo($email): void
+    public function add_to($email): void
     {
         $this->tos[] = $email;
     }
-
     /**
      * Retrieve To object(s) from a Personalization object
      *
      * @return To[]
      */
-    public function getTos()
+    public function get_tos()
     {
         return $this->tos;
     }
-
     /**
      * Add a From object to a Personalization object
      *
      * @param From $email From object
      */
-    public function addFrom($email): void
+    public function add_from($email): void
     {
         $this->from = $email;
     }
-
     /**
      * Retrieve From object from a Personalization object
      *
      * @return From|null
      */
-    public function getFrom()
+    public function get_from()
     {
         return $this->from;
     }
-
     /**
      * Add a Cc object to a Personalization object
      *
      * @param Cc $email Cc object
      */
-    public function addCc($email): void
+    public function add_cc($email): void
     {
         $this->ccs[] = $email;
     }
-
     /**
      * Retrieve Cc object(s) from a Personalization object
      *
      * @return Cc[]
      */
-    public function getCcs()
+    public function get_ccs()
     {
         return $this->ccs;
     }
-
     /**
      * Add a Bcc object to a Personalization object
      *
      * @param Bcc $email Bcc object
      */
-    public function addBcc($email): void
+    public function add_bcc($email): void
     {
         $this->bccs[] = $email;
     }
-
     /**
      * Retrieve Bcc object(s) from a Personalization object
      *
      * @return Bcc[]
      */
-    public function getBccs()
+    public function get_bccs()
     {
         return $this->bccs;
     }
-
     /**
      * Add a subject object to a Personalization object
      *
@@ -128,48 +117,42 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSubject($subject): void
+    public function set_subject($subject): void
     {
-        if (!($subject instanceof Subject)) {
+        if (!$subject instanceof Subject) {
             Assert::string($subject, 'subject', '"$subject" must be an instance of SendGrid\Mail\Subject or a string');
-
             $subject = new Subject($subject);
         }
         $this->subject = $subject;
     }
-
     /**
      * Retrieve a Subject object from a Personalization object
      *
      * @return Subject|null
      */
-    public function getSubject()
+    public function get_subject()
     {
         return $this->subject;
     }
-
     /**
      * Add a Header object to a Personalization object
      *
      * @param Header $header Header object
      */
-    public function addHeader($header): void
+    public function add_header($header): void
     {
-        Assert::isInstanceOf($header, 'header', Header::class);
-
-        $this->headers[$header->getKey()] = $header->getValue();
+        Assert::is_instance_of($header, 'header', Header::class);
+        $this->headers[$header->get_key()] = $header->get_value();
     }
-
     /**
      * Retrieve header key/value pairs from a Personalization object
      *
      * @return array|null
      */
-    public function getHeaders()
+    public function get_headers()
     {
         return $this->headers;
     }
-
     /**
      * Add a Substitution object or key/value to a Personalization object
      *
@@ -179,21 +162,19 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function addDynamicTemplateData($data, $value = null): void
+    public function add_dynamic_template_data($data, $value = null): void
     {
-        $this->addSubstitution($data, $value);
+        $this->add_substitution($data, $value);
     }
-
     /**
      * Retrieve dynamic template data key/value pairs from a Personalization object
      *
      * @return array|null
      */
-    public function getDynamicTemplateData()
+    public function get_dynamic_template_data()
     {
-        return $this->getSubstitutions();
+        return $this->get_substitutions();
     }
-
     /**
      * Add a Substitution object or key/value to a Personalization object
      *
@@ -203,25 +184,23 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function addSubstitution($substitution, $value = null): void
+    public function add_substitution($substitution, $value = null): void
     {
-        if (!($substitution instanceof Substitution)) {
+        if (!$substitution instanceof Substitution) {
             $key = $substitution;
             $substitution = new Substitution($key, $value);
         }
-        $this->substitutions[$substitution->getKey()] = $substitution->getValue();
+        $this->substitutions[$substitution->get_key()] = $substitution->get_value();
     }
-
     /**
      * Retrieve substitution key/value pairs from a Personalization object
      *
      * @return array|null
      */
-    public function getSubstitutions()
+    public function get_substitutions()
     {
         return $this->substitutions;
     }
-
     /**
      * Add a CustomArg object to a Personalization object
      *
@@ -229,23 +208,20 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function addCustomArg($custom_arg): void
+    public function add_custom_arg($custom_arg): void
     {
-        Assert::isInstanceOf($custom_arg, 'custom_arg', CustomArg::class);
-
-        $this->custom_args[$custom_arg->getKey()] = (string)$custom_arg->getValue();
+        Assert::is_instance_of($custom_arg, 'custom_arg', Custom_Arg::class);
+        $this->custom_args[$custom_arg->get_key()] = (string) $custom_arg->get_value();
     }
-
     /**
      * Retrieve custom arg key/value pairs from a Personalization object
      *
      * @return array|null
      */
-    public function getCustomArgs()
+    public function get_custom_args()
     {
         return $this->custom_args;
     }
-
     /**
      * Add a SendAt object to a Personalization object
      *
@@ -253,23 +229,20 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSendAt($send_at): void
+    public function set_send_at($send_at): void
     {
-        Assert::isInstanceOf($send_at, 'send_at', SendAt::class);
-
+        Assert::is_instance_of($send_at, 'send_at', Send_At::class);
         $this->send_at = $send_at;
     }
-
     /**
      * Retrieve a SendAt object from a Personalization object
      *
      * @return SendAt|null
      */
-    public function getSendAt()
+    public function get_send_at()
     {
         return $this->send_at;
     }
-
     /**
      * Specify if this personalization is using dynamic templates
      *
@@ -277,53 +250,35 @@ class Personalization implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setHasDynamicTemplate($has_dynamic_template): void
+    public function set_has_dynamic_template($has_dynamic_template): void
     {
         Assert::boolean($has_dynamic_template, 'has_dynamic_template');
-
         $this->has_dynamic_template = $has_dynamic_template;
     }
-
     /**
      * Determine if this Personalization object is using dynamic templates
      *
      * @return bool
      */
-    public function getHasDynamicTemplate()
+    public function get_has_dynamic_template()
     {
         return $this->has_dynamic_template;
     }
-
     /**
      * Return an array representing a Personalization object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        if ($this->getHasDynamicTemplate()) {
-            $dynamic_substitutions = $this->getSubstitutions();
+        if ($this->get_has_dynamic_template()) {
+            $dynamic_substitutions = $this->get_substitutions();
             $substitutions = null;
         } else {
-            $substitutions = $this->getSubstitutions();
+            $substitutions = $this->get_substitutions();
             $dynamic_substitutions = null;
         }
-
-        return array_filter(
-            [
-                'to' => $this->getTos(),
-                'from' => $this->getFrom(),
-                'cc' => $this->getCcs(),
-                'bcc' => $this->getBccs(),
-                'subject' => $this->getSubject(),
-                'headers' => $this->getHeaders(),
-                'substitutions' => $substitutions,
-                'dynamic_template_data' => $dynamic_substitutions,
-                'custom_args' => $this->getCustomArgs(),
-                'send_at' => $this->getSendAt(),
-            ],
-            static fn (\SendGrid\Mail\From|\SendGrid\Mail\Subject|\SendGrid\Mail\SendAt|array|null $value) => $value !== null
-        ) ?: null;
+        return array_filter(['to' => $this->get_tos(), 'from' => $this->get_from(), 'cc' => $this->get_ccs(), 'bcc' => $this->get_bccs(), 'subject' => $this->get_subject(), 'headers' => $this->get_headers(), 'substitutions' => $substitutions, 'dynamic_template_data' => $dynamic_substitutions, 'custom_args' => $this->get_custom_args(), 'send_at' => $this->get_send_at()], static fn(\Send_Grid\Mail\From|\Send_Grid\Mail\Subject|\Send_Grid\Mail\Send_At|array|null $value) => $value !== null) ?: null;
     }
 }

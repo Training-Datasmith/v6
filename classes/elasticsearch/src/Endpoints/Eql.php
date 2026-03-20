@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Eql extends AbstractEndpoint
+class Eql extends Abstract_Endpoint
 {
     /**
      * Deletes an async EQL search by ID. If the search is still running, the search request will be cancelled. Otherwise, the saved search results are deleted.
@@ -51,17 +48,13 @@ class Eql extends AbstractEndpoint
      */
     public function delete(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_eql/search/' . $this->encode($params['id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns async results from previously executed Event Query Language (EQL) search
      *
@@ -87,17 +80,13 @@ class Eql extends AbstractEndpoint
      */
     public function get(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_eql/search/' . $this->encode($params['id']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_completion_timeout','keep_alive','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_completion_timeout', 'keep_alive', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns the status of a previously submitted async or stored Event Query Language (EQL) search
      *
@@ -119,19 +108,15 @@ class Eql extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getStatus(array $params = [])
+    public function get_status(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_eql/search/status/' . $this->encode($params['id']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns results matching a query expressed in Event Query Language (EQL)
      *
@@ -159,15 +144,11 @@ class Eql extends AbstractEndpoint
      */
     public function search(array $params = [])
     {
-        $this->checkRequiredParameters(['index','body'], $params);
+        $this->check_required_parameters(['index', 'body'], $params);
         $url = '/' . $this->encode($params['index']) . '/_eql/search';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_completion_timeout','keep_on_completion','keep_alive','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_completion_timeout', 'keep_on_completion', 'keep_alive', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

@@ -11,17 +11,15 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Exception;
 
-use Elastic\Elasticsearch\Traits\ResponseTrait;
+use Elastic\Elasticsearch\Traits\Response_Trait;
 use Exception;
-
 /**
  * HTTP client error with 4xx status code
  */
-class ClientResponseException extends Exception implements ElasticsearchException
+class Client_Response_Exception extends Exception implements Elasticsearch_Exception
 {
-    use ResponseTrait;
+    use Response_Trait;
 }

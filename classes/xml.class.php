@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 /**
  * XML controller
  *
@@ -20,81 +19,75 @@ declare(strict_types=1);
  * @author Al Brookbanks
  * @since 5.0.0
  */
-class XML extends XMLWriter
+class XML extends Xml_Writer
 {
     ##############################################
-
     public function __construct($xml_header = true, $indent_string = ' ')
     {
-        $this->openMemory();
-        $this->setIndent(true);
-        $this->setIndentString($indent_string);
+        $this->open_memory();
+        $this->set_indent(true);
+        $this->set_indent_string($indent_string);
         if ($xml_header) {
-            $this->startDocument('1.0', 'UTF-8');
+            $this->start_document('1.0', 'UTF-8');
         }
     }
-
     //=====[ Public ]=======================================
     /**
      * Add an array to the element
      *
      * @param array $array
      */
-    public function addArray($array): bool
+    public function add_array($array): bool
     {
         if (is_array($array)) {
             foreach ($array as $index => $data) {
                 if (is_array($data)) {
                     if (!isset($data['value'])) {
-                        $this->startElement($index);
-                        $this->addArray($data);
-                        $this->endElement();
+                        $this->start_element($index);
+                        $this->add_array($data);
+                        $this->end_element();
                     } else {
-                        $this->setElement($index, $data['value'], $data['attributes'], $data['cdata']);
+                        $this->set_element($index, $data['value'], $data['attributes'], $data['cdata']);
                     }
                 } else {
-                    $this->setElement($index, false, $data);
+                    $this->set_element($index, false, $data);
                 }
             }
             return true;
         }
         return false;
     }
-
     /**
      * End element
      * @param bool $full_end
      */
-    public function endElement($full_end = true): void
+    public function end_element($full_end = true): void
     {
         if ($full_end) {
-            parent::fullEndElement();
+            parent::full_end_element();
         } else {
-            parent::endElement();
+            parent::end_element();
         }
     }
-
     /**
      * Get current document
      *
      * @param bool $flush
      */
-    public function getDocument($flush = true): string
+    public function get_document($flush = true): string
     {
-        $this->endDocument();
-        return $this->outputMemory($flush);
+        $this->end_document();
+        return $this->output_memory($flush);
     }
-
     /**
      * Display XML
      */
     public function output(): void
     {
-        Debug::getInstance()->supress();
+        Debug::get_instance()->supress();
         header('Content-Type: text/xml');
-        echo $this->getDocument();
+        echo $this->get_document();
     }
-
     /**
      * Set an XML element
      *
@@ -103,29 +96,28 @@ class XML extends XMLWriter
      * @param string $attributes
      * @param mixed $cdata
      */
-    public function setElement($name, $value = null, $attributes = false, $cdata = true): void
+    public function set_element($name, $value = null, $attributes = false, $cdata = true): void
     {
-        $this->startElement($name, $attributes);
+        $this->start_element($name, $attributes);
         if ($cdata) {
-            $this->writeCData($value);
+            $this->write_c_data($value);
         } else {
             $this->text($value);
         }
-        $this->endElement(true);
+        $this->end_element(true);
     }
-
     /**
      * Start a new element
      *
      * @param string $name
      * @param string $attributes
      */
-    public function startElement($name, $attributes = false): void
+    public function start_element($name, $attributes = false): void
     {
-        parent::startElement($name);
+        parent::start_element($name);
         if (is_array($attributes)) {
             foreach ($attributes as $attribute => $value) {
-                parent::writeAttribute($attribute, $value);
+                parent::write_attribute($attribute, $value);
             }
         }
     }

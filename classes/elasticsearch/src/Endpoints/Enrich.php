@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Enrich extends AbstractEndpoint
+class Enrich extends Abstract_Endpoint
 {
     /**
      * Deletes an existing enrich policy and its enrich index.
@@ -49,19 +46,15 @@ class Enrich extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deletePolicy(array $params = [])
+    public function delete_policy(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_enrich/policy/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates the enrich index for an existing enrich policy.
      *
@@ -84,19 +77,15 @@ class Enrich extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function executePolicy(array $params = [])
+    public function execute_policy(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_enrich/policy/' . $this->encode($params['name']) . '/_execute';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_completion','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_completion', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Gets information about an enrich policy.
      *
@@ -117,7 +106,7 @@ class Enrich extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getPolicy(array $params = [])
+    public function get_policy(array $params = [])
     {
         if (isset($params['name'])) {
             $url = '/_enrich/policy/' . $this->encode($params['name']);
@@ -126,13 +115,10 @@ class Enrich extends AbstractEndpoint
             $url = '/_enrich/policy';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a new enrich policy.
      *
@@ -155,20 +141,15 @@ class Enrich extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putPolicy(array $params = [])
+    public function put_policy(array $params = [])
     {
-        $this->checkRequiredParameters(['name','body'], $params);
+        $this->check_required_parameters(['name', 'body'], $params);
         $url = '/_enrich/policy/' . $this->encode($params['name']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Gets enrich coordinator statistics and information about enrich policies that are currently executing.
      *
@@ -192,11 +173,8 @@ class Enrich extends AbstractEndpoint
     {
         $url = '/_enrich/_stats';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

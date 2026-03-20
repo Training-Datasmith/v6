@@ -1,26 +1,23 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the BccSettings object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a BccSettings object for the /mail/send API call
  *
  * @package SendGrid\Mail
  */
-class BccSettings implements \JsonSerializable
+class Bcc_Settings implements \JsonSerializable
 {
     /** @var $enable bool Indicates if this setting is enabled */
     private $enable;
     /** @var $email string The email address that you would like to receive the BCC */
     private $email;
-
     /**
      * Optional constructor
      *
@@ -32,13 +29,12 @@ class BccSettings implements \JsonSerializable
     public function __construct($enable = null, $email = null)
     {
         if (isset($enable)) {
-            $this->setEnable($enable);
+            $this->set_enable($enable);
         }
         if (isset($email)) {
-            $this->setEmail($email);
+            $this->set_email($email);
         }
     }
-
     /**
      * Update the enable setting on a BccSettings object
      *
@@ -46,23 +42,20 @@ class BccSettings implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable): void
+    public function set_enable($enable): void
     {
         Assert::boolean($enable, 'enable');
-
         $this->enable = $enable;
     }
-
     /**
      * Retrieve the enable setting on a BccSettings object
      *
      * @return bool
      */
-    public function getEnable()
+    public function get_enable()
     {
         return $this->enable;
     }
-
     /**
      * Add the email setting on a BccSettings object
      *
@@ -71,37 +64,28 @@ class BccSettings implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEmail($email): void
+    public function set_email($email): void
     {
         Assert::email($email, 'email');
-
         $this->email = $email;
     }
-
     /**
      * Retrieve the email setting on a BccSettings object
      *
      * @return string
      */
-    public function getEmail()
+    public function get_email()
     {
         return $this->email;
     }
-
     /**
      * Return an array representing a BccSettings object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'enable' => $this->getEnable(),
-                'email' => $this->getEmail(),
-            ],
-            static fn (bool|string $value) => $value !== null
-        ) ?: null;
+        return array_filter(['enable' => $this->get_enable(), 'email' => $this->get_email()], static fn(bool|string $value) => $value !== null) ?: null;
     }
 }

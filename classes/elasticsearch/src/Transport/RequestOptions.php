@@ -11,27 +11,23 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Transport;
 
-final class RequestOptions
+final class Request_Options
 {
     /**
      * Enable or sidable the SSL verification
      */
     public const SSL_VERIFY = 'ssl_verify';
-
     /**
      * SSL certificate
      */
     public const SSL_CERT = 'ssl_cert';
-
     /**
      * SSL key
      */
     public const SSL_KEY = 'ssl_key';
-
     /**
      * SSL Certificate Authority (CA) bundle
      */

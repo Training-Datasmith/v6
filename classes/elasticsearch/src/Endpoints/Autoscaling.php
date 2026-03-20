@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Autoscaling extends AbstractEndpoint
+class Autoscaling extends Abstract_Endpoint
 {
     /**
      * Deletes an autoscaling policy. Designed for indirect use by ECE/ESS and ECK. Direct use is not supported.
@@ -49,19 +46,15 @@ class Autoscaling extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteAutoscalingPolicy(array $params = [])
+    public function delete_autoscaling_policy(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_autoscaling/policy/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Gets the current autoscaling capacity based on the configured autoscaling policy. Designed for indirect use by ECE/ESS and ECK. Direct use is not supported.
      *
@@ -81,18 +74,14 @@ class Autoscaling extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getAutoscalingCapacity(array $params = [])
+    public function get_autoscaling_capacity(array $params = [])
     {
         $url = '/_autoscaling/capacity';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves an autoscaling policy. Designed for indirect use by ECE/ESS and ECK. Direct use is not supported.
      *
@@ -114,19 +103,15 @@ class Autoscaling extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getAutoscalingPolicy(array $params = [])
+    public function get_autoscaling_policy(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_autoscaling/policy/' . $this->encode($params['name']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a new autoscaling policy. Designed for indirect use by ECE/ESS and ECK. Direct use is not supported.
      *
@@ -149,17 +134,13 @@ class Autoscaling extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putAutoscalingPolicy(array $params = [])
+    public function put_autoscaling_policy(array $params = [])
     {
-        $this->checkRequiredParameters(['name','body'], $params);
+        $this->check_required_parameters(['name', 'body'], $params);
         $url = '/_autoscaling/policy/' . $this->encode($params['name']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

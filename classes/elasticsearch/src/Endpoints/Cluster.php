@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Cluster extends AbstractEndpoint
+class Cluster extends Abstract_Endpoint
 {
     /**
      * Provides explanations for shard allocations in the cluster.
@@ -50,19 +47,14 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function allocationExplain(array $params = [])
+    public function allocation_explain(array $params = [])
     {
         $url = '/_cluster/allocation/explain';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['include_yes_decisions','include_disk_info','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['include_yes_decisions', 'include_disk_info', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes a component template
      *
@@ -86,19 +78,15 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteComponentTemplate(array $params = [])
+    public function delete_component_template(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_component_template/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Clears cluster voting config exclusions.
      *
@@ -120,18 +108,14 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteVotingConfigExclusions(array $params = [])
+    public function delete_voting_config_exclusions(array $params = [])
     {
         $url = '/_cluster/voting_config_exclusions';
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_removal','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_removal', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about whether a particular component template exist
      *
@@ -155,19 +139,15 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function existsComponentTemplate(array $params = [])
+    public function exists_component_template(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_component_template/' . $this->encode($params['name']);
         $method = 'HEAD';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns one or more component templates
      *
@@ -190,7 +170,7 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getComponentTemplate(array $params = [])
+    public function get_component_template(array $params = [])
     {
         if (isset($params['name'])) {
             $url = '/_component_template/' . $this->encode($params['name']);
@@ -199,13 +179,10 @@ class Cluster extends AbstractEndpoint
             $url = '/_component_template';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['master_timeout','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns cluster settings.
      *
@@ -229,18 +206,14 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getSettings(array $params = [])
+    public function get_settings(array $params = [])
     {
         $url = '/_cluster/settings';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['flat_settings','master_timeout','timeout','include_defaults','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['flat_settings', 'master_timeout', 'timeout', 'include_defaults', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns basic information about the health of the cluster.
      *
@@ -281,13 +254,10 @@ class Cluster extends AbstractEndpoint
             $url = '/_cluster/health';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['expand_wildcards','level','local','master_timeout','timeout','wait_for_active_shards','wait_for_nodes','wait_for_events','wait_for_no_relocating_shards','wait_for_no_initializing_shards','wait_for_status','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['expand_wildcards', 'level', 'local', 'master_timeout', 'timeout', 'wait_for_active_shards', 'wait_for_nodes', 'wait_for_events', 'wait_for_no_relocating_shards', 'wait_for_no_initializing_shards', 'wait_for_status', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns a list of any cluster-level changes (e.g. create index, update mapping,
      * allocate or fail shard) which have not yet been executed.
@@ -310,18 +280,14 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function pendingTasks(array $params = [])
+    public function pending_tasks(array $params = [])
     {
         $url = '/_cluster/pending_tasks';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['local','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['local', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates the cluster voting config exclusions by node ids or node names.
      *
@@ -345,18 +311,14 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function postVotingConfigExclusions(array $params = [])
+    public function post_voting_config_exclusions(array $params = [])
     {
         $url = '/_cluster/voting_config_exclusions';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['node_ids','node_names','timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['node_ids', 'node_names', 'timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates or updates a component template
      *
@@ -382,20 +344,15 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putComponentTemplate(array $params = [])
+    public function put_component_template(array $params = [])
     {
-        $this->checkRequiredParameters(['name','body'], $params);
+        $this->check_required_parameters(['name', 'body'], $params);
         $url = '/_component_template/' . $this->encode($params['name']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['create','timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['create', 'timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates the cluster settings.
      *
@@ -419,20 +376,15 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putSettings(array $params = [])
+    public function put_settings(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_cluster/settings';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['flat_settings','master_timeout','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['flat_settings', 'master_timeout', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns the information about configured remote clusters.
      *
@@ -452,18 +404,14 @@ class Cluster extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function remoteInfo(array $params = [])
+    public function remote_info(array $params = [])
     {
         $url = '/_remote/info';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows to manually change the allocation of individual shards in the cluster.
      *
@@ -494,15 +442,10 @@ class Cluster extends AbstractEndpoint
     {
         $url = '/_cluster/reroute';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['dry_run','explain','retry_failed','metric','master_timeout','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['dry_run', 'explain', 'retry_failed', 'metric', 'master_timeout', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns a comprehensive information about the state of the cluster.
      *
@@ -544,13 +487,10 @@ class Cluster extends AbstractEndpoint
             $url = '/_cluster/state';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['local','master_timeout','flat_settings','wait_for_metadata_version','wait_for_timeout','ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['local', 'master_timeout', 'flat_settings', 'wait_for_metadata_version', 'wait_for_timeout', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns high-level overview of cluster statistics.
      *
@@ -582,10 +522,8 @@ class Cluster extends AbstractEndpoint
             $url = '/_cluster/stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['flat_settings','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['flat_settings', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

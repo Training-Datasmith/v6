@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 /**
  * Archive controller
  *
@@ -42,19 +41,16 @@ class Archive
      * @var class
      */
     private object $_zip;
-
     ##############################################
-
     public function __construct($archive, $create = false)
     {
-        $this->_enabled = (extension_loaded('zip')) ? true : false;
+        $this->_enabled = extension_loaded('zip') ? true : false;
         if ($this->_enabled && !empty($archive)) {
-            $this->_zip = new ZipArchive();
+            $this->_zip = new Zip_Archive();
             $this->open($archive, $create);
             return;
         }
     }
-
     public function __destruct()
     {
         // Automatically close the zip file, writing all changes (if necessary)
@@ -62,9 +58,7 @@ class Archive
             $this->_close();
         }
     }
-
     //=====[ Public ]=======================================
-
     /**
      * Add file to the archive
      *
@@ -77,18 +71,17 @@ class Archive
         if ($this->_enabled) {
             if (is_array($files)) {
                 foreach ($files as $file) {
-                    $this->_addFile((string)$file);
+                    $this->_add_file((string) $file);
                 }
             } else {
                 if (!empty($string) && is_string($string)) {
-                    return $this->_zip->addFromString($files, $string);
+                    return $this->_zip->add_from_string($files, $string);
                 }
-                return $this->_addFile($files);
+                return $this->_add_file($files);
             }
         }
         return false;
     }
-
     /**
      * Get archive contents
      *
@@ -97,18 +90,17 @@ class Archive
     public function contents()
     {
         if ($this->_enabled) {
-            for ($i = 0; $i < $this->_zip->numFiles; ++$i) {
-                $this->_contents[$i] = $this->_zip->statIndex($i);
-                $comment = $this->_zip->getCommentIndex($i);
+            for ($i = 0; $i < $this->_zip->num_files; ++$i) {
+                $this->_contents[$i] = $this->_zip->stat_index($i);
+                $comment = $this->_zip->get_comment_index($i);
                 if ($comment) {
                     $this->_contents[$i]['comment'] = $comment;
                 }
             }
-            return (!is_null($this->_contents)) ? $this->_contents : false;
+            return !is_null($this->_contents) ? $this->_contents : false;
         }
         return false;
     }
-
     /**
      * Delete file from archive
      *
@@ -118,15 +110,13 @@ class Archive
     public function delete($filename)
     {
         if ($this->_enabled && !empty($filename)) {
-            $index = $this->_zip->locateName($filename, ZIPARCHIVE::FL_NODIR);
+            $index = $this->_zip->locate_name($filename, ZIPARCHIVE::FL_NODIR);
             if ($index) {
-                return $this->deleteIndex((int)$index);
+                return $this->delete_index((int) $index);
             }
         }
-
         return false;
     }
-
     //=====[ Private ]=======================================
     /**
      * Get error
@@ -169,17 +159,15 @@ class Archive
                     $message = 'ZIP file seek error';
                     break;
                 default:
-                    $message = 'Unknown error: '.$this->_archive;
+                    $message = 'Unknown error: ' . $this->_archive;
             }
         } else {
             $message = 'ZIP library was not detected in your PHP installation';
         }
         trigger_error($message, E_USER_WARNING);
         $this->_enabled = false;
-
         return $message;
     }
-
     /**
      * Extract archive
      *
@@ -189,11 +177,10 @@ class Archive
     public function extract($target)
     {
         if ($this->_enabled && !empty($target)) {
-            return $this->_zip->extractTo($target);
+            return $this->_zip->extract_to($target);
         }
         return false;
     }
-
     /**
      * Open archive
      *
@@ -209,7 +196,6 @@ class Archive
             } elseif (file_exists($archive)) {
                 $this->_archive = $this->_zip->open($archive);
             }
-
             if ($this->_archive === true) {
                 $this->contents();
                 return true;
@@ -217,10 +203,8 @@ class Archive
             $this->error();
             return false;
         }
-
         return false;
     }
-
     /**
      * Read archive
      *
@@ -230,14 +214,13 @@ class Archive
     public function read($filename = false)
     {
         if ($this->_enabled && !empty($filename)) {
-            $index = $this->_zip->locateName($filename, ZIPARCHIVE::FL_NODIR);
+            $index = $this->_zip->locate_name($filename, ZIPARCHIVE::FL_NODIR);
             if ($index) {
-                return $this->_zip->getFromIndex((int)$index);
+                return $this->_zip->get_from_index((int) $index);
             }
         }
         return false;
     }
-
     /**
      * Rename archive
      *
@@ -251,7 +234,6 @@ class Archive
         }
         return false;
     }
-
     /**
      * Revert archive
      *
@@ -259,9 +241,8 @@ class Archive
      */
     public function revert()
     {
-        return ($this->_enabled) ? $this->_zip->unchangeAll() : false;
+        return $this->_enabled ? $this->_zip->unchange_all() : false;
     }
-
     /**
      * Adds file to archive.
      *
@@ -269,7 +250,7 @@ class Archive
      *
      * @return bool
      */
-    private function _addFile($filename)
+    private function _add_file($filename)
     {
         if (!$this->_enabled) {
             return false;
@@ -278,11 +259,10 @@ class Archive
             return false;
         }
         if (is_dir($filename)) {
-            return $this->_zip->addEmptyDir($filename);
+            return $this->_zip->add_empty_dir($filename);
         }
-        return $this->_zip->addFile($filename);
+        return $this->_zip->add_file($filename);
     }
-
     /**
      * Close archive
      *
@@ -290,6 +270,6 @@ class Archive
      */
     private function _close()
     {
-        return ($this->_enabled) ? $this->_zip->close() : false;
+        return $this->_enabled ? $this->_zip->close() : false;
     }
 }

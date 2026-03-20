@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Templateparser Parse Tree
  * These are classes to build parse tree in the template parser
@@ -10,7 +10,6 @@ declare(strict_types=1);
  * @author     Thue Kristensen
  * @author     Uwe Tews
  */
-
 /**
  * A complete smarty tag.
  *
@@ -18,7 +17,7 @@ declare(strict_types=1);
  * @subpackage Compiler
  * @ignore
  */
-class Smarty_Internal_ParseTree_Tag extends Smarty_Internal_ParseTree
+class Smarty_internal_parse_Tree_tag extends Smarty_internal_parse_Tree
 {
     /**
      * Saved block nesting level
@@ -26,7 +25,6 @@ class Smarty_Internal_ParseTree_Tag extends Smarty_Internal_ParseTree
      * @var int
      */
     public $saved_block_nesting;
-
     /**
      * Create parse tree buffer for Smarty tag
      *
@@ -38,7 +36,6 @@ class Smarty_Internal_ParseTree_Tag extends Smarty_Internal_ParseTree
         $this->data = $data;
         $this->saved_block_nesting = $parser->block_nesting_level;
     }
-
     /**
      * Return buffer content
      *
@@ -50,7 +47,6 @@ class Smarty_Internal_ParseTree_Tag extends Smarty_Internal_ParseTree
     {
         return $this->data;
     }
-
     /**
      * Return complied code that loads the evaluated output of buffer content into a temporary variable
      *
@@ -60,9 +56,9 @@ class Smarty_Internal_ParseTree_Tag extends Smarty_Internal_ParseTree
      */
     public function assign_to_var(Smarty_Internal_Templateparser $parser)
     {
-        $var = $parser->compiler->getNewPrefixVariable();
-        $tmp = $parser->compiler->appendCode('<?php ob_start();?>', $this->data);
-        $tmp = $parser->compiler->appendCode($tmp, "<?php {$var}=ob_get_clean();?>");
+        $var = $parser->compiler->get_new_prefix_variable();
+        $tmp = $parser->compiler->append_code('<?php ob_start();?>', $this->data);
+        $tmp = $parser->compiler->append_code($tmp, "<?php {$var}=ob_get_clean();?>");
         $parser->compiler->prefix_code[] = sprintf('%s', $tmp);
         return $var;
     }

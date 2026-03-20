@@ -11,85 +11,70 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Traits;
 
-use Psr\Http\Message\StreamInterface;
-
+use Psr\Http\Message\Stream_Interface;
 /**
  * Proxy class for Psr\Http\Message\ResponseInterface using
  * $this->response as source object
  */
-trait MessageResponseTrait
+trait Message_Response_Trait
 {
-    public function getProtocolVersion()
+    public function get_protocol_version()
     {
-        return $this->response->getProtocolVersion();
+        return $this->response->get_protocol_version();
     }
-
-    public function withProtocolVersion($version)
+    public function with_protocol_version($version)
     {
-        return $this->response->withProtocolVersion($version);
+        return $this->response->with_protocol_version($version);
     }
-
-    public function getHeaders()
+    public function get_headers()
     {
-        return $this->response->getHeaders();
+        return $this->response->get_headers();
     }
-
-    public function hasHeader($name)
+    public function has_header($name)
     {
-        return $this->response->hasHeader($name);
+        return $this->response->has_header($name);
     }
-
-    public function getHeader($name)
+    public function get_header($name)
     {
-        return $this->response->getHeader($name);
+        return $this->response->get_header($name);
     }
-
-    public function getHeaderLine($name)
+    public function get_header_line($name)
     {
-        return $this->response->getHeaderLine($name);
+        return $this->response->get_header_line($name);
     }
-
-    public function withHeader($name, $value)
+    public function with_header($name, $value)
     {
-        return $this->response->withHeader($name, $value);
+        return $this->response->with_header($name, $value);
     }
-
-    public function withAddedHeader($name, $value)
+    public function with_added_header($name, $value)
     {
-        return $this->response->withAddedHeader($name, $value);
+        return $this->response->with_added_header($name, $value);
     }
-
-    public function withoutHeader($name)
+    public function without_header($name)
     {
-        return $this->response->withoutHeader($name);
+        return $this->response->without_header($name);
     }
-
-    public function getBody()
+    public function get_body()
     {
-        return $this->response->getBody();
+        return $this->response->get_body();
     }
-
-    public function withBody(StreamInterface $body)
+    public function with_body(Stream_Interface $body)
     {
-        return $this->response->withBody($body);
+        return $this->response->with_body($body);
     }
-
-    public function getStatusCode()
+    public function get_status_code()
     {
-        return $this->response->getStatusCode();
+        return $this->response->get_status_code();
     }
-
-    public function withStatus($code, $reasonPhrase = '')
+    public function with_status($code, $reason_phrase = '')
     {
-        return $this->response->withStatus($code, $reasonPhrase);
+        return $this->response->with_status($code, $reason_phrase);
     }
-
-    public function getReasonPhrase()
+    public function get_reason_phrase()
     {
-        return $this->response->getReasonPhrase();
+        return $this->response->get_reason_phrase();
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,57 +12,47 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 class GD
 {
     private bool $_abort = false;
-    private readonly string $_gdTargetDir;
-    private readonly bool $_gdWebpSupport;
-
-    private bool|array|null $_gdImageData = null;
-    private array|bool $_gdImageExif = [];
-    private ?int $_gdImageType = null;
-
-    private bool|\GdImage|null $_gdImageSource = null;
-    private bool|\GdImage|null $_gdImageOutput = null;
-
-    private $_gdImageArray = [];
-
+    private readonly string $_gd_target_dir;
+    private readonly bool $_gd_webp_support;
+    private bool|array|null $_gd_image_data = null;
+    private array|bool $_gd_image_exif = [];
+    private ?int $_gd_image_type = null;
+    private bool|\Gd_Image|null $_gd_image_source = null;
+    private bool|\Gd_Image|null $_gd_image_output = null;
+    private $_gd_image_array = [];
     ##############################################
-
-    public function __construct(string $targetDir, private $_gdImageMax = false, private $_gdJpegQuality = 80)
+    public function __construct(string $target_dir, private $_gd_image_max = false, private $_gd_jpeg_quality = 80)
     {
-        if (!str_ends_with($targetDir, '/')) {
-            $targetDir .= '/';
+        if (!str_ends_with($target_dir, '/')) {
+            $target_dir .= '/';
         }
-        $this->_gdTargetDir  = $targetDir;
-        $this->_gdWebpSupport = function_exists('imagecreatefromwebp');
+        $this->_gd_target_dir = $target_dir;
+        $this->_gd_webp_support = function_exists('imagecreatefromwebp');
     }
-
     //=====[ Public ]=======================================
-
     /**
      * Set GD params false
      */
     public function __destruct()
     {
-        $this->gdClear();
+        $this->gd_clear();
     }
-
-    public function gdClear(): void
+    public function gd_clear(): void
     {
-        if ($this->_gdImageOutput) {
-            imagedestroy($this->_gdImageOutput);
+        if ($this->_gd_image_output) {
+            imagedestroy($this->_gd_image_output);
         }
-        if ($this->_gdImageSource) {
-            imagedestroy($this->_gdImageSource);
+        if ($this->_gd_image_source) {
+            imagedestroy($this->_gd_image_source);
         }
-        $this->_gdImageOutput = false;
-        $this->_gdImageSource = false;
-        $this->_gdImageData  = false;
-        $this->_gdImageExif = [];
+        $this->_gd_image_output = false;
+        $this->_gd_image_source = false;
+        $this->_gd_image_data = false;
+        $this->_gd_image_exif = [];
     }
-
     /**
      * Crop image
      *
@@ -71,80 +61,77 @@ class GD
      * @param int $w
      * @param int $h
      */
-    public function gdCrop($x, $y, $w, $h): void
+    public function gd_crop($x, $y, $w, $h): void
     {
-        if ($im = $this->gdGetCurrentData()) {
+        if ($im = $this->gd_get_current_data()) {
             $oh = imagesy($im);
             $ow = imagesx($im);
-            $h = ($oh < $h) ? $oh : $h;
-            $w = ($ow < $w) ? $ow : $w;
-            if ($this->_gdImageOutput) {
-                imagedestroy($this->_gdImageOutput);
+            $h = $oh < $h ? $oh : $h;
+            $w = $ow < $w ? $ow : $w;
+            if ($this->_gd_image_output) {
+                imagedestroy($this->_gd_image_output);
             }
-            $this->_gdImageOutput = imagecreatetruecolor($w, $h);
-            if ($this->_gdImageType == IMAGETYPE_GIF) {
-                $transIndex = imagecolortransparent($im);
-                if ($transIndex >= 0) {
-                    $transColor = imagecolorsforindex($im, $transIndex);
-                    $transNew = imagecolorallocate($this->_gdImageOutput, $transColor['red'], $transColor['green'], $transColor['blue']);
-                    imagefill($this->_gdImageOutput, 0, 0, $transNew);
-                    imagecolortransparent($this->_gdImageOutput, $transNew);
+            $this->_gd_image_output = imagecreatetruecolor($w, $h);
+            if ($this->_gd_image_type == IMAGETYPE_GIF) {
+                $trans_index = imagecolortransparent($im);
+                if ($trans_index >= 0) {
+                    $trans_color = imagecolorsforindex($im, $trans_index);
+                    $trans_new = imagecolorallocate($this->_gd_image_output, $trans_color['red'], $trans_color['green'], $trans_color['blue']);
+                    imagefill($this->_gd_image_output, 0, 0, $trans_new);
+                    imagecolortransparent($this->_gd_image_output, $trans_new);
                 }
             } else {
-                imagealphablending($this->_gdImageOutput, false);
-                imagesavealpha($this->_gdImageOutput, true);
+                imagealphablending($this->_gd_image_output, false);
+                imagesavealpha($this->_gd_image_output, true);
             }
-            imagecopyresampled($this->_gdImageOutput, $im, 0, 0, $x, $y, $w, $h, $w, $h);
-            $this->_gdImageArray[0] = $w;
-            $this->_gdImageArray[1] = $h;
+            imagecopyresampled($this->_gd_image_output, $im, 0, 0, $x, $y, $w, $h, $w, $h);
+            $this->_gd_image_array[0] = $w;
+            $this->_gd_image_array[1] = $h;
         }
     }
-
     /**
      * Return image output
      *
      * @return data
      */
-    private function gdGetCurrentData()
+    private function gd_get_current_data()
     {
         // Detect what data source we should be using
         // If output is empty, use the source
-        return (!empty($this->_gdImageOutput)) ? $this->_gdImageOutput : $this->_gdImageSource;
+        return !empty($this->_gd_image_output) ? $this->_gd_image_output : $this->_gd_image_source;
     }
-
     /**
      * Load file
      *
      * @param string $file
      */
-    public function gdLoadFile($file): bool
+    public function gd_load_file($file): bool
     {
         if (file_exists($file)) {
-            $this->_gdImageData = getimagesize($file);
-            $this->_gdImageExif = ($this->_gdImageData[2] == IMAGETYPE_JPEG && function_exists('exif_read_data')) ? @exif_read_data($file) : [];
-            if ($this->_gdImageExif === false) {
-                $this->_gdImageExif = [];
+            $this->_gd_image_data = getimagesize($file);
+            $this->_gd_image_exif = $this->_gd_image_data[2] == IMAGETYPE_JPEG && function_exists('exif_read_data') ? @exif_read_data($file) : [];
+            if ($this->_gd_image_exif === false) {
+                $this->_gd_image_exif = [];
             }
-            $this->_gdImageType = $this->_gdImageData[2];
-
-            switch ($this->_gdImageType) {
+            $this->_gd_image_type = $this->_gd_image_data[2];
+            switch ($this->_gd_image_type) {
                 case IMAGETYPE_GIF:
-                    $this->_gdImageSource = imagecreatefromgif($file);
+                    $this->_gd_image_source = imagecreatefromgif($file);
                     break;
                 case IMAGETYPE_JPEG:
-                    $this->_allocateMemory();
+                    $this->_allocate_memory();
                     if ($this->_abort) {
                         return false;
                     }
-                    $this->_gdImageSource = imagecreatefromjpeg($file);
+                    $this->_gd_image_source = imagecreatefromjpeg($file);
                     break;
                 case IMAGETYPE_PNG:
-                    $this->_gdImageSource = imagecreatefrompng($file);
-                    imagesavealpha($this->_gdImageSource, true);
+                    $this->_gd_image_source = imagecreatefrompng($file);
+                    imagesavealpha($this->_gd_image_source, true);
                     break;
                 case IMAGETYPE_WEBP:
-                    if ($this->_gdWebpSupport) {
-                        $this->_gdImageSource = imagecreatefromwebp($file);
+                    if ($this->_gd_webp_support) {
+                        $this->_gd_image_source = imagecreatefromwebp($file);
                     } else {
                         return false;
                     }
@@ -156,16 +143,15 @@ class GD
         }
         return false;
     }
-
     /**
      * Orientate image based on EXIF data
      *
      * @return $im object
      */
-    private function gdOrientate($im)
+    private function gd_orientate($im)
     {
-        if (isset($this->_gdImageExif['Orientation']) && !empty($this->_gdImageExif['Orientation'])) {
-            switch ($this->_gdImageExif['Orientation']) {
+        if (isset($this->_gd_image_exif['Orientation']) && !empty($this->_gd_image_exif['Orientation'])) {
+            switch ($this->_gd_image_exif['Orientation']) {
                 case 3:
                     return imagerotate($im, 180, 0);
                 case 6:
@@ -176,15 +162,14 @@ class GD
         }
         return $im;
     }
-
     /**
      * Resize image
      * @param int $resize
      */
-    private function gdResize($resize): bool
+    private function gd_resize($resize): bool
     {
         // Resize the image, while maintaining the proportions
-        $im = $this->gdGetCurrentData();
+        $im = $this->gd_get_current_data();
         if ($im) {
             // Get the existing image details
             $width = imagesx($im);
@@ -194,12 +179,12 @@ class GD
             $y_ratio = $resize / $height;
             // Perform a few calculations to work out the new (constrained) dimensions
             $proceed = true;
-            if (($width <= $resize) && ($height <= $resize)) {
+            if ($width <= $resize && $height <= $resize) {
                 // no resize needed
                 $out_width = $width;
                 $out_height = $height;
                 $proceed = false;
-            } elseif (($x_ratio * $height) < $resize) {
+            } elseif ($x_ratio * $height < $resize) {
                 $out_height = ceil($x_ratio * $height);
                 $out_width = $resize;
             } else {
@@ -208,66 +193,64 @@ class GD
             }
             if ($proceed) {
                 // Create the output file and resample
-                if ($this->_gdImageOutput) {
-                    imagedestroy($this->_gdImageOutput);
+                if ($this->_gd_image_output) {
+                    imagedestroy($this->_gd_image_output);
                 }
-                $this->_gdImageOutput = imagecreatetruecolor($out_width, $out_height);
-                if ($this->_gdImageType == IMAGETYPE_GIF) {
-                    $transIndex = imagecolortransparent($im);
-                    if ($transIndex >= 0) {
-                        $transColor = imagecolorsforindex($im, $transIndex);
-                        $transNew = imagecolorallocate($this->_gdImageOutput, $transColor['red'], $transColor['green'], $transColor['blue']);
-                        imagefill($this->_gdImageOutput, 0, 0, $transNew);
-                        imagecolortransparent($this->_gdImageOutput, $transNew);
+                $this->_gd_image_output = imagecreatetruecolor($out_width, $out_height);
+                if ($this->_gd_image_type == IMAGETYPE_GIF) {
+                    $trans_index = imagecolortransparent($im);
+                    if ($trans_index >= 0) {
+                        $trans_color = imagecolorsforindex($im, $trans_index);
+                        $trans_new = imagecolorallocate($this->_gd_image_output, $trans_color['red'], $trans_color['green'], $trans_color['blue']);
+                        imagefill($this->_gd_image_output, 0, 0, $trans_new);
+                        imagecolortransparent($this->_gd_image_output, $trans_new);
                     }
                 } else {
-                    imagealphablending($this->_gdImageOutput, false);
-                    imagesavealpha($this->_gdImageOutput, true);
+                    imagealphablending($this->_gd_image_output, false);
+                    imagesavealpha($this->_gd_image_output, true);
                 }
-                imagecopyresampled($this->_gdImageOutput, $im, 0, 0, 0, 0, $out_width, $out_height, $width, $height);
+                imagecopyresampled($this->_gd_image_output, $im, 0, 0, 0, 0, $out_width, $out_height, $width, $height);
                 return true;
             }
         }
         return false;
     }
-
     /**
      * Save modified file
      *
      * @param bool $resize
      * @return bool
      */
-    public function gdSave(string $filename, $resize = false)
+    public function gd_save(string $filename, $resize = false)
     {
         if ($this->_abort) {
             return false;
         }
-
         // Do we need to resize the file before saving?
-        if ($resize || $this->_gdImageMax) {
-            $this->gdResize($resize ?: $this->_gdImageMax);
+        if ($resize || $this->_gd_image_max) {
+            $this->gd_resize($resize ?: $this->_gd_image_max);
         }
-        $im = $this->gdGetCurrentData();
+        $im = $this->gd_get_current_data();
         if ($im) {
-            $file = $this->_gdTargetDir.$filename;
+            $file = $this->_gd_target_dir . $filename;
             $source = $im;
-            $im = $this->gdOrientate($im);
+            $im = $this->gd_orientate($im);
             imageinterlace($im, true);
             $result = false;
-            switch ($this->_gdImageType) {
+            switch ($this->_gd_image_type) {
                 case IMAGETYPE_GIF:
                     $result = imagegif($im, $file);
                     break;
                 case IMAGETYPE_JPEG:
-                    $result = imagejpeg($im, $file, $this->_gdJpegQuality);
+                    $result = imagejpeg($im, $file, $this->_gd_jpeg_quality);
                     break;
                 case IMAGETYPE_PNG:
                     imagesavealpha($im, true);
                     $result = imagepng($im, $file);
                     break;
                 case IMAGETYPE_WEBP:
-                    if ($this->_gdWebpSupport) {
-                        $result = imagewebp($im, $file, $this->_gdJpegQuality);
+                    if ($this->_gd_webp_support) {
+                        $result = imagewebp($im, $file, $this->_gd_jpeg_quality);
                     } else {
                         if ($im !== $source) {
                             imagedestroy($im);
@@ -276,7 +259,7 @@ class GD
                     }
                     break;
                 default:
-                    trigger_error(__METHOD__.' - Unknown file type', E_USER_NOTICE);
+                    trigger_error(__METHOD__ . ' - Unknown file type', E_USER_NOTICE);
                     if ($im !== $source) {
                         imagedestroy($im);
                     }
@@ -289,47 +272,43 @@ class GD
         }
         return false;
     }
-
     //=====[ Private ]=======================================
-
     /**
      * Calculate and set memory for jpeg
      * Credit to Karolis Tamutis karolis.t_AT_gmail.com
      *
      * @return false
      */
-    private function _allocateMemory()
+    private function _allocate_memory()
     {
         $this->_abort = false;
-        $memLimit = ini_get('memory_limit');
-        if ($memLimit == -1) {
+        $mem_limit = ini_get('memory_limit');
+        if ($mem_limit == -1) {
             return true;
         }
-        $suffix = strtoupper(substr($memLimit, -1));
+        $suffix = strtoupper(substr($mem_limit, -1));
         if ($suffix === 'G') {
-            $memLimit = (int)$memLimit * 1024;
+            $mem_limit = (int) $mem_limit * 1024;
         } elseif ($suffix === 'K') {
-            $memLimit = (int)$memLimit / 1024;
+            $mem_limit = (int) $mem_limit / 1024;
         } else {
-            $memLimit = (int)$memLimit;
+            $mem_limit = (int) $mem_limit;
         }
-
-        $bits = $this->_gdImageData['bits'] ?? 8;
-        $channels = $this->_gdImageData['channels'] ?? 4;
-        $memoryNeeded = round(($this->_gdImageData[0] * $this->_gdImageData[1] * $bits * $channels / 8 + 2 ** 16) * 1.65);
-
-        if (function_exists('memory_get_usage') && memory_get_usage() + $memoryNeeded > $memLimit * 1024 ** 2) {
-            $new_memory_limit = $memLimit + ceil(((memory_get_usage() + $memoryNeeded) - $memLimit * 1024 ** 2) / 1024 ** 2) . 'M';
+        $bits = $this->_gd_image_data['bits'] ?? 8;
+        $channels = $this->_gd_image_data['channels'] ?? 4;
+        $memory_needed = round(($this->_gd_image_data[0] * $this->_gd_image_data[1] * $bits * $channels / 8 + 2 ** 16) * 1.65);
+        if (function_exists('memory_get_usage') && memory_get_usage() + $memory_needed > $mem_limit * 1024 ** 2) {
+            $new_memory_limit = $mem_limit + ceil((memory_get_usage() + $memory_needed - $mem_limit * 1024 ** 2) / 1024 ** 2) . 'M';
             // ini_set may be a disabled function
             if (!function_exists('ini_set')) {
                 $this->_abort = true;
-                $this->gdClear();
+                $this->gd_clear();
                 return false;
             }
             // check ini_set works
             if (!ini_set('memory_limit', $new_memory_limit)) {
                 $this->_abort = true;
-                $this->gdClear();
+                $this->gd_clear();
                 return false;
             }
             return true;

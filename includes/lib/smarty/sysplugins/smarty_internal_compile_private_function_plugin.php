@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Compile Function Plugin
  * Compiles code for the execution of function plugin
@@ -9,14 +9,13 @@ declare(strict_types=1);
  * @subpackage Compiler
  * @author     Uwe Tews
  */
-
 /**
  * Smarty Internal Plugin Compile Function Plugin Class
  *
  * @package    Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Private_Function_Plugin extends Smarty_Internal_CompileBase
+class Smarty_Internal_Compile_Private_Function_Plugin extends Smarty_internal_compile_Base
 {
     /**
      * Attribute definition: Overwrites base class.
@@ -25,7 +24,6 @@ class Smarty_Internal_Compile_Private_Function_Plugin extends Smarty_Internal_Co
      * @see Smarty_Internal_CompileBase
      */
     public $required_attributes = [];
-
     /**
      * Attribute definition: Overwrites base class.
      *
@@ -33,7 +31,6 @@ class Smarty_Internal_Compile_Private_Function_Plugin extends Smarty_Internal_Co
      * @see Smarty_Internal_CompileBase
      */
     public $optional_attributes = ['_any'];
-
     /**
      * Compiles code for the execution of function plugin
      *
@@ -47,32 +44,25 @@ class Smarty_Internal_Compile_Private_Function_Plugin extends Smarty_Internal_Co
      * @throws \SmartyCompilerException
      * @throws \SmartyException
      */
-    public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter, $tag, $function)
+    public function compile($args, Smarty_internal_template_Compiler_Base $compiler, $parameter, $tag, $function)
     {
         // check and get attributes
-        $_attr = $this->getAttributes($compiler, $args);
-        unset($_attr[ 'nocache' ]);
+        $_attr = $this->get_attributes($compiler, $args);
+        unset($_attr['nocache']);
         // convert attributes into parameter array string
-        $_paramsArray = [];
+        $_params_array = [];
         foreach ($_attr as $_key => $_value) {
             if (is_int($_key)) {
-                $_paramsArray[] = "$_key=>$_value";
+                $_params_array[] = "{$_key}=>{$_value}";
             } else {
-                $_paramsArray[] = "'$_key'=>$_value";
+                $_params_array[] = "'{$_key}'=>{$_value}";
             }
         }
-        $_params = 'array(' . implode(',', $_paramsArray) . ')';
+        $_params = 'array(' . implode(',', $_params_array) . ')';
         // compile code
         $output = "{$function}({$_params},\$_smarty_tpl)";
-        if (!empty($parameter[ 'modifierlist' ])) {
-            $output = $compiler->compileTag(
-                'private_modifier',
-                [],
-                [
-                    'modifierlist' => $parameter[ 'modifierlist' ],
-                    'value'        => $output,
-                ]
-            );
+        if (!empty($parameter['modifierlist'])) {
+            $output = $compiler->compile_tag('private_modifier', [], ['modifierlist' => $parameter['modifierlist'], 'value' => $output]);
         }
         $output = "<?php echo {$output};?>\n";
         return $output;

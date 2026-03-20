@@ -1,20 +1,18 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the EmailAddress object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a EmailAddress object for the /mail/send API call
  *
  * @package SendGrid\Mail
  */
-class EmailAddress implements \JsonSerializable
+class Email_Address implements \JsonSerializable
 {
     /** @var $name string The name of the person associated with the email */
     private $name;
@@ -25,8 +23,7 @@ class EmailAddress implements \JsonSerializable
      */
     private $substitutions;
     /** @var $subject Subject The personalized subject of the email */
-    private ?\SendGrid\Mail\Subject $subject = null;
-
+    private ?\Send_Grid\Mail\Subject $subject = null;
     /**
      * Optional constructor
      *
@@ -39,26 +36,21 @@ class EmailAddress implements \JsonSerializable
      * @param string|null $subject       The personalized subject of the email
      * @throws TypeException
      */
-    public function __construct(
-        $emailAddress = null,
-        $name = null,
-        $substitutions = null,
-        $subject = null
-    ) {
-        if (isset($emailAddress)) {
-            $this->setEmailAddress($emailAddress);
+    public function __construct($email_address = null, $name = null, $substitutions = null, $subject = null)
+    {
+        if (isset($email_address)) {
+            $this->set_email_address($email_address);
         }
         if (isset($name) && $name !== null) {
-            $this->setName($name);
+            $this->set_name($name);
         }
         if (isset($substitutions)) {
-            $this->setSubstitutions($substitutions);
+            $this->set_substitutions($substitutions);
         }
         if (isset($subject)) {
-            $this->setSubject($subject);
+            $this->set_subject($subject);
         }
     }
-
     /**
      * Add the email address to a EmailAddress object
      *
@@ -66,33 +58,29 @@ class EmailAddress implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setEmailAddress($emailAddress): void
+    public function set_email_address($email_address): void
     {
-        Assert::email($emailAddress, 'emailAddress');
-
-        $this->email = $emailAddress;
+        Assert::email($email_address, 'emailAddress');
+        $this->email = $email_address;
     }
-
     /**
      * Retrieve the email address from a EmailAddress object
      *
      * @return string
      */
-    public function getEmailAddress()
+    public function get_email_address()
     {
         return $this->email;
     }
-
     /**
      * Retrieve the email address from a EmailAddress object
      *
      * @return string
      */
-    public function getEmail()
+    public function get_email()
     {
-        return $this->getEmailAddress();
+        return $this->get_email_address();
     }
-
     /**
      * Add a name to a EmailAddress object
      *
@@ -100,23 +88,20 @@ class EmailAddress implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setName($name): void
+    public function set_name($name): void
     {
         Assert::string($name, 'name');
-
-        $this->name = (!empty($name)) ? $name : null;
+        $this->name = !empty($name) ? $name : null;
     }
-
     /**
      * Retrieve the name from a EmailAddress object
      *
      * @return string
      */
-    public function getName()
+    public function get_name()
     {
         return $this->name;
     }
-
     /**
      * Add substitutions to a EmailAddress object
      *
@@ -126,21 +111,18 @@ class EmailAddress implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSubstitutions($substitutions): void
+    public function set_substitutions($substitutions): void
     {
-        Assert::maxItems($substitutions, 'substitutions', 10000);
-
+        Assert::max_items($substitutions, 'substitutions', 10000);
         $this->substitutions = $substitutions;
     }
-
     /**
      * Retrieve substitutions from a EmailAddress object
      */
-    public function getSubstitutions()
+    public function get_substitutions()
     {
         return $this->substitutions;
     }
-
     /**
      * Add a subject to a EmailAddress object
      *
@@ -148,50 +130,40 @@ class EmailAddress implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSubject($subject): void
+    public function set_subject($subject): void
     {
         Assert::string($subject, 'subject');
-
         // Now that we know it is a string, we can safely create a new subject
         $this->subject = new Subject($subject);
     }
-
     /**
      * Retrieve a subject from an EmailAddress object
      *
      * @return Subject
      */
-    public function getSubject()
+    public function get_subject()
     {
         return $this->subject;
     }
-
     /**
      * Determine if this EmailAddress object is personalized by either
      * containing substitutions or a specific subject.
      */
-    public function isPersonalized(): bool
+    public function is_personalized(): bool
     {
-        if ($this->getSubstitutions()) {
+        if ($this->get_substitutions()) {
             return true;
         }
-        return (bool) $this->getSubject();
+        return (bool) $this->get_subject();
     }
-
     /**
      * Return an array representing an EmailAddress object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'name' => $this->getName(),
-                'email' => $this->getEmail(),
-            ],
-            fn (string $value) => $value !== null
-        ) ?: null;
+        return array_filter(['name' => $this->get_name(), 'email' => $this->get_email()], fn(string $value) => $value !== null) ?: null;
     }
 }

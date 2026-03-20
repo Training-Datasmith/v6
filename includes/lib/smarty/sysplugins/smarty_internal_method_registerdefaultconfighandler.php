@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method RegisterDefaultConfigHandler
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_RegisterDefaultConfigHandler
+class Smarty_internal_method_register_Default_Config_Handler
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * Register config default handler
      *
@@ -31,13 +29,13 @@ class Smarty_Internal_Method_RegisterDefaultConfigHandler
      * @return \Smarty|\Smarty_Internal_Template
      * @throws SmartyException              if $callback is not callable
      */
-    public function registerDefaultConfigHandler(Smarty_Internal_TemplateBase $obj, $callback)
+    public function register_default_config_handler(Smarty_internal_template_Base $obj, $callback)
     {
-        $smarty = $obj->_getSmartyObj();
+        $smarty = $obj->_get_smarty_obj();
         if (is_callable($callback)) {
             $smarty->default_config_handler_func = $callback;
         } else {
-            throw new SmartyException('Default config handler not callable');
+            throw new Smarty_Exception('Default config handler not callable');
         }
         return $obj;
     }

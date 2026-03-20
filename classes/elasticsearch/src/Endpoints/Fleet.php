@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Fleet extends AbstractEndpoint
+class Fleet extends Abstract_Endpoint
 {
     /**
      * Returns the current global checkpoints for an index. This API is design for internal use by the fleet server project.
@@ -53,20 +50,15 @@ class Fleet extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function globalCheckpoints(array $params = [])
+    public function global_checkpoints(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_fleet/global_checkpoints';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_advance','wait_for_index','checkpoints','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_advance', 'wait_for_index', 'checkpoints', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Multi Search API where the search will only be executed after specified checkpoints are available due to a refresh. This API is designed for internal use by the fleet server project.
      *
@@ -90,7 +82,7 @@ class Fleet extends AbstractEndpoint
      */
     public function msearch(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_fleet/_fleet_msearch';
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -98,14 +90,10 @@ class Fleet extends AbstractEndpoint
             $url = '/_fleet/_fleet_msearch';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/x-ndjson',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/x-ndjson'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Search API where the search will only be executed after specified checkpoints are available due to a refresh. This API is designed for internal use by the fleet server project.
      *
@@ -133,15 +121,11 @@ class Fleet extends AbstractEndpoint
      */
     public function search(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_fleet/_fleet_search';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_checkpoints','wait_for_checkpoints_timeout','allow_partial_search_results','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_checkpoints', 'wait_for_checkpoints_timeout', 'allow_partial_search_results', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

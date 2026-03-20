@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Nodes extends AbstractEndpoint
+class Nodes extends Abstract_Endpoint
 {
     /**
      * Removes the archived repositories metering information present in the cluster.
@@ -51,19 +48,15 @@ class Nodes extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function clearRepositoriesMeteringArchive(array $params = [])
+    public function clear_repositories_metering_archive(array $params = [])
     {
-        $this->checkRequiredParameters(['node_id','max_archive_version'], $params);
+        $this->check_required_parameters(['node_id', 'max_archive_version'], $params);
         $url = '/_nodes/' . $this->encode($params['node_id']) . '/_repositories_metering/' . $this->encode($params['max_archive_version']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns cluster repositories metering information.
      *
@@ -86,19 +79,15 @@ class Nodes extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getRepositoriesMeteringInfo(array $params = [])
+    public function get_repositories_metering_info(array $params = [])
     {
-        $this->checkRequiredParameters(['node_id'], $params);
+        $this->check_required_parameters(['node_id'], $params);
         $url = '/_nodes/' . $this->encode($params['node_id']) . '/_repositories_metering';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about hot threads on each node in the cluster.
      *
@@ -126,7 +115,7 @@ class Nodes extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function hotThreads(array $params = [])
+    public function hot_threads(array $params = [])
     {
         if (isset($params['node_id'])) {
             $url = '/_nodes/' . $this->encode($params['node_id']) . '/hot_threads';
@@ -135,13 +124,10 @@ class Nodes extends AbstractEndpoint
             $url = '/_nodes/hot_threads';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['interval','snapshots','threads','ignore_idle_threads','type','sort','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['interval', 'snapshots', 'threads', 'ignore_idle_threads', 'type', 'sort', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about nodes in the cluster.
      *
@@ -180,13 +166,10 @@ class Nodes extends AbstractEndpoint
             $url = '/_nodes';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['flat_settings','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['flat_settings', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Reloads secure settings.
      *
@@ -209,7 +192,7 @@ class Nodes extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function reloadSecureSettings(array $params = [])
+    public function reload_secure_settings(array $params = [])
     {
         if (isset($params['node_id'])) {
             $url = '/_nodes/' . $this->encode($params['node_id']) . '/reload_secure_settings';
@@ -218,14 +201,10 @@ class Nodes extends AbstractEndpoint
             $url = '/_nodes/reload_secure_settings';
             $method = 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns statistical information about nodes in the cluster.
      *
@@ -278,13 +257,10 @@ class Nodes extends AbstractEndpoint
             $url = '/_nodes/stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['completion_fields','fielddata_fields','fields','groups','level','types','timeout','include_segment_file_sizes','include_unloaded_segments','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['completion_fields', 'fielddata_fields', 'fields', 'groups', 'level', 'types', 'timeout', 'include_segment_file_sizes', 'include_unloaded_segments', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns low-level information about REST actions usage on nodes.
      *
@@ -322,10 +298,8 @@ class Nodes extends AbstractEndpoint
             $url = '/_nodes/usage';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

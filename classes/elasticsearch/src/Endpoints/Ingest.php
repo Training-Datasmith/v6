@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Ingest extends AbstractEndpoint
+class Ingest extends Abstract_Endpoint
 {
     /**
      * Deletes a pipeline.
@@ -51,19 +48,15 @@ class Ingest extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deletePipeline(array $params = [])
+    public function delete_pipeline(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_ingest/pipeline/' . $this->encode($params['id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns statistical information about geoip databases
      *
@@ -83,18 +76,14 @@ class Ingest extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function geoIpStats(array $params = [])
+    public function geo_ip_stats(array $params = [])
     {
         $url = '/_ingest/geoip/stats';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns a pipeline.
      *
@@ -117,7 +106,7 @@ class Ingest extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getPipeline(array $params = [])
+    public function get_pipeline(array $params = [])
     {
         if (isset($params['id'])) {
             $url = '/_ingest/pipeline/' . $this->encode($params['id']);
@@ -126,13 +115,10 @@ class Ingest extends AbstractEndpoint
             $url = '/_ingest/pipeline';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['summary','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['summary', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns a list of the built-in patterns.
      *
@@ -152,18 +138,14 @@ class Ingest extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function processorGrok(array $params = [])
+    public function processor_grok(array $params = [])
     {
         $url = '/_ingest/processor/grok';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates or updates a pipeline.
      *
@@ -189,20 +171,15 @@ class Ingest extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putPipeline(array $params = [])
+    public function put_pipeline(array $params = [])
     {
-        $this->checkRequiredParameters(['id','body'], $params);
+        $this->check_required_parameters(['id', 'body'], $params);
         $url = '/_ingest/pipeline/' . $this->encode($params['id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['if_version','master_timeout','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['if_version', 'master_timeout', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows to simulate a pipeline with example documents.
      *
@@ -227,7 +204,7 @@ class Ingest extends AbstractEndpoint
      */
     public function simulate(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['id'])) {
             $url = '/_ingest/pipeline/' . $this->encode($params['id']) . '/_simulate';
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -235,11 +212,8 @@ class Ingest extends AbstractEndpoint
             $url = '/_ingest/pipeline/_simulate';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['verbose','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['verbose', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

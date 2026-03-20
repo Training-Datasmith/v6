@@ -11,17 +11,15 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Traits;
 
-use Elastic\Elasticsearch\Endpoints\AsyncSearch;
+use Elastic\Elasticsearch\Endpoints\Async_Search;
 use Elastic\Elasticsearch\Endpoints\Autoscaling;
 use Elastic\Elasticsearch\Endpoints\Cat;
 use Elastic\Elasticsearch\Endpoints\Ccr;
 use Elastic\Elasticsearch\Endpoints\Cluster;
-use Elastic\Elasticsearch\Endpoints\DanglingIndices;
+use Elastic\Elasticsearch\Endpoints\Dangling_Indices;
 use Elastic\Elasticsearch\Endpoints\Enrich;
 use Elastic\Elasticsearch\Endpoints\Eql;
 use Elastic\Elasticsearch\Endpoints\Features;
@@ -37,7 +35,7 @@ use Elastic\Elasticsearch\Endpoints\Ml;
 use Elastic\Elasticsearch\Endpoints\Monitoring;
 use Elastic\Elasticsearch\Endpoints\Nodes;
 use Elastic\Elasticsearch\Endpoints\Rollup;
-use Elastic\Elasticsearch\Endpoints\SearchableSnapshots;
+use Elastic\Elasticsearch\Endpoints\Searchable_Snapshots;
 use Elastic\Elasticsearch\Endpoints\Security;
 use Elastic\Elasticsearch\Endpoints\Shutdown;
 use Elastic\Elasticsearch\Endpoints\Slm;
@@ -45,27 +43,24 @@ use Elastic\Elasticsearch\Endpoints\Snapshot;
 use Elastic\Elasticsearch\Endpoints\Sql;
 use Elastic\Elasticsearch\Endpoints\Ssl;
 use Elastic\Elasticsearch\Endpoints\Tasks;
-use Elastic\Elasticsearch\Endpoints\TextStructure;
+use Elastic\Elasticsearch\Endpoints\Text_Structure;
 use Elastic\Elasticsearch\Endpoints\Transform;
 use Elastic\Elasticsearch\Endpoints\Watcher;
 use Elastic\Elasticsearch\Endpoints\Xpack;
-
 /**
  * @generated This file is generated, please do not edit
  */
-trait NamespaceTrait
+trait Namespace_Trait
 {
     /** The endpoint namespace storage */
     protected array $namespace;
-
-    public function asyncSearch(): AsyncSearch
+    public function async_search(): Async_Search
     {
         if (!isset($this->namespace['AsyncSearch'])) {
-            $this->namespace['AsyncSearch'] = new AsyncSearch($this);
+            $this->namespace['AsyncSearch'] = new Async_Search($this);
         }
         return $this->namespace['AsyncSearch'];
     }
-
     public function autoscaling(): Autoscaling
     {
         if (!isset($this->namespace['Autoscaling'])) {
@@ -73,7 +68,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Autoscaling'];
     }
-
     public function cat(): Cat
     {
         if (!isset($this->namespace['Cat'])) {
@@ -81,7 +75,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Cat'];
     }
-
     public function ccr(): Ccr
     {
         if (!isset($this->namespace['Ccr'])) {
@@ -89,7 +82,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Ccr'];
     }
-
     public function cluster(): Cluster
     {
         if (!isset($this->namespace['Cluster'])) {
@@ -97,15 +89,13 @@ trait NamespaceTrait
         }
         return $this->namespace['Cluster'];
     }
-
-    public function danglingIndices(): DanglingIndices
+    public function dangling_indices(): Dangling_Indices
     {
         if (!isset($this->namespace['DanglingIndices'])) {
-            $this->namespace['DanglingIndices'] = new DanglingIndices($this);
+            $this->namespace['DanglingIndices'] = new Dangling_Indices($this);
         }
         return $this->namespace['DanglingIndices'];
     }
-
     public function enrich(): Enrich
     {
         if (!isset($this->namespace['Enrich'])) {
@@ -113,7 +103,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Enrich'];
     }
-
     public function eql(): Eql
     {
         if (!isset($this->namespace['Eql'])) {
@@ -121,7 +110,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Eql'];
     }
-
     public function features(): Features
     {
         if (!isset($this->namespace['Features'])) {
@@ -129,7 +117,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Features'];
     }
-
     public function fleet(): Fleet
     {
         if (!isset($this->namespace['Fleet'])) {
@@ -137,7 +124,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Fleet'];
     }
-
     public function graph(): Graph
     {
         if (!isset($this->namespace['Graph'])) {
@@ -145,7 +131,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Graph'];
     }
-
     public function ilm(): Ilm
     {
         if (!isset($this->namespace['Ilm'])) {
@@ -153,7 +138,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Ilm'];
     }
-
     public function indices(): Indices
     {
         if (!isset($this->namespace['Indices'])) {
@@ -161,7 +145,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Indices'];
     }
-
     public function ingest(): Ingest
     {
         if (!isset($this->namespace['Ingest'])) {
@@ -169,7 +152,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Ingest'];
     }
-
     public function license(): License
     {
         if (!isset($this->namespace['License'])) {
@@ -177,7 +159,6 @@ trait NamespaceTrait
         }
         return $this->namespace['License'];
     }
-
     public function logstash(): Logstash
     {
         if (!isset($this->namespace['Logstash'])) {
@@ -185,7 +166,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Logstash'];
     }
-
     public function migration(): Migration
     {
         if (!isset($this->namespace['Migration'])) {
@@ -193,7 +173,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Migration'];
     }
-
     public function ml(): Ml
     {
         if (!isset($this->namespace['Ml'])) {
@@ -201,7 +180,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Ml'];
     }
-
     public function monitoring(): Monitoring
     {
         if (!isset($this->namespace['Monitoring'])) {
@@ -209,7 +187,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Monitoring'];
     }
-
     public function nodes(): Nodes
     {
         if (!isset($this->namespace['Nodes'])) {
@@ -217,7 +194,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Nodes'];
     }
-
     public function rollup(): Rollup
     {
         if (!isset($this->namespace['Rollup'])) {
@@ -225,15 +201,13 @@ trait NamespaceTrait
         }
         return $this->namespace['Rollup'];
     }
-
-    public function searchableSnapshots(): SearchableSnapshots
+    public function searchable_snapshots(): Searchable_Snapshots
     {
         if (!isset($this->namespace['SearchableSnapshots'])) {
-            $this->namespace['SearchableSnapshots'] = new SearchableSnapshots($this);
+            $this->namespace['SearchableSnapshots'] = new Searchable_Snapshots($this);
         }
         return $this->namespace['SearchableSnapshots'];
     }
-
     public function security(): Security
     {
         if (!isset($this->namespace['Security'])) {
@@ -241,7 +215,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Security'];
     }
-
     public function shutdown(): Shutdown
     {
         if (!isset($this->namespace['Shutdown'])) {
@@ -249,7 +222,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Shutdown'];
     }
-
     public function slm(): Slm
     {
         if (!isset($this->namespace['Slm'])) {
@@ -257,7 +229,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Slm'];
     }
-
     public function snapshot(): Snapshot
     {
         if (!isset($this->namespace['Snapshot'])) {
@@ -265,7 +236,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Snapshot'];
     }
-
     public function sql(): Sql
     {
         if (!isset($this->namespace['Sql'])) {
@@ -273,7 +243,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Sql'];
     }
-
     public function ssl(): Ssl
     {
         if (!isset($this->namespace['Ssl'])) {
@@ -281,7 +250,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Ssl'];
     }
-
     public function tasks(): Tasks
     {
         if (!isset($this->namespace['Tasks'])) {
@@ -289,15 +257,13 @@ trait NamespaceTrait
         }
         return $this->namespace['Tasks'];
     }
-
-    public function textStructure(): TextStructure
+    public function text_structure(): Text_Structure
     {
         if (!isset($this->namespace['TextStructure'])) {
-            $this->namespace['TextStructure'] = new TextStructure($this);
+            $this->namespace['TextStructure'] = new Text_Structure($this);
         }
         return $this->namespace['TextStructure'];
     }
-
     public function transform(): Transform
     {
         if (!isset($this->namespace['Transform'])) {
@@ -305,7 +271,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Transform'];
     }
-
     public function watcher(): Watcher
     {
         if (!isset($this->namespace['Watcher'])) {
@@ -313,7 +278,6 @@ trait NamespaceTrait
         }
         return $this->namespace['Watcher'];
     }
-
     public function xpack(): Xpack
     {
         if (!isset($this->namespace['Xpack'])) {

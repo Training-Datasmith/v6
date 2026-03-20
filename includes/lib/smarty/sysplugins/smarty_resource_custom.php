@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Resource Plugin
  *
@@ -8,7 +8,6 @@ declare(strict_types=1);
  * @subpackage TemplateResources
  * @author     Rodney Rehm
  */
-
 /**
  * Smarty Resource Plugin
  * Wrapper Implementation for custom resource plugins
@@ -26,7 +25,6 @@ abstract class Smarty_Resource_Custom extends Smarty_Resource
      * @param integer &$mtime  template modification timestamp (epoch)
      */
     abstract protected function fetch($name, &$source, &$mtime);
-
     /**
      * Fetch template's modification timestamp from data source
      * {@internal implementing this method is optional.
@@ -36,11 +34,10 @@ abstract class Smarty_Resource_Custom extends Smarty_Resource
      *
      * @return integer|boolean timestamp (epoch) the template was modified, or false if not found
      */
-    protected function fetchTimestamp($name)
+    protected function fetch_timestamp($name)
     {
         return null;
     }
-
     /**
      * populate Source Object with meta data from Resource
      *
@@ -49,9 +46,9 @@ abstract class Smarty_Resource_Custom extends Smarty_Resource
      */
     public function populate(Smarty_Template_Source $source, Smarty_Internal_Template $_template = null)
     {
-        $source->filepath = $source->type . ':' . $this->generateSafeName($source->name);
+        $source->filepath = $source->type . ':' . $this->generate_safe_name($source->name);
         $source->uid = sha1($source->type . ':' . $source->name);
-        $mtime = $this->fetchTimestamp($source->name);
+        $mtime = $this->fetch_timestamp($source->name);
         if ($mtime !== null) {
             $source->timestamp = $mtime;
         } else {
@@ -63,7 +60,6 @@ abstract class Smarty_Resource_Custom extends Smarty_Resource
         }
         $source->exists = !!$source->timestamp;
     }
-
     /**
      * Load template's source into current template object
      *
@@ -72,15 +68,14 @@ abstract class Smarty_Resource_Custom extends Smarty_Resource
      * @return string                 template source
      * @throws SmartyException        if source cannot be loaded
      */
-    public function getContent(Smarty_Template_Source $source)
+    public function get_content(Smarty_Template_Source $source)
     {
         $this->fetch($source->name, $content, $timestamp);
         if (isset($content)) {
             return $content;
         }
-        throw new SmartyException("Unable to read template {$source->type} '{$source->name}'");
+        throw new Smarty_Exception("Unable to read template {$source->type} '{$source->name}'");
     }
-
     /**
      * Determine basename for compiled filename
      *
@@ -88,11 +83,10 @@ abstract class Smarty_Resource_Custom extends Smarty_Resource
      *
      * @return string                 resource's basename
      */
-    public function getBasename(Smarty_Template_Source $source)
+    public function get_basename(Smarty_Template_Source $source)
     {
-        return basename($this->generateSafeName($source->name));
+        return basename($this->generate_safe_name($source->name));
     }
-
     /**
      * Removes special characters from $name and limits its length to 127 characters.
      *
@@ -100,7 +94,7 @@ abstract class Smarty_Resource_Custom extends Smarty_Resource
      *
      * @return string
      */
-    private function generateSafeName($name): string
+    private function generate_safe_name($name): string
     {
         return substr(preg_replace('/[^A-Za-z0-9._]/', '', (string) $name), 0, 127);
     }

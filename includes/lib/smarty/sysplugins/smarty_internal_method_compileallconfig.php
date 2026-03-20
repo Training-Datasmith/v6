@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method CompileAllConfig
  *
@@ -11,7 +10,7 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_CompileAllConfig extends Smarty_Internal_Method_CompileAllTemplates
+class Smarty_internal_method_compile_All_Config extends Smarty_internal_method_compile_All_Templates
 {
     /**
      * Compile all config files
@@ -26,13 +25,8 @@ class Smarty_Internal_Method_CompileAllConfig extends Smarty_Internal_Method_Com
      *
      * @return int number of template files recompiled
      */
-    public function compileAllConfig(
-        Smarty $smarty,
-        $extension = '.conf',
-        $force_compile = false,
-        $time_limit = 0,
-        $max_errors = null
-    ) {
-        return $this->compileAll($smarty, $extension, $force_compile, $time_limit, $max_errors, true);
+    public function compile_all_config(Smarty $smarty, $extension = '.conf', $force_compile = false, $time_limit = 0, $max_errors = null)
+    {
+        return $this->compile_all($smarty, $extension, $force_compile, $time_limit, $max_errors, true);
     }
 }

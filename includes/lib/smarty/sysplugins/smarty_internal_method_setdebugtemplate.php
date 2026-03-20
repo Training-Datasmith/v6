@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method SetDebugTemplate
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_SetDebugTemplate
+class Smarty_internal_method_set_Debug_Template
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * set the debug template
      *
@@ -31,11 +29,11 @@ class Smarty_Internal_Method_SetDebugTemplate
      * @return \Smarty|\Smarty_Internal_Template
      * @throws SmartyException if file is not readable
      */
-    public function setDebugTemplate(Smarty_Internal_TemplateBase $obj, $tpl_name)
+    public function set_debug_template(Smarty_internal_template_Base $obj, $tpl_name)
     {
-        $smarty = $obj->_getSmartyObj();
+        $smarty = $obj->_get_smarty_obj();
         if (!is_readable($tpl_name)) {
-            throw new SmartyException("Unknown file '{$tpl_name}'");
+            throw new Smarty_Exception("Unknown file '{$tpl_name}'");
         }
         $smarty->debug_tpl = $tpl_name;
         return $obj;

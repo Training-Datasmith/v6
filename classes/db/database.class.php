@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 /**
  * Database controller
  *
@@ -27,20 +26,13 @@ class Database_Contoller
      *
      * @var array
      */
-    public $cache_notice_tables = [
-        'CubeCart_inventory',
-        'CubeCart_category',
-        'CubeCart_documents',
-        'CubeCart_config',
-    ];
-
+    public $cache_notice_tables = ['CubeCart_inventory', 'CubeCart_category', 'CubeCart_documents', 'CubeCart_config'];
     /**
      * Do we have a connection?
      *
      * @var bool
      */
     public $connected = false;
-
     /**
      * Array of page one names for canonical skip
      *
@@ -58,14 +50,13 @@ class Database_Contoller
      *
      * @var bool
      */
-    protected $_cached   = false;
+    protected $_cached = false;
     /**
      * Cache block functions
      *
      * @var string (pipe separated)
      */
-    protected $_cache_block_functions   = 'UNIX_TIMESTAMP()|NOW()';
-
+    protected $_cache_block_functions = 'UNIX_TIMESTAMP()|NOW()';
     /**
      * DB connection
      *
@@ -83,13 +74,13 @@ class Database_Contoller
      *
      * @var string
      */
-    protected $_prefix   = '';
+    protected $_prefix = '';
     /**
      * Query to execute
      *
      * @var $_query string
      */
-    protected $_query   = false;
+    protected $_query = false;
     /**
      * Query run time
      *
@@ -107,7 +98,7 @@ class Database_Contoller
      *
      * @var array
      */
-    protected $_allowedColumns = [];
+    protected $_allowed_columns = [];
     /**
      * Database Engine in use
      *
@@ -138,14 +129,11 @@ class Database_Contoller
      * @var array
      */
     protected static $_instance;
-
     ##############################################
-
     protected function __construct()
     {
         mysqli_report(MYSQLI_REPORT_ALL ^ MYSQLI_REPORT_STRICT ^ MYSQLI_REPORT_INDEX);
     }
-
     //=====[ Public ]=======================================
     /**
      * Change Database Encoding
@@ -153,27 +141,25 @@ class Database_Contoller
      * @param string $charset
      * @param string $collation
      */
-    public function changeCollation($dbname = '', $charset = 'utf8mb4', $collation = 'utf8mb4_unicode_ci'): void
+    public function change_collation($dbname = '', $charset = 'utf8mb4', $collation = 'utf8mb4_unicode_ci'): void
     {
         if (empty($dbname)) {
             $dbname = $GLOBALS['config']->get('config', 'dbdatabase');
         }
-        $this->_query = "ALTER DATABASE `$dbname` DEFAULT CHARSET=$charset COLLATE $collation;";
+        $this->_query = "ALTER DATABASE `{$dbname}` DEFAULT CHARSET={$charset} COLLATE {$collation};";
         $this->_execute(false);
-        $tables = $this->getRows();
-
+        $tables = $this->get_rows();
         foreach ($tables as $table) {
             // CubeCart tables only
-            if (!preg_match('/^'.$this->_prefix.'CubeCart_/', (string) $table['Name'])) {
+            if (!preg_match('/^' . $this->_prefix . 'CubeCart_/', (string) $table['Name'])) {
                 continue;
             }
-            $this->_query = "ALTER TABLE `$dbname`.`{$table['Name']}` DEFAULT CHARSET=$charset COLLATE $collation;";
+            $this->_query = "ALTER TABLE `{$dbname}`.`{$table['Name']}` DEFAULT CHARSET={$charset} COLLATE {$collation};";
             $this->_execute(false);
-            $this->_query = "ALTER TABLE `$dbname`.`{$table['Name']}` CONVERT TO CHARACTER SET $charset COLLATE $collation;";
+            $this->_query = "ALTER TABLE `{$dbname}`.`{$table['Name']}` CONVERT TO CHARACTER SET {$charset} COLLATE {$collation};";
             $this->_execute(false);
         }
     }
-
     /**
      * Get table checksum
      *
@@ -183,11 +169,10 @@ class Database_Contoller
      */
     public function checksum($table)
     {
-        $this->_query = "CHECKSUM TABLE `{$this->_prefix}$table`;";
+        $this->_query = "CHECKSUM TABLE `{$this->_prefix}{$table}`;";
         $this->_execute();
         return $this->_result[0]['Checksum'] ?? false;
     }
-
     /**
      * Display column sort
      *
@@ -199,26 +184,21 @@ class Database_Contoller
      */
     public function column_sort($column_name, string $display_text, $order_by = 'sort', $current_page = '', $current_sort = false, $anchor = false): string
     {
-        $link   = "$current_page&{$order_by}[$column_name]=";
-
+        $link = "{$current_page}&{$order_by}[{$column_name}]=";
         if ($anchor) {
-            $anchor = '#'.$anchor;
+            $anchor = '#' . $anchor;
         }
-
         $text_desc = sprintf($GLOBALS['language']->form['sort_by_desc'], strtolower($display_text));
         $text_asc = sprintf($GLOBALS['language']->form['sort_by_asc'], strtolower($display_text));
-
         if (isset($current_sort[$column_name]) && $current_sort[$column_name] == 'ASC') {
-            $html_out  = '<a href="'.$link.'DESC'.$anchor.'" class="clearfix"><div class="left">'.$display_text.'</div><div class="right"><i class="fa fa-sort-asc" title="'.$text_asc.'"></i></div></a>';
+            $html_out = '<a href="' . $link . 'DESC' . $anchor . '" class="clearfix"><div class="left">' . $display_text . '</div><div class="right"><i class="fa fa-sort-asc" title="' . $text_asc . '"></i></div></a>';
         } elseif (isset($current_sort[$column_name]) && $current_sort[$column_name] == 'DESC') {
-            $html_out  = '<a href="'.$link.'ASC'.$anchor.'" class="clearfix"><div class="left">'.$display_text.'</div><div class="right"><i class="fa fa-sort-desc" title="'.$text_desc.'"></i></div></a>';
+            $html_out = '<a href="' . $link . 'ASC' . $anchor . '" class="clearfix"><div class="left">' . $display_text . '</div><div class="right"><i class="fa fa-sort-desc" title="' . $text_desc . '"></i></div></a>';
         } else {
-            $html_out  = '<a href="'.$link.'ASC'.$anchor.'" class="clearfix"><div class="left">'.$display_text.'</div><div class="right"><i class="fa fa-sort" title="'.$text_desc.'"></i></div></a>';
+            $html_out = '<a href="' . $link . 'ASC' . $anchor . '" class="clearfix"><div class="left">' . $display_text . '</div><div class="right"><i class="fa fa-sort" title="' . $text_desc . '"></i></div></a>';
         }
-
-        return  $html_out;
+        return $html_out;
     }
-
     /**
      * Query count a field
      *
@@ -235,27 +215,21 @@ class Database_Contoller
             $wrapper = '';
             $prefix = '';
         }
-
         if (!empty($table)) {
-            $allowed = $this->getFields($table);
-
-            $field = (in_array($field, $allowed) && !is_numeric($field)) ? $field : '*';
-
-            $this->_query = "SELECT COUNT($field) AS Count FROM $wrapper$prefix$table$wrapper ".$this->where($table, $where).';';
+            $allowed = $this->get_fields($table);
+            $field = in_array($field, $allowed) && !is_numeric($field) ? $field : '*';
+            $this->_query = "SELECT COUNT({$field}) AS Count FROM {$wrapper}{$prefix}{$table}{$wrapper} " . $this->where($table, $where) . ';';
             $this->_execute();
             if ($this->_result && isset($this->_result[0]['Count'])) {
-                return ((int)$this->_result[0]['Count'] > 0) ? (int)$this->_result[0]['Count'] : false;
+                return (int) $this->_result[0]['Count'] > 0 ? (int) $this->_result[0]['Count'] : false;
             }
         }
-
         return false;
     }
-
     public function debug(): string
     {
-        return '[QUERY] - '.$this->_query."\n";
+        return '[QUERY] - ' . $this->_query . "\n";
     }
-
     /**
      * Delete from a table
      *
@@ -267,15 +241,14 @@ class Database_Contoller
     public function delete($table, $where, $limit = '', $purge = true): bool
     {
         if (!empty($limit)) {
-            $limit = "LIMIT $limit";
+            $limit = "LIMIT {$limit}";
         }
-        $this->_query = "DELETE FROM `{$this->_prefix}$table` ".$this->where($table, $where)." $limit;";
+        $this->_query = "DELETE FROM `{$this->_prefix}{$table}` " . $this->where($table, $where) . " {$limit};";
         $this->_execute(false);
-        $affected = ($this->affected() > 0);
-        $this->_clearCacheNotice($purge, $affected, $table);
-        return ($affected) ? true : false;
+        $affected = $this->affected() > 0;
+        $this->_clear_cache_notice($purge, $affected, $table);
+        return $affected ? true : false;
     }
-
     /**
      * Backup SQL
      *
@@ -285,61 +258,53 @@ class Database_Contoller
      *
      * @return string
      */
-    public function doSQLBackup($dropTables = false, $incStructure = true, $incRows = true, string $file_name = '', $compress = false, $all_tables = false)
+    public function do_sql_backup($drop_tables = false, $inc_structure = true, $inc_rows = true, string $file_name = '', $compress = false, $all_tables = false)
     {
-        $open_text = "-- --------------------------------------------------------\n-- CubeCart SQL Dump\n-- version ".CC_VERSION."\n-- https://www.cubecart.com\n-- \n-- Host: ".$GLOBALS['config']->get('config', 'dbhost')."\n-- Generation Time: ".date($GLOBALS['config']->get('config', 'time_format'), time())."\n-- Server version: ".$this->serverVersion()."\n-- PHP Version: ".phpversion()."\n-- \n-- Database: `".$GLOBALS['config']->get('config', 'dbdatabase')."`\n";
-
+        $open_text = "-- --------------------------------------------------------\n-- CubeCart SQL Dump\n-- version " . CC_VERSION . "\n-- https://www.cubecart.com\n-- \n-- Host: " . $GLOBALS['config']->get('config', 'dbhost') . "\n-- Generation Time: " . date($GLOBALS['config']->get('config', 'time_format'), time()) . "\n-- Server version: " . $this->server_version() . "\n-- PHP Version: " . phpversion() . "\n-- \n-- Database: `" . $GLOBALS['config']->get('config', 'dbdatabase') . "`\n";
         $fp = fopen($file_name, 'w');
         fwrite($fp, $open_text);
         fclose($fp);
-
-        $tables = $this->getRows(false, 'CubeCart_');
-
+        $tables = $this->get_rows(false, 'CubeCart_');
         foreach ($tables as $table) {
-            $this->sqldumptable($file_name, $table, $dropTables, $incStructure, $incRows);
+            $this->sqldumptable($file_name, $table, $drop_tables, $inc_structure, $inc_rows);
         }
-
         $fp = fopen($file_name, 'a+');
         $close_text = "-- --------------------------------------------------------\n-- CubeCart SQL Dump Complete\n-- --------------------------------------------------------";
         fwrite($fp, $close_text);
         fclose($fp);
-
         if ($compress) {
             if (file_exists($file_name)) {
-                $zip = new ZipArchive();
+                $zip = new Zip_Archive();
                 $filename = $file_name;
-                if ($zip->open($filename.'.zip', ZipArchive::CREATE) !== true) {
-                    $GLOBALS['main']->errorMessage($GLOBALS['language']->maintain['db_compress_fail']);
+                if ($zip->open($filename . '.zip', Zip_Archive::CREATE) !== true) {
+                    $GLOBALS['main']->error_message($GLOBALS['language']->maintain['db_compress_fail']);
                     return false;
                 }
-                $zip->addFile($filename);
+                $zip->add_file($filename);
                 $zip->close();
                 unlink($file_name);
-                return file_exists($file_name.'.zip');
+                return file_exists($file_name . '.zip');
             }
             return false;
         }
         return file_exists($file_name);
     }
-
     /**
      * Get DB engine
      *
      * @return string
      */
-    public function getDbEngine()
+    public function get_db_engine()
     {
         return $this->_db_engine;
     }
-
     /**
      * Get DB debug info
      */
-    public function getDebug(): array
+    public function get_debug(): array
     {
-        return ['error' => $this->_debugError, 'query' => $this->_debugQuery];
+        return ['error' => $this->_debug_error, 'query' => $this->_debug_query];
     }
-
     /**
      * Get all full text fields from a table
      *
@@ -347,13 +312,13 @@ class Database_Contoller
      * @param string $prefix
      * @return array
      */
-    public function getFulltextIndex($table = 'CubeCart_inventory', $prefix = false): false|array
+    public function get_fulltext_index($table = 'CubeCart_inventory', $prefix = false): false|array
     {
         if (is_array($table)) {
             return false;
         }
         $fieldlist = [];
-        $sql = "SHOW INDEX FROM `{$this->_prefix}$table`;";
+        $sql = "SHOW INDEX FROM `{$this->_prefix}{$table}`;";
         $result = $this->query($sql);
         if ($GLOBALS['config']->has('config', 'search_columns')) {
             $search_cols = $GLOBALS['config']->get('config', 'search_columns');
@@ -365,7 +330,7 @@ class Database_Contoller
                         continue;
                     }
                     if ($prefix) {
-                        $fieldlist[] = $prefix.'.'.$index['Column_name'];
+                        $fieldlist[] = $prefix . '.' . $index['Column_name'];
                     } else {
                         $fieldlist[] = $index['Column_name'];
                     }
@@ -374,24 +339,22 @@ class Database_Contoller
         }
         return $fieldlist;
     }
-
     /**
      * Get the number of rows found
      *
      * @return int
      */
-    public function getFoundRows()
+    public function get_found_rows()
     {
         return $this->_found_rows;
     }
-
     /**
      * Get all rows from a table
      *
      * @param string $query
      * @return array
      */
-    public function getRows($query = false, string $native_prefix = '', $all_tables = false)
+    public function get_rows($query = false, string $native_prefix = '', $all_tables = false)
     {
         // Used in maintenance/backup and database, also in upgrade
         if (!$query) {
@@ -399,51 +362,44 @@ class Database_Contoller
         } else {
             $this->_query = $query;
         }
-
-        $table_match = $this->_prefix.$native_prefix;
-
-        $this->_query .= (empty($table_match) || $all_tables == true) ? '' : " LIKE '".$table_match."%'";
+        $table_match = $this->_prefix . $native_prefix;
+        $this->_query .= empty($table_match) || $all_tables == true ? '' : " LIKE '" . $table_match . "%'";
         $this->_execute(false);
-        $tableNames = $this->_result;
+        $table_names = $this->_result;
         $tables = [];
-        foreach ($tableNames as $tableName) {
-            sort($tableName);
-            $this->_query = "SHOW TABLE STATUS LIKE '".$tableName[0]."'";
+        foreach ($table_names as $table_name) {
+            sort($table_name);
+            $this->_query = "SHOW TABLE STATUS LIKE '" . $table_name[0] . "'";
             $this->_execute(false);
             $tables[] = $this->_result[0];
         }
-
         return $tables ?: false;
     }
-
     /**
      * Gets the size of the ft_min_word_len
      */
-    public function getSearchWordLen(): int
+    public function get_search_word_len(): int
     {
         if ($query = $this->query("SHOW VARIABLES LIKE 'ft_min_word_len'") === false) {
             // Guess at 4 which is default in most cases
             return 4;
         }
         if (isset($query[0]['Value']) && is_numeric($query[0]['Value'])) {
-            return (int)$query[0]['Value'];
+            return (int) $query[0]['Value'];
         }
-
         // Guess at 4 which is default in most cases
         return 4;
     }
-
     /**
      * Returns the query that was run.
      * Good for debug
      *
      * @return string Query
      */
-    public function getQuery()
+    public function get_query()
     {
         return $this->_query;
     }
-
     /**
      * Insert data into a table
      *
@@ -456,26 +412,24 @@ class Database_Contoller
     public function insert($table, $record, $purge = true)
     {
         if (is_array($record)) {
-            $allowed = $this->getFields($table);
+            $allowed = $this->get_fields($table);
             foreach ($record as $field => $value) {
                 if (in_array($field, $allowed) && !is_numeric($field)) {
-                    $fields[] = "`$field`";
-                    $values[] = ($value === 'NULL') ? 'NULL' : $this->sqlSafe($value, true);
+                    $fields[] = "`{$field}`";
+                    $values[] = $value === 'NULL' ? 'NULL' : $this->sql_safe($value, true);
                 }
             }
             if (!empty($fields) && !empty($values)) {
-                $this->_query = "INSERT INTO `{$this->_prefix}$table` (".implode(',', $fields).') VALUES ('.implode(',', $values).');';
+                $this->_query = "INSERT INTO `{$this->_prefix}{$table}` (" . implode(',', $fields) . ') VALUES (' . implode(',', $values) . ');';
                 $this->_execute(false);
-                $affected = ($this->affected() > 0);
+                $affected = $this->affected() > 0;
                 $insert_id = $this->insertid() ?: true;
-                $this->_clearCacheNotice($purge, $affected, $table);
-                return ($affected) ? $insert_id : false;
+                $this->_clear_cache_notice($purge, $affected, $table);
+                return $affected ? $insert_id : false;
             }
         }
-
         return false;
     }
-
     /**
      * Execute a misc query
      *
@@ -488,7 +442,6 @@ class Database_Contoller
         $this->_execute($cache, true, $log);
         return $this->_result;
     }
-
     /**
      * GEt the number of rows
      *
@@ -503,7 +456,6 @@ class Database_Contoller
         $this->_execute($cache);
         return is_array($this->_result) ? count($this->_result) : 0;
     }
-
     /**
      * Create a pagination
      *
@@ -523,19 +475,17 @@ class Database_Contoller
         if ($page == 'all') {
             $page = 1;
             $disable = true;
-            $per_page = (int)GUI::getInstance()->itemsPerPage('products', 'perpage', 'last');
+            $per_page = (int) GUI::get_instance()->items_per_page('products', 'perpage', 'last');
         }
         if ($page == 1) {
             $this->page_one[] = $var_name;
         }
-
         if (!$total_results && !is_null($this->_found_rows) && is_numeric($this->_found_rows)) {
             $total_results = $this->_found_rows;
         }
-
         $GLOBALS['smarty']->assign('TOTAL_RESULTS', $total_results);
         // Lets do some maths...
-        $total_pages = (int)$per_page ? ceil((int)$total_results / (int)$per_page) : 0;
+        $total_pages = (int) $per_page ? ceil((int) $total_results / (int) $per_page) : 0;
         $params = [];
         if ($total_pages > 1) {
             // Get the current query string variables
@@ -544,56 +494,39 @@ class Database_Contoller
                 parse_str($url_elements['query'], $params);
                 unset($params[$var_name], $params['print_hash']);
             }
-            $anchor = ($anchor) ? "#$anchor" : '';
-
-            if (ctype_digit((string)$page)) {
+            $anchor = $anchor ? "#{$anchor}" : '';
+            if (ctype_digit((string) $page)) {
                 if ($page >= $show - 1) {
                     $params[$var_name] = 1;
                 }
                 if ($page > 1) {
-                    $params[$var_name] = (int)$page - 1;
+                    $params[$var_name] = (int) $page - 1;
                 }
-                if ($page < (int)$total_pages) {
-                    $params[$var_name] = (int)$page + 1;
+                if ($page < (int) $total_pages) {
+                    $params[$var_name] = (int) $page + 1;
                 }
             }
-
-            $data = [
-                'anchor'  => $anchor,
-                'current'  => "{$url_elements['path']}?",
-                'page'   => (int)$page,
-                'params'  => $params,
-                'http_params' => http_build_query($params),
-                'show'   => (int)$show,
-                'total'   => (int)$total_pages,
-                'var_name'  => $var_name,
-                'view_all'  => (bool)$view_all,
-                'per_page'  => (int)$per_page,
-                'disable' => $disable,
-            ];
+            $data = ['anchor' => $anchor, 'current' => "{$url_elements['path']}?", 'page' => (int) $page, 'params' => $params, 'http_params' => http_build_query($params), 'show' => (int) $show, 'total' => (int) $total_pages, 'var_name' => $var_name, 'view_all' => (bool) $view_all, 'per_page' => (int) $per_page, 'disable' => $disable];
             $GLOBALS['smarty']->assign($data);
             return $GLOBALS['smarty']->fetch('templates/element.paginate.php');
         }
-
         return false;
     }
-
     /**
      * Parse sql schema
      *
      * @param string $schema
      */
-    public function parseSchema($schema = false): bool
+    public function parse_schema($schema = false): bool
     {
         if (!empty($schema)) {
             $log = null;
-            $queries = preg_split("/;\s?(#EOQ|[\n\r])/i", $schema, -1, PREG_SPLIT_NO_EMPTY);
+            $queries = preg_split("/;\\s?(#EOQ|[\n\r])/i", $schema, -1, PREG_SPLIT_NO_EMPTY);
             if (is_array($queries)) {
-                $default_lang = (isset($_SESSION['setup']['long_lang_identifier']) && !empty($_SESSION['setup']['long_lang_identifier'])) ? $_SESSION['setup']['long_lang_identifier'] : 'en-GB';
-
+                $default_lang = isset($_SESSION['setup']['long_lang_identifier']) && !empty($_SESSION['setup']['long_lang_identifier']) ? $_SESSION['setup']['long_lang_identifier'] : 'en-GB';
                 foreach ($queries as $query) {
                     if (!empty($this->_prefix)) {
-                        $query = str_replace(['CubeCart_', '{%DEFAULT_EN-XX%}'], [$this->_prefix.'CubeCart_', $default_lang], $query);
+                        $query = str_replace(['CubeCart_', '{%DEFAULT_EN-XX%}'], [$this->_prefix . 'CubeCart_', $default_lang], $query);
                     }
                     $query = trim($query);
                     if (!empty($query)) {
@@ -603,10 +536,8 @@ class Database_Contoller
                 return true;
             }
         }
-
         return false;
     }
-
     /**
      * Query DB
      *
@@ -616,31 +547,26 @@ class Database_Contoller
      * @param bool $cache
      * @return result/false
      */
-    public function query(?string $query, $maxRows = false, $page = 0, $cache = true)
+    public function query(?string $query, $max_rows = false, $page = 0, $cache = true)
     {
         if (empty($query)) {
             return false;
         }
         // For old fashioned 'hand written' queries
         $limit = '';
-
-        if (is_numeric($maxRows)) {
+        if (is_numeric($max_rows)) {
             if ($page > 0) {
-                $limit = "LIMIT $maxRows OFFSET ".($page - 1) * $maxRows;
+                $limit = "LIMIT {$max_rows} OFFSET " . ($page - 1) * $max_rows;
+            } else if (strtolower($page) == 'all') {
+                // Don't set a limit - show EVERYTHING
             } else {
-                if (strtolower($page) == 'all') {
-                    // Don't set a limit - show EVERYTHING
-                } else {
-                    $limit = "LIMIT $maxRows";
-                }
+                $limit = "LIMIT {$max_rows}";
             }
         }
-        $this->_query = $query.' '.$limit;
+        $this->_query = $query . ' ' . $limit;
         $this->_execute($cache);
-
-        return (!$this->error()) ? $this->_result : false;
+        return !$this->error() ? $this->_result : false;
     }
-
     /**
      * SELECT query
      *
@@ -654,12 +580,11 @@ class Database_Contoller
      * @param array $cache
      * @return bool $group_by
      */
-    public function select($table, $columns = false, $where = false, $order = false, $maxRows = false, $page = false, $cache = true): array|false
+    public function select($table, $columns = false, $where = false, $order = false, $max_rows = false, $page = false, $cache = true): array|false
     {
         $table_where = $table;
         $distinct = '';
         $exclude_columns = false;
-
         // Support column exclusion: array('-col1', '-col2') means SELECT * minus those columns
         if (is_array($columns)) {
             $excludes = [];
@@ -673,10 +598,9 @@ class Database_Contoller
                 $columns = false;
             }
         }
-
         if (!stristr($table, 'JOIN')) {
             // Build an SQL SELECT query the (almost) easy way
-            $allowed = $this->getFields($table);
+            $allowed = $this->get_fields($table);
             $wrapper = '`';
             $prefix = $this->_prefix;
         } else {
@@ -687,19 +611,18 @@ class Database_Contoller
             $wrapper = '';
             $prefix = '';
         }
-
         if ($columns) {
             if (isset($allowed) && isset($columns) && is_array($allowed) && is_array($columns)) {
                 foreach ($columns as $key => $field) {
                     if (in_array($field, $allowed) && !is_numeric($field)) {
                         if (!is_numeric($key) && in_array(strtoupper(substr($key, 0, 8)), ['DISTINCT'])) {
                             $distinct = 'DISTINCT';
-                            $group_by[] = "`$field`";
-                            $cols[]  = "`$field`";
+                            $group_by[] = "`{$field}`";
+                            $cols[] = "`{$field}`";
                         } elseif (!is_numeric($key) && in_array(strtoupper($key), ['MIN', 'MAX', 'SUM'])) {
-                            $cols[]  = "$key($field) AS {$key}_$field";
+                            $cols[] = "{$key}({$field}) AS {$key}_{$field}";
                         } else {
-                            $cols[]  = "`$field`";
+                            $cols[] = "`{$field}`";
                         }
                     }
                 }
@@ -707,8 +630,7 @@ class Database_Contoller
                 $cols[] = $columns;
             }
         }
-
-        $orderString = null;
+        $order_string = null;
         if ($order) {
             if (is_array($order)) {
                 foreach ($order as $field => $sort) {
@@ -721,55 +643,46 @@ class Database_Contoller
                     if (!in_array($field, $allowed)) {
                         continue;
                     }
-                    $orderArray[] = "`$field` ".$this->sqlSafe($sort);
+                    $order_array[] = "`{$field}` " . $this->sql_safe($sort);
                 }
-                if (isset($orderArray) && is_array($orderArray)) {
-                    $orderString = 'ORDER BY '.implode(', ', $orderArray);
+                if (isset($order_array) && is_array($order_array)) {
+                    $order_string = 'ORDER BY ' . implode(', ', $order_array);
                 }
             } else {
-                $orderString = 'ORDER BY '.str_ireplace('ORDER BY', '', $this->sqlSafe($order));
+                $order_string = 'ORDER BY ' . str_ireplace('ORDER BY', '', $this->sql_safe($order));
             }
         }
-
         if (!$columns || !isset($cols)) {
             $cols[] = '*';
         }
-
-        $limit  = null;
+        $limit = null;
         $calc_rows = false;
-
-        if (is_numeric($maxRows)) {
+        if (is_numeric($max_rows)) {
             $calc_rows = true;
             if (is_numeric($page) && $page > 0) {
-                $limit = "LIMIT $maxRows OFFSET ".($page - 1) * $maxRows;
+                $limit = "LIMIT {$max_rows} OFFSET " . ($page - 1) * $max_rows;
+            } else if (strtolower($page) == 'all') {
+                // Don't set a limit - show EVERYTHING
             } else {
-                if (strtolower($page) == 'all') {
-                    // Don't set a limit - show EVERYTHING
-                } else {
-                    $limit = "LIMIT $maxRows";
-                }
+                $limit = "LIMIT {$max_rows}";
             }
         }
-
-        $group = (isset($group_by) && is_array($group_by)) ? 'GROUP BY '.implode(',', $group_by) : '';
-
-        $parent_query = "SELECT $distinct ".implode(', ', $cols)." FROM $wrapper{$prefix}$table$wrapper ".$this->where($table_where, $where)." $group $orderString $limit;";
+        $group = isset($group_by) && is_array($group_by) ? 'GROUP BY ' . implode(',', $group_by) : '';
+        $parent_query = "SELECT {$distinct} " . implode(', ', $cols) . " FROM {$wrapper}{$prefix}{$table}{$wrapper} " . $this->where($table_where, $where) . " {$group} {$order_string} {$limit};";
         $this->_query = $parent_query;
-
         $this->_execute($cache);
-
         if (is_array($this->_result) && count($this->_result) >= 1) {
             $output = $this->_result;
-            if ($maxRows == 1) {
+            if ($max_rows == 1) {
                 $this->_found_rows = 1;
             } else {
-                $count_query = "SELECT $distinct COUNT(*) AS `Count` FROM $wrapper{$prefix}$table$wrapper ".$this->where($table_where, $where)." $group;";
-                if ($count = $this->_getCached($count_query)) {
+                $count_query = "SELECT {$distinct} COUNT(*) AS `Count` FROM {$wrapper}{$prefix}{$table}{$wrapper} " . $this->where($table_where, $where) . " {$group};";
+                if ($count = $this->_get_cached($count_query)) {
                     $this->_found_rows = $count;
                 } else {
                     $count = $this->misc($count_query);
-                    $this->_found_rows = (count($count) > 1) ? count($count) : $count[0]['Count'];
-                    $this->_writeCache($count, $count_query);
+                    $this->_found_rows = count($count) > 1 ? count($count) : $count[0]['Count'];
+                    $this->_write_cache($count, $count_query);
                 }
             }
             // Strip excluded columns from results
@@ -787,7 +700,6 @@ class Database_Contoller
         }
         return false;
     }
-
     /**
      * Dump SQL data
      *
@@ -797,52 +709,50 @@ class Database_Contoller
      * @param bool $incRows
      * @return false
      */
-    public function sqldumptable($file_name, $tableData, $dropTables = false, $incStructure = true, $incRows = true, $maxRows = 50, $page = 1): bool
+    public function sqldumptable($file_name, $table_data, $drop_tables = false, $inc_structure = true, $inc_rows = true, $max_rows = 50, $page = 1): bool
     {
         $fp = fopen($file_name, 'a+');
-        if ($dropTables) {
-            fwrite($fp, "-- --------------------------------------------------------\n\nDROP TABLE IF EXISTS `".$tableData['Name']."`; #EOQ\n\n");
+        if ($drop_tables) {
+            fwrite($fp, "-- --------------------------------------------------------\n\nDROP TABLE IF EXISTS `" . $table_data['Name'] . "`; #EOQ\n\n");
         }
-        if ($incStructure) {
-            $schema	= $this->query('SHOW CREATE TABLE `'.$tableData['Name'].'`');
-            fwrite($fp, "-- --------------------------------------------------------\n\n-- \n-- Table structure for table `".$tableData['Name']."`\n--\n\n");
+        if ($inc_structure) {
+            $schema = $this->query('SHOW CREATE TABLE `' . $table_data['Name'] . '`');
+            fwrite($fp, "-- --------------------------------------------------------\n\n-- \n-- Table structure for table `" . $table_data['Name'] . "`\n--\n\n");
             fwrite($fp, (string) $schema[0]['Create Table']);
             fwrite($fp, "; #EOQ\n\n");
         }
-        if ($incRows) {
-            $hasData = false;
+        if ($inc_rows) {
+            $has_data = false;
             while (true) {
-                $offset = ($page - 1) * $maxRows;
-                $this->_query = 'SELECT * FROM `'.$tableData['Name']."` LIMIT $maxRows OFFSET $offset";
+                $offset = ($page - 1) * $max_rows;
+                $this->_query = 'SELECT * FROM `' . $table_data['Name'] . "` LIMIT {$max_rows} OFFSET {$offset}";
                 $this->_execute(false);
-
                 if (!$this->_result) {
                     break;
                 }
                 if ($page === 1) {
-                    fwrite($fp, "--\n-- Dumping data for table `".$tableData['Name']."`\n--\n\n");
+                    fwrite($fp, "--\n-- Dumping data for table `" . $table_data['Name'] . "`\n--\n\n");
                 }
-                $hasData = true;
+                $has_data = true;
                 foreach ($this->_result as $row) {
-                    fwrite($fp, 'INSERT INTO `'.$tableData['Name'].'` VALUES(');
+                    fwrite($fp, 'INSERT INTO `' . $table_data['Name'] . '` VALUES(');
                     $comma = false;
                     foreach ($row as $value) {
                         fwrite($fp, $comma ? ', ' : '');
-                        fwrite($fp, is_null($value) ? 'NULL' : $this->sqlSafe($value, true));
+                        fwrite($fp, is_null($value) ? 'NULL' : $this->sql_safe($value, true));
                         $comma = true;
                     }
                     fwrite($fp, "); #EOQ\n");
                 }
                 $page++;
             }
-            if (!$hasData) {
-                fwrite($fp, '-- Table `'.$tableData['Name']."` has no data\n\n");
+            if (!$has_data) {
+                fwrite($fp, '-- Table `' . $table_data['Name'] . "` has no data\n\n");
             }
         }
         fclose($fp);
         return false;
     }
-
     /**
      * Strip slashes
      *
@@ -855,10 +765,8 @@ class Database_Contoller
         if (!is_null($input) && !preg_match('#^\w:\d+:\{(.+)\}$#su', $input)) {
             return stripslashes($input);
         }
-
         return $input;
     }
-
     /**
      * TRUNCATE table
      *
@@ -870,19 +778,17 @@ class Database_Contoller
         if (is_array($input)) {
             $result = true;
             foreach ($input as $table) {
-                $this->_query = 'TRUNCATE `'.$this->_prefix.$table.'`; ';
+                $this->_query = 'TRUNCATE `' . $this->_prefix . $table . '`; ';
                 if (!$this->_execute(false)) {
                     $result = false;
                 }
             }
         } else {
-            $this->_query = 'TRUNCATE `'.$this->_prefix.$input.'`; ';
+            $this->_query = 'TRUNCATE `' . $this->_prefix . $input . '`; ';
             $result = $this->_execute(false);
         }
-
         return $result;
     }
-
     /**
      * Update table
      *
@@ -896,28 +802,27 @@ class Database_Contoller
     {
         $skip_math_fields = is_array($skip_math_fields) ? array_merge($skip_math_fields, $this->_skip_math_fields) : $this->_skip_math_fields;
         if (is_array($record)) {
-            $allowed = $this->getFields($table);
+            $allowed = $this->get_fields($table);
             foreach ($record as $field => $value) {
                 if (in_array($field, $allowed) && !is_numeric($field)) {
-                    if (($number = substr((string)$value, 1)) && is_numeric($number) && $skip_math_fields !== 'all' && !in_array($field, $skip_math_fields) && isset($value[0]) && ($value[0] == '+' || $value[0] == '-')) {
-                        $set[] = "`$field` = `$field` {$value[0]} ".$number;
+                    if (($number = substr((string) $value, 1)) && is_numeric($number) && $skip_math_fields !== 'all' && !in_array($field, $skip_math_fields) && isset($value[0]) && ($value[0] == '+' || $value[0] == '-')) {
+                        $set[] = "`{$field}` = `{$field}` {$value[0]} " . $number;
                     } else {
-                        $value = (in_array($value, $this->_allowed_exceptions, true)) ? $value : $this->sqlSafe($value, true);
-                        $set[] = "`$field` = $value";
+                        $value = in_array($value, $this->_allowed_exceptions, true) ? $value : $this->sql_safe($value, true);
+                        $set[] = "`{$field}` = {$value}";
                     }
                 }
             }
             if (!empty($set)) {
-                $this->_query = "UPDATE `{$this->_prefix}$table` SET ".implode(',', $set).'  '.$this->where($table, $where).';';
+                $this->_query = "UPDATE `{$this->_prefix}{$table}` SET " . implode(',', $set) . '  ' . $this->where($table, $where) . ';';
                 $result = $this->_execute(false);
-                $affected = ($this->affected() > 0);
-                $this->_clearCacheNotice($purge, $affected, $table);
-                return (bool)$result;
+                $affected = $this->affected() > 0;
+                $this->_clear_cache_notice($purge, $affected, $table);
+                return (bool) $result;
             }
         }
         return false;
     }
-
     /**
      * Builds a WHERE string
      *
@@ -925,18 +830,18 @@ class Database_Contoller
      * @param string $label optional table alias used to disambiguate fields
      * @return string
      */
-    public function where(string $table, $whereArray = null, $label = false)
+    public function where(string $table, $where_array = null, $label = false)
     {
-        if (!empty($whereArray)) {
-            if (is_array($whereArray)) {
-                $allowed = $this->getFields($table);
-                foreach ($whereArray as $key => $value) {
+        if (!empty($where_array)) {
+            if (is_array($where_array)) {
+                $allowed = $this->get_fields($table);
+                foreach ($where_array as $key => $value) {
                     unset($symbol);
                     if (is_array($value)) {
                         foreach ($value as $val) {
                             if (in_array($val, $allowed) && !is_numeric($val) || preg_match('/CONCAT/', (string) $val)) {
                                 if (isset($key[0]) && !ctype_alnum($key[0]) || $key[0] == 'NULL' || is_null($key[0]) || $key[0] == 'NOT NULL') {
-                                    if (preg_match('#^([<>~\+\-]=?|!=)(.+)#', (string)$key, $match)) {
+                                    if (preg_match('#^([<>~\+\-]=?|!=)(.+)#', (string) $key, $match)) {
                                         switch ($match[1]) {
                                             case '~':
                                                 // Fuzzy searching
@@ -949,18 +854,16 @@ class Database_Contoller
                                         }
                                     }
                                 }
-
-                                $val_ = preg_match('/CONCAT/', (string) $val) ? $val : "`$val`";
-
+                                $val_ = preg_match('/CONCAT/', (string) $val) ? $val : "`{$val}`";
                                 if (strtoupper($key[0]) == 'NULL' || is_null($key[0])) {
                                     $symbol = 'IS NULL';
-                                    $where[] = "$val_ $symbol";
+                                    $where[] = "{$val_} {$symbol}";
                                 } elseif (strtoupper($key[0]) == 'NOT NULL') {
                                     $symbol = 'IS NOT NULL';
-                                    $where[] = "$val_ $symbol";
+                                    $where[] = "{$val_} {$symbol}";
                                 } else {
                                     $symbol ??= '=';
-                                    $or[] = "$val_ $symbol ".$this->sqlSafe($key, true);
+                                    $or[] = "{$val_} {$symbol} " . $this->sql_safe($key, true);
                                 }
                             } else {
                                 foreach ($value as $i => $val) {
@@ -971,25 +874,25 @@ class Database_Contoller
                                 if (count($value) > 0) {
                                     if ($key[0] == '!') {
                                         $modifier = 'NOT';
-                                        $key  = substr((string) $key, 1);
+                                        $key = substr((string) $key, 1);
                                     } else {
                                         $modifier = '';
                                     }
-                                    $or[] = "`$key` $modifier IN (".implode(',', $value).')';
+                                    $or[] = "`{$key}` {$modifier} IN (" . implode(',', $value) . ')';
                                 }
                                 break;
                             }
                         }
                         if (isset($or) && is_array($or)) {
-                            $where[] = '('.implode(' OR ', $or).')';
+                            $where[] = '(' . implode(' OR ', $or) . ')';
                             unset($or);
                         }
                     } else {
                         // Remove column label so that it can correctly check against table columns
-                        $key = (is_string($key) && $label ? preg_replace("/^$label\./", '', $key, 1) : $key);
+                        $key = is_string($key) && $label ? preg_replace("/^{$label}\\./", '', $key, 1) : $key;
                         if (is_array($allowed) && in_array($key, $allowed) && !is_numeric($key)) {
-                            if (isset($value) && !ctype_alnum((string)$value) || $value == 'NULL' || is_null($value) || $value == 'NOT NULL') {
-                                if (preg_match('#^([<>!~\+\-]=?)(.+)#', (string)$value, $match)) {
+                            if (isset($value) && !ctype_alnum((string) $value) || $value == 'NULL' || is_null($value) || $value == 'NOT NULL') {
+                                if (preg_match('#^([<>!~\+\-]=?)(.+)#', (string) $value, $match)) {
                                     switch ($match[1]) {
                                         case '~':
                                             // Fuzzy searching
@@ -1002,112 +905,95 @@ class Database_Contoller
                                     }
                                 }
                             }
-
                             // Be sure to re-add column identifier if it was given; otherwise, use table name
-                            $full_key = ($label ?: $this->_prefix.$table).'.'.$key;
-
-                            if (strtoupper((string)$value) == 'NULL' || is_null($value)) {
+                            $full_key = ($label ?: $this->_prefix . $table) . '.' . $key;
+                            if (strtoupper((string) $value) == 'NULL' || is_null($value)) {
                                 $symbol = 'IS NULL';
                                 //$where[] = "`$key` $symbol";
-                                $where[] = "$full_key $symbol";
+                                $where[] = "{$full_key} {$symbol}";
                             } elseif (strtoupper((string) $value) == 'NOT NULL') {
                                 $symbol = 'IS NOT NULL';
                                 //$where[] = "`$key` $symbol";
-                                $where[] = "$full_key $symbol";
+                                $where[] = "{$full_key} {$symbol}";
                             } else {
                                 $symbol ??= '=';
                                 //$where[] = "`$key` $symbol ".$this->sqlSafe($value,true);
-                                $where[] = "$full_key $symbol ".$this->sqlSafe($value, true);
+                                $where[] = "{$full_key} {$symbol} " . $this->sql_safe($value, true);
                             }
                         } else {
-                            trigger_error("`$key` is not allowed as a key in '$table' table!");
+                            trigger_error("`{$key}` is not allowed as a key in '{$table}' table!");
                         }
                     }
                 }
-                return (!empty($where)) ? 'WHERE '.implode(' AND ', $where) : false;
+                return !empty($where) ? 'WHERE ' . implode(' AND ', $where) : false;
             }
-            return 'WHERE '.trim($whereArray);
+            return 'WHERE ' . trim($where_array);
         }
-
         return false;
     }
-
     //=====[ Private ]=======================================
-
     /**
      * Do we need to recommend a cache clear?
      */
-    private function _clearCacheNotice($purge, bool $affected, $table): void
+    private function _clear_cache_notice($purge, bool $affected, $table): void
     {
-        if (CC_IN_ADMIN && $purge && $affected && is_object($GLOBALS['session']) && method_exists($GLOBALS['session'], 'set')
-            && !$GLOBALS['session']->has('CLEAR_CACHE')
-            && (int)$GLOBALS['session']->get('logins', 'admin_data') <= 3
-            && in_array($table, $this->cache_notice_tables)) {
-            $GLOBALS['main']->successMessage($GLOBALS['language']->dashboard['cache_reminder'], false);
+        if (CC_IN_ADMIN && $purge && $affected && is_object($GLOBALS['session']) && method_exists($GLOBALS['session'], 'set') && !$GLOBALS['session']->has('CLEAR_CACHE') && (int) $GLOBALS['session']->get('logins', 'admin_data') <= 3 && in_array($table, $this->cache_notice_tables)) {
+            $GLOBALS['main']->success_message($GLOBALS['language']->dashboard['cache_reminder'], false);
             $GLOBALS['session']->set('CLEAR_CACHE', true);
         }
     }
-
     /**
      * Get cached query
      *
      * @param string $query
      * @return data/false
      */
-    protected function _getCached($query)
+    protected function _get_cached($query)
     {
         $this->_cached = false;
-
         if (isset($GLOBALS['cache']) && is_object($GLOBALS['cache'])) {
             $this->_cached = true;
             return $GLOBALS['cache']->read($query);
         }
-
         return false;
     }
-
     /**
      * Log SQL errors
      */
-    protected function _logError()
+    protected function _log_error()
     {
         $trace = debug_backtrace();
-        Database::getInstance()->insert('CubeCart_system_error_log', ['message' => 'File: ['.basename($trace[2]['file']).'] Line: ['.$trace[2]['line'].'] "'.$this->_query.'" - '.$this->errorInfo(), 'time' => time()]);
+        Database::get_instance()->insert('CubeCart_system_error_log', ['message' => 'File: [' . basename($trace[2]['file']) . '] Line: [' . $trace[2]['line'] . '] "' . $this->_query . '" - ' . $this->error_info(), 'time' => time()]);
     }
-
     /**
      * Sql debug
      *
      * @return bool
      */
-    protected function _sqlDebug($cache, $source)
+    protected function _sql_debug($cache, $source)
     {
         if (isset($GLOBALS['debug']) && $GLOBALS['debug'] instanceof Debug) {
             $message = [$this->_query, round($this->_query_time * 1000 * 1000) . ' &micro;s'];
-            $GLOBALS['debug']->debugSQL('query', $message, $cache, $source);
-            $this->_error = ($this->error()) ? $this->_errorno . ': '.$this->errorInfo() : false;
-            $GLOBALS['debug']->debugSQL('error', $this->_error, $cache, $source);
+            $GLOBALS['debug']->debug_sql('query', $message, $cache, $source);
+            $this->_error = $this->error() ? $this->_errorno . ': ' . $this->error_info() : false;
+            $GLOBALS['debug']->debug_sql('error', $this->_error, $cache, $source);
         }
-
         return $this->error();
     }
-
     /**
      * Starts a timer for a query
      */
-    protected function _startTimer()
+    protected function _start_timer()
     {
         $this->_query_time = microtime(true);
     }
-
     /**
      * Stops a timer
      */
-    protected function _stopTimer()
+    protected function _stop_timer()
     {
         $this->_query_time = microtime(true) - $this->_query_time;
     }
-
     /**
      * Write data to cached query
      *
@@ -1115,7 +1001,7 @@ class Database_Contoller
      * @param string $query
      * @return bool
      */
-    protected function _writeCache($data, $query)
+    protected function _write_cache($data, $query)
     {
         if (isset($GLOBALS['cache']) && is_object($GLOBALS['cache'])) {
             return $GLOBALS['cache']->write($data, $query);

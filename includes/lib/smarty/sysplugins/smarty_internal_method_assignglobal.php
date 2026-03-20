@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method AssignGlobal
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_AssignGlobal
+class Smarty_internal_method_assign_Global
 {
     /**
      * Valid for all objects
      *
      * @var int
      */
-    public $objMap = 7;
-
+    public $obj_map = 7;
     /**
      * assigns a global Smarty variable
      *
@@ -31,13 +29,13 @@ class Smarty_Internal_Method_AssignGlobal
      *
      * @return \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty
      */
-    public function assignGlobal(Smarty_Internal_Data $data, $varName, $value = null, $nocache = false)
+    public function assign_global(Smarty_Internal_Data $data, $var_name, $value = null, $nocache = false)
     {
-        if ($varName !== '') {
-            Smarty::$global_tpl_vars[ $varName ] = new Smarty_Variable($value, $nocache);
+        if ($var_name !== '') {
+            Smarty::$global_tpl_vars[$var_name] = new Smarty_Variable($value, $nocache);
             $ptr = $data;
-            while ($ptr->_isTplObj()) {
-                $ptr->tpl_vars[ $varName ] = clone Smarty::$global_tpl_vars[ $varName ];
+            while ($ptr->_is_tpl_obj()) {
+                $ptr->tpl_vars[$var_name] = clone Smarty::$global_tpl_vars[$var_name];
                 $ptr = $ptr->parent;
             }
         }

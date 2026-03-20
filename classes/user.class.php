@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 /**
  * User controller
  *
@@ -25,102 +24,40 @@ class User
     /**
      * Is bot?
      */
-    private ?bool $_bot   = null;
+    private ?bool $_bot = null;
     /**
      * Bot signatures
      *
      * @var array of strings
      */
-    protected $_bot_sigs =  [
-        'alexa',
-        'appie',
-        'archiver',
-        'ask jeeves',
-        'baiduspider',
-        'bot',
-        'crawl',
-        'crawler',
-        'curl',
-        'eventbox',
-        'facebookexternal',
-        'fast',
-        'firefly',
-        'froogle',
-        'gigabot',
-        'girafabot',
-        'google',
-        'googlebot',
-        'infoseek',
-        'inktomi',
-        'java',
-        'larbin',
-        'looksmart',
-        'mechanize',
-        'monitor',
-        'msnbot',
-        'nambu',
-        'nationaldirectory',
-        'novarra',
-        'pear',
-        'perl',
-        'python',
-        'rabaz',
-        'radian',
-        'rankivabot',
-        'scooter',
-        'slurp',
-        'sogou web spider',
-        'spade',
-        'sphere',
-        'spider',
-        'technoratisnoop',
-        'tecnoseek',
-        'teoma',
-        'toolbar',
-        'transcoder',
-        'twitt',
-        'url_spider_sql',
-        'webalta',
-        'webbug',
-        'webfindbot',
-        'wordpress',
-        'www.galaxy.com',
-        'yahoo',
-        'yandex',
-        'zyborg',
-    ];
+    protected $_bot_sigs = ['alexa', 'appie', 'archiver', 'ask jeeves', 'baiduspider', 'bot', 'crawl', 'crawler', 'curl', 'eventbox', 'facebookexternal', 'fast', 'firefly', 'froogle', 'gigabot', 'girafabot', 'google', 'googlebot', 'infoseek', 'inktomi', 'java', 'larbin', 'looksmart', 'mechanize', 'monitor', 'msnbot', 'nambu', 'nationaldirectory', 'novarra', 'pear', 'perl', 'python', 'rabaz', 'radian', 'rankivabot', 'scooter', 'slurp', 'sogou web spider', 'spade', 'sphere', 'spider', 'technoratisnoop', 'tecnoseek', 'teoma', 'toolbar', 'transcoder', 'twitt', 'url_spider_sql', 'webalta', 'webbug', 'webfindbot', 'wordpress', 'www.galaxy.com', 'yahoo', 'yandex', 'zyborg'];
     /**
      * Has the user data changed
      */
-    private bool $_changed  = false;
+    private bool $_changed = false;
     /**
      * Logged in
      */
-    private bool $_logged_in  = false;
+    private bool $_logged_in = false;
     /**
      * Users data
      *
      * @var array
      */
-    private $_user_data  = [];
-
+    private $_user_data = [];
     /**
      * Class instance
      *
      * @var instance
      */
     protected static $_instance;
-
     ##############################################
-
     final protected function __construct()
     {
-
         //If there is a login attempt
         if (isset($_POST['username']) && isset($_POST['password']) && !empty($_POST['username']) && !empty($_POST['password'])) {
-
             //Did they check the remember me box
-            $remember = (isset($_POST['remember']) && !empty($_POST['remember'])) ? true : false;
+            $remember = isset($_POST['remember']) && !empty($_POST['remember']) ? true : false;
             $this->authenticate($_POST['username'], $_POST['password'], $remember);
         } else {
             //If there is a cookie for the username and they are not logged in
@@ -134,46 +71,38 @@ class User
                     }
                 }
             }
-
             $this->_load();
             //IS_USER defines if a the user is a valid user on the template
             $GLOBALS['smarty']->assign('IS_USER', $this->is());
-
             if ($this->is() && isset($_POST['mailing_list'])) {
-                Newsletter::getInstance()->subscribe($this->get('email'), $this->getId());
+                Newsletter::get_instance()->subscribe($this->get('email'), $this->get_id());
             }
-
-            $GLOBALS['smarty']->assign('IS_BOT', $this->isBot());
+            $GLOBALS['smarty']->assign('IS_BOT', $this->is_bot());
         }
     }
-
     public function __destruct()
     {
     }
-
     /**
      * Setup the instance (singleton)
      */
-    public static function getInstance(): self
+    public static function get_instance(): self
     {
-        if (!(self::$_instance instanceof self)) {
+        if (!self::$_instance instanceof self) {
             self::$_instance = new self();
         }
-
         return self::$_instance;
     }
-
     //=====[ Public ]=======================================
     /**
      * Increment customer order count by 1
      *
      * @param integer $customer_id
      */
-    public function addOrder($customer_id): bool
+    public function add_order($customer_id): bool
     {
-        return (bool)$GLOBALS['db']->misc('UPDATE `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_customer` SET `order_count` = `order_count` + 1 WHERE `customer_id` = '.(int)$customer_id, false);
+        return (bool) $GLOBALS['db']->misc('UPDATE `' . $GLOBALS['config']->get('config', 'dbprefix') . 'CubeCart_customer` SET `order_count` = `order_count` + 1 WHERE `customer_id` = ' . (int) $customer_id, false);
     }
-
     /**
      * Authenticate a user (ie login)
      *
@@ -185,73 +114,51 @@ class User
      */
     public function authenticate($username, $password, $remember = false, $from_cookie = false, $is_openid = false, $redirect = true): bool
     {
-        $username = (string)$username;
-        $password = (string)$password;
-
+        $username = (string) $username;
+        $password = (string) $password;
         //Check we are not upgrading an unregistered account
         if ($unregistered = $GLOBALS['db']->select('CubeCart_customer', ['customer_id'], ['type' => 2, 'email' => $username, 'status' => true], false, 1, false, false)) {
-            $record = [
-                'type' => 1,
-                'new_password' => 0,
-                'password' => md5($password),
-            ];
-            $GLOBALS['db']->update('CubeCart_customer', $record, ['customer_id' => (int)$unregistered[0]['customer_id']]);
+            $record = ['type' => 1, 'new_password' => 0, 'password' => md5($password)];
+            $GLOBALS['db']->update('CubeCart_customer', $record, ['customer_id' => (int) $unregistered[0]['customer_id']]);
             $this->authenticate($username, $password);
         }
-
         $hash_password = '';
         //Get customer_id, password, and salt for the user
         if (($user = $GLOBALS['db']->select('CubeCart_customer', ['customer_id', 'password', 'salt', 'new_password'], ['type' => 1, 'email' => $username, 'status' => true], false, 1, false, false)) !== false) {
             //If there is no salt we need to make it
             if (empty($user[0]['salt'])) {
                 //Get the salt
-                $salt = Password::getInstance()->createSalt();
+                $salt = Password::get_instance()->create_salt();
                 //Update it to the newer MD5 so we can fix it later
-                $pass = Password::getInstance()->updateOld($user[0]['password'], $salt);
-                $record = [
-                    'salt'   => $salt,
-                    'password'  => $pass,
-                ];
-
+                $pass = Password::get_instance()->update_old($user[0]['password'], $salt);
+                $record = ['salt' => $salt, 'password' => $pass];
                 //Update the DB with the new salt and salted password
-                if ($GLOBALS['db']->update('CubeCart_customer', $record, ['customer_id' => (int)$user[0]['customer_id']])) {
+                if ($GLOBALS['db']->update('CubeCart_customer', $record, ['customer_id' => (int) $user[0]['customer_id']])) {
                     $hash_password = $pass;
                 }
+            } else if ($user[0]['new_password'] == 1) {
+                //Get the salted new password
+                $hash_password = Password::get_instance()->get_salted($password, $user[0]['salt']);
             } else {
-                if ($user[0]['new_password'] == 1) {
-                    //Get the salted new password
-                    $hash_password = Password::getInstance()->getSalted($password, $user[0]['salt']);
-                } else {
-                    //Get the salted old password
-                    $hash_password = Password::getInstance()->getSaltedOld($password, $user[0]['salt']);
-                }
+                //Get the salted old password
+                $hash_password = Password::get_instance()->get_salted_old($password, $user[0]['salt']);
             }
         }
-
         //Try to get the user data with the username and salted password
-        $where = [
-            'email'  => $username,
-            'password' => $hash_password,
-        ];
+        $where = ['email' => $username, 'password' => $hash_password];
         $user = $GLOBALS['db']->select('CubeCart_customer', ['language', 'customer_id', 'email', 'password', 'salt', 'new_password', 'currency'], $where, false, 1, false, false);
-
-        $GLOBALS['session']->blocker($username, (is_array($user)) ? $user[0]['customer_id'] : 0, (bool)$user, Session::BLOCKER_FRONTEND, $GLOBALS['config']->get('config', 'bfattempts'), $GLOBALS['config']->get('config', 'bftime'));
+        $GLOBALS['session']->blocker($username, is_array($user) ? $user[0]['customer_id'] : 0, (bool) $user, Session::BLOCKER_FRONTEND, $GLOBALS['config']->get('config', 'bfattempts'), $GLOBALS['config']->get('config', 'bftime'));
         if (!$user) {
-            $GLOBALS['gui']->setError($GLOBALS['language']->account['error_login']);
+            $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_login']);
         } else {
             $GLOBALS['session']->set('currency', $user[0]['currency'], 'client');
-            $user[0]['language'] = $this->_validLanguage($user[0]['language']);
+            $user[0]['language'] = $this->_valid_language($user[0]['language']);
             if ($user[0]['new_password'] != 1) {
-                $salt = Password::getInstance()->createSalt();
-                $pass = Password::getInstance()->getSalted($password, $salt);
-                $record = [
-                    'salt'   => $salt,
-                    'password'  => $pass,
-                    'new_password' => 1,
-                ];
-
+                $salt = Password::get_instance()->create_salt();
+                $pass = Password::get_instance()->get_salted($password, $salt);
+                $record = ['salt' => $salt, 'password' => $pass, 'new_password' => 1];
                 //Update the DB with the new salt and salted password
-                if (($GLOBALS['db']->update('CubeCart_customer', $record, ['customer_id' => (int)$user[0]['customer_id']])) === false) {
+                if ($GLOBALS['db']->update('CubeCart_customer', $record, ['customer_id' => (int) $user[0]['customer_id']]) === false) {
                     trigger_error('Could not update password', E_USER_ERROR);
                 }
             }
@@ -262,25 +169,21 @@ class User
                  * The password cookie is not stored to make stores more secure
                  */
                 if ($remember || $from_cookie) {
-                    $GLOBALS['session']->set_cookie('cc_username', $user[0]['email'], time() + (3600 * 24 * 30));
+                    $GLOBALS['session']->set_cookie('cc_username', $user[0]['email'], time() + 3600 * 24 * 30);
                 }
                 if (!$GLOBALS['session']->blocked()) {
                     // possibly replaceable with session_set_save_handler?
-                    $GLOBALS['session']->regenerateSessionId();
-                    $GLOBALS['db']->update('CubeCart_sessions', ['customer_id' => $user[0]['customer_id']], ['session_id' => $GLOBALS['session']->getId()]);
-                    $GLOBALS['db']->update('CubeCart_cookie_consent', ['customer_id' => $user[0]['customer_id']], ['session_id' => $GLOBALS['session']->getId()]);
+                    $GLOBALS['session']->regenerate_session_id();
+                    $GLOBALS['db']->update('CubeCart_sessions', ['customer_id' => $user[0]['customer_id']], ['session_id' => $GLOBALS['session']->get_id()]);
+                    $GLOBALS['db']->update('CubeCart_cookie_consent', ['customer_id' => $user[0]['customer_id']], ['session_id' => $GLOBALS['session']->get_id()]);
                     $GLOBALS['session']->set('language', $user[0]['language'], 'client');
                     // Load user data
                     $this->_load();
-
                     $pass_len = strlen($password);
-
                     if ($pass_len > 0 && $pass_len < 6) {
-                        $GLOBALS['gui']->setInfo($GLOBALS['language']->account['error_pass_length']);
+                        $GLOBALS['gui']->set_info($GLOBALS['language']->account['error_pass_length']);
                     }
-
                     $GLOBALS['session']->set('check_autoload', true);
-
                     if ($redirect) {
                         //Check for a redirect
                         $redir = '';
@@ -293,21 +196,18 @@ class User
                         } elseif ($GLOBALS['session']->has('back')) {
                             $redir = $GLOBALS['session']->get('back');
                         }
-
                         foreach ($GLOBALS['hooks']->load('class.user.preredirect') as $hook) {
                             include $hook;
                         }
-
                         //If there is a redirect
                         if (!empty($redir)) {
                             // Prevent phishing attacks, or anything untoward, unless it's redirecting back to this store
-                            if (!$GLOBALS['ssl']->validRedirect($redir)) {
-                                trigger_error("Possible Phishing attack - Redirection to '".$redir."' is not allowed. Please check the value of 'Store URL' in the SSL section of your store settings.", E_USER_ERROR);
+                            if (!$GLOBALS['ssl']->valid_redirect($redir)) {
+                                trigger_error("Possible Phishing attack - Redirection to '" . $redir . "' is not allowed. Please check the value of 'Store URL' in the SSL section of your store settings.", E_USER_ERROR);
                             }
                         } else {
                             $remove = ['redir'];
                         }
-
                         if (!empty($redir)) {
                             //Clean up
                             if ($GLOBALS['session']->has('back')) {
@@ -319,20 +219,19 @@ class User
                             //Send to redirect
                             httpredir($redir);
                         } else {
-                            httpredir(currentPage($remove));
+                            httpredir(current_page($remove));
                         }
                     }
                     return true;
                 }
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_login_block']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_login_block']);
             }
         }
         return false;
     }
-
-    public function addressCompare($address1, $address2): string
+    public function address_compare($address1, $address2): string
     {
-        $allowed_keys = ['line1','line2','town','postcode','state_id','state','state_abbrev','country','country_id','country_iso','country_name'];
+        $allowed_keys = ['line1', 'line2', 'town', 'postcode', 'state_id', 'state', 'state_abbrev', 'country', 'country_id', 'country_iso', 'country_name'];
         $address1_filtered = [];
         foreach ($address1 as $key => $value) {
             if (in_array($key, $allowed_keys)) {
@@ -345,43 +244,39 @@ class User
                 $address2_filtered[$key] = strtolower((string) $value);
             }
         }
-        return md5(serialize($address1_filtered).serialize($address2_filtered));
+        return md5(serialize($address1_filtered) . serialize($address2_filtered));
     }
-
     /**
      * Change a user password
      */
-    public function changePassword(): bool
+    public function change_password(): bool
     {
         //If everything lines up
-        if (Password::getInstance()->getSalted($_POST['passold'], $this->_user_data['salt']) == $this->_user_data['password']) {
-
+        if (Password::get_instance()->get_salted($_POST['passold'], $this->_user_data['salt']) == $this->_user_data['password']) {
             if ($_POST['passnew'] !== $_POST['passconf']) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_mismatch']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_mismatch']);
                 return false;
             }
             if (strlen((string) $_POST['passnew']) < 6) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_length']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_length']);
                 return false;
             }
             if (strlen((string) $_POST['passnew']) > 64) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_length_max']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_length_max']);
                 return false;
             }
-
             //Change it
-            $record = ['password' => Password::getInstance()->getSalted($_POST['passnew'], $this->_user_data['salt'])];
-            if ($GLOBALS['db']->update('CubeCart_customer', $record, ['customer_id' => (int)$this->_user_data['customer_id']], true)) {
+            $record = ['password' => Password::get_instance()->get_salted($_POST['passnew'], $this->_user_data['salt'])];
+            if ($GLOBALS['db']->update('CubeCart_customer', $record, ['customer_id' => (int) $this->_user_data['customer_id']], true)) {
                 $this->_user_data['password'] = $record['password'];
                 return true;
             }
-            $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_update']);
+            $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_update']);
             return false;
         }
-        $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_update_mismatch']);
+        $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_update_mismatch']);
         return false;
     }
-
     /**
      * Manually create a user
      *
@@ -390,34 +285,30 @@ class User
      * @param int $type
      * @return customer_id/false
      */
-    public function createUser($data, $login = false, $type = 1)
+    public function create_user($data, $login = false, $type = 1)
     {
         if (!empty($data)) {
             // Insert record(s)
             $data['new_password'] = '0';
-            $data['ip_address']  = get_ip_address();
-
+            $data['ip_address'] = get_ip_address();
             $data = array_map(trim(...), $data);
-
             foreach ($data as $key => $value) {
                 $data[$key] = htmlspecialchars(html_entity_decode($value));
             }
-
             if ($existing = $GLOBALS['db']->select('CubeCart_customer', 'customer_id', ['email' => $data['email']], false, 1, false, false)) {
                 $GLOBALS['db']->update('CubeCart_customer', $data, ['email' => $data['email']]);
                 $customer_id = $existing[0]['customer_id'];
             } else {
-                $data['registered']  = time();
-                $data['type']    = $type;
-                $data['language']    = $GLOBALS['language']->current();
-
-                $customer_id = $this->_validCustomerId();
+                $data['registered'] = time();
+                $data['type'] = $type;
+                $data['language'] = $GLOBALS['language']->current();
+                $customer_id = $this->_valid_customer_id();
                 if ($customer_id) {
-                    $data['customer_id']  = $customer_id;
+                    $data['customer_id'] = $customer_id;
                 }
                 $customer_id = $GLOBALS['db']->insert('CubeCart_customer', $data);
                 if ($type == 2) {
-                    $this->setGhostId($customer_id);
+                    $this->set_ghost_id($customer_id);
                 }
             }
             if ($login) {
@@ -428,13 +319,12 @@ class User
         }
         return false;
     }
-
     /**
      * Delete an address from the address book
      *
      * @param array/address_id $delete
      */
-    public function deleteAddress($delete): bool
+    public function delete_address($delete): bool
     {
         if ($this->is()) {
             $where['customer_id'] = $this->_user_data['customer_id'];
@@ -442,70 +332,55 @@ class User
                 foreach ($delete as $address) {
                     $where['address_id'] = $address;
                     $GLOBALS['db']->delete('CubeCart_addressbook', $where);
-                    $this->_deleteBasketAddress($address);
+                    $this->_delete_basket_address($address);
                 }
             } else {
                 $where['address_id'] = $delete;
                 $GLOBALS['db']->delete('CubeCart_addressbook', $where);
-                $this->_deleteBasketAddress($address);
+                $this->_delete_basket_address($address);
             }
-
             return true;
         }
-
         return false;
     }
-
     /**
      * Format address array
      *
      * @param array
      * @return array
      */
-    public function formatAddress($address = [], $user_defined = true, $estimate = false)
+    public function format_address($address = [], $user_defined = true, $estimate = false)
     {
         if (!$user_defined && !is_array($address)) {
             if ($GLOBALS['config']->get('config', 'disable_estimates') == '1') {
-                $address = [
-                    'postcode' => '',
-                    'country' => '',
-                    'state' => '',
-                ];
+                $address = ['postcode' => '', 'country' => '', 'state' => ''];
             } else {
-                $address = [
-                    'postcode' => $GLOBALS['config']->get('config', 'store_postcode'),
-                    'country' => $GLOBALS['config']->get('config', 'store_country'),
-                    'state' => $GLOBALS['config']->get('config', 'store_zone'),
-                ];
+                $address = ['postcode' => $GLOBALS['config']->get('config', 'store_postcode'), 'country' => $GLOBALS['config']->get('config', 'store_country'), 'state' => $GLOBALS['config']->get('config', 'store_zone')];
             }
         }
-
         $state_field = is_numeric($address['state']) ? 'id' : 'name';
-
         // Check state
-        $country_id = getCountryFormat($address['country'], 'numcode', 'id');
+        $country_id = get_country_format($address['country'], 'numcode', 'id');
         // Is state required for this country?!
         if ($GLOBALS['db']->select('CubeCart_geo_country', false, ['id' => $country_id, 'status' => 1])) {
-            if ($user_defined && !CC_IN_ADMIN && $_GET['_a'] !== 'addressbook' && ((empty($address['state']) && !empty($address['country'])) || ($GLOBALS['db']->select('CubeCart_geo_zone', false, [$state_field => $address['state'], 'status' => 1]) == false) && $GLOBALS['db']->select('CubeCart_geo_zone', false, ['country_id' => $country_id, 'status' => 1]))) {
-                $address_description = empty($address['description']) ? '' : ' (&quot;'.$address['description'].'&quot;)';
-                $GLOBALS['gui']->setError(sprintf($GLOBALS['language']->address['check_state'], $address_description));
-                httpredir('?_a=addressbook&action=edit&address_id='.$address['address_id']);
+            if ($user_defined && !CC_IN_ADMIN && $_GET['_a'] !== 'addressbook' && (empty($address['state']) && !empty($address['country']) || $GLOBALS['db']->select('CubeCart_geo_zone', false, [$state_field => $address['state'], 'status' => 1]) == false && $GLOBALS['db']->select('CubeCart_geo_zone', false, ['country_id' => $country_id, 'status' => 1]))) {
+                $address_description = empty($address['description']) ? '' : ' (&quot;' . $address['description'] . '&quot;)';
+                $GLOBALS['gui']->set_error(sprintf($GLOBALS['language']->address['check_state'], $address_description));
+                httpredir('?_a=addressbook&action=edit&address_id=' . $address['address_id']);
                 return false;
             }
         }
-
-        $address['state_id']  = getStateFormat($address['state'], $state_field, 'id');
-        $address['country_id']  = $address['country'];
-        $address['country']   = getCountryFormat($address['country_id']);
-        $address['state_abbrev'] = getStateFormat($address['state'], $state_field, 'abbrev');
-        $address['country_iso']  = getCountryFormat($address['country_id'], 'numcode', 'iso');
-        $address['country_iso3'] = getCountryFormat($address['country_id'], 'numcode', 'iso3');
-        $address['state']   = getStateFormat($address['state_id']);
+        $address['state_id'] = get_state_format($address['state'], $state_field, 'id');
+        $address['country_id'] = $address['country'];
+        $address['country'] = get_country_format($address['country_id']);
+        $address['state_abbrev'] = get_state_format($address['state'], $state_field, 'abbrev');
+        $address['country_iso'] = get_country_format($address['country_id'], 'numcode', 'iso');
+        $address['country_iso3'] = get_country_format($address['country_id'], 'numcode', 'iso3');
+        $address['state'] = get_state_format($address['state_id']);
         $address['user_defined'] = $user_defined;
         $address['estimate'] = $estimate;
         return $address;
     }
-
     /**
      * Get an element or all the user data
      *
@@ -517,7 +392,6 @@ class User
         if (!$this->is()) {
             return false;
         }
-
         //If there is a field
         if (!empty($field)) {
             //Send just that field
@@ -526,14 +400,13 @@ class User
         //Send all the user data
         return $this->_user_data;
     }
-
     /**
      * Convert John Smith <john.smith@example.org> to array of parts
      *
      * @param string $input
      * @return false/array
      */
-    public static function getEmailAddressParts($input): false|array
+    public static function get_email_address_parts($input): false|array
     {
         if (filter_var($input, FILTER_VALIDATE_EMAIL)) {
             $email = $input;
@@ -549,14 +422,13 @@ class User
         }
         return ['name' => $name, 'email' => $email];
     }
-
     /**
      * Get address information
      *
      * @param int $address_id
      * @return array/false
      */
-    public function getAddress($address_id, $format = false)
+    public function get_address($address_id, $format = false)
     {
         if (!$this->is()) {
             return false;
@@ -565,18 +437,17 @@ class User
             return false;
         }
         if ($format) {
-            return $this->formatAddress($raw_address[0]);
+            return $this->format_address($raw_address[0]);
         }
         return $raw_address[0];
     }
-
     /**
      * Get all addresses
      *
      * @param bool $show_all
      * @return array/false
      */
-    public function getAddresses($show_all = true): array|false
+    public function get_addresses($show_all = true): array|false
     {
         if ($this->is()) {
             $where['customer_id'] = $this->_user_data['customer_id'];
@@ -585,90 +456,80 @@ class User
             }
             if (($addresses = $GLOBALS['db']->select('CubeCart_addressbook', false, $where, 'billing DESC', false, false, false)) !== false) {
                 foreach ($addresses as $address) {
-                    $addressArray[] = $this->formatAddress($address);
+                    $address_array[] = $this->format_address($address);
                 }
-                return $addressArray;
+                return $address_array;
             }
         }
-
         return false;
     }
-
     /**
      * Get the default shipping address
      * @return array/false
      */
-    public function getDefaultAddress(): array|false
+    public function get_default_address(): array|false
     {
         if ($this->is()) {
             $where['customer_id'] = $this->_user_data['customer_id'];
-
             if ($GLOBALS['config']->get('config', 'basket_allow_non_invoice_address')) {
                 $where['default'] = '1';
             } else {
                 $where['billing'] = '1';
             }
-
             if (($addresses = $GLOBALS['db']->select('CubeCart_addressbook', false, $where, 'billing DESC', false, false, false)) !== false) {
                 foreach ($addresses as $address) {
-                    $addressArray[] = $this->formatAddress($address);
+                    $address_array[] = $this->format_address($address);
                 }
-                return $addressArray;
+                return $address_array;
             }
         }
         return false;
     }
-
     /**
      * Get customer id for unregistered customers
      *
      * @return integer/bool
      */
-    public function getGhostId()
+    public function get_ghost_id()
     {
         return $GLOBALS['session']->get('ghost_customer_id');
     }
-
     /**
      * Get customer_id
      * @return customer_id/0
      */
-    public function getId()
+    public function get_id()
     {
         if (!$this->is()) {
             return 0;
         }
         return $this->_user_data['customer_id'];
     }
-
     /**
      * Get customer group memberships
      * @param int $customer_id
      * @return false/array
      */
-    public function getMemberships($customer_id = null)
+    public function get_memberships($customer_id = null)
     {
         if ($customer_id === 0) {
             return false;
         }
-
         if (is_null($customer_id)) {
-            $customer_id = $this->getId();
+            $customer_id = $this->get_id();
         }
-
-        if (ctype_digit((string)$customer_id)) {
+        if (ctype_digit((string) $customer_id)) {
             return $GLOBALS['db']->select('CubeCart_customer_membership', false, ['customer_id' => $customer_id]);
         }
         return false;
     }
-
     /**
      * Get required fields for state
      * @param int $country_id
      */
-    public function getRequiredAddressFields($country_id): array
+    public function get_required_address_fields($country_id): array
     {
-        $fields = ['first_name','last_name','line1','town','country','postcode'];
+        $fields = ['first_name', 'last_name', 'line1', 'town', 'country', 'postcode'];
         if (ctype_digit($country_id)) {
             $result = $GLOBALS['db']->select('CubeCart_geo_country', 'status', ['numcode' => $country_id]);
             if ($result && $result[0]['status'] == '1') {
@@ -677,7 +538,6 @@ class User
         }
         return $fields;
     }
-
     /**
      * Is a customer
      *
@@ -694,13 +554,12 @@ class User
         }
         return true;
     }
-
     /**
      * Is the user a bot?
      *
      * @return bool
      */
-    public function isBot()
+    public function is_bot()
     {
         if (is_null($this->_bot)) {
             $this->_bot = false;
@@ -713,11 +572,10 @@ class User
         }
         return $this->_bot;
     }
-
     /**
      * Log Consent
      */
-    public function logConsent($dialogue): void
+    public function log_consent($dialogue): void
     {
         $hash = md5((string) $dialogue);
         if ($e = $GLOBALS['db']->select('CubeCart_cookie_consent_text', 'id', ['hash' => $hash], false, 1, false, false)) {
@@ -725,19 +583,11 @@ class User
         } else {
             $id = $GLOBALS['db']->insert('CubeCart_cookie_consent_text', ['hash' => $hash, 'log' => $dialogue]);
         }
-        if (!$GLOBALS['db']->select('CubeCart_cookie_consent', false, ['dialogue_id' => $id, 'session_id' => $GLOBALS['session']->getId()], false, 1, false, false)) {
-            $consent_log = [
-                'ip_address' => get_ip_address(),
-                'session_id' => $GLOBALS['session']->getId(),
-                'customer_id' => $this->getId(),
-                'dialogue_id' => $id,
-                'url_shown' => str_replace($GLOBALS['storeURL'].'/', '', currentPage()),
-                'time' => time(),
-            ];
+        if (!$GLOBALS['db']->select('CubeCart_cookie_consent', false, ['dialogue_id' => $id, 'session_id' => $GLOBALS['session']->get_id()], false, 1, false, false)) {
+            $consent_log = ['ip_address' => get_ip_address(), 'session_id' => $GLOBALS['session']->get_id(), 'customer_id' => $this->get_id(), 'dialogue_id' => $id, 'url_shown' => str_replace($GLOBALS['storeURL'] . '/', '', current_page()), 'time' => time()];
             $GLOBALS['db']->insert('CubeCart_cookie_consent', $consent_log);
         }
     }
-
     /**
      * Logout
      */
@@ -746,7 +596,6 @@ class User
         foreach ($GLOBALS['hooks']->load('class.user.logout') as $hook) {
             include $hook;
         }
-
         if (isset($_COOKIE['cc_username'])) {
             // Unset the 'Remember Me' cookies
             $GLOBALS['session']->set_cookie('cc_username', '', time() - 3600);
@@ -757,29 +606,28 @@ class User
         $get = ['_a' => 'login'];
         if ($password_change) {
             $get['pu'] = 1;
-        };
-        httpredir(currentPage(null, $get));
+        }
+        httpredir(current_page(null, $get));
     }
-
     /**
      * Request password
      *
      * @param string $email
      */
-    public function passwordRequest($email): bool
+    public function password_request($email): bool
     {
         if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            if (($check = $GLOBALS['db']->select('CubeCart_customer', false, "`email` = '$email' AND `type` = 1", false, 1, false, false)) !== false) {
+            if (($check = $GLOBALS['db']->select('CubeCart_customer', false, "`email` = '{$email}' AND `type` = 1", false, 1, false, false)) !== false) {
                 // Generate validation key
-                $validation = Password::getInstance()->createSalt();
-                if (($GLOBALS['db']->update('CubeCart_customer', ['verify' => $validation], ['customer_id' => (int)$check[0]['customer_id']])) !== false) {
+                $validation = Password::get_instance()->create_salt();
+                if ($GLOBALS['db']->update('CubeCart_customer', ['verify' => $validation], ['customer_id' => (int) $check[0]['customer_id']]) !== false) {
                     // Send email
-                    if (($user = $GLOBALS['db']->select('CubeCart_customer', false, ['customer_id' => (int)$check[0]['customer_id']], false, 1, false, false)) !== false) {
+                    if (($user = $GLOBALS['db']->select('CubeCart_customer', false, ['customer_id' => (int) $check[0]['customer_id']], false, 1, false, false)) !== false) {
                         $mailer = new Mailer();
-                        $link['reset_link'] = CC_STORE_URL.'/index.php?_a=recovery&validate='.$validation;
+                        $link['reset_link'] = CC_STORE_URL . '/index.php?_a=recovery&validate=' . $validation;
                         $data = array_merge($user[0], $link);
-                        $content = $mailer->loadContent('account.password_recovery', $GLOBALS['language']->current(), $data);
-                        $mailer->sendEmail($user[0]['email'], $content);
+                        $content = $mailer->load_content('account.password_recovery', $GLOBALS['language']->current(), $data);
+                        $mailer->send_email($user[0]['email'], $content);
                         return true;
                     }
                 }
@@ -787,7 +635,6 @@ class User
         }
         return false;
     }
-
     /**
      * Reset password
      *
@@ -795,141 +642,113 @@ class User
      * @param string $verification
      * @param string $password
      */
-    public function passwordReset($email, $verification, $password): bool
+    public function password_reset($email, $verification, $password): bool
     {
-        if (filter_var($email, FILTER_VALIDATE_EMAIL) && !empty($verification) && !empty($password['password']) && !empty($password['passconf']) && ($password['password'] === $password['passconf'])) {
-
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) && !empty($verification) && !empty($password['password']) && !empty($password['passconf']) && $password['password'] === $password['passconf']) {
             if (strlen($password['password']) < 6) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_length']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_length']);
                 return false;
             }
             if (strlen($password['password']) > 64) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_length_max']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_length_max']);
                 return false;
             }
             if (($check = $GLOBALS['db']->select('CubeCart_customer', ['customer_id', 'email'], ['email' => $email, 'verify' => $verification], false, 1, false, false)) !== false) {
                 // Remove any blocks
                 $GLOBALS['db']->delete('CubeCart_blocker', ['username' => $email]);
-
-                $salt = Password::getInstance()->createSalt();
-
-                $record = [
-                    'salt'   => $salt,
-                    'password'  => Password::getInstance()->getSalted((string)$password['password'], $salt),
-                    'verify'  => null,
-                    'new_password' => 1,
-                ];
-                $where = [
-                    'customer_id' => $check[0]['customer_id'],
-                    'email'   => $email,
-                    'verify'  => $verification,
-                ];
+                $salt = Password::get_instance()->create_salt();
+                $record = ['salt' => $salt, 'password' => Password::get_instance()->get_salted((string) $password['password'], $salt), 'verify' => null, 'new_password' => 1];
+                $where = ['customer_id' => $check[0]['customer_id'], 'email' => $email, 'verify' => $verification];
                 if ($GLOBALS['db']->update('CubeCart_customer', $record, $where)) {
-                    if ($this->authenticate($check[0]['email'], (string)$password['password'], false, false, false, false)) {
-                        $GLOBALS['gui']->setNotify(($GLOBALS['language']->account['notify_password_recovery_success']));
+                    if ($this->authenticate($check[0]['email'], (string) $password['password'], false, false, false, false)) {
+                        $GLOBALS['gui']->set_notify($GLOBALS['language']->account['notify_password_recovery_success']);
                         httpredir('?_a=profile');
                     }
                 }
             }
         }
-
-        $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_recover']);
+        $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_recover']);
         return false;
     }
-
     /**
      * Register a new user
      */
-    public function registerUser(): bool
+    public function register_user(): bool
     {
         // Validation
         $error = [];
         foreach ($GLOBALS['hooks']->load('class.user.register_user') as $hook) {
             include $hook;
         }
-
         //Validate email
         if (!filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL)) {
-            $GLOBALS['gui']->setError($GLOBALS['language']->common['error_email_invalid']);
+            $GLOBALS['gui']->set_error($GLOBALS['language']->common['error_email_invalid']);
             $error['email'] = true;
-        } else {
-            // check for duplicates
-            if ($existing = $GLOBALS['db']->select('CubeCart_customer', ['email', 'type', 'customer_id'], ['email' => strtolower((string) $_POST['email'])])) {
-                if ($existing[0]['type'] == 1) {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->account['error_email_in_use']);
-                    $error['dupe'] = true;
-                }
+        } else if ($existing = $GLOBALS['db']->select('CubeCart_customer', ['email', 'type', 'customer_id'], ['email' => strtolower((string) $_POST['email'])])) {
+            if ($existing[0]['type'] == 1) {
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_email_in_use']);
+                $error['dupe'] = true;
             }
         }
-
         if (!empty($_POST['password'])) {
             if ($_POST['password'] !== $_POST['passconf']) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_mismatch']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_mismatch']);
                 $error['pass'] = true;
             }
             if (strlen((string) $_POST['password']) < 6) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_length']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_length']);
                 $error['pass'] = true;
             }
             if (strlen((string) $_POST['password']) > 64) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_length_max']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_length_max']);
                 $error['pass'] = true;
             }
         } else {
-            $GLOBALS['gui']->setError($GLOBALS['language']->account['error_password_empty']);
+            $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_password_empty']);
             $error['nopass'] = true;
         }
-
         if (empty($_POST['first_name']) || empty($_POST['last_name'])) {
-            $GLOBALS['gui']->setError($GLOBALS['language']->account['error_name_required']);
+            $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_name_required']);
             $error['name'] = true;
         }
-
         if (isset($_POST['first_name']) && isset($_POST['last_name']) && !empty($_POST['first_name']) && !empty($_POST['last_name']) && $_POST['first_name'] == $_POST['last_name']) {
-            $GLOBALS['gui']->setError($GLOBALS['language']->account['error_name_same']);
+            $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_name_same']);
             $error['same_name'] = true;
         }
-
-        if ($GLOBALS['gui']->recaptchaRequired()) {
+        if ($GLOBALS['gui']->recaptcha_required()) {
             if (($message = $GLOBALS['session']->get('error', 'recaptcha')) === false) {
                 //If the error message from recaptcha fails for some reason:
-                $GLOBALS['gui']->setError($GLOBALS['language']->form['verify_human_fail']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->form['verify_human_fail']);
             } else {
-                $GLOBALS['gui']->setError($GLOBALS['session']->get('error', 'recaptcha'));
+                $GLOBALS['gui']->set_error($GLOBALS['session']->get('error', 'recaptcha'));
             }
             $error['recaptcha'] = true;
         }
-
         if ($terms = $GLOBALS['db']->select('CubeCart_documents', false, ['doc_terms' => '1'])) {
             if (isset($_POST['terms_agree']) !== true && !$GLOBALS['config']->get('config', 'disable_checkout_terms')) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_terms_agree']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_terms_agree']);
                 $error['terms'] = true;
             }
         }
-
         if (empty($error)) {
             // Format data nicely from barney brimstock to Barney Brimstock
-            $_POST['first_name']  = ucwords((string) $_POST['first_name']);
-            $_POST['last_name']  = ucwords((string) $_POST['last_name']);
-
+            $_POST['first_name'] = ucwords((string) $_POST['first_name']);
+            $_POST['last_name'] = ucwords((string) $_POST['last_name']);
             // Register the user
-            $_POST['salt']  = Password::getInstance()->createSalt();
-            $_POST['password'] = Password::getInstance()->getSalted($_POST['password'], $_POST['salt']);
+            $_POST['salt'] = Password::get_instance()->create_salt();
+            $_POST['password'] = Password::get_instance()->get_salted($_POST['password'], $_POST['salt']);
             $_POST['registered'] = time();
             if (($_POST['ip_address'] = get_ip_address()) === false) {
                 $_POST['ip_address'] = 'Unknown';
-            } // Get IP Address
-
+            }
+            // Get IP Address
             foreach ($GLOBALS['hooks']->load('class.user.register_user.insert') as $hook) {
                 include $hook;
             }
-
             foreach ($_POST as $key => $value) {
                 $_POST[$key] = htmlspecialchars(html_entity_decode((string) $value));
             }
-
             $_POST['language'] = $GLOBALS['language']->current();
-
             if (is_array($existing) && $existing[0]['type'] == 2) {
                 $_POST['type'] = 1;
                 $_POST['new_password'] = 1;
@@ -938,24 +757,18 @@ class User
             } else {
                 $insert = $GLOBALS['db']->insert('CubeCart_customer', $_POST);
             }
-
             foreach ($GLOBALS['hooks']->load('class.user.register_user.inserted') as $hook) {
                 include $hook;
             }
-
             if (isset($_POST['mailing_list'])) {
-                $newsletter = Newsletter::getInstance();
+                $newsletter = Newsletter::get_instance();
                 $newsletter->subscribe($_POST['email'], $insert);
             }
-
             $this->authenticate($_POST['email'], $_POST['passconf']);
-
             return true;
         }
-
         return false;
     }
-
     /**
      * Save address to the addressbook
      *
@@ -963,10 +776,9 @@ class User
      * @param bool $new_user
      * @return bool
      */
-    public function saveAddress($array, $new_user = false)
+    public function save_address($array, $new_user = false)
     {
         $array = array_map(trim(...), $array);
-
         if ($this->is() || $new_user) {
             if ($array['billing']) {
                 $reset['billing'] = '0';
@@ -979,24 +791,21 @@ class User
                 $array['default'] = '0';
             }
             $user_id = $new_user ?: $this->_user_data['customer_id'];
-
             foreach ($GLOBALS['hooks']->load('class.user.saveaddress') as $hook) {
                 include $hook;
             }
-
             if (isset($reset)) {
                 // "There can only be one"
                 $GLOBALS['db']->update('CubeCart_addressbook', $reset, ['customer_id' => $user_id], true);
             }
-
             // Format data nicely from mr barney brimstock to Mr Barney Brimstock & Post/Zip code to uppercase
             $array['first_name'] = ucwords($array['first_name']);
             $array['last_name'] = ucwords($array['last_name']);
-            $array['postcode'] = strtoupper($array['postcode']); // e.g. ab12 34cd to  AB12 34CD
+            $array['postcode'] = strtoupper($array['postcode']);
+            // e.g. ab12 34cd to  AB12 34CD
             if (!isset($array['state'])) {
                 $array['state'] = '';
             }
-
             $hash_values = '';
             $checked_keys = ['billing', 'first_name', 'last_name', 'company_name', 'line1', 'line2', 'town', 'state', 'postcode', 'country'];
             foreach ($array as $key => $value) {
@@ -1004,17 +813,14 @@ class User
                     $hash_values .= $value;
                 }
             }
-
             $array['hash'] = md5($hash_values);
-
             if ($result = $GLOBALS['db']->select('CubeCart_addressbook', ['address_id'], ['hash' => $array['hash'], 'customer_id' => $user_id], false, 1, false, false)) {
                 $array['address_id'] = $result[0]['address_id'];
             }
-
             if (isset($array['address_id']) && is_numeric($array['address_id'])) {
                 // Update
                 $result = $GLOBALS['db']->update('CubeCart_addressbook', $array, ['address_id' => $array['address_id'], 'customer_id' => $user_id], true);
-                $this->_updateBasketAddress($array['address_id']);
+                $this->_update_basket_address($array['address_id']);
                 return $result;
             }
             // Insert
@@ -1023,18 +829,16 @@ class User
         }
         return false;
     }
-
     /**
      * Set customer id for unregistered customers
      *
      * @param int $customer_id
      * @return bool
      */
-    public function setGhostId($customer_id = '')
+    public function set_ghost_id($customer_id = '')
     {
         return $GLOBALS['session']->set('ghost_customer_id', $customer_id);
     }
-
     /**
      * Update customer data
      *
@@ -1066,9 +870,8 @@ class User
             unset($update['customer_id']);
             unset($update['status']);
             unset($update['type']);
-
             //Check of any acutal changes
-            $diff = arrayRecursiveDiff($update, $this->_user_data);
+            $diff = array_recursive_diff($update, $this->_user_data);
             if (!empty($diff)) {
                 $this->_user_data = array_merge($this->_user_data, $update);
                 $this->_changed = true;
@@ -1077,21 +880,18 @@ class User
         }
         return false;
     }
-
     public function load(): void
     {
         $this->_load();
     }
-
     //=====[ Private ]=======================================
-
     /**
      * Delete address from basket
      *
      * @param int $id
      * @return bool
      */
-    private function _deleteBasketAddress($id)
+    private function _delete_basket_address($id)
     {
         $match = false;
         if (isset($GLOBALS['cart']->basket['delivery_address']['address_id']) && $GLOBALS['cart']->basket['delivery_address']['address_id'] == $id) {
@@ -1106,7 +906,6 @@ class User
         }
         return $match;
     }
-
     /**
      * Load customer data
      */
@@ -1115,12 +914,11 @@ class User
         foreach ($GLOBALS['hooks']->load('class.user.load') as $hook) {
             include $hook;
         }
-
         if (!isset($GLOBALS['session']->session_data['customer_id']) || $GLOBALS['session']->session_data['customer_id'] == '0') {
             return;
         }
-        if ($GLOBALS['session']->session_data['customer_id'] && $result = $GLOBALS['db']->select('CubeCart_customer', false, ['customer_id' => (int)$GLOBALS['session']->session_data['customer_id']], false, 1, false, false)) {
-            $result[0]['language'] = $this->_validLanguage($result[0]['language']);
+        if ($GLOBALS['session']->session_data['customer_id'] && $result = $GLOBALS['db']->select('CubeCart_customer', false, ['customer_id' => (int) $GLOBALS['session']->session_data['customer_id']], false, 1, false, false)) {
+            $result[0]['language'] = $this->_valid_language($result[0]['language']);
             $this->_user_data = $result[0];
             foreach ($GLOBALS['hooks']->load('class.user.load.user') as $hook) {
                 include $hook;
@@ -1132,31 +930,27 @@ class User
             if ((empty($this->_user_data['email']) || !filter_var($this->_user_data['email'], FILTER_VALIDATE_EMAIL) || empty($this->_user_data['first_name']) || empty($this->_user_data['last_name'])) && !in_array(strtolower((string) $_GET['_a']), ['profile', 'logout'])) {
                 // Force account details page
                 $GLOBALS['session']->set('temp_profile_required', true);
-                httpredir(currentPage(null, ['_a' => 'profile']));
+                httpredir(current_page(null, ['_a' => 'profile']));
             }
         }
     }
-
     /**
      * Update db
      */
     private function _update()
     {
-        return Database::getInstance()->update('CubeCart_customer', $this->_user_data, ['customer_id' => $this->_user_data['customer_id']], true);
+        return Database::get_instance()->update('CubeCart_customer', $this->_user_data, ['customer_id' => $this->_user_data['customer_id']], true);
     }
-
     /**
      * Update address from basket
      *
      * @param int $id
      * @return bool
      */
-    private function _updateBasketAddress($id)
+    private function _update_basket_address($id)
     {
         $match = false;
-
-        $updated_address = $this->getAddress($id, true);
-
+        $updated_address = $this->get_address($id, true);
         if (isset($GLOBALS['cart']->basket['delivery_address']['address_id']) && $GLOBALS['cart']->basket['delivery_address']['address_id'] == $id) {
             $GLOBALS['cart']->basket['delivery_address'] = array_merge($GLOBALS['cart']->basket['delivery_address'], $updated_address);
             $GLOBALS['cart']->save();
@@ -1174,38 +968,37 @@ class User
      *
      * @return false/int
      */
-    private function _validCustomerId(): bool
+    private function _valid_customer_id(): bool
     {
         return false;
         /* Kept for hiistorical purposes
-        $customers = $GLOBALS['db']->misc("SHOW TABLE STATUS LIKE '".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_customer'", false);
-
-        $orders = $GLOBALS['db']->misc("SELECT MAX(`customer_id`) as `max_id` FROM `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_order_summary`", false);
-
-        // Do we have any orders yet and is the max customer_id > 0?
-        if ($orders && $orders[0]['max_id'] > 0) {
-            // Do we have any customers yet and is the auto increment > 0?
-            if ($customers && $customers[0]['Auto_increment'] > 0) {
-                // Are there existing customers orders with higher customer id than next customer id?
-                if ($orders[0]['max_id'] >= $customers[0]['Auto_increment']) {
-                    // Finally be sure proposed ID isn't in use
-                    $id = $orders[0]['max_id']+1;
-                    if($GLOBALS['db']->select('CubeCart_customer', false, array('customer_id' => $id), false, 1, false, false) == false) {
-                        return $id;
+                $customers = $GLOBALS['db']->misc("SHOW TABLE STATUS LIKE '".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_customer'", false);
+        
+                $orders = $GLOBALS['db']->misc("SELECT MAX(`customer_id`) as `max_id` FROM `".$GLOBALS['config']->get('config', 'dbprefix')."CubeCart_order_summary`", false);
+        
+                // Do we have any orders yet and is the max customer_id > 0?
+                if ($orders && $orders[0]['max_id'] > 0) {
+                    // Do we have any customers yet and is the auto increment > 0?
+                    if ($customers && $customers[0]['Auto_increment'] > 0) {
+                        // Are there existing customers orders with higher customer id than next customer id?
+                        if ($orders[0]['max_id'] >= $customers[0]['Auto_increment']) {
+                            // Finally be sure proposed ID isn't in use
+                            $id = $orders[0]['max_id']+1;
+                            if($GLOBALS['db']->select('CubeCart_customer', false, array('customer_id' => $id), false, 1, false, false) == false) {
+                                return $id;
+                            }
+                        }
                     }
                 }
-            }
-        }
-        return false;
-        */
+                return false;
+                */
     }
-
     /**
      * Validate users language string
      *
      * @return string
      */
-    private function _validLanguage($language)
+    private function _valid_language($language)
     {
         $default_language = $GLOBALS['config']->get('config', 'default_language');
         if (!preg_match(Language::LANG_REGEX, (string) $language)) {

@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method RegisterCacheResource
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_RegisterCacheResource
+class Smarty_internal_method_register_Cache_Resource
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * Registers a resource to fetch a template
      *
@@ -32,13 +30,10 @@ class Smarty_Internal_Method_RegisterCacheResource
      *
      * @return \Smarty|\Smarty_Internal_Template
      */
-    public function registerCacheResource(
-        Smarty_Internal_TemplateBase $obj,
-        $name,
-        Smarty_CacheResource $resource_handler
-    ) {
-        $smarty = $obj->_getSmartyObj();
-        $smarty->registered_cache_resources[ $name ] = $resource_handler;
+    public function register_cache_resource(Smarty_internal_template_Base $obj, $name, Smarty_cache_Resource $resource_handler)
+    {
+        $smarty = $obj->_get_smarty_obj();
+        $smarty->registered_cache_resources[$name] = $resource_handler;
         return $obj;
     }
 }

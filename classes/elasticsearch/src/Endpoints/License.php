@@ -11,21 +11,18 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class License extends AbstractEndpoint
+class License extends Abstract_Endpoint
 {
     /**
      * Deletes licensing information for the cluster
@@ -50,14 +47,10 @@ class License extends AbstractEndpoint
     {
         $url = '/_license';
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves licensing information for the cluster
      *
@@ -83,14 +76,10 @@ class License extends AbstractEndpoint
     {
         $url = '/_license';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['local','accept_enterprise','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['local', 'accept_enterprise', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves information about the status of the basic license.
      *
@@ -110,18 +99,14 @@ class License extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getBasicStatus(array $params = [])
+    public function get_basic_status(array $params = [])
     {
         $url = '/_license/basic_status';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves information about the status of the trial license.
      *
@@ -141,18 +126,14 @@ class License extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getTrialStatus(array $params = [])
+    public function get_trial_status(array $params = [])
     {
         $url = '/_license/trial_status';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates the license for the cluster.
      *
@@ -178,15 +159,10 @@ class License extends AbstractEndpoint
     {
         $url = '/_license';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['acknowledge','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['acknowledge', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Starts an indefinite basic license.
      *
@@ -207,18 +183,14 @@ class License extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function postStartBasic(array $params = [])
+    public function post_start_basic(array $params = [])
     {
         $url = '/_license/start_basic';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['acknowledge','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['acknowledge', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * starts a limited time trial license.
      *
@@ -240,15 +212,12 @@ class License extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function postStartTrial(array $params = [])
+    public function post_start_trial(array $params = [])
     {
         $url = '/_license/start_trial';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['type','acknowledge','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['type', 'acknowledge', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

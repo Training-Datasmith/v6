@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Debug
  * Class to collect data for the Smarty Debugging Console
@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @subpackage Debug
  * @author     Uwe Tews
  */
-
 /**
  * Smarty Internal Plugin Debug Class
  *
@@ -24,28 +23,24 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
      * @var array
      */
     public $template_data = [];
-
     /**
      * List of uid's which shall be ignored
      *
      * @var array
      */
     public $ignore_uid = [];
-
     /**
      * Index of display() and fetch() calls
      *
      * @var int
      */
     public $index = 0;
-
     /**
      * Counter for window offset
      *
      * @var int
      */
     public $offset = 0;
-
     /**
      * Start logging template
      *
@@ -54,15 +49,14 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
      */
     public function start_template(Smarty_Internal_Template $template, $mode = null)
     {
-        if (isset($mode) && !$template->_isSubTpl()) {
+        if (isset($mode) && !$template->_is_sub_tpl()) {
             $this->index++;
             $this->offset++;
-            $this->template_data[ $this->index ] = null;
+            $this->template_data[$this->index] = null;
         }
         $key = $this->get_key($template);
-        $this->template_data[ $this->index ][ $key ][ 'start_template_time' ] = microtime(true);
+        $this->template_data[$this->index][$key]['start_template_time'] = microtime(true);
     }
-
     /**
      * End logging of cache time
      *
@@ -71,11 +65,9 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
     public function end_template(Smarty_Internal_Template $template)
     {
         $key = $this->get_key($template);
-        $this->template_data[ $this->index ][ $key ][ 'total_time' ] +=
-            microtime(true) - $this->template_data[ $this->index ][ $key ][ 'start_template_time' ];
+        $this->template_data[$this->index][$key]['total_time'] += microtime(true) - $this->template_data[$this->index][$key]['start_template_time'];
         //$this->template_data[$this->index][$key]['properties'] = $template->properties;
     }
-
     /**
      * Start logging of compile time
      *
@@ -86,26 +78,24 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
         static $_is_stringy = ['string' => true, 'eval' => true];
         if (!empty($template->compiler->trace_uid)) {
             $key = $template->compiler->trace_uid;
-            if (!isset($this->template_data[ $this->index ][ $key ])) {
-                if (isset($_is_stringy[ $template->source->type ])) {
-                    $this->template_data[ $this->index ][ $key ][ 'name' ] =
-                        '\'' . substr($template->source->name, 0, 25) . '...\'';
+            if (!isset($this->template_data[$this->index][$key])) {
+                if (isset($_is_stringy[$template->source->type])) {
+                    $this->template_data[$this->index][$key]['name'] = '\'' . substr($template->source->name, 0, 25) . '...\'';
                 } else {
-                    $this->template_data[ $this->index ][ $key ][ 'name' ] = $template->source->filepath;
+                    $this->template_data[$this->index][$key]['name'] = $template->source->filepath;
                 }
-                $this->template_data[ $this->index ][ $key ][ 'compile_time' ] = 0;
-                $this->template_data[ $this->index ][ $key ][ 'render_time' ] = 0;
-                $this->template_data[ $this->index ][ $key ][ 'cache_time' ] = 0;
+                $this->template_data[$this->index][$key]['compile_time'] = 0;
+                $this->template_data[$this->index][$key]['render_time'] = 0;
+                $this->template_data[$this->index][$key]['cache_time'] = 0;
             }
         } else {
-            if (isset($this->ignore_uid[ $template->source->uid ])) {
+            if (isset($this->ignore_uid[$template->source->uid])) {
                 return;
             }
             $key = $this->get_key($template);
         }
-        $this->template_data[ $this->index ][ $key ][ 'start_time' ] = microtime(true);
+        $this->template_data[$this->index][$key]['start_time'] = microtime(true);
     }
-
     /**
      * End logging of compile time
      *
@@ -116,15 +106,13 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
         if (!empty($template->compiler->trace_uid)) {
             $key = $template->compiler->trace_uid;
         } else {
-            if (isset($this->ignore_uid[ $template->source->uid ])) {
+            if (isset($this->ignore_uid[$template->source->uid])) {
                 return;
             }
             $key = $this->get_key($template);
         }
-        $this->template_data[ $this->index ][ $key ][ 'compile_time' ] +=
-            microtime(true) - $this->template_data[ $this->index ][ $key ][ 'start_time' ];
+        $this->template_data[$this->index][$key]['compile_time'] += microtime(true) - $this->template_data[$this->index][$key]['start_time'];
     }
-
     /**
      * Start logging of render time
      *
@@ -133,9 +121,8 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
     public function start_render(Smarty_Internal_Template $template)
     {
         $key = $this->get_key($template);
-        $this->template_data[ $this->index ][ $key ][ 'start_time' ] = microtime(true);
+        $this->template_data[$this->index][$key]['start_time'] = microtime(true);
     }
-
     /**
      * End logging of compile time
      *
@@ -144,10 +131,8 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
     public function end_render(Smarty_Internal_Template $template)
     {
         $key = $this->get_key($template);
-        $this->template_data[ $this->index ][ $key ][ 'render_time' ] +=
-            microtime(true) - $this->template_data[ $this->index ][ $key ][ 'start_time' ];
+        $this->template_data[$this->index][$key]['render_time'] += microtime(true) - $this->template_data[$this->index][$key]['start_time'];
     }
-
     /**
      * Start logging of cache time
      *
@@ -156,9 +141,8 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
     public function start_cache(Smarty_Internal_Template $template)
     {
         $key = $this->get_key($template);
-        $this->template_data[ $this->index ][ $key ][ 'start_time' ] = microtime(true);
+        $this->template_data[$this->index][$key]['start_time'] = microtime(true);
     }
-
     /**
      * End logging of cache time
      *
@@ -167,10 +151,8 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
     public function end_cache(Smarty_Internal_Template $template)
     {
         $key = $this->get_key($template);
-        $this->template_data[ $this->index ][ $key ][ 'cache_time' ] +=
-            microtime(true) - $this->template_data[ $this->index ][ $key ][ 'start_time' ];
+        $this->template_data[$this->index][$key]['cache_time'] += microtime(true) - $this->template_data[$this->index][$key]['start_time'];
     }
-
     /**
      * Register template object
      *
@@ -179,7 +161,6 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
     public function register_template(Smarty_Internal_Template $template)
     {
     }
-
     /**
      * Register data object
      *
@@ -188,7 +169,6 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
     public static function register_data(Smarty_Data $data)
     {
     }
-
     /**
      * Opens a window for the Smarty Debugging Console and display the data
      *
@@ -202,37 +182,35 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
     {
         if (!$full) {
             $this->offset++;
-            $savedIndex = $this->index;
+            $saved_index = $this->index;
             $this->index = 9999;
         }
-        $smarty = $obj->_getSmartyObj();
+        $smarty = $obj->_get_smarty_obj();
         // create fresh instance of smarty for displaying the debug console
         // to avoid problems if the application did overload the Smarty class
-        $debObj = new Smarty();
+        $deb_obj = new Smarty();
         // copy the working dirs from application
-        $debObj->setCompileDir($smarty->getCompileDir());
+        $deb_obj->set_compile_dir($smarty->get_compile_dir());
         // init properties by hand as user may have edited the original Smarty class
-        $debObj->setPluginsDir(is_dir(__DIR__ . '/../plugins') ? __DIR__ .
-                                                                           '/../plugins' : $smarty->getPluginsDir());
-        $debObj->force_compile = false;
-        $debObj->compile_check = Smarty::COMPILECHECK_ON;
-        $debObj->left_delimiter = '{';
-        $debObj->right_delimiter = '}';
-        $debObj->security_policy = null;
-        $debObj->debugging = false;
-        $debObj->debugging_ctrl = 'NONE';
-        $debObj->error_reporting = E_ALL & ~E_NOTICE;
-        $debObj->debug_tpl =
-            isset($smarty->debug_tpl) ? $smarty->debug_tpl : 'file:' . __DIR__ . '/../debug.tpl';
-        $debObj->registered_plugins = [];
-        $debObj->registered_resources = [];
-        $debObj->registered_filters = [];
-        $debObj->autoload_filters = [];
-        $debObj->default_modifiers = [];
-        $debObj->escape_html = true;
-        $debObj->caching = Smarty::CACHING_OFF;
-        $debObj->compile_id = null;
-        $debObj->cache_id = null;
+        $deb_obj->set_plugins_dir(is_dir(__DIR__ . '/../plugins') ? __DIR__ . '/../plugins' : $smarty->get_plugins_dir());
+        $deb_obj->force_compile = false;
+        $deb_obj->compile_check = Smarty::COMPILECHECK_ON;
+        $deb_obj->left_delimiter = '{';
+        $deb_obj->right_delimiter = '}';
+        $deb_obj->security_policy = null;
+        $deb_obj->debugging = false;
+        $deb_obj->debugging_ctrl = 'NONE';
+        $deb_obj->error_reporting = E_ALL & ~E_NOTICE;
+        $deb_obj->debug_tpl = isset($smarty->debug_tpl) ? $smarty->debug_tpl : 'file:' . __DIR__ . '/../debug.tpl';
+        $deb_obj->registered_plugins = [];
+        $deb_obj->registered_resources = [];
+        $deb_obj->registered_filters = [];
+        $deb_obj->autoload_filters = [];
+        $deb_obj->default_modifiers = [];
+        $deb_obj->escape_html = true;
+        $deb_obj->caching = Smarty::CACHING_OFF;
+        $deb_obj->compile_id = null;
+        $deb_obj->cache_id = null;
         // prepare information of assigned variables
         $ptr = $this->get_debug_vars($obj);
         $_assigned_vars = $ptr->tpl_vars;
@@ -240,12 +218,12 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
         $_config_vars = $ptr->config_vars;
         ksort($_config_vars);
         $debugging = $smarty->debugging;
-        $_template = new Smarty_Internal_Template($debObj->debug_tpl, $debObj);
-        if ($obj->_isTplObj()) {
+        $_template = new Smarty_Internal_Template($deb_obj->debug_tpl, $deb_obj);
+        if ($obj->_is_tpl_obj()) {
             $_template->assign('template_name', $obj->source->type . ':' . $obj->source->name);
         }
-        if ($obj->_objType === 1 || $full) {
-            $_template->assign('template_data', $this->template_data[ $this->index ]);
+        if ($obj->_obj_type === 1 || $full) {
+            $_template->assign('template_data', $this->template_data[$this->index]);
         } else {
             $_template->assign('template_data', null);
         }
@@ -259,10 +237,9 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
             $this->index--;
         }
         if (!$full) {
-            $this->index = $savedIndex;
+            $this->index = $saved_index;
         }
     }
-
     /**
      * Recursively gets variables from all template/data scopes
      *
@@ -274,51 +251,47 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
     {
         $config_vars = [];
         foreach ($obj->config_vars as $key => $var) {
-            $config_vars[ $key ][ 'value' ] = $var;
-            if ($obj->_isTplObj()) {
-                $config_vars[ $key ][ 'scope' ] = $obj->source->type . ':' . $obj->source->name;
-            } elseif ($obj->_isDataObj()) {
-                $tpl_vars[ $key ][ 'scope' ] = $obj->dataObjectName;
+            $config_vars[$key]['value'] = $var;
+            if ($obj->_is_tpl_obj()) {
+                $config_vars[$key]['scope'] = $obj->source->type . ':' . $obj->source->name;
+            } elseif ($obj->_is_data_obj()) {
+                $tpl_vars[$key]['scope'] = $obj->data_object_name;
             } else {
-                $config_vars[ $key ][ 'scope' ] = 'Smarty object';
+                $config_vars[$key]['scope'] = 'Smarty object';
             }
         }
         $tpl_vars = [];
         foreach ($obj->tpl_vars as $key => $var) {
             foreach ($var as $varkey => $varvalue) {
                 if ($varkey === 'value') {
-                    $tpl_vars[ $key ][ $varkey ] = $varvalue;
-                } else {
-                    if ($varkey === 'nocache') {
-                        if ($varvalue === true) {
-                            $tpl_vars[ $key ][ $varkey ] = $varvalue;
-                        }
-                    } else {
-                        if ($varkey !== 'scope' || $varvalue !== 0) {
-                            $tpl_vars[ $key ][ 'attributes' ][ $varkey ] = $varvalue;
-                        }
+                    $tpl_vars[$key][$varkey] = $varvalue;
+                } else if ($varkey === 'nocache') {
+                    if ($varvalue === true) {
+                        $tpl_vars[$key][$varkey] = $varvalue;
                     }
+                } else if ($varkey !== 'scope' || $varvalue !== 0) {
+                    $tpl_vars[$key]['attributes'][$varkey] = $varvalue;
                 }
             }
-            if ($obj->_isTplObj()) {
-                $tpl_vars[ $key ][ 'scope' ] = $obj->source->type . ':' . $obj->source->name;
-            } elseif ($obj->_isDataObj()) {
-                $tpl_vars[ $key ][ 'scope' ] = $obj->dataObjectName;
+            if ($obj->_is_tpl_obj()) {
+                $tpl_vars[$key]['scope'] = $obj->source->type . ':' . $obj->source->name;
+            } elseif ($obj->_is_data_obj()) {
+                $tpl_vars[$key]['scope'] = $obj->data_object_name;
             } else {
-                $tpl_vars[ $key ][ 'scope' ] = 'Smarty object';
+                $tpl_vars[$key]['scope'] = 'Smarty object';
             }
         }
         if (isset($obj->parent)) {
             $parent = $this->get_debug_vars($obj->parent);
             foreach ($parent->tpl_vars as $name => $pvar) {
-                if (isset($tpl_vars[ $name ]) && $tpl_vars[ $name ][ 'value' ] === $pvar[ 'value' ]) {
-                    $tpl_vars[ $name ][ 'scope' ] = $pvar[ 'scope' ];
+                if (isset($tpl_vars[$name]) && $tpl_vars[$name]['value'] === $pvar['value']) {
+                    $tpl_vars[$name]['scope'] = $pvar['scope'];
                 }
             }
             $tpl_vars = array_merge($parent->tpl_vars, $tpl_vars);
             foreach ($parent->config_vars as $name => $pvar) {
-                if (isset($config_vars[ $name ]) && $config_vars[ $name ][ 'value' ] === $pvar[ 'value' ]) {
-                    $config_vars[ $name ][ 'scope' ] = $pvar[ 'scope' ];
+                if (isset($config_vars[$name]) && $config_vars[$name]['value'] === $pvar['value']) {
+                    $config_vars[$name]['scope'] = $pvar['scope'];
                 }
             }
             $config_vars = array_merge($parent->config_vars, $config_vars);
@@ -327,26 +300,21 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
                 if (!array_key_exists($key, $tpl_vars)) {
                     foreach ($var as $varkey => $varvalue) {
                         if ($varkey === 'value') {
-                            $tpl_vars[ $key ][ $varkey ] = $varvalue;
-                        } else {
-                            if ($varkey === 'nocache') {
-                                if ($varvalue === true) {
-                                    $tpl_vars[ $key ][ $varkey ] = $varvalue;
-                                }
-                            } else {
-                                if ($varkey !== 'scope' || $varvalue !== 0) {
-                                    $tpl_vars[ $key ][ 'attributes' ][ $varkey ] = $varvalue;
-                                }
+                            $tpl_vars[$key][$varkey] = $varvalue;
+                        } else if ($varkey === 'nocache') {
+                            if ($varvalue === true) {
+                                $tpl_vars[$key][$varkey] = $varvalue;
                             }
+                        } else if ($varkey !== 'scope' || $varvalue !== 0) {
+                            $tpl_vars[$key]['attributes'][$varkey] = $varvalue;
                         }
                     }
-                    $tpl_vars[ $key ][ 'scope' ] = 'Global';
+                    $tpl_vars[$key]['scope'] = 'Global';
                 }
             }
         }
-        return (object)['tpl_vars' => $tpl_vars, 'config_vars' => $config_vars];
+        return (object) ['tpl_vars' => $tpl_vars, 'config_vars' => $config_vars];
     }
-
     /**
      * Return key into $template_data for template
      *
@@ -362,23 +330,21 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
             $template->source->filepath;
         }
         $key = $template->source->uid;
-        if (isset($this->template_data[ $this->index ][ $key ])) {
+        if (isset($this->template_data[$this->index][$key])) {
             return $key;
         } else {
-            if (isset($_is_stringy[ $template->source->type ])) {
-                $this->template_data[ $this->index ][ $key ][ 'name' ] =
-                    '\'' . substr($template->source->name, 0, 25) . '...\'';
+            if (isset($_is_stringy[$template->source->type])) {
+                $this->template_data[$this->index][$key]['name'] = '\'' . substr($template->source->name, 0, 25) . '...\'';
             } else {
-                $this->template_data[ $this->index ][ $key ][ 'name' ] = $template->source->filepath;
+                $this->template_data[$this->index][$key]['name'] = $template->source->filepath;
             }
-            $this->template_data[ $this->index ][ $key ][ 'compile_time' ] = 0;
-            $this->template_data[ $this->index ][ $key ][ 'render_time' ] = 0;
-            $this->template_data[ $this->index ][ $key ][ 'cache_time' ] = 0;
-            $this->template_data[ $this->index ][ $key ][ 'total_time' ] = 0;
+            $this->template_data[$this->index][$key]['compile_time'] = 0;
+            $this->template_data[$this->index][$key]['render_time'] = 0;
+            $this->template_data[$this->index][$key]['cache_time'] = 0;
+            $this->template_data[$this->index][$key]['total_time'] = 0;
             return $key;
         }
     }
-
     /**
      * Ignore template
      *
@@ -390,18 +356,17 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
         if ($template->source->uid === '') {
             $template->source->filepath;
         }
-        $this->ignore_uid[ $template->source->uid ] = true;
+        $this->ignore_uid[$template->source->uid] = true;
     }
-
     /**
      * handle 'URL' debugging mode
      *
      * @param Smarty $smarty
      */
-    public function debugUrl(Smarty $smarty)
+    public function debug_url(Smarty $smarty)
     {
-        if (isset($_SERVER[ 'QUERY_STRING' ])) {
-            $_query_string = $_SERVER[ 'QUERY_STRING' ];
+        if (isset($_SERVER['QUERY_STRING'])) {
+            $_query_string = $_SERVER['QUERY_STRING'];
         } else {
             $_query_string = '';
         }
@@ -418,10 +383,8 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data
                 // enable debugging for this page
                 $smarty->debugging = true;
             }
-        } else {
-            if (isset($_COOKIE[ 'SMARTY_DEBUG' ])) {
-                $smarty->debugging = true;
-            }
+        } else if (isset($_COOKIE['SMARTY_DEBUG'])) {
+            $smarty->debugging = true;
         }
     }
 }

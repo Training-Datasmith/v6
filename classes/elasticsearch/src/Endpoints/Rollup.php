@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Rollup extends AbstractEndpoint
+class Rollup extends Abstract_Endpoint
 {
     /**
      * Deletes an existing rollup job.
@@ -50,19 +47,15 @@ class Rollup extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteJob(array $params = [])
+    public function delete_job(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_rollup/job/' . $this->encode($params['id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves the configuration, stats, and status of rollup jobs.
      *
@@ -84,7 +77,7 @@ class Rollup extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getJobs(array $params = [])
+    public function get_jobs(array $params = [])
     {
         if (isset($params['id'])) {
             $url = '/_rollup/job/' . $this->encode($params['id']);
@@ -93,13 +86,10 @@ class Rollup extends AbstractEndpoint
             $url = '/_rollup/job/';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns the capabilities of any rollup jobs that have been configured for a specific index or index pattern.
      *
@@ -121,7 +111,7 @@ class Rollup extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getRollupCaps(array $params = [])
+    public function get_rollup_caps(array $params = [])
     {
         if (isset($params['id'])) {
             $url = '/_rollup/data/' . $this->encode($params['id']);
@@ -130,13 +120,10 @@ class Rollup extends AbstractEndpoint
             $url = '/_rollup/data/';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns the rollup capabilities of all jobs inside of a rollup index (e.g. the index where rollup data is stored).
      *
@@ -159,19 +146,15 @@ class Rollup extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getRollupIndexCaps(array $params = [])
+    public function get_rollup_index_caps(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_rollup/data';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a rollup job.
      *
@@ -195,20 +178,15 @@ class Rollup extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putJob(array $params = [])
+    public function put_job(array $params = [])
     {
-        $this->checkRequiredParameters(['id','body'], $params);
+        $this->check_required_parameters(['id', 'body'], $params);
         $url = '/_rollup/job/' . $this->encode($params['id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Enables searching rolled-up data using the standard query DSL.
      *
@@ -234,20 +212,15 @@ class Rollup extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function rollupSearch(array $params = [])
+    public function rollup_search(array $params = [])
     {
-        $this->checkRequiredParameters(['index','body'], $params);
+        $this->check_required_parameters(['index', 'body'], $params);
         $url = '/' . $this->encode($params['index']) . '/_rollup_search';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['typed_keys','rest_total_hits_as_int','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['typed_keys', 'rest_total_hits_as_int', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Starts an existing, stopped rollup job.
      *
@@ -270,19 +243,15 @@ class Rollup extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function startJob(array $params = [])
+    public function start_job(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_rollup/job/' . $this->encode($params['id']) . '/_start';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Stops an existing, started rollup job.
      *
@@ -307,16 +276,13 @@ class Rollup extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function stopJob(array $params = [])
+    public function stop_job(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_rollup/job/' . $this->encode($params['id']) . '/_stop';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_completion','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_completion', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 /**
  * Core controller
  *
@@ -28,115 +27,93 @@ class Cubecart
      * @var array
      */
     private $_basket;
-
-    public const AFFILIATE_GATEWAY  = 1;
+    public const AFFILIATE_GATEWAY = 1;
     public const AFFILIATE_COMPLETE = 2;
-
-    public const OPTION_SELECT   = 0;
-    public const OPTION_TEXTBOX  = 1;
-    public const OPTION_TEXTAREA  = 2;
-    public const OPTION_PASSWORD  = 3;
-    public const OPTION_RADIO   = 4;
-    public const OPTION_CHECKBOX  = 5;
-    public const OPTION_DATEPICKER  = 6;
-    public const OPTION_HIDDEN   = 7;
-    public const OPTION_FILE   = 8;
-
-    public const ORDER_PENDING   = 1;
-    public const ORDER_PROCESS   = 2;
-    public const ORDER_COMPLETE  = 3;
-    public const ORDER_DECLINED  = 4;
-    public const ORDER_FAILED   = 5;
-    public const ORDER_CANCELLED  = 6;
-
+    public const OPTION_SELECT = 0;
+    public const OPTION_TEXTBOX = 1;
+    public const OPTION_TEXTAREA = 2;
+    public const OPTION_PASSWORD = 3;
+    public const OPTION_RADIO = 4;
+    public const OPTION_CHECKBOX = 5;
+    public const OPTION_DATEPICKER = 6;
+    public const OPTION_HIDDEN = 7;
+    public const OPTION_FILE = 8;
+    public const ORDER_PENDING = 1;
+    public const ORDER_PROCESS = 2;
+    public const ORDER_COMPLETE = 3;
+    public const ORDER_DECLINED = 4;
+    public const ORDER_FAILED = 5;
+    public const ORDER_CANCELLED = 6;
     /**
      * Class instance
      *
      * @var instance
      */
     protected static $_instance;
-
     ##############################################
-
     final protected function __construct()
     {
         if (isset($_SERVER['REDIRECT_STATUS']) && $_SERVER['REDIRECT_STATUS'] >= 400) {
             $_GET['_a'] = '404';
         }
     }
-
     /**
      * Setup the instance (singleton)
      */
-    public static function getInstance(): self
+    public static function get_instance(): self
     {
-        if (!(self::$_instance instanceof self)) {
+        if (!self::$_instance instanceof self) {
             self::$_instance = new self();
         }
-
         return self::$_instance;
     }
-
     //=====[ Public ]=======================================
-
     /**
      * Show the home page
      */
-    public function displayHomePage(): void
+    public function display_home_page(): void
     {
-        if (($home = $this->getDocument(null, true)) !== false) {
-            $GLOBALS['smarty']->assign('DOCUMENT', [
-                    'title'  => $home['doc_name'],
-                    'content' => $home['doc_content'],
-                    'hide_title' => $home['hide_title'],
-                ]);
+        if (($home = $this->get_document(null, true)) !== false) {
+            $GLOBALS['smarty']->assign('DOCUMENT', ['title' => $home['doc_name'], 'content' => $home['doc_content'], 'hide_title' => $home['hide_title']]);
         }
-
         $products = [];
-
-        $where = $GLOBALS['catalogue']->outOfStockWhere(['I.status' => '1', 'I.latest' => '1'], 'I');
-
+        $where = $GLOBALS['catalogue']->out_of_stock_where(['I.status' => '1', 'I.latest' => '1'], 'I');
         if ($GLOBALS['config']->get('config', 'catalogue_latest_products')) {
-            $query = sprintf("SELECT I.* FROM `%1\$sCubeCart_inventory` AS I JOIN `%1\$sCubeCart_category` AS C ON C.cat_id=I.cat_id AND C.`status`=1 AND $where ORDER BY I.date_added DESC, I.product_id DESC", $GLOBALS['config']->get('config', 'dbprefix'));
-            $latestProducts = $GLOBALS['db']->query($query, (int)$GLOBALS['config']->get('config', 'catalogue_latest_products_count'));
+            $query = sprintf("SELECT I.* FROM `%1\$sCubeCart_inventory` AS I JOIN `%1\$sCubeCart_category` AS C ON C.cat_id=I.cat_id AND C.`status`=1 AND {$where} ORDER BY I.date_added DESC, I.product_id DESC", $GLOBALS['config']->get('config', 'dbprefix'));
+            $latest_products = $GLOBALS['db']->query($query, (int) $GLOBALS['config']->get('config', 'catalogue_latest_products_count'));
             foreach ($GLOBALS['hooks']->load('class.cubecart.latest_products') as $hook) {
                 include $hook;
             }
-            if ($latestProducts) {
-                foreach ($latestProducts as $product) {
+            if ($latest_products) {
+                foreach ($latest_products as $product) {
                     // Product Translation
-                    $GLOBALS['language']->translateProduct($product);
-                    $product['image'] = $GLOBALS['gui']->getProductImage($product['product_id'], 'small');
+                    $GLOBALS['language']->translate_product($product);
+                    $product['image'] = $GLOBALS['gui']->get_product_image($product['product_id'], 'small');
                     if (isset($GLOBALS['catalogue']->image_tags[$product['image']])) {
                         $product['image_tags'] = $GLOBALS['catalogue']->image_tags[$product['image']];
                     }
-
-                    $product['ctrl_sale'] = (!$GLOBALS['tax']->salePrice($product['price'], $product['sale_price']) || !$GLOBALS['config']->get('config', 'catalogue_sale_mode')) ? false : true;
-
-                    $GLOBALS['catalogue']->getProductPrice($product);
-                    $sale = $GLOBALS['tax']->salePrice($product['price'], $product['sale_price']);
+                    $product['ctrl_sale'] = !$GLOBALS['tax']->sale_price($product['price'], $product['sale_price']) || !$GLOBALS['config']->get('config', 'catalogue_sale_mode') ? false : true;
+                    $GLOBALS['catalogue']->get_product_price($product);
+                    $sale = $GLOBALS['tax']->sale_price($product['price'], $product['sale_price']);
                     $product['price_unformatted'] = $product['price'];
-                    $product['sale_price_unformatted'] = ($sale) ? $product['sale_price'] : null;
-                    $product['price'] = $GLOBALS['tax']->priceFormat($product['price']);
-                    $product['sale_price'] = ($sale) ? $GLOBALS['tax']->priceFormat($product['sale_price']) : null;
-
+                    $product['sale_price_unformatted'] = $sale ? $product['sale_price'] : null;
+                    $product['price'] = $GLOBALS['tax']->price_format($product['price']);
+                    $product['sale_price'] = $sale ? $GLOBALS['tax']->price_format($product['sale_price']) : null;
                     // ctrl_stock True when a product is considered 'in stock' for purposes of allowing a purchase, either by actually being in stock or via certain settings
-                    $product['ctrl_stock'] = (!$product['use_stock_level'] || $GLOBALS['config']->get('config', 'basket_out_of_stock_purchase') || ($product['use_stock_level'] && $GLOBALS['catalogue']->getProductStock($product['product_id'], null, true) > 0)) ? true : false;
-                    $product['url'] = $GLOBALS['seo']->buildURL('prod', $product['product_id'], '&');
-
-                    $GLOBALS['smarty']->assign('CTRL_REVIEW', (bool)$GLOBALS['config']->get('config', 'enable_reviews'));
+                    $product['ctrl_stock'] = !$product['use_stock_level'] || $GLOBALS['config']->get('config', 'basket_out_of_stock_purchase') || $product['use_stock_level'] && $GLOBALS['catalogue']->get_product_stock($product['product_id'], null, true) > 0 ? true : false;
+                    $product['url'] = $GLOBALS['seo']->build_url('prod', $product['product_id'], '&');
+                    $GLOBALS['smarty']->assign('CTRL_REVIEW', (bool) $GLOBALS['config']->get('config', 'enable_reviews'));
                     if (($product_review = $GLOBALS['db']->select('CubeCart_reviews', 'SUM(`rating`) AS Score, COUNT(`id`) as Count', ['approved' => 1, 'product_id' => $product['product_id']])) !== false) {
                         if (!empty($product_review[0]['Count'])) {
                             $product['review_score'] = round($product_review[0]['Score'] / $product_review[0]['Count'], 1);
                         }
                     }
-                    $product['description_short'] = $GLOBALS['catalogue']->descriptionShort($product);
+                    $product['description_short'] = $GLOBALS['catalogue']->description_short($product);
                     $products[] = $product;
                 }
                 $GLOBALS['smarty']->assign('LATEST_PRODUCTS', $products);
             }
         }
-
         $GLOBALS['smarty']->assign('CTRL_HIDE_PRICES', $GLOBALS['session']->get('hide_prices'));
         foreach ($GLOBALS['hooks']->load('class.cubecart.display_homepage') as $hook) {
             include $hook;
@@ -144,7 +121,6 @@ class Cubecart
         $content = $GLOBALS['smarty']->fetch('templates/content.homepage.php');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Load a document
      *
@@ -153,19 +129,18 @@ class Cubecart
      *
      * @return string/false
      */
-    public function getDocument($doc_id = null, $homepage = false)
+    public function get_document($doc_id = null, $homepage = false)
     {
         if (is_numeric($doc_id) || $homepage) {
-            $where  = ($homepage) ? ['doc_home' => '1', 'doc_status' => '1'] : ['doc_id' => $doc_id, 'doc_status' => '1'];
+            $where = $homepage ? ['doc_home' => '1', 'doc_status' => '1'] : ['doc_id' => $doc_id, 'doc_status' => '1'];
             $doc_lang = $GLOBALS['language']->current();
             if ($parent = $GLOBALS['db']->select('CubeCart_documents', false, $where)) {
                 $contents = $parent[0];
                 if ($parent[0]['doc_lang'] != $doc_lang) {
                     if ($contents['doc_parent_id'] > 0) {
                         // we have different than store default lang document but language switched just on product page
-                        $target_column = ($doc_lang == $GLOBALS['config']->get('config', 'default_language')) ? 'doc_id' : 'doc_parent_id' ;
+                        $target_column = $doc_lang == $GLOBALS['config']->get('config', 'default_language') ? 'doc_id' : 'doc_parent_id';
                         $document = $GLOBALS['db']->select('CubeCart_documents', false, [$target_column => $contents['doc_parent_id'], 'doc_lang' => $doc_lang]);
-
                         // Default Lang, if it exists
                         if (!$document) {
                             $document = $GLOBALS['db']->select('CubeCart_documents', false, ['doc_id' => $contents['doc_parent_id'], 'doc_lang' => $GLOBALS['config']->get('config', 'default_language')]);
@@ -176,51 +151,41 @@ class Cubecart
                         // Default Lang, if it exists
                         $document = $GLOBALS['db']->select('CubeCart_documents', false, ['doc_parent_id' => $contents['doc_id'], 'doc_lang' => $GLOBALS['config']->get('config', 'default_language')]);
                     }
-
                     if ($document) {
                         $contents = $document[0];
                     }
                 }
-                $meta_data = [
-                    'name'   => $contents['doc_name'],
-                    'path'   => null,
-                    'description' => $contents['seo_meta_description'] ?? '',
-                    'title'   => $contents['seo_meta_title'] ?? '',
-                ];
-
+                $meta_data = ['name' => $contents['doc_name'], 'path' => null, 'description' => $contents['seo_meta_description'] ?? '', 'title' => $contents['seo_meta_title'] ?? ''];
                 $GLOBALS['seo']->set_meta_data($meta_data);
-
                 if ($contents['doc_privacy'] == 1 && $GLOBALS['config']->get('config', 'cookie_dialogue') == '1') {
                     $GLOBALS['smarty']->assign('COOKIE_SWITCH', true);
                 }
-                $contents['doc_content'] = ($contents['doc_parse'] == 1) ? $GLOBALS['smarty']->fetch('string:'.$contents['doc_content']) : $contents['doc_content'];
-
+                $contents['doc_content'] = $contents['doc_parse'] == 1 ? $GLOBALS['smarty']->fetch('string:' . $contents['doc_content']) : $contents['doc_content'];
                 return $contents;
             }
         }
         return false;
     }
-
     /**
      * Load a page
      */
-    public function loadPage(): void
+    public function load_page(): void
     {
         if (isset($_GET['_g']) && !empty($_GET['_g'])) {
             switch (strtolower((string) $_GET['_g'])) {
                 case 'ajax_cookie_consent':
-                    $dialogue = ($_GET['accept'] == 1) ? 'Accepted chosen.' : 'Blocked chosen.';
-                    $GLOBALS['user']->logConsent($dialogue);
+                    $dialogue = $_GET['accept'] == 1 ? 'Accepted chosen.' : 'Blocked chosen.';
+                    $GLOBALS['user']->log_consent($dialogue);
                     exit;
                 case 'ajax_price_format':
                     $GLOBALS['debug']->supress();
                     if (is_numeric($_GET['price'])) {
-                        echo json_encode($GLOBALS['tax']->priceFormat($_GET['price']));
+                        echo json_encode($GLOBALS['tax']->price_format($_GET['price']));
                     } elseif (is_array($_GET['price'])) {
                         $prices = [];
                         foreach ($_GET['price'] as $key => $price) {
                             if (is_numeric($price)) {
-                                $prices[$key] = $GLOBALS['tax']->priceFormat($price);
+                                $prices[$key] = $GLOBALS['tax']->price_format($price);
                             }
                         }
                         die(json_encode($prices));
@@ -228,24 +193,22 @@ class Cubecart
                     exit;
                 case 'ajax_email':
                     $GLOBALS['debug']->supress();
-
                     if (isset($_GET['source']) && $_GET['source'] == 'newsletter') {
                         $result = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', 'subscriber_id', ['email' => $_POST['subscribe']], false, 1, false, false);
                     } else {
                         $email = $_POST['user']['email'] ?? $_POST['email'];
                         $result = $GLOBALS['db']->select('CubeCart_customer', 'customer_id', ['email' => $email, 'type' => 1]);
                     }
-
                     if ($result) {
-                        $response = ($GLOBALS['config']->get('config', 'csrf') == '1') ? ['result' => false, 'token' => SESSION_TOKEN] : false;
+                        $response = $GLOBALS['config']->get('config', 'csrf') == '1' ? ['result' => false, 'token' => SESSION_TOKEN] : false;
                         die(json_encode($response));
                     }
-                    $response = ($GLOBALS['config']->get('config', 'csrf') == '1') ? ['result' => true, 'token' => SESSION_TOKEN] : true;
+                    $response = $GLOBALS['config']->get('config', 'csrf') == '1' ? ['result' => true, 'token' => SESSION_TOKEN] : true;
                     die(json_encode($response));
                 case 'ajaxadd':
                     $GLOBALS['debug']->supress();
-                    $sideBasket = $GLOBALS['gui']->displaySideBasket();
-                    die($sideBasket);
+                    $side_basket = $GLOBALS['gui']->display_side_basket();
+                    die($side_basket);
                 case 'rm':
                 case 'remote':
                     $GLOBALS['debug']->supress();
@@ -255,22 +218,20 @@ class Cubecart
                             case 'plugins':
                             case 'gateway':
                                 /* Important Notice!
-                                Please be careful with this hook that you don't always force $plugin to 'plugin'.
-                                This will stop other normal gateways working. Wrap your code in a condition to
-                                make sure that it only ever executed when needed.
-                                */
+                                   Please be careful with this hook that you don't always force $plugin to 'plugin'.
+                                   This will stop other normal gateways working. Wrap your code in a condition to
+                                   make sure that it only ever executed when needed.
+                                   */
                                 foreach ($GLOBALS['hooks']->load('class.cubecart.construct.callback.gateway') as $hook) {
                                     include $hook;
                                 }
-                                $folder = (isset($plugin)) ? 'plugins' : 'gateway';
+                                $folder = isset($plugin) ? 'plugins' : 'gateway';
                                 $module = preg_replace('#[^a-z0-9\_\-]#iU', '', (string) $_GET['module']);
-
-                                $class_file = CC_ROOT_DIR.'/modules/'.$folder.'/'.$module.'/'.'gateway.class.php';
-
+                                $class_file = CC_ROOT_DIR . '/modules/' . $folder . '/' . $module . '/' . 'gateway.class.php';
                                 if (file_exists($class_file)) {
                                     include $class_file;
                                     $gateway = new Gateway($GLOBALS['config']->get($module));
-                                    $command = (isset($_GET['cmd'])) ? strtolower($_GET['cmd']) : null;
+                                    $command = isset($_GET['cmd']) ? strtolower($_GET['cmd']) : null;
                                     if (!empty($command)) {
                                         # if (method_exists($gateway, $command)) $gateway->{$command}();
                                         switch ($_GET['cmd']) {
@@ -304,7 +265,7 @@ class Cubecart
                     $GLOBALS['debug']->supress();
                     $cron = new Cron();
                     if (method_exists($cron, $method)) {
-                        $cron->$method();
+                        $cron->{$method}();
                         // Update last_run for individual task calls
                         if ($method !== 'run') {
                             $GLOBALS['db']->update('CubeCart_cron_tasks', ['last_run' => date('Y-m-d H:i:s'), 'last_result' => 'OK'], ['method' => $method]);
@@ -324,7 +285,7 @@ class Cubecart
             //Clear cart
             if (isset($_GET['empty-basket'])) {
                 $GLOBALS['cart']->clear();
-                httpredir(currentPage(['empty-basket'], ['_a' => 'basket']));
+                httpredir(current_page(['empty-basket'], ['_a' => 'basket']));
             }
             switch (strtolower((string) $_GET['_a'])) {
                 /**
@@ -334,10 +295,8 @@ class Cubecart
                  */
                 case '404':
                     $GLOBALS['smarty']->assign('SECTION_NAME', '404');
-
                     $this->_404();
                     break;
-
                 case 'cancel':
                     $GLOBALS['smarty']->assign('SECTION_NAME', 'checkout');
                     // Cancel payment
@@ -345,7 +304,6 @@ class Cubecart
                         include $hook;
                     }
                     break;
-
                 case 'checkout':
                 case 'confirm':
                     $GLOBALS['smarty']->assign('SECTION_NAME', 'checkout');
@@ -355,7 +313,7 @@ class Cubecart
                     }
                     $this->_checkout();
                     $editable = false;
-                    // no break
+                // no break
                 case 'basket':
                 case 'cart':
                     $GLOBALS['smarty']->assign('SECTION_NAME', 'checkout');
@@ -365,49 +323,41 @@ class Cubecart
                     }
                     $this->_basket($editable ?? true);
                     break;
-
                 case 'document':
                     $GLOBALS['smarty']->assign('SECTION_NAME', 'document');
                     // Site Documents
-                    if (($document = $this->getDocument($_GET['doc_id'])) !== false) {
-
+                    if (($document = $this->get_document($_GET['doc_id'])) !== false) {
                         // Homepage shouldn't load as a document (duplicate content)
                         if ($document['doc_home'] == '1') {
                             httpredir('index.php', '', false, 301);
                         }
-
                         foreach ($GLOBALS['hooks']->load('class.cubecart.document_widgets') as $hook) {
                             include $hook;
                         }
-
-                        $GLOBALS['gui']->addBreadcrumb($document['doc_name'], 'index.php?_a=document&doc_id='.$document['doc_id']);
+                        $GLOBALS['gui']->add_breadcrumb($document['doc_name'], 'index.php?_a=document&doc_id=' . $document['doc_id']);
                         $GLOBALS['smarty']->assign('DOCUMENT', $document);
                         /* Social Bookmarks */
-                        $GLOBALS['smarty']->assign('SHARE', $this->_getSocial('document', 'getButtonHTML'));
+                        $GLOBALS['smarty']->assign('SHARE', $this->_get_social('document', 'getButtonHTML'));
                         /* Social Comments */
-                        $GLOBALS['smarty']->assign('COMMENTS', $this->_getSocial('document', 'getCommunityHTML'));
+                        $GLOBALS['smarty']->assign('COMMENTS', $this->_get_social('document', 'getCommunityHTML'));
                         $content = $GLOBALS['smarty']->fetch('templates/content.document.php');
                         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
                     }
                     break;
-
                 case 'download':
                 case 'downloads':
                     $GLOBALS['smarty']->assign('SECTION_NAME', 'download');
                     $this->_download();
                     break;
-
                 case 'saleitems':
                     $GLOBALS['smarty']->assign('SECTION_NAME', 'saleitems');
                     $_GET['cat_id'] = 'sale';
                     $this->_category();
                     break;
-
                 case 'category':
                     $GLOBALS['smarty']->assign('SECTION_NAME', 'category');
                     $this->_category();
                     break;
-
                 case 'login':
                     if ($GLOBALS['user']->is()) {
                         httpredir('index.php');
@@ -416,43 +366,38 @@ class Cubecart
                         $this->_login();
                     }
                     break;
-
                 case 'newsletter':
                 case 'unsubscribe':
                     $this->_newsletter();
                     break;
-
                 case 'plugin':
                     $trigger = 'class.cubecart.display_content';
                     $plugin = preg_replace('#[^a-z0-9\_\-]#iU', '', (string) $_GET['plugin']);
-                    $path = 'modules/plugins/'.$plugin.'/'.'hooks/'.$trigger.'.php';
+                    $path = 'modules/plugins/' . $plugin . '/' . 'hooks/' . $trigger . '.php';
                     if ($GLOBALS['hooks']->is_enabled($trigger, $plugin) && file_exists($path)) {
                         include $path;
                     } else {
                         httpredir('index.php');
                     }
                     break;
-
                 case 'template':
                     if (isset($_GET['type']) && isset($_GET['module'])) {
                         $module = preg_replace('#[^a-z0-9\_\-]#iU', '', $_GET['module']);
                         $type = preg_replace('#[^a-z0-9\_\-]#iU', '', $_GET['type']);
-                        $template = 'modules/'.$type.'/'.$module.'/skin/inline.php';
+                        $template = 'modules/' . $type . '/' . $module . '/skin/inline.php';
                         if (file_exists($template)) {
                             $GLOBALS['smarty']->assign('PAGE_CONTENT', file_get_contents($template, false));
                         }
                     }
                     break;
-
                 case 'vieworders':
                 case 'vieworder':
                 case 'orderhistory':
                     $GLOBALS['smarty']->assign('SECTION_NAME', 'order');
                     $this->_orders();
                     break;
-
                 default:
-                    $method = '_'.strtolower((string) $_GET['_a']);
+                    $method = '_' . strtolower((string) $_GET['_a']);
                     // CubeCart will auto load any class in the classes folder. Please use the method below to
                     // load a function from the class. e.g. widget.class.php
                     if (method_exists($this, $method)) {
@@ -463,17 +408,15 @@ class Cubecart
                         include $hook;
                     }
             }
-            if ($GLOBALS['smarty']->getTemplateVars('PAGE_CONTENT') === null) {
+            if ($GLOBALS['smarty']->get_template_vars('PAGE_CONTENT') === null) {
                 $this->_404();
             }
         } else {
             $GLOBALS['smarty']->assign('SECTION_NAME', 'home');
-            $this->displayHomePage();
+            $this->display_home_page();
         }
     }
-
     //=====[ Private ]=======================================
-
     /**
      * Display user account
      */
@@ -481,22 +424,19 @@ class Cubecart
     {
         // Display profile overview
         $GLOBALS['user']->is(true);
-
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
-
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
         // Custom Account Menu Items
         $account_list_hooks = [];
         foreach ($GLOBALS['hooks']->load('class.cubecart.account.list') as $hook) {
             include $hook;
         }
-        $credit = $GLOBALS['tax']->priceFormat($GLOBALS['user']->get('credit'));
+        $credit = $GLOBALS['tax']->price_format($GLOBALS['user']->get('credit'));
         $GLOBALS['smarty']->assign('CREDIT', $credit);
         $GLOBALS['smarty']->assign('ACCOUNT_LIST_HOOKS', $account_list_hooks);
         $content = $GLOBALS['smarty']->fetch('templates/content.account.php');
         $GLOBALS['smarty']->assign('SECTION_NAME', 'account');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Display addressbook
      */
@@ -504,14 +444,10 @@ class Cubecart
     {
         // Address Book
         $GLOBALS['user']->is(true);
-
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['your_addressbook'], 'index.php?_a=addressbook');
-
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['your_addressbook'], 'index.php?_a=addressbook');
         $_a = isset($_GET['redir']) ? preg_replace('/[^a-z]/i', '', (string) $_GET['redir']) : 'addressbook';
-
         $GLOBALS['smarty']->assign('REDIR', $_a);
-
         if (isset($_POST['save'])) {
             if (empty($_POST['description'])) {
                 if ($_POST['billing'] == 1 && $_POST['default'] == 1) {
@@ -525,7 +461,7 @@ class Cubecart
                 }
             }
             $empties = false;
-            $required_fields = $GLOBALS['user']->getRequiredAddressFields($_POST['country']);
+            $required_fields = $GLOBALS['user']->get_required_address_fields($_POST['country']);
             foreach ($_POST as $key => $value) {
                 if (in_array($key, $required_fields) && empty($value)) {
                     $empties = true;
@@ -536,104 +472,83 @@ class Cubecart
             foreach ($GLOBALS['hooks']->load('class.cubecart.addressbook.update') as $hook) {
                 include $hook;
             }
-            if (!$empties && $GLOBALS['user']->saveAddress($_POST)) {
-                $message = ($_POST['address_id']) ? $GLOBALS['language']->account['notify_address_updated'] : $GLOBALS['language']->account['notify_address_added'];
-                $GLOBALS['gui']->setNotify($message);
-                httpredir('?_a='.$_a);
+            if (!$empties && $GLOBALS['user']->save_address($_POST)) {
+                $message = $_POST['address_id'] ? $GLOBALS['language']->account['notify_address_updated'] : $GLOBALS['language']->account['notify_address_added'];
+                $GLOBALS['gui']->set_notify($message);
+                httpredir('?_a=' . $_a);
             } else {
-                $message = ($_POST['address_id']) ? $GLOBALS['language']->account['error_address_updated'] : $GLOBALS['language']->account['error_address_added'];
-                $GLOBALS['gui']->setError($message);
+                $message = $_POST['address_id'] ? $GLOBALS['language']->account['error_address_updated'] : $GLOBALS['language']->account['error_address_added'];
+                $GLOBALS['gui']->set_error($message);
             }
         }
         if (isset($_POST['delete'])) {
-            if ($GLOBALS['user']->deleteAddress($_POST['delete'])) {
-                $GLOBALS['gui']->setNotify($GLOBALS['language']->account['notify_address_delete']);
+            if ($GLOBALS['user']->delete_address($_POST['delete'])) {
+                $GLOBALS['gui']->set_notify($GLOBALS['language']->account['notify_address_delete']);
             } else {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_address_delete']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_address_delete']);
             }
-            httpredir('?_a='.$_a);
+            httpredir('?_a=' . $_a);
         }
-
         // Display addressbook
         foreach ($GLOBALS['hooks']->load('class.cubecart.construct.addressbook') as $hook) {
             include $hook;
         }
-
         if (isset($_GET['action'])) {
             $address = [];
             switch ($_GET['action']) {
                 case 'edit':
                     if (isset($_GET['address_id']) && is_numeric($_GET['address_id'])) {
-                        if (($address = $GLOBALS['user']->getAddress($_GET['address_id'])) !== false) {
-                            $address['default'] = ($address['default']) ? 'checked="checked"' : '';
-                            $address['billing'] = ($address['billing']) ? 'checked="checked"' : '';
+                        if (($address = $GLOBALS['user']->get_address($_GET['address_id'])) !== false) {
+                            $address['default'] = $address['default'] ? 'checked="checked"' : '';
+                            $address['billing'] = $address['billing'] ? 'checked="checked"' : '';
                             $GLOBALS['smarty']->assign('DATA', $address);
                         } else {
-                            $GLOBALS['gui']->setError($GLOBALS['language']->account['error_address_not_found']);
-                            httpredir('?_a='.$_a);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_address_not_found']);
+                            httpredir('?_a=' . $_a);
                         }
                     }
-                    // no break
+                // no break
                 case 'add':
                     if (empty($address)) {
-                        $addresses = $GLOBALS['user']->getAddresses();
-                        $GLOBALS['smarty']->assign('DATA', [
-                                'first_name' => $GLOBALS['user']->get('first_name'),
-                                'last_name'  => $GLOBALS['user']->get('last_name'),
-                                'description' => '',
-                                'title'   => '',
-                                'company_name' => '',
-                                'line1'   => '',
-                                'line2'   => '',
-                                'town'   => '',
-                                'state'   => '',
-                                'postcode'  => '',
-                                'billing'  => (!is_array($addresses)) ? 'checked="checked"' : '',
-                                'default'  => (!is_array($addresses)) ? 'checked="checked"' : '',
-                            ]);
+                        $addresses = $GLOBALS['user']->get_addresses();
+                        $GLOBALS['smarty']->assign('DATA', ['first_name' => $GLOBALS['user']->get('first_name'), 'last_name' => $GLOBALS['user']->get('last_name'), 'description' => '', 'title' => '', 'company_name' => '', 'line1' => '', 'line2' => '', 'town' => '', 'state' => '', 'postcode' => '', 'billing' => !is_array($addresses) ? 'checked="checked"' : '', 'default' => !is_array($addresses) ? 'checked="checked"' : '']);
                     }
                     if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', false, 'status > 0', ['name' => 'ASC'])) !== false) {
                         if (!isset($address['country'])) {
                             $address['country'] = $GLOBALS['config']->get('config', 'store_country');
                         }
                         foreach ($countries as $country) {
-                            $country['selected'] = ($country['numcode'] == $address['country']) ? 'selected="selected"' : '';
+                            $country['selected'] = $country['numcode'] == $address['country'] ? 'selected="selected"' : '';
                             $GLOBALS['smarty']->append('COUNTRIES', $country);
                         }
                     }
-
-                    $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->address['add_edit'], currentPage());
+                    $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->address['add_edit'], current_page());
                     break;
             }
             $GLOBALS['smarty']->assign('CTRL_FORM', true);
         } else {
-            $addresses = $GLOBALS['user']->getAddresses();
+            $addresses = $GLOBALS['user']->get_addresses();
             if ($addresses) {
                 foreach ($addresses as $address) {
-                    $address['billing'] = ($address['billing']) ? '('.$GLOBALS['language']->address['billing_address'].')' : false;
-                    $address['default'] = ($address['default']) ? '('.$GLOBALS['language']->address['default_delivery_address'].')' : false;
+                    $address['billing'] = $address['billing'] ? '(' . $GLOBALS['language']->address['billing_address'] . ')' : false;
+                    $address['default'] = $address['default'] ? '(' . $GLOBALS['language']->address['default_delivery_address'] . ')' : false;
                     $GLOBALS['smarty']->append('ADDRESSES', $address);
                 }
             } else {
                 httpredir('?_a=addressbook&action=add');
             }
         }
-
         $GLOBALS['smarty']->assign('VAL_JSON_STATE', state_json());
-
         foreach ($GLOBALS['hooks']->load('class.cubecart.addressbook') as $hook) {
             include $hook;
         }
-
         if (isset($GLOBALS['cart']->basket['contents'])) {
             $GLOBALS['smarty']->assign('CHECKOUT_BUTTON', true);
         }
-
         $content = $GLOBALS['smarty']->fetch('templates/content.addressbook.php');
         $GLOBALS['smarty']->assign('SECTION_NAME', 'account');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Display basket
      */
@@ -643,44 +558,35 @@ class Cubecart
         foreach ($GLOBALS['hooks']->load('class.cubecart.pre_basket') as $hook) {
             include $hook;
         }
-
-        $this->_checkoutProcess();
-        $GLOBALS['cart']->verifyBasket();
-        $this->_basket = & $GLOBALS['cart']->basket;
-
+        $this->_checkout_process();
+        $GLOBALS['cart']->verify_basket();
+        $this->_basket =& $GLOBALS['cart']->basket;
         if ($_GET['_a'] == 'basket' && $this->_basket['billing_address']['user_defined'] ?? false) {
             httpredir('index.php?_a=confirm');
         }
-
         if ($editable) {
             if ($_GET['_a'] == 'basket') {
                 if (isset($_POST['get-estimate'])) {
                     $_POST['estimate']['postcode'] = empty($_POST['estimate']['postcode']) ? $GLOBALS['config']->get('config', 'store_postcode') : $_POST['estimate']['postcode'];
-                    $basket_data['delivery_address'] = $GLOBALS['user']->formatAddress($_POST['estimate'], false, true);
-
+                    $basket_data['delivery_address'] = $GLOBALS['user']->format_address($_POST['estimate'], false, true);
                     $before = md5(serialize($this->_basket['delivery_address']));
                     $this->_basket['delivery_address'] = $basket_data['delivery_address'];
                     $this->_basket['billing_address'] = $basket_data['delivery_address'];
-
                     if ($before !== md5(serialize($this->_basket['delivery_address']))) {
                         $GLOBALS['cart']->save();
-                        $GLOBALS['gui']->setNotify($GLOBALS['language']->basket['shipping_address_updated']);
+                        $GLOBALS['gui']->set_notify($GLOBALS['language']->basket['shipping_address_updated']);
                     }
                 }
-
                 // Estimated shipping
                 if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', false, 'status > 0', ['name' => 'ASC'])) !== false) {
                     foreach ($countries as $country) {
                         $country['selected'] = '';
-
                         if (isset($this->_basket['delivery_address'])) {
                             if ($country['numcode'] == $this->_basket['delivery_address']['country_id']) {
                                 $country['selected'] = 'selected="selected"';
                             }
-                        } else {
-                            if ($country['numcode'] == $GLOBALS['config']->get('config', 'store_country')) {
-                                $country['selected_d'] = 'selected="selected"';
-                            }
+                        } else if ($country['numcode'] == $GLOBALS['config']->get('config', 'store_country')) {
+                            $country['selected_d'] = 'selected="selected"';
                         }
                         $GLOBALS['smarty']->append('COUNTRIES', $country);
                     }
@@ -695,133 +601,103 @@ class Cubecart
             } else {
                 $GLOBALS['smarty']->assign('ESTIMATE_SHIPPING', false);
             }
-
             $GLOBALS['smarty']->assign('INCLUDE_CHECKOUT', false);
         }
-
         if ($GLOBALS['user']->is() && in_array($_GET['_a'], ['basket', 'cart'])) {
-            httpredir(currentPage(null, ['_a' => 'confirm']));
+            httpredir(current_page(null, ['_a' => 'confirm']));
         }
-
         if (isset($_POST['use_credit'])) {
             $this->_basket['use_credit'] = $_POST['use_credit'];
         }
-
         if (isset($_POST['gateway']) && !empty($_POST['gateway'])) {
             $this->_basket['gateway'] = $_POST['gateway'];
             $GLOBALS['cart']->save();
         }
-
         // Auto-apply coupon from abandoned cart recovery link
         if ($abandon_coupon = $GLOBALS['session']->get('abandon_coupon', 'client')) {
             $GLOBALS['session']->delete('abandon_coupon', 'client');
-            $GLOBALS['cart']->discountAdd($abandon_coupon);
+            $GLOBALS['cart']->discount_add($abandon_coupon);
             $GLOBALS['cart']->save();
         }
-
         if (isset($_POST['update'])) {
             $GLOBALS['cart']->update();
             if (isset($_POST['coupon']) && !empty($_POST['coupon'])) {
-                $GLOBALS['cart']->discountAdd($_POST['coupon']);
+                $GLOBALS['cart']->discount_add($_POST['coupon']);
             }
             foreach ($GLOBALS['hooks']->load('class.cubecart.post_discount_add') as $hook) {
                 include $hook;
             }
             $GLOBALS['cart']->save();
-            httpredir(currentPage());
+            httpredir(current_page());
         }
         if (isset($_POST['coupon']) && !empty($_POST['coupon'])) {
-            $GLOBALS['cart']->discountAdd($_POST['coupon']);
+            $GLOBALS['cart']->discount_add($_POST['coupon']);
             $GLOBALS['cart']->save();
-            httpredir(currentPage());
+            httpredir(current_page());
         }
         if (isset($_GET['remove_code'])) {
-            $GLOBALS['cart']->discountRemove($_GET['remove_code']);
+            $GLOBALS['cart']->discount_remove($_GET['remove_code']);
             $GLOBALS['cart']->save();
-            httpredir(currentPage(['remove_code']));
+            httpredir(current_page(['remove_code']));
         }
         // Update shipping values
         if (isset($_POST['shipping']) && !empty($_POST['shipping'])) {
             $posted_shipping = json_decode(base64url_decode($_POST['shipping']), true);
-
             $GLOBALS['cart']->set('shipping', $posted_shipping);
             $GLOBALS['cart']->set('shipping_hash', '');
             if (!isset($_POST['proceed'])) {
-                httpredir(currentPage());
+                httpredir(current_page());
             }
         }
-
-        if ((isset($this->_basket['delivery_address']['user_defined']) && !$this->_basket['delivery_address']['user_defined']) || (isset($this->_basket['billing_address']['user_defined']) && !$this->_basket['billing_address']['user_defined'])) {
-            $customer_locale = [
-                'mark' => $GLOBALS['language']->basket['unconfirmed_locale_mark'],
-                'description' => true,
-            ];
+        if (isset($this->_basket['delivery_address']['user_defined']) && !$this->_basket['delivery_address']['user_defined'] || isset($this->_basket['billing_address']['user_defined']) && !$this->_basket['billing_address']['user_defined']) {
+            $customer_locale = ['mark' => $GLOBALS['language']->basket['unconfirmed_locale_mark'], 'description' => true];
         } else {
-            $customer_locale = [
-                'mark' => '',
-                'description' => false,
-            ];
+            $customer_locale = ['mark' => '', 'description' => false];
         }
-
         $GLOBALS['smarty']->assign('CUSTOMER_LOCALE', $customer_locale);
-
         // Can we proceed?
         if (isset($_POST['proceed']) && in_array($_GET['_a'], ['basket', 'cart'])) {
-            httpredir(currentPage(null, ['_a' => 'confirm']));
+            httpredir(current_page(null, ['_a' => 'confirm']));
         }
-
         // Display basket
-        $this->_displayBasket();
-
+        $this->_display_basket();
         if (!empty($this->_basket['contents']) && is_array($this->_basket['contents'])) {
-            $gatway_proceed = (($_GET['_a'] == 'confirm' || $_GET['_a'] == 'checkout') && isset($_POST['proceed'])) ? true : false;
-
+            $gatway_proceed = ($_GET['_a'] == 'confirm' || $_GET['_a'] == 'checkout') && isset($_POST['proceed']) ? true : false;
             // Check minimum order value
-            $order_minimum = (float)$GLOBALS['config']->get('config', 'order_minimum');
-            if ($order_minimum > 0 && (float)$this->_basket['subtotal'] < $order_minimum) {
-                $GLOBALS['gui']->setError(sprintf($GLOBALS['language']->checkout['error_order_minimum'], $GLOBALS['tax']->priceFormat($this->_basket['subtotal']), $GLOBALS['tax']->priceFormat($order_minimum)));
+            $order_minimum = (float) $GLOBALS['config']->get('config', 'order_minimum');
+            if ($order_minimum > 0 && (float) $this->_basket['subtotal'] < $order_minimum) {
+                $GLOBALS['gui']->set_error(sprintf($GLOBALS['language']->checkout['error_order_minimum'], $GLOBALS['tax']->price_format($this->_basket['subtotal']), $GLOBALS['tax']->price_format($order_minimum)));
                 $GLOBALS['smarty']->assign('DISABLE_CHECKOUT_BUTTON', true);
                 $gatway_proceed = false;
             }
-
             // Check maximum order value
-            $order_maximum = (float)$GLOBALS['config']->get('config', 'order_maximum');
-            if ($order_maximum > 0 && (float)$this->_basket['subtotal'] > $order_maximum) {
-                $GLOBALS['gui']->setError(sprintf($GLOBALS['language']->checkout['error_order_maximum'], $GLOBALS['tax']->priceFormat($this->_basket['subtotal']), $GLOBALS['tax']->priceFormat($order_maximum)));
+            $order_maximum = (float) $GLOBALS['config']->get('config', 'order_maximum');
+            if ($order_maximum > 0 && (float) $this->_basket['subtotal'] > $order_maximum) {
+                $GLOBALS['gui']->set_error(sprintf($GLOBALS['language']->checkout['error_order_maximum'], $GLOBALS['tax']->price_format($this->_basket['subtotal']), $GLOBALS['tax']->price_format($order_maximum)));
                 $GLOBALS['smarty']->assign('DISABLE_CHECKOUT_BUTTON', true);
                 $gatway_proceed = false;
             }
-
             // Check shipping has been defined for tangible orders
             if (!isset($this->_basket['digital_only']) && !isset($this->_basket['shipping'])) {
                 $de = $GLOBALS['config']->get('config', 'disable_estimates');
-                if (($de == '1' && $this->_basket['delivery_address']['user_defined']) || ($de == '0' || !$de)) {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->checkout['error_shipping']);
-                    $GLOBALS['db']->insert('CubeCart_system_error_log', [
-                        'message' => 'Shipping error - no suitable methods for basket',
-                        'url' => "https://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}",
-                        'backtrace' => json_encode($this->_basket, JSON_PRETTY_PRINT),
-                        'time' => time(),
-                    ]);
+                if ($de == '1' && $this->_basket['delivery_address']['user_defined'] || ($de == '0' || !$de)) {
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->checkout['error_shipping']);
+                    $GLOBALS['db']->insert('CubeCart_system_error_log', ['message' => 'Shipping error - no suitable methods for basket', 'url' => "https://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}", 'backtrace' => json_encode($this->_basket, JSON_PRETTY_PRINT), 'time' => time()]);
                 }
                 $gatway_proceed = false;
             }
-
             // Check billing address is user defined
             if ($this->_basket['billing_address']['user_defined'] == false) {
                 $gatway_proceed = false;
             }
-
             // Check new registered cutomers has been to confirmed address page
             if ($GLOBALS['user']->is() && !$this->_basket['confirm_addresses']) {
                 $gatway_proceed = false;
             }
-
             // Check there are no system errors
             if ($GLOBALS['session']->has('GUI_MESSAGE')) {
                 $gatway_proceed = false;
             }
-
             // All good we go to payment
             if ($gatway_proceed) {
                 httpredir('index.php?_a=gateway');
@@ -835,7 +711,6 @@ class Cubecart
         }
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Display product categories
      */
@@ -846,14 +721,13 @@ class Cubecart
         $search = false;
         if (isset($_POST['sort'])) {
             [$field, $order] = explode('|', (string) $_POST['sort']);
-            $_GET['sort'][$field] = $query['sort'][$field] =  $order;
+            $_GET['sort'][$field] = $query['sort'][$field] = $order;
             if (isset($_GET['search'])) {
                 foreach ($_GET['search'] as $key => $value) {
                     $query['search'][$key] = $value;
                 }
             }
         }
-
         if (isset($_REQUEST['search'])) {
             if (isset($_POST['search'])) {
                 foreach ($_POST['search'] as $key => $value) {
@@ -881,7 +755,6 @@ class Cubecart
                         continue;
                     }
                     $GLOBALS['session']->set($term, '1', 'search');
-
                     if (($select = $GLOBALS['db']->select('CubeCart_search', ['id', 'hits'], ['searchstr' => strtoupper($term)], false, 1, false, false)) !== false) {
                         $GLOBALS['db']->update('CubeCart_search', ['hits' => $select[0]['hits'] + 1], ['id' => $select[0]['id']], false);
                     } else {
@@ -892,110 +765,96 @@ class Cubecart
         }
         if (!empty($query)) {
             $query['_a'] = $_GET['_a'];
-            if ($search || (isset($_GET['cat_id']) && $_GET['cat_id'] == 'sale')) {
+            if ($search || isset($_GET['cat_id']) && $_GET['cat_id'] == 'sale') {
                 $query['cat_id'] = $_GET['cat_id'] ?? null;
             }
             ksort($query);
             $path = explode('?', (string) $_SERVER['REQUEST_URI']);
-            httpredir($path[0].'?'.http_build_query($query, '', '&'));
+            httpredir($path[0] . '?' . http_build_query($query, '', '&'));
         }
         $GLOBALS['session']->delete('', 'search');
-
-        $page = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? $_REQUEST['page'] : 1;
-
-        $catalogue_products_per_page = $GLOBALS['gui']->itemsPerPage();
-
+        $page = isset($_REQUEST['page']) && !empty($_REQUEST['page']) ? $_REQUEST['page'] : 1;
+        $catalogue_products_per_page = $GLOBALS['gui']->items_per_page();
         if (isset($_REQUEST['search']) && is_array($_REQUEST['search'])) {
-            if (!$GLOBALS['catalogue']->searchCatalogue($_REQUEST['search'], $page, $catalogue_products_per_page)) {
-                $GLOBALS['catalogue']->setCategory('cat_name', $GLOBALS['language']->navigation['search_results']);
+            if (!$GLOBALS['catalogue']->search_catalogue($_REQUEST['search'], $page, $catalogue_products_per_page)) {
+                $GLOBALS['catalogue']->set_category('cat_name', $GLOBALS['language']->navigation['search_results']);
             } else {
-                $GLOBALS['catalogue']->setCategory('cat_name', sprintf($GLOBALS['language']->catalogue['notify_product_search'], $_REQUEST['search']['keywords']));
+                $GLOBALS['catalogue']->set_category('cat_name', sprintf($GLOBALS['language']->catalogue['notify_product_search'], $_REQUEST['search']['keywords']));
             }
-            $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->common['search'], 'index.php?_a=search');
-            $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->navigation['search_results'], currentPage());
+            $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->common['search'], 'index.php?_a=search');
+            $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->navigation['search_results'], current_page());
         } else {
-            $GLOBALS['catalogue']->searchCatalogue((ctype_digit((string) $_GET['cat_id']) ? (int)$_GET['cat_id'] : (string)$_GET['cat_id']), $page, $catalogue_products_per_page);
+            $GLOBALS['catalogue']->search_catalogue(ctype_digit((string) $_GET['cat_id']) ? (int) $_GET['cat_id'] : (string) $_GET['cat_id'], $page, $catalogue_products_per_page);
             if ($_GET['cat_id'] == 'sale') {
-                $GLOBALS['catalogue']->setCategory('cat_name', $GLOBALS['language']->navigation['saleitems']);
-                $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->navigation['saleitems'], currentPage());
+                $GLOBALS['catalogue']->set_category('cat_name', $GLOBALS['language']->navigation['saleitems']);
+                $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->navigation['saleitems'], current_page());
             }
         }
-
-        $GLOBALS['catalogue']->categoryPagination($page);
-
+        $GLOBALS['catalogue']->category_pagination($page);
         // Display Product listing
-        $GLOBALS['catalogue']->displayCategory();
+        $GLOBALS['catalogue']->display_category();
     }
-
     /**
      * Display certificates
      */
     private function _certificates(): void
     {
         // Gift Certificates
-
         foreach ($GLOBALS['hooks']->load('class.cubecart.construct.certificates') as $hook) {
             include $hook;
         }
-
         $gc = $GLOBALS['config']->get('gift_certs');
         if (!$gc['status']) {
             httpredir('index.php');
         }
-        $meta_data = [
-            'description' => $gc['seo_meta_description'] ?? '',
-            'title'   => $gc['seo_meta_title'] ?? '',
-        ];
+        $meta_data = ['description' => $gc['seo_meta_description'] ?? '', 'title' => $gc['seo_meta_title'] ?? ''];
         $GLOBALS['seo']->set_meta_data($meta_data);
-
         $error = false;
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->catalogue['gift_certificates'], currentPage());
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->catalogue['gift_certificates'], current_page());
         if (isset($_POST['gc'])) {
             // Validate submitted data
             $_POST['gc']['value'] = str_replace(',', '.', $_POST['gc']['value']);
-            $_POST['gc']['value'] = preg_replace('/[^0-9.]*/', '', $_POST['gc']['value']); // Strip off currency symbols etc...
+            $_POST['gc']['value'] = preg_replace('/[^0-9.]*/', '', $_POST['gc']['value']);
+            // Strip off currency symbols etc...
             if (!is_numeric($_POST['gc']['value'])) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_gc_value']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_gc_value']);
                 $error = true;
                 // Validate amount
-            } elseif ((isset($gc['max']) && !empty($gc['max'])) && $_POST['gc']['value'] > $gc['max']) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_gc_value_high']);
+            } elseif (isset($gc['max']) && !empty($gc['max']) && $_POST['gc']['value'] > $gc['max']) {
+                $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_gc_value_high']);
                 $error = true;
-            } elseif ((isset($gc['min']) && !empty($gc['min'])) && $_POST['gc']['value'] < $gc['min']) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_gc_value_low']);
+            } elseif (isset($gc['min']) && !empty($gc['min']) && $_POST['gc']['value'] < $gc['min']) {
+                $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_gc_value_low']);
                 $error = true;
             }
             // Validate email if email delivery
             if (strtolower((string) $_POST['gc']['method']) == 'e' && !filter_var($_POST['gc']['email'], FILTER_VALIDATE_EMAIL)) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_gc_email']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_gc_email']);
                 $error = true;
             }
-
             if (!$error) {
                 $GLOBALS['cart']->add($gc['product_code'], $_POST['gc']);
             } else {
                 $GLOBALS['smarty']->assign('POST', $_POST['gc']);
             }
         }
-
         if ($gc['status'] == '2' && !$GLOBALS['user']->is()) {
             $purchase_enabled = false;
-            $GLOBALS['gui']->setInfo($GLOBALS['language']->customer['login_register']);
+            $GLOBALS['gui']->set_info($GLOBALS['language']->customer['login_register']);
         } else {
             $purchase_enabled = true;
         }
         if (isset($gc['image']) && !empty($gc['image'])) {
-            $gc['image'] = $GLOBALS['catalogue']->imagePath($gc['image']);
+            $gc['image'] = $GLOBALS['catalogue']->image_path($gc['image']);
             $gc['image_tags'] = $GLOBALS['catalogue']->image_tags[$gc['image']] ?? [];
         }
-        $GLOBALS['smarty']->assign('LANG_CERT_VALUES', sprintf($GLOBALS['language']->catalogue['gift_certificate_value'], $GLOBALS['tax']->priceFormat($gc['min'], true, true, $purchase_enabled), $GLOBALS['tax']->priceFormat($gc['max'], true, true, $purchase_enabled)));
+        $GLOBALS['smarty']->assign('LANG_CERT_VALUES', sprintf($GLOBALS['language']->catalogue['gift_certificate_value'], $GLOBALS['tax']->price_format($gc['min'], true, true, $purchase_enabled), $GLOBALS['tax']->price_format($gc['max'], true, true, $purchase_enabled)));
         $GLOBALS['smarty']->assign('ctrl_allow_purchase', $purchase_enabled);
         $GLOBALS['smarty']->assign('GC', $gc);
         $content = $GLOBALS['smarty']->fetch('templates/content.certificates.php');
         $GLOBALS['smarty']->assign('SECTION_NAME', 'giftcertificate');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Display checkout
      */
@@ -1003,18 +862,14 @@ class Cubecart
     {
         // Update basket if we need to!
         $GLOBALS['cart']->update();
-
-        $GLOBALS['smarty']->assign('URL', ['login' => $GLOBALS['seo']->buildURL('login')]);
+        $GLOBALS['smarty']->assign('URL', ['login' => $GLOBALS['seo']->build_url('login')]);
         $GLOBALS['smarty']->assign('INCLUDE_CHECKOUT', true);
-
-        $this->_basket = & $GLOBALS['cart']->basket;
-
+        $this->_basket =& $GLOBALS['cart']->basket;
         if (isset($_POST['comments']) && !empty($_POST['comments'])) {
             $this->_basket['comments'] = strip_tags(urldecode((string) $_POST['comments']));
             $GLOBALS['cart']->save();
         }
         $GLOBALS['smarty']->assign('VAL_CUSTOMER_COMMENTS', $this->_basket['comments'] ?? '');
-
         foreach ($GLOBALS['hooks']->load('class.cubecart.construct.confirm') as $hook) {
             include $hook;
         }
@@ -1027,12 +882,7 @@ class Cubecart
             if (!isset($_POST['username']) && isset($_POST['user']) && isset($_POST['billing'])) {
                 $proceed = true;
                 $optional = ['mobile', 'line2'];
-
-                $handle_post = [
-                    'user'  => 'customer',
-                    'billing' => 'billing_address',
-                    'delivery' => 'delivery_address',
-                ];
+                $handle_post = ['user' => 'customer', 'billing' => 'billing_address', 'delivery' => 'delivery_address'];
                 foreach ($_POST as $index => $data) {
                     if (!in_array($index, $handle_post)) {
                         continue;
@@ -1040,48 +890,26 @@ class Cubecart
                     $missing_field = false;
                     foreach ($data as $key => $value) {
                         if (!in_array($key, $optional) && empty($value)) {
-                            $proceed  = false;
-                            $missing_field  = true;
+                            $proceed = false;
+                            $missing_field = true;
                         }
                     }
                 }
-
                 if ($missing_field) {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->common['error_fields_required']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->common['error_fields_required']);
                 }
-
                 // Check T&C's have been agreed to
-                if (!$GLOBALS['config']->get('config', 'disable_checkout_terms') && ($GLOBALS['db']->select('CubeCart_documents', false, ['doc_terms' => '1']) !== false) && !isset($_POST['terms_agree'])) {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->account['error_terms_agree']);
+                if (!$GLOBALS['config']->get('config', 'disable_checkout_terms') && $GLOBALS['db']->select('CubeCart_documents', false, ['doc_terms' => '1']) !== false && !isset($_POST['terms_agree'])) {
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_terms_agree']);
                     $errors['terms_agree'] = true;
                 } elseif ($_POST['terms_agree']) {
                     $this->_basket['terms_agree'] = true;
                 }
-
                 // Handle user data, and put into the basket array
                 $this->_basket['customer'] = $_POST['user'];
-
-                $old_addresses = $GLOBALS['user']->addressCompare($this->_basket['billing_address'], $this->_basket['delivery_address']);
-
-                $this->_basket['billing_address'] = [
-                    'user_defined' => true,
-                    'first_name'  => $_POST['user']['first_name'],
-                    'last_name'  => $_POST['user']['last_name'],
-                    'company_name'  => $_POST['billing']['company_name'],
-                    'line1'   => $_POST['billing']['line1'],
-                    'line2'   => $_POST['billing']['line2'],
-                    'town'    => $_POST['billing']['town'],
-                    'postcode'   => strtoupper((string) $_POST['billing']['postcode']),
-                    'state_id'   => $_POST['billing']['state'],
-                    'state'   => getStateFormat($_POST['billing']['state'], 'id', 'name'),
-                    'state_abbrev'  => getStateFormat($_POST['billing']['state'], 'id', 'abbrev'),
-                    'country'   => $_POST['billing']['country'],
-                    'country_id'  => $_POST['billing']['country'],
-                    'country_iso'  => getCountryFormat($_POST['billing']['country'], 'numcode', 'iso'),
-                    'country_name' => getCountryFormat($_POST['billing']['country'], 'numcode', 'name'),
-                    'w3w' => $_POST['billing']['w3w'],
-                ];
-                $required_billing_fields = $GLOBALS['user']->getRequiredAddressFields($_POST['billing']['country']);
+                $old_addresses = $GLOBALS['user']->address_compare($this->_basket['billing_address'], $this->_basket['delivery_address']);
+                $this->_basket['billing_address'] = ['user_defined' => true, 'first_name' => $_POST['user']['first_name'], 'last_name' => $_POST['user']['last_name'], 'company_name' => $_POST['billing']['company_name'], 'line1' => $_POST['billing']['line1'], 'line2' => $_POST['billing']['line2'], 'town' => $_POST['billing']['town'], 'postcode' => strtoupper((string) $_POST['billing']['postcode']), 'state_id' => $_POST['billing']['state'], 'state' => get_state_format($_POST['billing']['state'], 'id', 'name'), 'state_abbrev' => get_state_format($_POST['billing']['state'], 'id', 'abbrev'), 'country' => $_POST['billing']['country'], 'country_id' => $_POST['billing']['country'], 'country_iso' => get_country_format($_POST['billing']['country'], 'numcode', 'iso'), 'country_name' => get_country_format($_POST['billing']['country'], 'numcode', 'name'), 'w3w' => $_POST['billing']['w3w']];
+                $required_billing_fields = $GLOBALS['user']->get_required_address_fields($_POST['billing']['country']);
                 foreach ($this->_basket['billing_address'] as $key => $value) {
                     if (in_array($key, $required_billing_fields) && empty($value)) {
                         $errors['billing_address'] = true;
@@ -1090,9 +918,8 @@ class Cubecart
                 if (isset($errors['billing_address']) && $errors['billing_address']) {
                     $error_messages[] = $GLOBALS['language']->account['error_billing_fields_missing'];
                 }
-
                 if (isset($_POST['delivery']) && !isset($_POST['delivery_is_billing'])) {
-                    $required_delivery_fields = $GLOBALS['user']->getRequiredAddressFields($_POST['delivery']['country']);
+                    $required_delivery_fields = $GLOBALS['user']->get_required_address_fields($_POST['delivery']['country']);
                     foreach ($_POST['delivery'] as $key => $value) {
                         if (in_array($key, $required_delivery_fields) && empty($value)) {
                             $errors['delivery_address'] = true;
@@ -1101,40 +928,18 @@ class Cubecart
                     if (isset($errors['delivery_address']) && $errors['delivery_address']) {
                         $error_messages[] = $GLOBALS['language']->account['error_delivery_fields_missing'];
                     }
-
-                    $this->_basket['delivery_address'] = [
-                        'user_defined' => true,
-                        'first_name'  => $_POST['delivery']['first_name'],
-                        'last_name'  => $_POST['delivery']['last_name'],
-                        'company_name'  => $_POST['delivery']['company_name'],
-                        'line1'   => $_POST['delivery']['line1'],
-                        'line2'   => $_POST['delivery']['line2'],
-                        'town'    => $_POST['delivery']['town'],
-                        'postcode'   => strtoupper((string) $_POST['delivery']['postcode']),
-                        'state_id'   => $_POST['delivery']['state'],
-                        'state'   => getStateFormat($_POST['delivery']['state'], 'id', 'name'),
-                        'state_abbrev'  => getStateFormat($_POST['delivery']['state'], 'id', 'abbrev'),
-                        'country'   => $_POST['delivery']['country'],
-                        'country_id'  => $_POST['delivery']['country'],
-                        'country_iso'  => getCountryFormat($_POST['delivery']['country'], 'numcode', 'iso'),
-                        'country_name' => getCountryFormat($_POST['delivery']['country'], 'numcode', 'name'),
-                        'w3w' => $_POST['delivery']['w3w'],
-                    ];
+                    $this->_basket['delivery_address'] = ['user_defined' => true, 'first_name' => $_POST['delivery']['first_name'], 'last_name' => $_POST['delivery']['last_name'], 'company_name' => $_POST['delivery']['company_name'], 'line1' => $_POST['delivery']['line1'], 'line2' => $_POST['delivery']['line2'], 'town' => $_POST['delivery']['town'], 'postcode' => strtoupper((string) $_POST['delivery']['postcode']), 'state_id' => $_POST['delivery']['state'], 'state' => get_state_format($_POST['delivery']['state'], 'id', 'name'), 'state_abbrev' => get_state_format($_POST['delivery']['state'], 'id', 'abbrev'), 'country' => $_POST['delivery']['country'], 'country_id' => $_POST['delivery']['country'], 'country_iso' => get_country_format($_POST['delivery']['country'], 'numcode', 'iso'), 'country_name' => get_country_format($_POST['delivery']['country'], 'numcode', 'name'), 'w3w' => $_POST['delivery']['w3w']];
                 } else {
                     $this->_basket['delivery_address'] = $this->_basket['billing_address'];
                 }
-
-                $this->_basket['delivery_address']['is_billing'] = (isset($_POST['delivery_is_billing'])) ? true : false;
-
-                $new_addresses = $GLOBALS['user']->addressCompare($this->_basket['billing_address'], $this->_basket['delivery_address']);
-
+                $this->_basket['delivery_address']['is_billing'] = isset($_POST['delivery_is_billing']) ? true : false;
+                $new_addresses = $GLOBALS['user']->address_compare($this->_basket['billing_address'], $this->_basket['delivery_address']);
                 if ($new_addresses !== $old_addresses) {
                     // Set notice to prevent proceed to payment screen
                     $message = $GLOBALS['cart']->basket['digital_only'] ? $GLOBALS['language']->checkout['confirm_billing'] : $GLOBALS['language']->account['notify_address_updated'];
-                    $GLOBALS['gui']->setNotify($message);
+                    $GLOBALS['gui']->set_notify($message);
                 }
-
-                if ($GLOBALS['gui']->recaptchaRequired()) {
+                if ($GLOBALS['gui']->recaptcha_required()) {
                     if (($message = $GLOBALS['session']->get('error', 'recaptcha')) === false) {
                         //If the error message from recaptcha fails for some reason:
                         $error_messages[] = $GLOBALS['language']->form['verify_human_fail'];
@@ -1143,7 +948,6 @@ class Cubecart
                     }
                     $errors['recaptcha'] = true;
                 }
-
                 // Check email is valid
                 if (!filter_var($_POST['user']['email'], FILTER_VALIDATE_EMAIL)) {
                     $errors['email'] = true;
@@ -1177,54 +981,40 @@ class Cubecart
                     $error_messages[] = $GLOBALS['language']->account['error_valid_mobile_phone'];
                 }
                 if (is_array($error_messages)) {
-                    $GLOBALS['gui']->setError($error_messages);
+                    $GLOBALS['gui']->set_error($error_messages);
                 }
-
                 if (!isset($errors)) {
                     // Create the user account
-                    $_POST['user']['password'] = (isset($_POST['register']) && $_POST['register'] == 1) ? md5((string) $_POST['password']) : md5(time().$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']);
-                    $type = (isset($_POST['register']) && $_POST['register'] == 1) ? 1 : 2;
-                    $user_id = $GLOBALS['user']->createUser($_POST['user'], false, $type);
+                    $_POST['user']['password'] = isset($_POST['register']) && $_POST['register'] == 1 ? md5((string) $_POST['password']) : md5(time() . $_SERVER['HTTP_USER_AGENT'] . $_SERVER['REMOTE_ADDR']);
+                    $type = isset($_POST['register']) && $_POST['register'] == 1 ? 1 : 2;
+                    $user_id = $GLOBALS['user']->create_user($_POST['user'], false, $type);
                     $this->_basket['customer']['customer_id'] = $user_id;
-
                     // Insert a new BILLING address
-                    $address = [
-                        'customer_id' => $user_id,
-                        'billing'  => true,
-                        'default'  => (isset($_POST['delivery'])) ? false : true,
-                        'first_name' => $this->_basket['customer']['first_name'],
-                        'last_name'  => $this->_basket['customer']['last_name'],
-                        'description' => $GLOBALS['language']->address['default_billing_address'],
-                    ];
-
-                    $GLOBALS['user']->saveAddress(array_merge($this->_basket['billing_address'], $address), $user_id);
-
+                    $address = ['customer_id' => $user_id, 'billing' => true, 'default' => isset($_POST['delivery']) ? false : true, 'first_name' => $this->_basket['customer']['first_name'], 'last_name' => $this->_basket['customer']['last_name'], 'description' => $GLOBALS['language']->address['default_billing_address']];
+                    $GLOBALS['user']->save_address(array_merge($this->_basket['billing_address'], $address), $user_id);
                     // Insert a new DELIVERY address
                     $address = [
                         'customer_id' => $user_id,
-                        'billing'  => false,
-                        'default'  => true, // This selects the correct delivery address
+                        'billing' => false,
+                        'default' => true,
+                        // This selects the correct delivery address
                         'description' => $GLOBALS['language']->address['default_delivery_address'],
                     ];
-                    $GLOBALS['user']->saveAddress(array_merge($this->_basket['delivery_address'], $address), $user_id);
-
+                    $GLOBALS['user']->save_address(array_merge($this->_basket['delivery_address'], $address), $user_id);
                     foreach ($GLOBALS['hooks']->load('class.cubecart.construct.confirm.create_user.created') as $hook) {
                         include $hook;
                     }
-
                     // Log in
-                    $GLOBALS['session']->set('redir', $GLOBALS['rootRel'].'index.php?_a=confirm');
+                    $GLOBALS['session']->set('redir', $GLOBALS['rootRel'] . 'index.php?_a=confirm');
                     if (isset($_POST['register']) && $_POST['register'] == 1 && !$GLOBALS['user']->authenticate($_POST['user']['email'], $_POST['password'], false, false, false, false)) {
                         httpredir('index.php?_a=login');
                     }
                 }
-
                 if (isset($_POST['register']) && $_POST['register'] == 1) {
                     $this->_basket['register'] = true;
                 } else {
                     $this->_basket['register'] = false;
                 }
-
                 if (isset($errors) && is_array($errors)) {
                     foreach ($errors as $parent => $error) {
                         if (is_array($error)) {
@@ -1236,9 +1026,7 @@ class Cubecart
                 }
                 $GLOBALS['cart']->save();
             }
-
-            $GLOBALS['smarty']->assign('ALLOW_DELIVERY_ADDRESS', ($GLOBALS['config']->get('config', 'basket_allow_non_invoice_address') && !$GLOBALS['cart']->getBasketDigital()));
-
+            $GLOBALS['smarty']->assign('ALLOW_DELIVERY_ADDRESS', $GLOBALS['config']->get('config', 'basket_allow_non_invoice_address') && !$GLOBALS['cart']->get_basket_digital());
             if (isset($this->_basket['customer'])) {
                 $GLOBALS['smarty']->assign('USER', $this->_basket['customer']);
             }
@@ -1248,12 +1036,10 @@ class Cubecart
             if (isset($this->_basket['delivery_address']) && ($this->_basket['delivery_address']['user_defined'] || $this->_basket['delivery_address']['estimate'])) {
                 $GLOBALS['smarty']->assign('DELIVERY', $this->_basket['delivery_address']);
             }
-
             // @todo fix this - should auto select on first load
             if (!isset($this->_basket['delivery_address']['is_billing']) || $this->_basket['delivery_address']['is_billing']) {
                 $GLOBALS['smarty']->assign('DELIVERY_CHECKED', 'checked="checked"');
             }
-
             // Parse page elements
             if (($countries = $GLOBALS['db']->select('CubeCart_geo_country', false, 'status > 0', ['name' => 'ASC'])) !== false) {
                 foreach ($countries as $country) {
@@ -1262,77 +1048,60 @@ class Cubecart
                         if ($country['numcode'] == $this->_basket['billing_address']['country_id']) {
                             $country['selected'] = 'selected="selected"';
                         }
-                    } else {
-                        if ($country['numcode'] == $GLOBALS['config']->get('config', 'store_country')) {
-                            $country['selected'] = 'selected="selected"';
-                        }
+                    } else if ($country['numcode'] == $GLOBALS['config']->get('config', 'store_country')) {
+                        $country['selected'] = 'selected="selected"';
                     }
                     $country['selected_d'] = '';
                     if (isset($this->_basket['delivery_address']['country_id']) && !empty($this->_basket['delivery_address']['country_id'])) {
                         if ($country['numcode'] == $this->_basket['delivery_address']['country_id']) {
                             $country['selected_d'] = 'selected="selected"';
                         }
-                    } else {
-                        if ($country['numcode'] == $GLOBALS['config']->get('config', 'store_country')) {
-                            $country['selected_d'] = 'selected="selected"';
-                        }
+                    } else if ($country['numcode'] == $GLOBALS['config']->get('config', 'store_country')) {
+                        $country['selected_d'] = 'selected="selected"';
                     }
                     $GLOBALS['smarty']->append('COUNTRIES', $country);
                 }
                 $GLOBALS['smarty']->assign('STATE_JSON', state_json());
             }
-
             foreach ($GLOBALS['hooks']->load('class.cubecart.prerecaptcha.confirm') as $hook) {
                 include $hook;
             }
-
-            $GLOBALS['smarty']->assign('TERMS_CONDITIONS', (!$GLOBALS['config']->get('config', 'disable_checkout_terms') && $terms = $GLOBALS['db']->select('CubeCart_documents', false, ['doc_terms' => '1'])) ? $GLOBALS['seo']->buildURL('doc', $terms[0]['doc_id'], '&') : false);
+            $GLOBALS['smarty']->assign('TERMS_CONDITIONS', !$GLOBALS['config']->get('config', 'disable_checkout_terms') && ($terms = $GLOBALS['db']->select('CubeCart_documents', false, ['doc_terms' => '1'])) ? $GLOBALS['seo']->build_url('doc', $terms[0]['doc_id'], '&') : false);
             if (isset($_POST['terms_agree']) && $_POST['terms_agree'] == 1) {
                 $this->_basket['terms_agree'] = true;
             }
             if (isset($_POST['mailing_list']) && $_POST['mailing_list'] == 1) {
                 $this->_basket['mailing_list'] = true;
-                $newsletter = Newsletter::getInstance();
-                $newsletter->subscribe($this->_basket['customer']['email'], (int)$user_id);
+                $newsletter = Newsletter::get_instance();
+                $newsletter->subscribe($this->_basket['customer']['email'], (int) $user_id);
             }
-            $GLOBALS['smarty']->assign('REGISTER_CHECKED', (isset($this->_basket['register']) && $this->_basket['register']) ? 'checked="checked"' : '');
-            $GLOBALS['smarty']->assign('TERMS_CONDITIONS_CHECKED', (isset($this->_basket['terms_agree']) && $this->_basket['terms_agree']) ? 'checked="checked"' : '');
-            $GLOBALS['smarty']->assign('MAILING_LIST_SUBSCRIBE', (isset($this->_basket['mailing_list']) && $this->_basket['mailing_list']) ? 'checked="checked"' : '');
+            $GLOBALS['smarty']->assign('REGISTER_CHECKED', isset($this->_basket['register']) && $this->_basket['register'] ? 'checked="checked"' : '');
+            $GLOBALS['smarty']->assign('TERMS_CONDITIONS_CHECKED', isset($this->_basket['terms_agree']) && $this->_basket['terms_agree'] ? 'checked="checked"' : '');
+            $GLOBALS['smarty']->assign('MAILING_LIST_SUBSCRIBE', isset($this->_basket['mailing_list']) && $this->_basket['mailing_list'] ? 'checked="checked"' : '');
         } else {
             // Registered users - Display predefined addresses, if any exist
-            $this->_displayAddresses();
+            $this->_display_addresses();
         }
     }
-
     /**
      * Display part of the checkout process
      */
-    private function _checkoutProcess($section = null): void
+    private function _checkout_process($section = null): void
     {
         $status = match ($section) {
             'complete' => 3,
             'gateway' => 2,
-            default => ($GLOBALS['user']->is() || $_GET['_a'] == 'confirm' || (isset($GLOBALS['cart']->basket['register']) && $GLOBALS['cart']->basket['register'] == false)) ? 1 : 0,
+            default => $GLOBALS['user']->is() || $_GET['_a'] == 'confirm' || isset($GLOBALS['cart']->basket['register']) && $GLOBALS['cart']->basket['register'] == false ? 1 : 0,
         };
-
         foreach ($GLOBALS['hooks']->load('class.cubecart.checkout_progress') as $hook) {
             include $hook;
         }
-
-        $blocks = [
-            0 => $GLOBALS['language']->checkout['process_basket'],
-            1 => $GLOBALS['language']->checkout['process_checkout'],
-            2 => $GLOBALS['language']->checkout['process_payment'],
-            3 => $GLOBALS['language']->checkout['process_complete'],
-        ];
-
+        $blocks = [0 => $GLOBALS['language']->checkout['process_basket'], 1 => $GLOBALS['language']->checkout['process_checkout'], 2 => $GLOBALS['language']->checkout['process_payment'], 3 => $GLOBALS['language']->checkout['process_complete']];
         // v6 skins don't have a payment step!
-        $skin_data = $GLOBALS['gui']->getSkinData();
-
+        $skin_data = $GLOBALS['gui']->get_skin_data();
         if (version_compare($skin_data['info']['compatible']['min'], '6.0.0a', '>=')) {
             unset($blocks[2]);
         }
-
         $step = 1;
         foreach ($blocks as $key => $title) {
             $class[] = match (true) {
@@ -1360,25 +1129,23 @@ class Cubecart
         $GLOBALS['smarty']->assign('BLOCKS', $vars);
         $GLOBALS['smarty']->assign('CHECKOUT_PROGRESS', $GLOBALS['smarty']->fetch('templates/box.progress.php'));
     }
-
     /**
      * Display final checkout process
      */
     private function _complete(): void
     {
-        $this->_basket = & $GLOBALS['cart']->basket;
-
+        $this->_basket =& $GLOBALS['cart']->basket;
         if (isset($this->_basket['cart_order_id'])) {
-            $this->_checkoutProcess('complete');
+            $this->_checkout_process('complete');
             foreach ($GLOBALS['hooks']->load('class.cubecart.construct.complete') as $hook) {
                 include $hook;
             }
-            $formatting  = ['discount', 'price', 'shipping', 'subtotal', 'total', 'total_tax', 'credit_used'];
+            $formatting = ['discount', 'price', 'shipping', 'subtotal', 'total', 'total_tax', 'credit_used'];
             $empty_basket = true;
             # Get the order details, and display a receipt
             if (($orders = $GLOBALS['db']->select('CubeCart_order_summary', false, ['cart_order_id' => $this->_basket['cart_order_id']], false, false, false, false)) !== false) {
                 $order = $orders[0];
-                $GLOBALS['user']->setGhostId($order['customer_id']);
+                $GLOBALS['user']->set_ghost_id($order['customer_id']);
                 if (($items = $GLOBALS['db']->select('CubeCart_order_inventory', false, ['cart_order_id' => $this->_basket['cart_order_id']])) !== false) {
                     $GLOBALS['smarty']->assign('GA_ITEMS', $items);
                     $prod_ids = [];
@@ -1389,14 +1156,14 @@ class Cubecart
                                 continue;
                             }
                             if ($key == 'price') {
-                                $item['price_total'] = $GLOBALS['tax']->priceFormat(($item['price'] * $item['quantity']), true);
+                                $item['price_total'] = $GLOBALS['tax']->price_format($item['price'] * $item['quantity'], true);
                             }
-                            $item[$key] = $GLOBALS['tax']->priceFormat($value);
+                            $item[$key] = $GLOBALS['tax']->price_format($value);
                         }
-                        $item['options'] = Order::getInstance()->unSerializeOptions($item['product_options']);
+                        $item['options'] = Order::get_instance()->un_serialize_options($item['product_options']);
                         $vars['items'][] = $item;
                     }
-                    if ($cats = $GLOBALS['db']->select('`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_category_index` AS `I` INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_category` AS `C` ON `I`.`cat_id` = `C`.`cat_id`', '`I`.`product_id`, `C`.`cat_name`', '`I`.`product_id` IN ('.implode(',', $prod_ids).') AND `primary` = 1')) {
+                    if ($cats = $GLOBALS['db']->select('`' . $GLOBALS['config']->get('config', 'dbprefix') . 'CubeCart_category_index` AS `I` INNER JOIN `' . $GLOBALS['config']->get('config', 'dbprefix') . 'CubeCart_category` AS `C` ON `I`.`cat_id` = `C`.`cat_id`', '`I`.`product_id`, `C`.`cat_name`', '`I`.`product_id` IN (' . implode(',', $prod_ids) . ') AND `primary` = 1')) {
                         $cat_names = [];
                         foreach ($cats as $cat) {
                             $cat_names[$cat['product_id']] = $cat['cat_name'];
@@ -1407,23 +1174,20 @@ class Cubecart
                 }
                 // Retrieve taxes
                 if (($taxes = $GLOBALS['db']->select('CubeCart_order_tax', false, ['cart_order_id' => $order['cart_order_id']])) !== false) {
-                    $GLOBALS['tax']->loadTaxes(($GLOBALS['config']->get('config', 'basket_tax_by_delivery')) ? (int)$order['country'] : (int)$order['country_d']);
+                    $GLOBALS['tax']->load_taxes($GLOBALS['config']->get('config', 'basket_tax_by_delivery') ? (int) $order['country'] : (int) $order['country_d']);
                     foreach ($taxes as $vat) {
-                        $detail = $GLOBALS['tax']->fetchTaxDetails($vat['tax_id']);
-                        $vars['taxes'][] = ['name' => $detail['name'], 'value' => $GLOBALS['tax']->priceFormat($vat['amount'], true)];
+                        $detail = $GLOBALS['tax']->fetch_tax_details($vat['tax_id']);
+                        $vars['taxes'][] = ['name' => $detail['name'], 'value' => $GLOBALS['tax']->price_format($vat['amount'], true)];
                     }
                 } elseif (!empty($order['total_tax']) && $order['total_tax'] > 0) {
-                    $vars['taxes'][] = ['name' => $GLOBALS['language']->basket['total_tax'], 'value' => $GLOBALS['tax']->priceFormat($order['total_tax'])];
+                    $vars['taxes'][] = ['name' => $GLOBALS['language']->basket['total_tax'], 'value' => $GLOBALS['tax']->price_format($order['total_tax'])];
                 }
-
                 $GLOBALS['smarty']->assign('TAXES', $vars['taxes']);
-                $order['state'] = getStateFormat($order['state']);
-                $order['state_d'] = getStateFormat($order['state_d']);
-                $order['country'] = getCountryFormat($order['country']);
-                $order['country_d'] = getCountryFormat($order['country_d']);
-
-                $order['order_status'] = $GLOBALS['language']->order_state['name_'.$order['status']];
-
+                $order['state'] = get_state_format($order['state']);
+                $order['state_d'] = get_state_format($order['state_d']);
+                $order['country'] = get_country_format($order['country']);
+                $order['country_d'] = get_country_format($order['country_d']);
+                $order['order_status'] = $GLOBALS['language']->order_state['name_' . $order['status']];
                 if ($order['discount'] > 0) {
                     $GLOBALS['smarty']->assign('DISCOUNT', true);
                 }
@@ -1432,48 +1196,43 @@ class Cubecart
                     if (!in_array($key, $formatting)) {
                         continue;
                     }
-                    $order[$key] = $GLOBALS['tax']->priceFormat($value);
+                    $order[$key] = $GLOBALS['tax']->price_format($value);
                 }
-                $order['order_date_formatted'] = formatTime($order['order_date'], false, true);
-
+                $order['order_date_formatted'] = format_time($order['order_date'], false, true);
                 foreach ($GLOBALS['hooks']->load('class.cubecart.order_summary') as $hook) {
                     include $hook;
                 }
                 $order['basket'] = unserialize($order['basket'], ['allowed_classes' => false]);
-
                 $GLOBALS['smarty']->assign('SUM', $order);
-
                 switch ($order['status']) {
                     case self::ORDER_PENDING:
-                        $GLOBALS['gui']->setNotify($GLOBALS['language']->confirm['order_pending']);
+                        $GLOBALS['gui']->set_notify($GLOBALS['language']->confirm['order_pending']);
                         break;
                     case self::ORDER_PROCESS:
-                        $GLOBALS['gui']->setNotify($GLOBALS['language']->confirm['order_processing']);
+                        $GLOBALS['gui']->set_notify($GLOBALS['language']->confirm['order_processing']);
                         break;
                     case self::ORDER_COMPLETE:
-                        if ((int)preg_replace('/[^0-9]/', '', (string) $order['total']) == 0) {
-                            $GLOBALS['gui']->setNotify($GLOBALS['language']->confirm['free_order_complete']);
+                        if ((int) preg_replace('/[^0-9]/', '', (string) $order['total']) == 0) {
+                            $GLOBALS['gui']->set_notify($GLOBALS['language']->confirm['free_order_complete']);
                         } else {
-                            $GLOBALS['gui']->setNotify($GLOBALS['language']->confirm['order_complete']);
+                            $GLOBALS['gui']->set_notify($GLOBALS['language']->confirm['order_complete']);
                         }
                         break;
                     case self::ORDER_DECLINED:
                     case self::ORDER_FAILED:
                         $empty_basket = false;
-                        $GLOBALS['gui']->setError($GLOBALS['language']->confirm['order_failed']);
+                        $GLOBALS['gui']->set_error($GLOBALS['language']->confirm['order_failed']);
                         $GLOBALS['smarty']->assign('CTRL_PAYMENT', true);
                         break;
                     case self::ORDER_CANCELLED:
-                        $GLOBALS['gui']->setError($GLOBALS['language']->confirm['order_cancelled']);
+                        $GLOBALS['gui']->set_error($GLOBALS['language']->confirm['order_cancelled']);
                         break;
                 }
-
                 // Display Affilate Tracker code
-                $affiliates = $this->_getAffiliates(self::AFFILIATE_COMPLETE);
+                $affiliates = $this->_get_affiliates(self::AFFILIATE_COMPLETE);
                 if ($affiliates) {
                     $GLOBALS['smarty']->assign('AFFILIATES', $affiliates);
                 }
-
                 $GLOBALS['smarty']->assign('SECTION_NAME', 'receipt');
                 $content = $GLOBALS['smarty']->fetch('templates/content.receipt.php');
                 $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
@@ -1483,10 +1242,9 @@ class Cubecart
                 $GLOBALS['cart']->clear();
             }
         } else {
-            httpredir($GLOBALS['rootRel'].'index.php?_a=basket');
+            httpredir($GLOBALS['rootRel'] . 'index.php?_a=basket');
         }
     }
-
     /**
      * Display contact page
      */
@@ -1495,90 +1253,76 @@ class Cubecart
         // Contact Form
         $contact = $GLOBALS['config']->get('Contact_Form');
         if ($contact && $contact['status']) {
-            $meta_data = [
-                'description' => $contact['seo_meta_description'] ?? '',
-                'title'   => $contact['seo_meta_title'] ?? '',
-            ];
+            $meta_data = ['description' => $contact['seo_meta_description'] ?? '', 'title' => $contact['seo_meta_title'] ?? ''];
             $GLOBALS['seo']->set_meta_data($meta_data);
-            $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->documents['document_contact'], $GLOBALS['seo']->buildURL('contact'));
+            $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->documents['document_contact'], $GLOBALS['seo']->build_url('contact'));
             if (isset($_POST['contact'])) {
                 $error = false;
                 $required = ['email', 'name', 'subject', 'enquiry'];
                 if ($contact['phone'] == '2') {
                     array_push($required, 'phone');
                 }
-
                 foreach ($GLOBALS['hooks']->load('class.cubecart.contact') as $hook) {
                     include $hook;
                 }
-
                 $GLOBALS['smarty']->assign('MESSAGE', $_POST['contact']);
                 // Validation
                 foreach ($_POST['contact'] as $key => $value) {
                     if (in_array($key, $required) && empty($value)) {
-                        $GLOBALS['gui']->setError($GLOBALS['language']->common['error_fields_required']);
+                        $GLOBALS['gui']->set_error($GLOBALS['language']->common['error_fields_required']);
                         $error = true;
                         break;
                     }
                 }
                 if (!filter_var($_POST['contact']['email'], FILTER_VALIDATE_EMAIL)) {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->common['error_email_invalid']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->common['error_email_invalid']);
                     $error = true;
                 }
-
                 // reCAPTCHA, if enabled
-                if ($GLOBALS['gui']->recaptchaRequired()) {
+                if ($GLOBALS['gui']->recaptcha_required()) {
                     if (($message = $GLOBALS['session']->get('error', 'recaptcha')) === false) {
                         //If the error message from recaptcha fails for some reason:
-                        $GLOBALS['gui']->setError($GLOBALS['language']->form['verify_human_fail']);
+                        $GLOBALS['gui']->set_error($GLOBALS['language']->form['verify_human_fail']);
                     } else {
-                        $GLOBALS['gui']->setError($GLOBALS['session']->get('error', 'recaptcha'));
+                        $GLOBALS['gui']->set_error($GLOBALS['session']->get('error', 'recaptcha'));
                     }
                     $error = true;
                 }
                 if (!$error) {
-                    $email = (isset($contact['email']) && filter_var($contact['email'], FILTER_VALIDATE_EMAIL)) ? $contact['email'] : $GLOBALS['config']->get('config', 'email_address');
+                    $email = isset($contact['email']) && filter_var($contact['email'], FILTER_VALIDATE_EMAIL) ? $contact['email'] : $GLOBALS['config']->get('config', 'email_address');
                     // Send email to correct department
                     $mailer = new Mailer();
-
                     $department = $GLOBALS['config']->get('config', 'store_name');
                     if (isset($_POST['contact']['dept']) && is_array($contact['department'])) {
-                        $key  = (int)$_POST['contact']['dept'];
+                        $key = (int) $_POST['contact']['dept'];
                         $department = $contact['department'][$key]['name'];
-                        $email  = (!empty($contact['department'][$key]['email'])) ? $contact['department'][$key]['email'] : $email;
-                        $mailer->AddAddress($email, $department);
+                        $email = !empty($contact['department'][$key]['email']) ? $contact['department'][$key]['email'] : $email;
+                        $mailer->add_address($email, $department);
                     }
                     // Load content, assign variables
-                    $mailer->IsHTML(false);
-                    $mailer->AddAddress($email, $department);
+                    $mailer->is_html(false);
+                    $mailer->add_address($email, $department);
                     $from_name = strip_tags((string) $_POST['contact']['name']);
                     $from_email = $_POST['contact']['email'];
                     if (isset($_POST['contact']['cc'])) {
-                        $mailer->AddAddress($from_email, $from_name);
+                        $mailer->add_address($from_email, $from_name);
                     }
-                    $mailer->addReplyTo($_POST['contact']['email'], strip_tags((string) $_POST['contact']['name']));
+                    $mailer->add_reply_to($_POST['contact']['email'], strip_tags((string) $_POST['contact']['name']));
                     $mailer->Subject = html_entity_decode(strip_tags((string) $_POST['contact']['subject']), ENT_QUOTES);
                     $enquiry = html_entity_decode(strip_tags((string) $_POST['contact']['enquiry']), ENT_QUOTES);
                     if (!empty($_POST['contact']['phone'])) {
-                        $enquiry .= "\r\n\r\n".$GLOBALS['language']->address['phone'].': '.$_POST['contact']['phone'];
+                        $enquiry .= "\r\n\r\n" . $GLOBALS['language']->address['phone'] . ': ' . $_POST['contact']['phone'];
                     }
-                    $mailer->Body  = sprintf($GLOBALS['language']->contact['email_content'], $_POST['contact']['name'], $_POST['contact']['email'], $department, nl2br(htmlToPlainText($enquiry)));
+                    $mailer->Body = sprintf($GLOBALS['language']->contact['email_content'], $_POST['contact']['name'], $_POST['contact']['email'], $department, nl2br(html_to_plain_text($enquiry)));
                     foreach ($GLOBALS['hooks']->load('class.cubecart.contact.mailer') as $hook) {
                         include $hook;
                     }
                     /*
                     Add multiple attachments
                     */
-                    $attach_dir = CC_FILES_DIR.'attachments/';
-                    $attachment_prefix = time().'_';
-                    $allowed = [
-                        'image/jpeg',
-                        'image/png',
-                        'image/gif',
-                        'image/png',
-                        'application/zip',
-                        'application/pdf',
-                    ];
+                    $attach_dir = CC_FILES_DIR . 'attachments/';
+                    $attachment_prefix = time() . '_';
+                    $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/png', 'application/zip', 'application/pdf'];
                     $total_files = 0;
                     $attachments = [];
                     if (isset($_FILES['attachments']) && is_array($_FILES['attachments']['name']) && count(array_filter($_FILES['attachments']['name'])) > 0) {
@@ -1589,11 +1333,11 @@ class Cubecart
                         }
                         for ($i = 0; $i < $total_files; $i++) {
                             if (in_array($_FILES['attachments']['type'][$i], $allowed) && file_exists($_FILES['attachments']['tmp_name'][$i])) {
-                                $mailer->AddAttachment($_FILES['attachments']['tmp_name'][$i], $attachment_prefix.$_FILES['attachments']['name'][$i]);
-                                $attachments[] = ['tmp_name' => $_FILES['attachments']['tmp_name'][$i], 'name' => $attachment_prefix.$_FILES['attachments']['name'][$i]];
+                                $mailer->add_attachment($_FILES['attachments']['tmp_name'][$i], $attachment_prefix . $_FILES['attachments']['name'][$i]);
+                                $attachments[] = ['tmp_name' => $_FILES['attachments']['tmp_name'][$i], 'name' => $attachment_prefix . $_FILES['attachments']['name'][$i]];
                             } else {
                                 $error = true;
-                                $GLOBALS['gui']->setError(sprintf($GLOBALS['language']->contact['type_not_allowed'], $_FILES['attachments']['type'][$i]));
+                                $GLOBALS['gui']->set_error(sprintf($GLOBALS['language']->contact['type_not_allowed'], $_FILES['attachments']['type'][$i]));
                             }
                         }
                     }
@@ -1601,117 +1345,97 @@ class Cubecart
                     if (!$error) {
                         $email_sent = $mailer->Send();
                         $moved = [];
-
                         foreach ($attachments as $file) {
-                            move_uploaded_file($file['tmp_name'], $attach_dir.$file['name']);
+                            move_uploaded_file($file['tmp_name'], $attach_dir . $file['name']);
                             $moved[] = $file['name'];
                         }
-
                         if (count($moved) > 0 && !$error) {
-                            $fm  = new FileManager(FileManager::FM_FILETYPE_DL);
-                            $fm->buildDatabase(false, false, $attach_dir);
+                            $fm = new File_Manager(File_Manager::FM_FILETYPE_DL);
+                            $fm->build_database(false, false, $attach_dir);
                         }
-
-                        $email_data = [
-                            'subject' => $mailer->Subject,
-                            'content_html' => '',
-                            'content_text' => $mailer->Body,
-                            'to' => "$department <$email>",
-                            'from' => "$from_name <$from_email>",
-                            'result' => $email_sent,
-                            'email_content_id' => '',
-                            'attachment' => json_encode($moved),
-                        ];
+                        $email_data = ['subject' => $mailer->Subject, 'content_html' => '', 'content_text' => $mailer->Body, 'to' => "{$department} <{$email}>", 'from' => "{$from_name} <{$from_email}>", 'result' => $email_sent, 'email_content_id' => '', 'attachment' => json_encode($moved)];
                         $GLOBALS['db']->insert('CubeCart_email_log', $email_data);
                         if ($email_sent) {
-                            $GLOBALS['gui']->setNotify($GLOBALS['language']->documents['notify_document_contact']);
+                            $GLOBALS['gui']->set_notify($GLOBALS['language']->documents['notify_document_contact']);
                             httpredir('index.php');
                         } else {
-                            $GLOBALS['gui']->setError($GLOBALS['language']->documents['error_document_contact']);
+                            $GLOBALS['gui']->set_error($GLOBALS['language']->documents['error_document_contact']);
                         }
                     }
                 }
             }
-
             // Display form
             $contact['description'] = base64_decode((string) $contact['description']);
-            $contact['description'] = (($contact['parse'] ?? '0') == '1') ? $GLOBALS['smarty']->fetch('string:'.$contact['description']) : $contact['description'];
+            $contact['description'] = ($contact['parse'] ?? '0') == '1' ? $GLOBALS['smarty']->fetch('string:' . $contact['description']) : $contact['description'];
             if (!isset($_POST['contact']) && $GLOBALS['user']->is()) {
-                $GLOBALS['smarty']->assign('MESSAGE', ['name' => $GLOBALS['user']->get('first_name').' '.$GLOBALS['user']->get('last_name'), 'email' => $GLOBALS['user']->get('email')]);
+                $GLOBALS['smarty']->assign('MESSAGE', ['name' => $GLOBALS['user']->get('first_name') . ' ' . $GLOBALS['user']->get('last_name'), 'email' => $GLOBALS['user']->get('email')]);
             }
             $GLOBALS['smarty']->assign('CONTACT', $contact);
             if (isset($contact['department']) && is_array($contact['department'])) {
                 foreach ($contact['department'] as $key => $dept) {
-                    $dept['key']  = $key;
-                    $dept['selected'] = (isset($_POST['contact']['dept']) && $_POST['contact']['dept'] == $key) ? ' selected="selected"' : '';
+                    $dept['key'] = $key;
+                    $dept['selected'] = isset($_POST['contact']['dept']) && $_POST['contact']['dept'] == $key ? ' selected="selected"' : '';
                     $vars['departments'][] = $dept;
                 }
                 $GLOBALS['smarty']->assign('DEPARTMENTS', $vars['departments']);
             }
-
             foreach ($GLOBALS['hooks']->load('class.cubecart.contact.display') as $hook) {
                 include $hook;
             }
             $GLOBALS['smarty']->assign('SECTION_NAME', 'contact');
-            $GLOBALS['smarty']->assign('ALLOW_ATTACHMENTS', (bool)$contact['attachments']);
+            $GLOBALS['smarty']->assign('ALLOW_ATTACHMENTS', (bool) $contact['attachments']);
             $content = $GLOBALS['smarty']->fetch('templates/content.contact.php');
             $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
         } else {
             httpredir('index.php');
         }
     }
-
     /**
      * Display addresses
      */
-    private function _displayAddresses(): void
+    private function _display_addresses(): void
     {
         $billing_address = false;
-        $this->_basket = & $GLOBALS['cart']->basket;
-
+        $this->_basket =& $GLOBALS['cart']->basket;
         if ($GLOBALS['config']->get('config', 'basket_allow_non_invoice_address')) {
-            $addresses = $GLOBALS['user']->getAddresses();
+            $addresses = $GLOBALS['user']->get_addresses();
         } else {
-            $addresses = $GLOBALS['user']->getDefaultAddress();
+            $addresses = $GLOBALS['user']->get_default_address();
         }
-
         if ($addresses) {
             $GLOBALS['cart']->set('confirm_addresses', true);
-
             // Work out which address id to default to
             if (isset($_POST['delivery_address']) && is_numeric($_POST['delivery_address'])) {
-                $selected = (int)$_POST['delivery_address'];
+                $selected = (int) $_POST['delivery_address'];
             } elseif (isset($this->_basket['delivery_address']) && isset($this->_basket['delivery_address']['address_id'])) {
-                $selected = (is_array($this->_basket['delivery_address'])) ? (int)$this->_basket['delivery_address']['address_id'] : (int)$this->_basket['delivery_address'];
+                $selected = is_array($this->_basket['delivery_address']) ? (int) $this->_basket['delivery_address']['address_id'] : (int) $this->_basket['delivery_address'];
             } else {
                 $selected = false;
             }
             // Loop addresses
             foreach ($addresses as $address) {
                 if ($selected) {
-                    $address['selected'] = ($address['address_id'] == $selected) ? 'selected="selected"' : '';
-                    $address['checked']  = ($address['address_id'] == $selected) ? 'checked="checked"' : '';
+                    $address['selected'] = $address['address_id'] == $selected ? 'selected="selected"' : '';
+                    $address['checked'] = $address['address_id'] == $selected ? 'checked="checked"' : '';
                 } else {
-                    $address['selected'] = ($address['default']) ? 'selected="selected"' : '';
-                    $address['checked']  = ($address['default']) ? 'checked="checked"' : '';
+                    $address['selected'] = $address['default'] ? 'selected="selected"' : '';
+                    $address['checked'] = $address['default'] ? 'checked="checked"' : '';
                 }
                 $address_list[$address['address_id']] = $address;
-
                 unset($address['selected'], $address['checked']);
-
                 if ($address['billing'] || !$GLOBALS['config']->get('config', 'basket_allow_non_invoice_address')) {
                     $billing_address = true;
                     $this->_basket['billing_address'] = $address;
                     $GLOBALS['cart']->save();
                     $GLOBALS['smarty']->assign('DATA', $address);
                 }
-                if ($selected && (int)$selected === (int)$address['address_id'] || !$selected && $address['default']) {
+                if ($selected && (int) $selected === (int) $address['address_id'] || !$selected && $address['default']) {
                     $this->_basket['delivery_address'] = $address;
                     $GLOBALS['cart']->save();
                 }
             }
             if (!$billing_address) {
-                $GLOBALS['gui']->setInfo($GLOBALS['language']->account['error_address_billing']);
+                $GLOBALS['gui']->set_info($GLOBALS['language']->account['error_address_billing']);
                 httpredir('?_a=addressbook&action=add&redir=confirm');
             }
             // If for some reason we have no delivery address defined but we do have billing address.. take that
@@ -1724,21 +1448,19 @@ class Cubecart
             }
             $GLOBALS['smarty']->assign('ADDRESSES', $address_list);
             // Display selector, if allowed
-            $GLOBALS['smarty']->assign('CTRL_DELIVERY', ($GLOBALS['config']->get('config', 'basket_allow_non_invoice_address') && !$GLOBALS['cart']->getBasketDigital()));
-
+            $GLOBALS['smarty']->assign('CTRL_DELIVERY', $GLOBALS['config']->get('config', 'basket_allow_non_invoice_address') && !$GLOBALS['cart']->get_basket_digital());
             $subscribed = $GLOBALS['db']->select('CubeCart_newsletter_subscriber', 'subscriber_id', ['status' => '1', 'email' => $GLOBALS['user']->get('email')], false, false, false, false);
             $GLOBALS['smarty']->assign('USER_SUBSCRIBED', $subscribed);
         } else {
             // no address found - lets redirect to the 'add address' page
-            $GLOBALS['gui']->setInfo($GLOBALS['language']->account['error_address_billing']);
+            $GLOBALS['gui']->set_info($GLOBALS['language']->account['error_address_billing']);
             httpredir('?_a=addressbook&action=add');
         }
     }
-
     /**
      * Display basket
      */
-    private function _displayBasket(): void
+    private function _display_basket(): void
     {
         // Display the basket/cart page
         $contents = $GLOBALS['cart']->get();
@@ -1747,45 +1469,42 @@ class Cubecart
             $digital_only = true;
             $product_list = [];
             foreach ($contents as $hash => $product) {
-                if ((int)$product['product_id'] > 0) {
-                    $product_list[] = $product['product_id']; // Certificate ID is NULL
+                if ((int) $product['product_id'] > 0) {
+                    $product_list[] = $product['product_id'];
+                    // Certificate ID is NULL
                 }
-                $product['line_price_display'] = $GLOBALS['tax']->priceFormat($product['line_price_display']);
-                $product['price_display'] = $GLOBALS['tax']->priceFormat($product['price_display']);
-
+                $product['line_price_display'] = $GLOBALS['tax']->price_format($product['line_price_display']);
+                $product['price_display'] = $GLOBALS['tax']->price_format($product['price_display']);
                 if (!$product['digital']) {
                     $digital_only = false;
                 }
                 // Thumbnail
                 $images = $GLOBALS['db']->select('CubeCart_image_index', false, ['product_id' => $product['product_id']], ['main_img' => 'DESC'], 1);
-                $product['image'] = $GLOBALS['gui']->getProductImage($product['product_id'], ['checkout', 'gallery']);
+                $product['image'] = $GLOBALS['gui']->get_product_image($product['product_id'], ['checkout', 'gallery']);
                 if (isset($gc['product_code']) && $product['product_code'] == $gc['product_code']) {
                     if ($gc['image']) {
-                        $product['image'] = $GLOBALS['catalogue']->imagePath($gc['image'], ['checkout', 'gallery'], 'url');
+                        $product['image'] = $GLOBALS['catalogue']->image_path($gc['image'], ['checkout', 'gallery'], 'url');
                     }
-                    $product['link'] = $GLOBALS['seo']->buildURL('certificates');
+                    $product['link'] = $GLOBALS['seo']->build_url('certificates');
                 } else {
-                    $product['link'] = $GLOBALS['seo']->buildURL('prod', $product['product_id']);
+                    $product['link'] = $GLOBALS['seo']->build_url('prod', $product['product_id']);
                 }
                 $items[$hash] = $product;
             }
-            uasort($items, fn ($a, $b) => strnatcasecmp((string) $a['name'], (string) $b['name']));
+            uasort($items, fn($a, $b) => strnatcasecmp((string) $a['name'], (string) $b['name']));
             $GLOBALS['smarty']->assign('ITEMS', $items);
-
             // Ratio to convert ex-tax amounts to inclusive for display (1.0 for exclusive stores)
             $inclusive_ratio = 1.0;
-            if (!empty($GLOBALS['cart']->basket['has_inclusive_tax']) && $GLOBALS['cart']->getSubTotal() > 0) {
-                $shipping_tax = (float)($GLOBALS['cart']->basket['shipping']['tax']['amount'] ?? 0);
+            if (!empty($GLOBALS['cart']->basket['has_inclusive_tax']) && $GLOBALS['cart']->get_sub_total() > 0) {
+                $shipping_tax = (float) ($GLOBALS['cart']->basket['shipping']['tax']['amount'] ?? 0);
                 $pre_discount_product_tax = $GLOBALS['tax']->_total_tax_add - $shipping_tax;
-                $inclusive_ratio = ($GLOBALS['cart']->getSubTotal() + $pre_discount_product_tax) / $GLOBALS['cart']->getSubTotal();
+                $inclusive_ratio = ($GLOBALS['cart']->get_sub_total() + $pre_discount_product_tax) / $GLOBALS['cart']->get_sub_total();
             }
-
             // Get basket total
             if (isset($this->_basket['coupons']) && is_array($this->_basket['coupons']) && !empty($this->_basket['coupons']) || !empty($this->_basket['discount'])) {
                 if (!empty($this->_basket['discount']) && $this->_basket['discount'] > 0) {
-                    $GLOBALS['smarty']->assign('DISCOUNT', $GLOBALS['tax']->priceFormat($this->_basket['discount'] * $inclusive_ratio));
+                    $GLOBALS['smarty']->assign('DISCOUNT', $GLOBALS['tax']->price_format($this->_basket['discount'] * $inclusive_ratio));
                 }
-
                 if (isset($this->_basket['coupons']) && is_array($this->_basket['coupons']) && !empty($this->_basket['coupons'])) {
                     foreach ($this->_basket['coupons'] as $coupon) {
                         $coupon['remove_code'] = $coupon['voucher'];
@@ -1793,81 +1512,70 @@ class Cubecart
                         $display_ratio = $coupon['gc'] ? 1.0 : $inclusive_ratio;
                         if ($coupon['type'] == 'fixed') {
                             $this->_basket['discount_type'] = 'f';
-                            $coupon['value'] = $GLOBALS['tax']->priceFormat($coupon['value_display'] * $display_ratio, true);
+                            $coupon['value'] = $GLOBALS['tax']->price_format($coupon['value_display'] * $display_ratio, true);
                             $coupons[] = $coupon;
                         } elseif ($coupon['type'] == 'percent') {
                             $this->_basket['discount_type'] = $coupon['products'] ? 'pp' : 'p';
-                            $coupon['voucher'] .= ' ('.$coupon['value'].'%)';
-                            $coupon['value'] = $GLOBALS['tax']->priceFormat($coupon['value_display'] * $display_ratio, true);
+                            $coupon['voucher'] .= ' (' . $coupon['value'] . '%)';
+                            $coupon['value'] = $GLOBALS['tax']->price_format($coupon['value_display'] * $display_ratio, true);
                             $coupons[] = $coupon;
                         }
                     }
                     $GLOBALS['smarty']->assign('COUPONS', $coupons);
                 }
             }
-
             foreach ($GLOBALS['hooks']->load('class.cubecart.post_coupon') as $hook) {
                 include $hook;
             }
-
             // Shipping Calculations
-            if (($shipping = $GLOBALS['cart']->loadShippingModules()) !== false) {
+            if (($shipping = $GLOBALS['cart']->load_shipping_modules()) !== false) {
                 $offset = 1;
-
                 if (isset($this->_basket['free_coupon_shipping']) && $this->_basket['free_coupon_shipping'] == 1) {
-                    $GLOBALS['smarty']->assign('free_coupon_shipping', (bool)$this->_basket['free_coupon_shipping']);
-                    $shipping['Free_Coupon_Shipping'] = [
-                        0 => [
-                              'name' => $GLOBALS['language']->basket['free_coupon_shipping'],
-                              'value' => 0,
-                            ],
-                        ];
+                    $GLOBALS['smarty']->assign('free_coupon_shipping', (bool) $this->_basket['free_coupon_shipping']);
+                    $shipping['Free_Coupon_Shipping'] = [0 => ['name' => $GLOBALS['language']->basket['free_coupon_shipping'], 'value' => 0]];
                 }
-
                 $offset_matched = false;
                 foreach ($shipping as $ship_name => $methods) {
                     $folder = str_replace(' ', '_', $ship_name);
-                    $label = (!is_numeric($ship_name) && !empty($ship_name)) ? str_replace('_', ' ', $ship_name) : null;
+                    $label = !is_numeric($ship_name) && !empty($ship_name) ? str_replace('_', ' ', $ship_name) : null;
                     foreach ($methods as $data) {
                         $data['value_inclusive'] = $data['value'];
-                        if (isset($data['tax_inclusive']) && (bool)$data['tax_inclusive']) {
-                            $GLOBALS['tax']->inclusiveTaxRemove($data['value'], $data['tax_id']);
+                        if (isset($data['tax_inclusive']) && (bool) $data['tax_inclusive']) {
+                            $GLOBALS['tax']->inclusive_tax_remove($data['value'], $data['tax_id']);
                         } else {
                             $data['value_inclusive'] = null;
                         }
-
                         $regex = '/[^a-z0-9]/i';
                         if (preg_replace($regex, '', (string) $data['name']) == preg_replace($regex, '', (string) $ship_name)) {
                             $data['name'] = '';
                         }
-
                         $value = [
-                            'offset' 	=> $offset,
-                            'folder'    => $folder,
-                            'name'		=> $ship_name, // e.g. UPS
-                            'product'	=> $data['name'], // e.g. Ground
-                            'value'		=> $data['value'],
+                            'offset' => $offset,
+                            'folder' => $folder,
+                            'name' => $ship_name,
+                            // e.g. UPS
+                            'product' => $data['name'],
+                            // e.g. Ground
+                            'value' => $data['value'],
                             'value_inclusive' => $data['value_inclusive'],
-                            'tax_id' 	=> $data['tax_id'], // Kept for legacy
-                            'tax'		=> $data['tax'],
-                            'position'	=> $data['position'],
+                            'tax_id' => $data['tax_id'],
+                            // Kept for legacy
+                            'tax' => $data['tax'],
+                            'position' => $data['position'],
                             'module_folder' => $data['module_folder'] ?? $folder,
                         ];
                         $shipping_values[] = $value;
-                        $data['name'] = empty($data['name']) ? '' : ' ('.$data['name'].')';
-                        $data['desc'] = empty($data['desc']) ? '' : ' ('.$data['desc'].')';
+                        $data['name'] = empty($data['name']) ? '' : ' (' . $data['name'] . ')';
+                        $data['desc'] = empty($data['desc']) ? '' : ' (' . $data['desc'] . ')';
                         $ship_display_value = $data['value_inclusive'] ?? $data['value'];
-                        $option = [
-                            'value'  => base64url_encode(json_encode($value)),
-                            'display' => (isset($data['name'])) ? $GLOBALS['tax']->priceFormat($ship_display_value, true).$data['name'] : $data['desc'],
-                        ];
-                        if (isset($this->_basket['shipping']['offset']) && (int)$this->_basket['shipping']['offset'] == $offset) {
+                        $option = ['value' => base64url_encode(json_encode($value)), 'display' => isset($data['name']) ? $GLOBALS['tax']->price_format($ship_display_value, true) . $data['name'] : $data['desc']];
+                        if (isset($this->_basket['shipping']['offset']) && (int) $this->_basket['shipping']['offset'] == $offset) {
                             $offset_matched = true;
                             $option['selected'] = ' selected="selected"';
-                            if ((string)$value['value'] !== (string)$this->_basket['shipping']['value']) {
+                            if ((string) $value['value'] !== (string) $this->_basket['shipping']['value']) {
                                 $this->_basket['shipping'] = $value;
                                 $GLOBALS['cart']->save();
-                                httpredir(currentPage());
+                                httpredir(current_page());
                             }
                             // Sync inclusive value into session for display
                             $this->_basket['shipping']['value_inclusive'] = $value['value_inclusive'];
@@ -1878,73 +1586,66 @@ class Cubecart
                         $shipping_list[$label][] = $option;
                     }
                 }
-
                 // Lets try to choose cheapest shipping option
                 // for them if they haven't chosen already
-                if (((!isset($this->_basket['shipping']) || empty($this->_basket['shipping'])) && !$digital_only) || (!$offset_matched && isset($this->_basket['shipping']['offset']) && !$digital_only)) {
+                if ((!isset($this->_basket['shipping']) || empty($this->_basket['shipping'])) && !$digital_only || !$offset_matched && isset($this->_basket['shipping']['offset']) && !$digital_only) {
                     if (isset($this->_basket['free_coupon_shipping']) && $this->_basket['free_coupon_shipping'] == 1) {
                         $shipping_defaults = 'default';
                     } else {
                         $shipping_defaults = $GLOBALS['config']->get('config', 'shipping_defaults');
                     }
-
                     $cheapest = null;
-                    $mostExpensive = null;
-                    $cheapestOverZero = null;
+                    $most_expensive = null;
+                    $cheapest_over_zero = null;
                     $count = count($shipping_values);
-
                     foreach ($shipping_values as $row) {
-                        $val = (float)$row['value'];
-                        $priority = (int)($row['priority'] ?? PHP_INT_MAX); // Default to lowest priority if not set
-
+                        $val = (float) $row['value'];
+                        $priority = (int) ($row['priority'] ?? PHP_INT_MAX);
+                        // Default to lowest priority if not set
                         // Cheapest (min value) - with priority tie-breaker
-                        if ($cheapest === null || $val < (float)$cheapest['value']) {
+                        if ($cheapest === null || $val < (float) $cheapest['value']) {
                             $cheapest = $row;
-                        } elseif ($val == (float)$cheapest['value'] && $val == 0) {
+                        } elseif ($val == (float) $cheapest['value'] && $val == 0) {
                             // Tie at zero - pick highest priority (lowest priority value)
-                            if ($priority < (int)($cheapest['priority'] ?? PHP_INT_MAX)) {
+                            if ($priority < (int) ($cheapest['priority'] ?? PHP_INT_MAX)) {
                                 $cheapest = $row;
                             }
                         }
-
                         // Most expensive (max value) - with priority tie-breaker
-                        if ($mostExpensive === null || $val > (float)$mostExpensive['value']) {
-                            $mostExpensive = $row;
-                        } elseif ($val == (float)$mostExpensive['value'] && $val == 0) {
+                        if ($most_expensive === null || $val > (float) $most_expensive['value']) {
+                            $most_expensive = $row;
+                        } elseif ($val == (float) $most_expensive['value'] && $val == 0) {
                             // Tie at zero - pick highest priority (lowest priority value)
-                            if ($priority < (int)($mostExpensive['priority'] ?? PHP_INT_MAX)) {
-                                $mostExpensive = $row;
+                            if ($priority < (int) ($most_expensive['priority'] ?? PHP_INT_MAX)) {
+                                $most_expensive = $row;
                             }
                         }
-
                         // Cheapest over zero - with priority tie-breaker
-                        if ($count == 1 || ($val > 0 && ($cheapestOverZero === null || $val < (float)$cheapestOverZero['value']))) {
-                            $cheapestOverZero = $row;
-                        } elseif ($cheapestOverZero !== null && $val > 0 && $val == (float)$cheapestOverZero['value']) {
+                        if ($count == 1 || $val > 0 && ($cheapest_over_zero === null || $val < (float) $cheapest_over_zero['value'])) {
+                            $cheapest_over_zero = $row;
+                        } elseif ($cheapest_over_zero !== null && $val > 0 && $val == (float) $cheapest_over_zero['value']) {
                             // Tie above zero - pick highest priority (lowest priority value)
-                            if ($priority < (int)($cheapestOverZero['priority'] ?? PHP_INT_MAX)) {
-                                $cheapestOverZero = $row;
+                            if ($priority < (int) ($cheapest_over_zero['priority'] ?? PHP_INT_MAX)) {
+                                $cheapest_over_zero = $row;
                             }
                         }
                     }
-
                     $default_shipping = match ($shipping_defaults) {
                         // Cheapest over zero
-                        '1' => $cheapestOverZero,
+                        '1' => $cheapest_over_zero,
                         // Most expensive
-                        '2' => $mostExpensive,
+                        '2' => $most_expensive,
                         // Force choice
                         '3' => true,
                         // Cheapest
                         default => $cheapest,
                     };
-
                     if (!empty($default_shipping)) {
                         $GLOBALS['cart']->set('shipping', $default_shipping);
                         if (!isset($this->_basket['default_shipping_set'])) {
                             $GLOBALS['cart']->set('default_shipping_set', true);
                             if (!isset($this->_basket['free_coupon_shipping'])) {
-                                httpredir(currentPage());
+                                httpredir(current_page());
                             }
                         }
                     } elseif (!$GLOBALS['config']->get('config', 'allow_no_shipping')) {
@@ -1952,7 +1653,8 @@ class Cubecart
                     }
                     if (isset($this->_basket['digital_only'])) {
                         unset($this->_basket['digital_only']);
-                    } // Digital good removed fix
+                    }
+                    // Digital good removed fix
                 } elseif ($digital_only) {
                     $GLOBALS['cart']->set('digital_only', true);
                 }
@@ -1961,53 +1663,50 @@ class Cubecart
                     $GLOBALS['cart']->set('shipping', []);
                     if ($digital_only) {
                         $GLOBALS['cart']->set('digital_only', true);
-                    } #gift card purchased only
+                    }
+                    #gift card purchased only
                 } else {
                     trigger_error('Shipping not setup or allow no shipping not enabled', E_USER_WARNING);
-                    unset($GLOBALS['cart']->basket['shipping'], $GLOBALS['cart']->basket['default_shipping_set']); // past 5.0.9
+                    unset($GLOBALS['cart']->basket['shipping'], $GLOBALS['cart']->basket['default_shipping_set']);
+                    // past 5.0.9
                 }
                 $shipping_list = false;
             }
-
             foreach ($GLOBALS['hooks']->load('class.cubecart.post_shipping') as $hook) {
                 include $hook;
             }
-
             // Check if new shipping methods are avialble and notify if they are
             $shipping_hash = md5(serialize($shipping_list));
             if (isset($GLOBALS['cart']->basket['shipping_hash']) && !empty($GLOBALS['cart']->basket['shipping_hash']) && $shipping_hash !== $GLOBALS['cart']->basket['shipping_hash']) {
-                $GLOBALS['gui']->setNotify($GLOBALS['language']->checkout['check_shipping']);
+                $GLOBALS['gui']->set_notify($GLOBALS['language']->checkout['check_shipping']);
             }
             $GLOBALS['cart']->basket['shipping_hash'] = $shipping_hash;
-
             if (!$digital_only && isset($this->_basket['digital_only'])) {
-                unset($this->_basket['digital_only']); // Digital good removed fix
+                unset($this->_basket['digital_only']);
+                // Digital good removed fix
             }
-            $ship_display = (isset($this->_basket['shipping'])) ? ($this->_basket['shipping']['value_inclusive'] ?? $this->_basket['shipping']['value']) : null;
-            $GLOBALS['smarty']->assign('SHIPPING_VALUE', ($ship_display !== null) ? $GLOBALS['tax']->priceFormat($ship_display, true) : '-');
+            $ship_display = isset($this->_basket['shipping']) ? $this->_basket['shipping']['value_inclusive'] ?? $this->_basket['shipping']['value'] : null;
+            $GLOBALS['smarty']->assign('SHIPPING_VALUE', $ship_display !== null ? $GLOBALS['tax']->price_format($ship_display, true) : '-');
             $GLOBALS['smarty']->assign('HIDE_OPTION_GROUPS', $GLOBALS['config']->get('config', 'disable_shipping_groups'));
             if (!$digital_only && $shipping) {
                 $GLOBALS['smarty']->assign('SHIPPING', $shipping_list);
             }
-
-            $GLOBALS['smarty']->assign('SUBTOTAL', $GLOBALS['tax']->priceFormat($GLOBALS['cart']->getSubTotal() * $inclusive_ratio));
-
-            $GLOBALS['tax']->displayTaxes();
-            $GLOBALS['smarty']->assign('TOTAL', $GLOBALS['tax']->priceFormat($GLOBALS['cart']->getTotal()));
+            $GLOBALS['smarty']->assign('SUBTOTAL', $GLOBALS['tax']->price_format($GLOBALS['cart']->get_sub_total() * $inclusive_ratio));
+            $GLOBALS['tax']->display_taxes();
+            $GLOBALS['smarty']->assign('TOTAL', $GLOBALS['tax']->price_format($GLOBALS['cart']->get_total()));
             $GLOBALS['smarty']->assign('CHECKOUT_BUTTON', $GLOBALS['language']->checkout['checkout']);
             if ($this->_basket['weight'] > 0) {
-                $display_weight = (float)$this->_basket['weight'];
+                $display_weight = (float) $this->_basket['weight'];
                 if (isset($this->_basket['shipping']['module_folder'])) {
                     $ship_config = $GLOBALS['config']->get($this->_basket['shipping']['module_folder']);
                     if (!empty($ship_config['packagingWeight'])) {
-                        $display_weight += (float)$ship_config['packagingWeight'];
+                        $display_weight += (float) $ship_config['packagingWeight'];
                     }
                 }
-                $GLOBALS['smarty']->assign('BASKET_WEIGHT', ($GLOBALS['config']->get('config', 'show_basket_weight')) ? $display_weight.strtolower((string) $GLOBALS['config']->get('config', 'product_weight_unit')) : false);
+                $GLOBALS['smarty']->assign('BASKET_WEIGHT', $GLOBALS['config']->get('config', 'show_basket_weight') ? $display_weight . strtolower((string) $GLOBALS['config']->get('config', 'product_weight_unit')) : false);
             }
             $GLOBALS['smarty']->assign('USE_CREDIT', $this->_basket['use_credit'] ?? '0');
-            $this->_listPaymentOptions($this->_basket['gateway'] ?? '');
-
+            $this->_list_payment_options($this->_basket['gateway'] ?? '');
             // Alternate Checkouts - loaded as hooks
             $load_checkouts = true;
             $list_checkouts = [];
@@ -2023,29 +1722,26 @@ class Cubecart
             // Related Products from most recent 30 orders containing this product.
             if (!empty($product_list) && ($related_orders = $GLOBALS['db']->select('CubeCart_order_inventory', ['DISTINCT' => 'cart_order_id'], ['product_id' => $product_list], ['id' => 'DESC'], 30)) !== false) {
                 foreach ($related_orders as $data) {
-                    $related[] = "'".$data['cart_order_id']."'";
+                    $related[] = "'" . $data['cart_order_id'] . "'";
                 }
                 if (($related_products = $GLOBALS['db']->select('CubeCart_order_inventory', ['DISTINCT' => 'product_id'], ['cart_order_id' => $related, '!product_id' => $product_list], false, 10)) !== false) {
-                    $i = 0; // Looking for 5 related products (possibly configurable in the future)
+                    $i = 0;
+                    // Looking for 5 related products (possibly configurable in the future)
                     foreach ($related_products as $related) {
                         if (!empty($related['product_id']) && !in_array($related['product_id'], $product_list)) {
-                            $related = $GLOBALS['catalogue']->getProductData($related['product_id']);
+                            $related = $GLOBALS['catalogue']->get_product_data($related['product_id']);
                             if ($related == false) {
                                 continue;
                             }
-                            $related['img_src'] = $GLOBALS['gui']->getProductImage($related['product_id']);
-                            $related['url'] = $GLOBALS['seo']->buildURL('prod', $related['product_id'], '&');
-
-                            $related['ctrl_sale'] = (!$GLOBALS['tax']->salePrice($related['price'], $related['sale_price']) || !$GLOBALS['config']->get('config', 'catalogue_sale_mode')) ? false : true;
-
-                            $GLOBALS['catalogue']->getProductPrice($related);
-                            $sale = $GLOBALS['tax']->salePrice($related['price'], $related['sale_price']);
-
-                            $related['price_unformatted']  = $related['price'];
-                            $related['sale_price_unformatted'] = ($sale) ? $related['sale_price'] : null;
-                            $related['price']  = $GLOBALS['tax']->priceFormat($related['price']);
-                            $related['sale_price'] = ($sale) ? $GLOBALS['tax']->priceFormat($related['sale_price']) : null;
-
+                            $related['img_src'] = $GLOBALS['gui']->get_product_image($related['product_id']);
+                            $related['url'] = $GLOBALS['seo']->build_url('prod', $related['product_id'], '&');
+                            $related['ctrl_sale'] = !$GLOBALS['tax']->sale_price($related['price'], $related['sale_price']) || !$GLOBALS['config']->get('config', 'catalogue_sale_mode') ? false : true;
+                            $GLOBALS['catalogue']->get_product_price($related);
+                            $sale = $GLOBALS['tax']->sale_price($related['price'], $related['sale_price']);
+                            $related['price_unformatted'] = $related['price'];
+                            $related['sale_price_unformatted'] = $sale ? $related['sale_price'] : null;
+                            $related['price'] = $GLOBALS['tax']->price_format($related['price']);
+                            $related['sale_price'] = $sale ? $GLOBALS['tax']->price_format($related['sale_price']) : null;
                             if ($related['product_id'] > 0) {
                                 $related_list[] = $related;
                             }
@@ -2063,15 +1759,13 @@ class Cubecart
             }
         }
     }
-
     /**
      * Display gateways (Semi deprecated)
      */
-    private function _displayGateways($name = false): void
+    private function _display_gateways($name = false): void
     {
         $where = ['status' => '1'];
-        $this->_basket = & $GLOBALS['cart']->basket;
-
+        $this->_basket =& $GLOBALS['cart']->basket;
         if ($name) {
             $where['folder'] = $name;
             // Update Order Summary with gateway name
@@ -2086,7 +1780,6 @@ class Cubecart
         foreach ($GLOBALS['hooks']->load('class.cubecart.display_gateways') as $hook) {
             include $hook;
         }
-
         if ($gateways) {
             if (count($gateways) == 1) {
                 if (!isset($gateways[0])) {
@@ -2097,35 +1790,30 @@ class Cubecart
                 if (!$module) {
                     $module = $GLOBALS['config']->get($gateways[0]['base_folder']);
                 }
-
                 // Clever exceptions for Gateway Plugins (PayPal Pro, Google Checkout, et al)
                 if (isset($gateways[0]['plugin']) && $gateways[0]['plugin']) {
                     $module = array_merge($gateways[0], $module);
                 }
-                $folder = (isset($gateways[0]['plugin']) && $gateways[0]['plugin']) ? 'plugins' : 'gateway';
-                $class_path = CC_ROOT_DIR.'/modules/'.$folder.'/'.$gateways[0]['folder'].'/gateway.class.php';
-
+                $folder = isset($gateways[0]['plugin']) && $gateways[0]['plugin'] ? 'plugins' : 'gateway';
+                $class_path = CC_ROOT_DIR . '/modules/' . $folder . '/' . $gateways[0]['folder'] . '/gateway.class.php';
                 if (!file_exists($class_path) && isset($gateways[0]['base_folder'])) {
-                    $class_path = CC_ROOT_DIR.'/modules/'.$folder.'/'.$gateways[0]['base_folder'].'/gateway.class.php';
+                    $class_path = CC_ROOT_DIR . '/modules/' . $folder . '/' . $gateways[0]['base_folder'] . '/gateway.class.php';
                 }
-
                 if (file_exists($class_path)) {
                     include $class_path;
                     $gateway = new Gateway($module, $this->_basket);
                     if (method_exists($gateway, 'transfer')) {
                         $transfer = $gateway->transfer();
-
                         // Update Order Summary with gateway name
                         $GLOBALS['db']->update('CubeCart_order_summary', ['gateway' => $gateways[0]['folder']], ['cart_order_id' => $this->_basket['cart_order_id']]);
-
-                        switch (strtolower((string)$transfer['submit'])) {
+                        switch (strtolower((string) $transfer['submit'])) {
                             case 'iframe':
                                 $transfer['mode'] = 'iframe';
                                 if (method_exists($gateway, 'iframeURL')) {
-                                    $GLOBALS['smarty']->assign('IFRAME_SRC', $gateway->iframeURL());
+                                    $GLOBALS['smarty']->assign('IFRAME_SRC', $gateway->iframe_url());
                                 }
                                 if (method_exists($gateway, 'iframeForm')) {
-                                    $GLOBALS['smarty']->assign('IFRAME_FORM', $gateway->iframeForm());
+                                    $GLOBALS['smarty']->assign('IFRAME_FORM', $gateway->iframe_form());
                                 }
                                 $build_hidden_vars = false;
                                 break;
@@ -2137,15 +1825,15 @@ class Cubecart
                                 break;
                             default:
                                 if (method_exists($gateway, 'form')) {
-                                    $order = Order::getInstance();
-                                    $order_data = $order->getOrderDetails($this->_basket['cart_order_id']);
+                                    $order = Order::get_instance();
+                                    $order_data = $order->get_order_details($this->_basket['cart_order_id']);
                                     $col = $GLOBALS['config']->get('config', 'oid_col');
                                     if ($GLOBALS['config']->get('config', 'oid_mode') == 'i' && !empty($order_data['order_summary'][$col])) {
                                         $oid = $order_data['order_summary'][$col];
                                     } else {
                                         $oid = $order_data['cart_order_id'];
                                     }
-                                    $GLOBALS['smarty']->assign('LANG_AMOUNT_DUE', sprintf($GLOBALS['language']->checkout['make_payment'], $GLOBALS['tax']->priceFormat($this->_basket['total']), $oid));
+                                    $GLOBALS['smarty']->assign('LANG_AMOUNT_DUE', sprintf($GLOBALS['language']->checkout['make_payment'], $GLOBALS['tax']->price_format($this->_basket['total']), $oid));
                                     $GLOBALS['smarty']->assign('FORM_TEMPLATE', $gateway->form());
                                     $GLOBALS['smarty']->assign('BTN_PROCEED', $GLOBALS['language']->gateway['make_payment']);
                                 } else {
@@ -2173,7 +1861,7 @@ class Cubecart
                                 $GLOBALS['smarty']->assign('FORM_VARS', $form_vars);
                             }
                         }
-                        $affiliates = $this->_getAffiliates(self::AFFILIATE_GATEWAY);
+                        $affiliates = $this->_get_affiliates(self::AFFILIATE_GATEWAY);
                         if ($affiliates) {
                             $GLOBALS['smarty']->assign('AFFILIATES', $affiliates);
                         }
@@ -2189,16 +1877,14 @@ class Cubecart
             } else {
                 // List all available and enabled payment gateways
                 foreach ($gateways as $gateway) {
-                    $gateway_path  = (isset($gateway['folder'])) ? CC_ROOT_DIR.'/modules/gateway/'.$gateway['folder'].'/gateway.class.php' : '';
-                    $plugin_path  = (isset($gateway['base_folder'])) ? CC_ROOT_DIR.'/modules/plugins/'.$gateway['base_folder'].'/gateway.class.php' : '';
-
+                    $gateway_path = isset($gateway['folder']) ? CC_ROOT_DIR . '/modules/gateway/' . $gateway['folder'] . '/gateway.class.php' : '';
+                    $plugin_path = isset($gateway['base_folder']) ? CC_ROOT_DIR . '/modules/plugins/' . $gateway['base_folder'] . '/gateway.class.php' : '';
                     if (!file_exists($gateway_path) && !file_exists($plugin_path)) {
                         continue;
                     }
-                    $module = (isset($gateway['plugin']) && $gateway['plugin']) ? $gateway : $GLOBALS['config']->get($gateway['folder']);
-
-                    $countries = (!empty($module['countries'])) ? unserialize($module['countries'], ['allowed_classes' => false]) : false;
-                    $disabled_countries = (!empty($module['disabled_countries'])) ? unserialize($module['disabled_countries'], ['allowed_classes' => false]) : false;
+                    $module = isset($gateway['plugin']) && $gateway['plugin'] ? $gateway : $GLOBALS['config']->get($gateway['folder']);
+                    $countries = !empty($module['countries']) ? unserialize($module['countries'], ['allowed_classes' => false]) : false;
+                    $disabled_countries = !empty($module['disabled_countries']) ? unserialize($module['disabled_countries'], ['allowed_classes' => false]) : false;
                     // Check module isn't set for mobile / main only!
                     if (isset($module['scope']) && !empty($module['scope']) && ($module['scope'] == 'main' && $GLOBALS['gui']->mobile)) {
                         continue;
@@ -2212,7 +1898,6 @@ class Cubecart
                     if (is_array($disabled_countries) && in_array($GLOBALS['cart']->basket['delivery_address']['country_id'], $disabled_countries)) {
                         continue;
                     }
-
                     if (preg_match('#\.(gif|jpg|png|jpeg|webp)$#i', strtolower((string) $module['desc']))) {
                         $gateway['description'] = sprintf('<img src="%s" border="0" title="" alt="" />', $module['desc']);
                     } elseif (!empty($module['desc'])) {
@@ -2220,7 +1905,7 @@ class Cubecart
                     } else {
                         $gateway['description'] = $gateway['folder'];
                     }
-                    $gateway['checked'] = (isset($gateway['default']) && $gateway['default']) ? 'checked="checked"' : '';
+                    $gateway['checked'] = isset($gateway['default']) && $gateway['default'] ? 'checked="checked"' : '';
                     $gateway_list[] = $gateway;
                 }
                 $GLOBALS['smarty']->assign('GATEWAYS', $gateway_list);
@@ -2232,7 +1917,6 @@ class Cubecart
             httpredir('index.php?_a=complete');
         }
     }
-
     /**
      * 404 Handling
      */
@@ -2241,44 +1925,38 @@ class Cubecart
         foreach ($GLOBALS['hooks']->load('class.cubecart.404') as $hook) {
             include $hook;
         }
-
         if (isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI'])) {
-
             $uri = $_SERVER['REQUEST_URI'];
-
             if (str_ends_with((string) $uri, '_a=404')) {
                 return false;
             }
-            if (executionChance(2)) { // 2% chance
+            if (execution_chance(2)) {
+                // 2% chance
                 $GLOBALS['db']->delete('CubeCart_404_log', '`created` < DATE_SUB(NOW(), INTERVAL 90 DAY)', 500);
             }
             $uri = strtok($uri, '?');
-            $cc_root_rel_pattern = "/\A" . preg_quote(CC_ROOT_REL, '/') . '/';
+            $cc_root_rel_pattern = "/\\A" . preg_quote(CC_ROOT_REL, '/') . '/';
             $uri = preg_replace($cc_root_rel_pattern, '', $uri);
             $uri = rtrim((string) $uri, '/');
             $uri = htmlentities($uri, ENT_QUOTES);
-
             if (!empty($uri)) {
                 if ($existing = $GLOBALS['db']->select('CubeCart_404_log', false, ['uri' => $uri], false, 1, false, false)) {
-                    $warn = ($existing[0]['done'] == 1) ? 1 : 0;
+                    $warn = $existing[0]['done'] == 1 ? 1 : 0;
                     $GLOBALS['db']->update('CubeCart_404_log', ['hits' => '+1', 'warn' => $warn], ['uri' => $uri]);
                 } else {
                     $GLOBALS['db']->insert('CubeCart_404_log', ['uri' => $uri]);
                 }
             }
         }
-
         header('HTTP/1.0 404 Not Found');
         $template = 'templates/content.404.php';
-
-        if ($content = $GLOBALS['smarty']->templateExists($template)) {
+        if ($content = $GLOBALS['smarty']->template_exists($template)) {
             $content = $GLOBALS['smarty']->fetch($template);
         } else {
-            $content = '<h2>'.$GLOBALS['language']->documents['404_title']."</h2>\r\n<p>".$GLOBALS['language']->documents['404_content'].'</p>';
+            $content = '<h2>' . $GLOBALS['language']->documents['404_title'] . "</h2>\r\n<p>" . $GLOBALS['language']->documents['404_content'] . '</p>';
         }
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Download
      */
@@ -2287,14 +1965,14 @@ class Cubecart
         foreach ($GLOBALS['hooks']->load('class.cubecart.construct.download') as $hook) {
             include $hook;
         }
-        $filemanager = new FileManager(FileManager::FM_FILETYPE_DL);
+        $filemanager = new File_Manager(File_Manager::FM_FILETYPE_DL);
         if (isset($_REQUEST['accesskey']) && !empty($_REQUEST['accesskey']) && preg_match('/^[a-f0-9]{32}$/i', (string) $_REQUEST['accesskey'])) {
             // Supress the debugger output
             $GLOBALS['debug']->supress();
             if ($_GET['s'] == '1') {
-                $data = $filemanager->deliverDownload($_REQUEST['accesskey'], $error, true);
-                $mime_parts = $filemanager->mimeParts($data['mimetype']);
-                $GLOBALS['smarty']->assign('STREAM_URL', '?_a=download&accesskey='.$_REQUEST['accesskey']);
+                $data = $filemanager->deliver_download($_REQUEST['accesskey'], $error, true);
+                $mime_parts = $filemanager->mime_parts($data['mimetype']);
+                $GLOBALS['smarty']->assign('STREAM_URL', '?_a=download&accesskey=' . $_REQUEST['accesskey']);
                 $GLOBALS['smarty']->assign('DATA', $data);
                 $GLOBALS['smarty']->assign('TYPE', $mime_parts['type']);
                 foreach ($GLOBALS['hooks']->load('class.cubecart.stream') as $hook) {
@@ -2302,70 +1980,68 @@ class Cubecart
                 }
                 $GLOBALS['gui']->display('templates/main.stream.php');
             } else {
-                if ($filemanager->deliverDownload($_REQUEST['accesskey'], $error)) {
+                if ($filemanager->deliver_download($_REQUEST['accesskey'], $error)) {
                     exit;
                 }
                 if (!empty($error)) {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->filemanager['error_dl_'.$error]);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->filemanager['error_dl_' . $error]);
                 }
-                httpredir(currentPage(['accesskey'], ['_a' => 'downloads']));
+                httpredir(current_page(['accesskey'], ['_a' => 'downloads']));
             }
         }
-
         if ($GLOBALS['user']->is()) {
             $page = $_GET['p'] ?? 1;
             $per_page = 50;
-            $where = ['customer_id' => $GLOBALS['user']->getId()];
+            $where = ['customer_id' => $GLOBALS['user']->get_id()];
             if (($downloads = $GLOBALS['db']->select('CubeCart_downloads', false, $where, ['digital_id' => 'DESC'], $per_page, $page, false)) !== false) {
-                $GLOBALS['smarty']->assign('PAGINATION', $GLOBALS['db']->pagination($GLOBALS['db']->getFoundRows(), $per_page, $page, 5, 'p'));
-                $max_downloads = (int)$GLOBALS['config']->get('config', 'download_count');
-                $max_downloads = ($max_downloads > 0) ? $max_downloads : '&infin;';
+                $GLOBALS['smarty']->assign('PAGINATION', $GLOBALS['db']->pagination($GLOBALS['db']->get_found_rows(), $per_page, $page, 5, 'p'));
+                $max_downloads = (int) $GLOBALS['config']->get('config', 'download_count');
+                $max_downloads = $max_downloads > 0 ? $max_downloads : '&infin;';
                 $GLOBALS['smarty']->assign('MAX_DOWNLOADS', $max_downloads);
                 foreach ($downloads as $download) {
-                    if (($product = $GLOBALS['db']->select('`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_inventory` INNER JOIN `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_summary` ON `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_inventory`.`cart_order_id` = `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_summary`.`cart_order_id`', '`'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_inventory`.*, `'.$GLOBALS['config']->get('config', 'dbprefix').'CubeCart_order_summary`.`status`', ['id' => $download['order_inv_id']], false, 1, false, false)) !== false) {
-                        $download['file_info'] = $filemanager->getFileInfo($download['product_id']) ?: []; // Make sure this is an array
-                        if (($download['file_info']['stream'] ??= 0) == 1) { // Make un-streamable if FileManager does not otherwise indicate - for template
-                            $type = $filemanager->mimeParts($download['file_info']['mimetype']);
+                    if (($product = $GLOBALS['db']->select('`' . $GLOBALS['config']->get('config', 'dbprefix') . 'CubeCart_order_inventory` INNER JOIN `' . $GLOBALS['config']->get('config', 'dbprefix') . 'CubeCart_order_summary` ON `' . $GLOBALS['config']->get('config', 'dbprefix') . 'CubeCart_order_inventory`.`cart_order_id` = `' . $GLOBALS['config']->get('config', 'dbprefix') . 'CubeCart_order_summary`.`cart_order_id`', '`' . $GLOBALS['config']->get('config', 'dbprefix') . 'CubeCart_order_inventory`.*, `' . $GLOBALS['config']->get('config', 'dbprefix') . 'CubeCart_order_summary`.`status`', ['id' => $download['order_inv_id']], false, 1, false, false)) !== false) {
+                        $download['file_info'] = $filemanager->get_file_info($download['product_id']) ?: [];
+                        // Make sure this is an array
+                        if (($download['file_info']['stream'] ??= 0) == 1) {
+                            // Make un-streamable if FileManager does not otherwise indicate - for template
+                            $type = $filemanager->mime_parts($download['file_info']['mimetype']);
                             $download['action'] = $type['type'] == 'video' ? $GLOBALS['language']->common['watch'] : $GLOBALS['language']->common['listen'];
                         } else {
                             $download['action'] = $GLOBALS['language']->common['download'];
                         }
-                        $download['expires'] = ($download['expire'] > 0) ? formatTime($download['expire']) : $GLOBALS['language']->common['never'];
-                        $download['active'] = (!in_array($product[0]['status'], [2,3]) || $download['expire'] > 0 && $download['expire'] < time() || (int)$download['downloads'] >= $GLOBALS['config']->get('config', 'download_count') && $GLOBALS['config']->get('config', 'download_count') > 0) ? false : true;
+                        $download['expires'] = $download['expire'] > 0 ? format_time($download['expire']) : $GLOBALS['language']->common['never'];
+                        $download['active'] = !in_array($product[0]['status'], [2, 3]) || $download['expire'] > 0 && $download['expire'] < time() || (int) $download['downloads'] >= $GLOBALS['config']->get('config', 'download_count') && $GLOBALS['config']->get('config', 'download_count') > 0 ? false : true;
                         $download['deleted'] = false;
                         $download = array_merge($product[0], $download);
                     } else {
                         $download['deleted'] = true;
                     }
-                    $download['product_url'] = $GLOBALS['seo']->buildURL('prod', $download['product_id']);
+                    $download['product_url'] = $GLOBALS['seo']->build_url('prod', $download['product_id']);
                     $vars['downloads'][] = $download;
                 }
             } else {
                 $vars['downloads'] = false;
             }
             $GLOBALS['smarty']->assign('DOWNLOADS', $vars['downloads']);
-            $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
-            $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['your_downloads'], currentPage());
+            $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
+            $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['your_downloads'], current_page());
             $content = $GLOBALS['smarty']->fetch('templates/content.downloads.php');
             $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
         } else {
             httpredir('?_a=login');
         }
     }
-
     /**
      * Gateway
      */
     private function _gateway(): void
     {
-        if (!isset($_REQUEST['gateway']) || (isset($_GET['cart_order_id']) && $_GET['retrieve'])) {
-            Order::getInstance()->placeOrder();
+        if (!isset($_REQUEST['gateway']) || isset($_GET['cart_order_id']) && $_GET['retrieve']) {
+            Order::get_instance()->place_order();
         }
-
         foreach ($GLOBALS['hooks']->load('class.cubecart.construct.gateway') as $hook) {
             include $hook;
         }
-
         if (isset($_REQUEST['gateway']) && !empty($_REQUEST['gateway'])) {
             $gateway = $_REQUEST['gateway'];
         } elseif (!empty($GLOBALS['cart']->basket['gateway'])) {
@@ -2373,23 +2049,20 @@ class Cubecart
         } else {
             $gateway = false;
         }
-
-        $this->_displayGateways($gateway);
-        $this->_checkoutProcess('gateway');
-
+        $this->_display_gateways($gateway);
+        $this->_checkout_process('gateway');
         $content = $GLOBALS['smarty']->fetch('templates/content.gateway.php');
         $GLOBALS['smarty']->assign('SECTION_NAME', 'gateway');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Get affiliates
      *
      * @param int
      */
-    private function _getAffiliates(int $mode = self::AFFILIATE_COMPLETE): array|false
+    private function _get_affiliates(int $mode = self::AFFILIATE_COMPLETE): array|false
     {
-        $this->_basket = & $GLOBALS['cart']->basket;
+        $this->_basket =& $GLOBALS['cart']->basket;
         if (!empty($mode)) {
             if (($affiliates = $GLOBALS['db']->select('CubeCart_modules', ['folder'], ['module' => 'affiliate', 'status' => '1'])) !== false) {
                 foreach ($affiliates as $affiliate) {
@@ -2399,18 +2072,17 @@ class Cubecart
                         $module['display'] = self::AFFILIATE_GATEWAY;
                     }
                     if ($module['display'] == $mode) {
-                        $file_path = CC_ROOT_DIR.'/modules/affiliate/'.$affiliate['folder'].'/tracker.inc.php';
+                        $file_path = CC_ROOT_DIR . '/modules/affiliate/' . $affiliate['folder'] . '/tracker.inc.php';
                         if (file_exists($file_path)) {
                             include $file_path;
-                            $affiliate_html[] = $affCode;
+                            $affiliate_html[] = $aff_code;
                         }
                     }
                 }
             }
         }
-        return (isset($affiliate_html) && is_array($affiliate_html)) ? $affiliate_html : false;
+        return isset($affiliate_html) && is_array($affiliate_html) ? $affiliate_html : false;
     }
-
     /**
      * Get live help
      *
@@ -2419,54 +2091,52 @@ class Cubecart
      *
      * @return string/bool
      */
-    private function _getLiveHelp($section, $method = 'invocationHTML')
+    private function _get_live_help($section, $method = 'invocationHTML')
     {
         if (($livehelp_plugins = $GLOBALS['db']->select('CubeCart_modules', ['folder'], ['module' => 'livehelp', 'status' => '1'])) !== false) {
             foreach ($livehelp_plugins as $plugin) {
-                $file_path = CC_ROOT_DIR.'/modules/social/'.$plugin['folder'].'/livehelp.class.php';
+                $file_path = CC_ROOT_DIR . '/modules/social/' . $plugin['folder'] . '/livehelp.class.php';
                 if (file_exists($file_path)) {
                     if (!class_exists($plugin['folder'])) {
                         include $file_path;
                     }
                     $social_plugin = new $plugin['folder']($GLOBALS['config']->get($plugin['folder']), $section);
                     if (method_exists($social_plugin, $method)) {
-                        $social_html[] = $social_plugin->$method();
+                        $social_html[] = $social_plugin->{$method}();
                     }
                 }
             }
         }
-        return (isset($social_html) && is_array($social_html) && !empty($social_html[0])) ? $social_html : false;
+        return isset($social_html) && is_array($social_html) && !empty($social_html[0]) ? $social_html : false;
     }
-
     /**
      * Get social
      *
      *
      * @return string/bool
      */
-    private function _getSocial(string $section, string $method = 'getButtonHTML')
+    private function _get_social(string $section, string $method = 'getButtonHTML')
     {
         if (($social_plugins = $GLOBALS['db']->select('CubeCart_modules', ['folder'], ['module' => 'social', 'status' => '1'])) !== false) {
             foreach ($social_plugins as $plugin) {
-                $file_path = CC_ROOT_DIR.'/modules/social/'.$plugin['folder'].'/social.class.php';
+                $file_path = CC_ROOT_DIR . '/modules/social/' . $plugin['folder'] . '/social.class.php';
                 if (file_exists($file_path)) {
                     if (!class_exists($plugin['folder'])) {
                         include $file_path;
                     }
                     $social_plugin = new $plugin['folder']($GLOBALS['config']->get($plugin['folder']), $section);
                     if (method_exists($social_plugin, $method)) {
-                        $social_html[] = $social_plugin->$method();
+                        $social_html[] = $social_plugin->{$method}();
                     }
                 }
             }
         }
-        return (isset($social_html) && is_array($social_html) && !empty($social_html[0])) ? $social_html : false;
+        return isset($social_html) && is_array($social_html) && !empty($social_html[0]) ? $social_html : false;
     }
-
     /**
      * List payment gateways
      */
-    private function _listPaymentOptions($selected_gateway = ''): void
+    private function _list_payment_options($selected_gateway = ''): void
     {
         $gateways = $GLOBALS['db']->select('CubeCart_modules', false, ['module' => 'gateway', 'status' => '1'], ['position' => 'ASC']);
         if (!$gateways) {
@@ -2476,21 +2146,18 @@ class Cubecart
         foreach ($GLOBALS['hooks']->load('class.cubecart.display_gateways') as $hook) {
             include $hook;
         }
-
         // List all available and enabled payment gateways
         if (is_array($gateways) && !empty($gateways)) {
             $gateway_list = [];
             foreach ($gateways as $gateway) {
-                $gateway_path  = CC_ROOT_DIR.'/modules/gateway/'.$gateway['folder'].'/gateway.class.php';
-                $plugin_path  = CC_ROOT_DIR.'/modules/plugins/'.($gateway['base_folder'] ?? '').'/gateway.class.php';
-
+                $gateway_path = CC_ROOT_DIR . '/modules/gateway/' . $gateway['folder'] . '/gateway.class.php';
+                $plugin_path = CC_ROOT_DIR . '/modules/plugins/' . ($gateway['base_folder'] ?? '') . '/gateway.class.php';
                 if (!file_exists($gateway_path) && !file_exists($plugin_path)) {
                     continue;
                 }
-                $module = (isset($gateway['plugin']) && $gateway['plugin']) ? $gateway : $GLOBALS['config']->get($gateway['folder']);
-
-                $countries = (!empty($module['countries'])) ? unserialize($module['countries']) : false;
-                $disabled_countries = (!empty($module['disabled_countries'])) ? unserialize($module['disabled_countries']) : false;
+                $module = isset($gateway['plugin']) && $gateway['plugin'] ? $gateway : $GLOBALS['config']->get($gateway['folder']);
+                $countries = !empty($module['countries']) ? unserialize($module['countries']) : false;
+                $disabled_countries = !empty($module['disabled_countries']) ? unserialize($module['disabled_countries']) : false;
                 // Check module isn't set for mobile / main only!
                 if (isset($module['scope']) && !empty($module['scope']) && ($module['scope'] == 'main' && $GLOBALS['gui']->mobile)) {
                     continue;
@@ -2504,7 +2171,6 @@ class Cubecart
                 if (is_array($disabled_countries) && in_array($GLOBALS['cart']->basket['delivery_address']['country_id'], $disabled_countries)) {
                     continue;
                 }
-
                 if (preg_match('#\.(gif|jpg|png|jpeg|webp)$#i', strtolower((string) $module['desc']))) {
                     $gateway['description'] = sprintf('<img src="%s" border="0" title="" alt="" />', $module['desc']);
                 } elseif (!empty($module['desc'])) {
@@ -2512,7 +2178,7 @@ class Cubecart
                 } else {
                     $gateway['description'] = $gateway['folder'];
                 }
-                $gateway['checked'] = ((isset($gateway['default']) && $gateway['default'] && $selected_gateway == '') || ($selected_gateway == $gateway['folder']) || count($gateways) == 1) ? 'checked="checked"' : '';
+                $gateway['checked'] = isset($gateway['default']) && $gateway['default'] && $selected_gateway == '' || $selected_gateway == $gateway['folder'] || count($gateways) == 1 ? 'checked="checked"' : '';
                 $gateway_list[] = $gateway;
             }
         } else {
@@ -2520,20 +2186,17 @@ class Cubecart
         }
         $GLOBALS['smarty']->assign('GATEWAYS', $gateway_list);
     }
-
     /**
      * Login
      */
     private function _login(): void
     {
         if (isset($_GET['pu'])) {
-            $GLOBALS['gui']->setNotify($GLOBALS['language']->account['password_updated']);
+            $GLOBALS['gui']->set_notify($GLOBALS['language']->account['password_updated']);
         }
-        $GLOBALS['session']->setBack();
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['login'], $GLOBALS['seo']->buildURL('login'));
-
+        $GLOBALS['session']->set_back();
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['login'], $GLOBALS['seo']->build_url('login'));
         $GLOBALS['seo']->set_meta_data(['description' => '', 'title' => $GLOBALS['language']->account['login']]);
-
         //If there is a cookie for the username then use it in the login
         if (isset($_COOKIE['cc_username']) && !empty($_COOKIE['cc_username'])) {
             $GLOBALS['smarty']->assign('USERNAME', $_COOKIE['cc_username']);
@@ -2541,7 +2204,6 @@ class Cubecart
         } else {
             $GLOBALS['smarty']->assign('REMEMBER', false);
         }
-
         // Login Routines
         $login_html = [];
         foreach ($GLOBALS['hooks']->load('class.cubecart.login') as $hook) {
@@ -2549,24 +2211,17 @@ class Cubecart
         }
         $GLOBALS['smarty']->assign('LOGIN_HTML', $login_html);
         if ($GLOBALS['session']->has('LAST_PAGE')) {
-            $redir = 'index.php?_a='.$GLOBALS['session']->get('LAST_PAGE');
+            $redir = 'index.php?_a=' . $GLOBALS['session']->get('LAST_PAGE');
         } elseif (!isset($redir) && is_array($GLOBALS['cart']->basket) && is_array($GLOBALS['cart']->basket['contents'])) {
             $redir = 'index.php?_a=basket';
         } elseif (!isset($redir)) {
             $redir = 'index.php?_a=account';
         }
         $GLOBALS['smarty']->assign('REDIRECT_TO', $redir);
-        $GLOBALS['smarty']->assign(
-            'URL',
-            [
-            'register' => $GLOBALS['seo']->buildURL('register'),
-            'recover' => $GLOBALS['seo']->buildURL('recover')]
-        );
-
+        $GLOBALS['smarty']->assign('URL', ['register' => $GLOBALS['seo']->build_url('register'), 'recover' => $GLOBALS['seo']->build_url('recover')]);
         $content = $GLOBALS['smarty']->fetch('templates/content.login.php');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Logout
      */
@@ -2575,98 +2230,83 @@ class Cubecart
         foreach ($GLOBALS['hooks']->load('class.cubecart.construct.logout') as $hook) {
             include $hook;
         }
-        $GLOBALS['gui']->setNotify($GLOBALS['language']->account['notify_logged_out']);
+        $GLOBALS['gui']->set_notify($GLOBALS['language']->account['notify_logged_out']);
         $GLOBALS['user']->logout();
     }
-
     /**
      * Handle cart recovery and abandonment opt-out links
      */
-    private function _recoverCart(): void
+    private function _recover_cart(): void
     {
         if (empty($_GET['token'])) {
             httpredir('index.php');
             return;
         }
-
         $token = preg_replace('/[^a-f0-9]/i', '', (string) $_GET['token']);
         $record = $GLOBALS['db']->select('CubeCart_cart_abandonment', false, ['token' => $token], false, 1, false, false);
-
         if (!$record || strtotime((string) $record[0]['expires_at']) < time()) {
-            $GLOBALS['gui']->setError($GLOBALS['language']->basket['abandon_link_invalid']);
+            $GLOBALS['gui']->set_error($GLOBALS['language']->basket['abandon_link_invalid']);
             httpredir('index.php');
             return;
         }
-
         $action = isset($_GET['action']) ? strtolower($_GET['action']) : 'recover';
-
         if ($action === 'optout') {
-            $GLOBALS['db']->update('CubeCart_customer', ['abandon_optout' => 1], ['customer_id' => (int)$record[0]['customer_id']]);
-            $GLOBALS['gui']->setNotify($GLOBALS['language']->basket['abandon_optout_confirmed']);
+            $GLOBALS['db']->update('CubeCart_customer', ['abandon_optout' => 1], ['customer_id' => (int) $record[0]['customer_id']]);
+            $GLOBALS['gui']->set_notify($GLOBALS['language']->basket['abandon_optout_confirmed']);
             httpredir('index.php');
             return;
         }
-
         // Mark as clicked
         if (empty($record[0]['clicked_at'])) {
-            $GLOBALS['db']->update('CubeCart_cart_abandonment', ['clicked_at' => date('Y-m-d H:i:s')], ['id' => (int)$record[0]['id']]);
+            $GLOBALS['db']->update('CubeCart_cart_abandonment', ['clicked_at' => date('Y-m-d H:i:s')], ['id' => (int) $record[0]['id']]);
         }
-
         // Auto-apply discount coupon if one was included in the abandonment email
         if (!empty($record[0]['coupon_code'])) {
             $GLOBALS['session']->set('abandon_coupon', $record[0]['coupon_code'], 'client');
         }
-
         // Redirect to checkout - if logged in, saved cart auto-loads; if not, login/guest form will show
         httpredir('index.php?_a=checkout');
     }
-
     /**
      * Newsletter
      */
     private function _newsletter(): void
     {
-        $newsletter = Newsletter::getInstance();
-
+        $newsletter = Newsletter::get_instance();
         if (isset($_GET['do']) && !empty($_GET['do'])) {
-            if ($newsletter->doubleOptIn($_GET['do'])) {
-                $GLOBALS['gui']->setNotify($GLOBALS['language']->newsletter['dbl_opt_in_success']);
+            if ($newsletter->double_opt_in($_GET['do'])) {
+                $GLOBALS['gui']->set_notify($GLOBALS['language']->newsletter['dbl_opt_in_success']);
             } else {
-                $GLOBALS['gui']->setError($GLOBALS['language']->newsletter['dbl_opt_in_fail']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->newsletter['dbl_opt_in_fail']);
             }
-            httpredir(currentPage(['newsletter_id', 'do', '_a']));
+            httpredir(current_page(['newsletter_id', 'do', '_a']));
         }
-
         // Newsletters
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->newsletter['newsletters'], '?_a=newsletter');
-
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->newsletter['newsletters'], '?_a=newsletter');
         // Display Newsletter archive
         if (isset($_GET['newsletter_id']) && is_numeric($_GET['newsletter_id'])) {
             // Show a newsletter from the archive
-            if (($content = $GLOBALS['db']->select('CubeCart_newsletter', false, ['newsletter_id' => (int)$_GET['newsletter_id'], 'status' => 1])) !== false) {
-                $GLOBALS['gui']->addBreadcrumb($content[0]['subject'], '?_a=newsletter&newsletter_id='.(int)$_GET['newsletter_id']);
+            if (($content = $GLOBALS['db']->select('CubeCart_newsletter', false, ['newsletter_id' => (int) $_GET['newsletter_id'], 'status' => 1])) !== false) {
+                $GLOBALS['gui']->add_breadcrumb($content[0]['subject'], '?_a=newsletter&newsletter_id=' . (int) $_GET['newsletter_id']);
                 $GLOBALS['smarty']->assign('NEWSLETTER', $content[0]);
                 $GLOBALS['smarty']->assign('CTRL_VIEW', true);
             } else {
-                httpredir(currentPage(['newsletter_id']));
+                httpredir(current_page(['newsletter_id']));
             }
         } else {
             if (isset($_POST['subscribe'])) {
-                if ($newsletter->subscribe($_POST['subscribe'], $GLOBALS['user']->getId())) {
+                if ($newsletter->subscribe($_POST['subscribe'], $GLOBALS['user']->get_id())) {
                     httpredir('?_a=unsubscribe');
                 } elseif ($GLOBALS['user']->is()) {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->common['error_email_invalid']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->common['error_email_invalid']);
+                } else if ($newsletter->unsubscribe($_POST['subscribe'])) {
+                    httpredir('?_a=newsletter');
                 } else {
-                    if ($newsletter->unsubscribe($_POST['subscribe'])) {
-                        httpredir('?_a=newsletter');
-                    } else {
-                        $GLOBALS['gui']->setError($GLOBALS['language']->common['error_email_invalid']);
-                    }
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->common['error_email_invalid']);
                 }
-                httpredir(currentPage());
+                httpredir(current_page());
             }
-
             if (isset($_REQUEST['unsubscribe']) && filter_var($_REQUEST['unsubscribe'], FILTER_VALIDATE_EMAIL)) {
                 if ($newsletter->unsubscribe($_REQUEST['unsubscribe'])) {
                     httpredir('?_a=newsletter');
@@ -2674,16 +2314,15 @@ class Cubecart
             }
             if (isset($_GET['verify'])) {
                 if ($newsletter->verify($_GET['verify'])) {
-                    $GLOBALS['gui']->setNotify($GLOBALS['language']->newsletter['notify_email_verified']);
+                    $GLOBALS['gui']->set_notify($GLOBALS['language']->newsletter['notify_email_verified']);
                 } else {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->common['error_email_verified']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->common['error_email_verified']);
                 }
-                httpredir(currentPage(['verify']));
+                httpredir(current_page(['verify']));
             }
-
             if ($GLOBALS['user']->is()) {
                 if (isset($_GET['action'])) {
-                    $newsletter = Newsletter::getInstance();
+                    $newsletter = Newsletter::get_instance();
                     switch (strtolower((string) $_GET['action'])) {
                         case 'subscribe':
                             $newsletter->subscribe($GLOBALS['user']->get('email'), $GLOBALS['user']->get('customer_id'));
@@ -2698,38 +2337,31 @@ class Cubecart
                             }
                             break;
                     }
-
-                    httpredir(currentPage(['action']));
+                    httpredir(current_page(['action']));
                 }
-                $GLOBALS['smarty']->assign(
-                    'URL',
-                    [
-                        'subscribe' => $GLOBALS['storeURL'].'/index.php?_a=newsletter&action=subscribe',
-                        'unsubscribe' => $GLOBALS['storeURL'].'/index.php?_a=newsletter&action=unsubscribe']
-                );
+                $GLOBALS['smarty']->assign('URL', ['subscribe' => $GLOBALS['storeURL'] . '/index.php?_a=newsletter&action=subscribe', 'unsubscribe' => $GLOBALS['storeURL'] . '/index.php?_a=newsletter&action=unsubscribe']);
                 $where = ['email' => $GLOBALS['user']->get('email')];
-                if ((bool)$GLOBALS['config']->get('config', 'dbl_opt')) {
+                if ((bool) $GLOBALS['config']->get('config', 'dbl_opt')) {
                     $where['dbl_opt'] = '1';
                 }
-                $GLOBALS['smarty']->assign('SUBSCRIBED', (bool)$GLOBALS['db']->select('CubeCart_newsletter_subscriber', false, $where, false, 1, false, false));
+                $GLOBALS['smarty']->assign('SUBSCRIBED', (bool) $GLOBALS['db']->select('CubeCart_newsletter_subscriber', false, $where, false, 1, false, false));
             }
             // Show list of publicly visible newsletters
             if (($archive = $GLOBALS['db']->select('CubeCart_newsletter', false, ['status' => 1])) !== false) {
                 foreach ($archive as $content) {
-                    $content['view'] = currentPage(['subscribed','action'], ['newsletter_id' => $content['newsletter_id']]);
-                    $content['date_sent'] = formatTime(strtotime((string) $content['date_sent']));
+                    $content['view'] = current_page(['subscribed', 'action'], ['newsletter_id' => $content['newsletter_id']]);
+                    $content['date_sent'] = format_time(strtotime((string) $content['date_sent']));
                     $vars['newsletters'][] = $content;
                 }
                 $GLOBALS['smarty']->assign('NEWSLETTERS', $vars['newsletters']);
             }
         }
-
         if ($_GET['_a'] == 'unsubscribe') {
-            $form_id 	= 'newsletter_form_unsubscribe';
-            $mode 		= 'unsubscribe';
+            $form_id = 'newsletter_form_unsubscribe';
+            $mode = 'unsubscribe';
         } else {
-            $form_id 	= 'newsletter_form';
-            $mode 		= 'subscribe';
+            $form_id = 'newsletter_form';
+            $mode = 'subscribe';
         }
         $GLOBALS['smarty']->assign('FORM_ID', $form_id);
         $GLOBALS['smarty']->assign('SUBSCRIBE_MODE', $mode);
@@ -2738,7 +2370,6 @@ class Cubecart
         $content = $GLOBALS['smarty']->fetch('templates/content.newsletter.php');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Orders
      */
@@ -2747,19 +2378,19 @@ class Cubecart
         // Order history
         $template = 'templates/content.orders.php';
         if ($GLOBALS['user']->is()) {
-            $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
-            $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['your_orders'], currentPage(['cart_order_id'], null, false));
-            if (isset($_GET['cart_order_id']) && Order::validOrderId(trim((string) $_GET['cart_order_id']), true)) {
+            $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
+            $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['your_orders'], current_page(['cart_order_id'], null, false));
+            if (isset($_GET['cart_order_id']) && Order::valid_order_id(trim((string) $_GET['cart_order_id']), true)) {
                 if (($orders = $GLOBALS['db']->select('CubeCart_order_summary', false, ['customer_id' => $GLOBALS['user']->get('customer_id'), 'cart_order_id' => $_GET['cart_order_id']], false, 1, false, false)) !== false) {
                     $template = 'templates/content.receipt.php';
                     $order = $orders[0];
-                    $GLOBALS['gui']->addBreadcrumb(($GLOBALS['config']->get('config', 'oid_mode') == 'i' && !empty($order[$GLOBALS['config']->get('config', 'oid_col')])) ? $order[$GLOBALS['config']->get('config', 'oid_col')] : $order['cart_order_id'], currentPage());
+                    $GLOBALS['gui']->add_breadcrumb($GLOBALS['config']->get('config', 'oid_mode') == 'i' && !empty($order[$GLOBALS['config']->get('config', 'oid_col')]) ? $order[$GLOBALS['config']->get('config', 'oid_col')] : $order['cart_order_id'], current_page());
                     if (($items = $GLOBALS['db']->select('CubeCart_order_inventory', false, ['cart_order_id' => $order['cart_order_id']])) !== false) {
                         foreach ($items as $item) {
                             // Do price formatting
-                            $item['price_total'] = $GLOBALS['tax']->priceFormat(($item['price'] * $item['quantity']), true);
-                            $item['price'] = $GLOBALS['tax']->priceFormat($item['price']);
-                            $options = Order::getInstance()->unSerializeOptions($item['product_options']);
+                            $item['price_total'] = $GLOBALS['tax']->price_format($item['price'] * $item['quantity'], true);
+                            $item['price'] = $GLOBALS['tax']->price_format($item['price']);
+                            $options = Order::get_instance()->un_serialize_options($item['product_options']);
                             $item['options'] = implode(' ', $options);
                             $vars['items'][] = $item;
                         }
@@ -2767,32 +2398,29 @@ class Cubecart
                     }
                     // Taxes
                     if (($taxes = $GLOBALS['db']->select('CubeCart_order_tax', false, ['cart_order_id' => $order['cart_order_id']])) !== false) {
-                        $GLOBALS['tax']->loadTaxes(($GLOBALS['config']->get('config', 'basket_tax_by_delivery')) ? $order['country'] : $order['country_d']);
+                        $GLOBALS['tax']->load_taxes($GLOBALS['config']->get('config', 'basket_tax_by_delivery') ? $order['country'] : $order['country_d']);
                         foreach ($taxes as $vat) {
-                            $detail = $GLOBALS['tax']->fetchTaxDetails($vat['tax_id']);
-                            $vars['taxes'][] = ['name' => $detail['name'], 'value' => $GLOBALS['tax']->priceFormat($vat['amount'], true)];
+                            $detail = $GLOBALS['tax']->fetch_tax_details($vat['tax_id']);
+                            $vars['taxes'][] = ['name' => $detail['name'], 'value' => $GLOBALS['tax']->price_format($vat['amount'], true)];
                         }
                     } else {
-                        $vars['taxes'][] = ['name' => $GLOBALS['language']->basket['total_tax'], 'value' => $GLOBALS['tax']->priceFormat($order['total_tax'])];
+                        $vars['taxes'][] = ['name' => $GLOBALS['language']->basket['total_tax'], 'value' => $GLOBALS['tax']->price_format($order['total_tax'])];
                     }
                     $GLOBALS['smarty']->assign('TAXES', $vars['taxes']);
-                    $order['state']  = getStateFormat($order['state']);
-                    $order['country'] = getCountryFormat($order['country']);
-                    $order['state_d'] = is_numeric($order['state_d']) ? getStateFormat($order['state_d']) : $order['state_d'];
-                    $order['country_d'] = getCountryFormat($order['country_d']);
-
+                    $order['state'] = get_state_format($order['state']);
+                    $order['country'] = get_country_format($order['country']);
+                    $order['state_d'] = is_numeric($order['state_d']) ? get_state_format($order['state_d']) : $order['state_d'];
+                    $order['country_d'] = get_country_format($order['country_d']);
                     if ($order['discount'] > 0) {
                         $GLOBALS['smarty']->assign('DISCOUNT', true);
                     }
-
                     // Loop through price values, and do the formatting
-                    $order['show_credit'] = ($order['credit_used'] > 0) ? true : false;
+                    $order['show_credit'] = $order['credit_used'] > 0 ? true : false;
                     foreach (['discount', 'shipping', 'subtotal', 'total', 'total_tax', 'credit_used'] as $key) {
-                        $order[$key] = $GLOBALS['tax']->priceFormat($order[$key], true);
+                        $order[$key] = $GLOBALS['tax']->price_format($order[$key], true);
                     }
-                    $order['order_status'] = $GLOBALS['language']->order_state['name_'.$order['status']];
-                    $order['order_date_formatted'] = formatTime($order['order_date'], false, true);
-
+                    $order['order_status'] = $GLOBALS['language']->order_state['name_' . $order['status']];
+                    $order['order_date_formatted'] = format_time($order['order_date'], false, true);
                     foreach ($GLOBALS['hooks']->load('class.cubecart.order_summary') as $hook) {
                         include $hook;
                     }
@@ -2800,63 +2428,44 @@ class Cubecart
                     $GLOBALS['smarty']->assign('SUM', $order);
                     $GLOBALS['smarty']->assign('ORDER', $order);
                     $GLOBALS['session']->delete('ghost_customer_id');
-
                     if (isset($order['ship_method']) && !empty($order['ship_method'])) {
                         $method = str_replace(' ', '_', $order['ship_method']);
-                        $ship_class = CC_ROOT_DIR.'/modules/shipping/'.$method.'/'.'shipping.class.php';
+                        $ship_class = CC_ROOT_DIR . '/modules/shipping/' . $method . '/' . 'shipping.class.php';
                         $ship_class_exists = file_exists($ship_class);
                     } else {
                         $ship_class_exists = false;
                     }
-
                     if ($ship_class_exists) {
                         include $ship_class;
                         if (class_exists($method) && method_exists($method, 'tracking')) {
                             $shipping = new $method(false);
                             $url = $shipping->tracking($order['ship_tracking']);
-
-                            $url = (empty($url) && filter_var($order['ship_tracking'], FILTER_VALIDATE_URL)) ? $order['ship_tracking'] : $url;
-
-                            $delivery = [
-                                'url'  => $url,
-                                'method' => $order['ship_method'],
-                                'product' => $order['ship_product'],
-                                'tracking' => $order['ship_tracking'],
-                                'date'  => (!empty($order['ship_date']) && $order['ship_date'] !== '0000-00-00') ? formatDispatchDate($order['ship_date']) : '',
-                            ];
+                            $url = empty($url) && filter_var($order['ship_tracking'], FILTER_VALIDATE_URL) ? $order['ship_tracking'] : $url;
+                            $delivery = ['url' => $url, 'method' => $order['ship_method'], 'product' => $order['ship_product'], 'tracking' => $order['ship_tracking'], 'date' => !empty($order['ship_date']) && $order['ship_date'] !== '0000-00-00' ? format_dispatch_date($order['ship_date']) : ''];
                         }
                         unset($ship_class);
                     } else {
-                        $delivery = [
-                            'url' => filter_var($order['ship_tracking'], FILTER_VALIDATE_URL) ? $order['ship_tracking'] : '',
-                            'method' => $order['ship_method'],
-                            'product' => $order['ship_product'],
-                            'tracking' => $order['ship_tracking'],
-                            'date'  => (!empty($order['ship_date']) && $order['ship_date'] !== '0000-00-00') ? formatDispatchDate($order['ship_date']) : '',
-                        ];
+                        $delivery = ['url' => filter_var($order['ship_tracking'], FILTER_VALIDATE_URL) ? $order['ship_tracking'] : '', 'method' => $order['ship_method'], 'product' => $order['ship_product'], 'tracking' => $order['ship_tracking'], 'date' => !empty($order['ship_date']) && $order['ship_date'] !== '0000-00-00' ? format_dispatch_date($order['ship_date']) : ''];
                     }
-                    if (!$delivery['url']) { // We may have multiple to parse
-                        $delivery['tracking'] = parseUrlToLink($delivery['tracking']);
+                    if (!$delivery['url']) {
+                        // We may have multiple to parse
+                        $delivery['tracking'] = parse_url_to_link($delivery['tracking']);
                     }
                     $GLOBALS['smarty']->assign('DELIVERY', $delivery);
                 } else {
-                    httpredir(currentPage(['cart_order_id']));
+                    httpredir(current_page(['cart_order_id']));
                 }
             } else {
-                if (isset($_GET['cancel']) && Order::validOrderId(trim((string) $_GET['cancel']))) {
-                    $order = Order::getInstance();
-                    if ($order->orderStatus(Order::ORDER_CANCELLED, $_GET['cancel'])) {
+                if (isset($_GET['cancel']) && Order::valid_order_id(trim((string) $_GET['cancel']))) {
+                    $order = Order::get_instance();
+                    if ($order->order_status(Order::ORDER_CANCELLED, $_GET['cancel'])) {
                         // Specify order was cancelled by customer
-                        $note	= [
-                            'admin_id'		=> 0,
-                            'cart_order_id'	=> $_GET['cancel'],
-                            'content'		=> $GLOBALS['language']->orders['cancel_by_customer'],
-                        ];
+                        $note = ['admin_id' => 0, 'cart_order_id' => $_GET['cancel'], 'content' => $GLOBALS['language']->orders['cancel_by_customer']];
                         $GLOBALS['db']->insert('CubeCart_order_notes', $note);
-                        $GLOBALS['gui']->setError($GLOBALS['language']->orders['notify_order_cancelled']);
+                        $GLOBALS['gui']->set_error($GLOBALS['language']->orders['notify_order_cancelled']);
                     }
-                    httpredir(currentPage(['cancel']));
-                } elseif (isset($_GET['reorder']) && Order::validOrderId(trim((string) $_GET['reorder']))) {
+                    httpredir(current_page(['cancel']));
+                } elseif (isset($_GET['reorder']) && Order::valid_order_id(trim((string) $_GET['reorder']))) {
                     $basket = $GLOBALS['db']->select('CubeCart_order_summary', ['basket'], ['cart_order_id' => $_GET['reorder'], 'customer_id' => $GLOBALS['user']->get('customer_id')]);
                     $past_data = unserialize($basket[0]['basket'], ['allowed_classes' => false]);
                     $GLOBALS['cart']->basket['contents'] = $past_data['contents'];
@@ -2865,184 +2474,173 @@ class Cubecart
                 }
                 $per_page = 15;
                 $page = $_GET['page'] ?? 1;
-
                 if (($paginated_orders = $GLOBALS['db']->select('CubeCart_order_summary', ['custom_oid', 'id', 'cart_order_id', 'ship_tracking', 'order_date', 'status', 'total', 'basket'], ['customer_id' => $GLOBALS['user']->get('customer_id')], ['cart_order_id' => 'DESC'], $per_page, $page, false)) !== false) {
-                    $order_count = $GLOBALS['db']->getFoundRows();
+                    $order_count = $GLOBALS['db']->get_found_rows();
                     foreach ($paginated_orders as $i => $order) {
-                        $order['time'] = formatTime($order['order_date']);
+                        $order['time'] = format_time($order['order_date']);
                         $status = $order['status'];
-
-                        switch ((int)$order['status']) {
-                            case 1:  # Pending
+                        switch ((int) $order['status']) {
+                            case 1:
+                                # Pending
                                 $icon = 'basket.png';
                                 break;
-                            case 2:  # Processing
+                            case 2:
+                                # Processing
                                 $icon = 'clock.png';
                                 break;
-                            case 3:  # Complete & dispatched
+                            case 3:
+                                # Complete & dispatched
                                 $icon = 'lorry.png';
                                 break;
-                            case 4:  # Declined
-                            case 5:  # Fraud
+                            case 4:
+                            # Declined
+                            case 5:
+                                # Fraud
                                 $icon = 'error.png';
                                 break;
-                            case 6:  # Cancelled
+                            case 6:
+                                # Cancelled
                                 $icon = 'bin.png';
                                 break;
                         }
-
-                        $order['total'] = $GLOBALS['tax']->priceFormat($order['total'], true);
+                        $order['total'] = $GLOBALS['tax']->price_format($order['total'], true);
                         $existing_transactions = $GLOBALS['db']->select('CubeCart_transactions', ['id'], ['order_id' => $order['cart_order_id']]);
-                        $order['make_payment'] = ($order['status'] == 1 && !empty($order['basket']) && !$existing_transactions) ? true : false;
-                        $order['cancel'] = ($order['status'] == 1 && !$existing_transactions) ? true : false;
-                        $order['status'] = ['icon' => $icon, 'text' => $GLOBALS['language']->order_state['name_'.(int)$order['status']]];
+                        $order['make_payment'] = $order['status'] == 1 && !empty($order['basket']) && !$existing_transactions ? true : false;
+                        $order['cancel'] = $order['status'] == 1 && !$existing_transactions ? true : false;
+                        $order['status'] = ['icon' => $icon, 'text' => $GLOBALS['language']->order_state['name_' . (int) $order['status']]];
                         $vars['orders'][] = $order;
                     }
                     foreach ($GLOBALS['hooks']->load('class.cubecart.order_list') as $hook) {
                         include $hook;
                     }
                     $GLOBALS['smarty']->assign('ORDERS', $vars['orders']);
-
                     $GLOBALS['smarty']->assign('PAGINATION', $GLOBALS['db']->pagination($order_count, $per_page, $page));
                 }
             }
-        } else {
-
-            // Order lookup for unregistered users
-            if (isset($_REQUEST['cart_order_id']) && isset($_REQUEST['email']) && filter_var($_REQUEST['email'], FILTER_VALIDATE_EMAIL) && Order::validOrderId(trim((string) $_REQUEST['cart_order_id']))) {
-                $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->orders['my_order'], currentPage());
-                $oid_field = $GLOBALS['config']->get('config', 'oid_col');
-                if (($orders = $GLOBALS['db']->select('CubeCart_order_summary', false, ['email' => $_REQUEST['email'], $oid_field => $_REQUEST['cart_order_id']])) !== false) {
-                    $template = 'templates/content.receipt.php';
-                    $order = $orders[0];
-                    $GLOBALS['user']->setGhostId($order['customer_id']);
-
-                    if (($items = $GLOBALS['db']->select('CubeCart_order_inventory', false, ['cart_order_id' => $order['cart_order_id']])) !== false) {
-                        foreach ($items as $item) {
-                            // Do price formatting
-                            $item['price_total'] = $GLOBALS['tax']->priceFormat(($item['price'] * $item['quantity']), true);
-                            $item['price'] = $GLOBALS['tax']->priceFormat($item['price']);
-                            $item['options'] = Order::getInstance()->unSerializeOptions($item['product_options']);
-                            $vars['items'][] = $item;
-                        }
-                        $GLOBALS['smarty']->assign('ITEMS', $vars['items']);
+        } else if (isset($_REQUEST['cart_order_id']) && isset($_REQUEST['email']) && filter_var($_REQUEST['email'], FILTER_VALIDATE_EMAIL) && Order::valid_order_id(trim((string) $_REQUEST['cart_order_id']))) {
+            $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->orders['my_order'], current_page());
+            $oid_field = $GLOBALS['config']->get('config', 'oid_col');
+            if (($orders = $GLOBALS['db']->select('CubeCart_order_summary', false, ['email' => $_REQUEST['email'], $oid_field => $_REQUEST['cart_order_id']])) !== false) {
+                $template = 'templates/content.receipt.php';
+                $order = $orders[0];
+                $GLOBALS['user']->set_ghost_id($order['customer_id']);
+                if (($items = $GLOBALS['db']->select('CubeCart_order_inventory', false, ['cart_order_id' => $order['cart_order_id']])) !== false) {
+                    foreach ($items as $item) {
+                        // Do price formatting
+                        $item['price_total'] = $GLOBALS['tax']->price_format($item['price'] * $item['quantity'], true);
+                        $item['price'] = $GLOBALS['tax']->price_format($item['price']);
+                        $item['options'] = Order::get_instance()->un_serialize_options($item['product_options']);
+                        $vars['items'][] = $item;
                     }
-                    if (($taxes = $GLOBALS['db']->select('CubeCart_order_tax', false, ['cart_order_id' => $order['cart_order_id']])) !== false) {
-                        $GLOBALS['tax']->loadTaxes(($GLOBALS['config']->get('config', 'basket_tax_by_delivery')) ? $order['country'] : $order['country_d']);
-                        foreach ($taxes as $vat) {
-                            $detail = $GLOBALS['tax']->fetchTaxDetails($vat['tax_id']);
-                            $vars['taxes'][] = ['name' => $detail['name'], 'value' => $GLOBALS['tax']->priceFormat($vat['amount'], true)];
-                        }
-                    } else {
-                        $vars['taxes'][] = ['name' => $GLOBALS['language']->basket['total_tax'], 'value' => $GLOBALS['tax']->priceFormat($order['total_tax'])];
+                    $GLOBALS['smarty']->assign('ITEMS', $vars['items']);
+                }
+                if (($taxes = $GLOBALS['db']->select('CubeCart_order_tax', false, ['cart_order_id' => $order['cart_order_id']])) !== false) {
+                    $GLOBALS['tax']->load_taxes($GLOBALS['config']->get('config', 'basket_tax_by_delivery') ? $order['country'] : $order['country_d']);
+                    foreach ($taxes as $vat) {
+                        $detail = $GLOBALS['tax']->fetch_tax_details($vat['tax_id']);
+                        $vars['taxes'][] = ['name' => $detail['name'], 'value' => $GLOBALS['tax']->price_format($vat['amount'], true)];
                     }
-                    $GLOBALS['smarty']->assign('TAXES', $vars['taxes']);
-                    $order['country'] = getCountryFormat($order['country']);
-                    $order['country_d'] = getCountryFormat($order['country_d']);
-                    $order['state'] = is_numeric($order['state']) ? getStateFormat($order['state']) : $order['state'];
-                    $order['state_d'] = is_numeric($order['state_d']) ? getStateFormat($order['state_d']) : $order['state_d'];
-                    // Loop through price values, and do the formatting
-                    foreach (['discount', 'shipping', 'subtotal', 'total', 'total_tax'] as $key) {
-                        $order[$key] = $GLOBALS['tax']->priceFormat($order[$key], true);
-                    }
-                    $order['order_status'] = $GLOBALS['language']->order_state['name_'.$order['status']];
-                    $order['order_date_formatted'] = formatTime($order['order_date'], false, true);
-
-                    foreach ($GLOBALS['hooks']->load('class.cubecart.order_summary') as $hook) {
-                        include $hook;
-                    }
-                    $order['basket'] = unserialize($order['basket'], ['allowed_classes' => false]);
-                    $GLOBALS['smarty']->assign('SUM', $order);
-                    $GLOBALS['smarty']->assign('ORDER', $order);
                 } else {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->orders['error_search_result']);
+                    $vars['taxes'][] = ['name' => $GLOBALS['language']->basket['total_tax'], 'value' => $GLOBALS['tax']->price_format($order['total_tax'])];
                 }
+                $GLOBALS['smarty']->assign('TAXES', $vars['taxes']);
+                $order['country'] = get_country_format($order['country']);
+                $order['country_d'] = get_country_format($order['country_d']);
+                $order['state'] = is_numeric($order['state']) ? get_state_format($order['state']) : $order['state'];
+                $order['state_d'] = is_numeric($order['state_d']) ? get_state_format($order['state_d']) : $order['state_d'];
+                // Loop through price values, and do the formatting
+                foreach (['discount', 'shipping', 'subtotal', 'total', 'total_tax'] as $key) {
+                    $order[$key] = $GLOBALS['tax']->price_format($order[$key], true);
+                }
+                $order['order_status'] = $GLOBALS['language']->order_state['name_' . $order['status']];
+                $order['order_date_formatted'] = format_time($order['order_date'], false, true);
+                foreach ($GLOBALS['hooks']->load('class.cubecart.order_summary') as $hook) {
+                    include $hook;
+                }
+                $order['basket'] = unserialize($order['basket'], ['allowed_classes' => false]);
+                $GLOBALS['smarty']->assign('SUM', $order);
+                $GLOBALS['smarty']->assign('ORDER', $order);
             } else {
-                if (isset($_REQUEST['cart_order_id']) && isset($_REQUEST['email'])) {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->orders['error_search_result']);
-                }
-
-                // Display a search page
-                $cart_order_id = Order::validOrderId(trim($_GET['cart_order_id'] ?? '')) ? trim($_GET['cart_order_id'] ?? '') : '';
-                $GLOBALS['smarty']->assign('ORDER_NUMBER', $cart_order_id);
-                $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->orders['search'], currentPage());
+                $GLOBALS['gui']->set_error($GLOBALS['language']->orders['error_search_result']);
             }
+        } else {
+            if (isset($_REQUEST['cart_order_id']) && isset($_REQUEST['email'])) {
+                $GLOBALS['gui']->set_error($GLOBALS['language']->orders['error_search_result']);
+            }
+            // Display a search page
+            $cart_order_id = Order::valid_order_id(trim($_GET['cart_order_id'] ?? '')) ? trim($_GET['cart_order_id'] ?? '') : '';
+            $GLOBALS['smarty']->assign('ORDER_NUMBER', $cart_order_id);
+            $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->orders['search'], current_page());
         }
-
         $content = $GLOBALS['smarty']->fetch($template);
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Products
      */
     private function _product(): void
     {
-        if (($product = $GLOBALS['catalogue']->getProductData($_GET['product_id'])) === false) {
+        if (($product = $GLOBALS['catalogue']->get_product_data($_GET['product_id'])) === false) {
             return;
         }
         if ($GLOBALS['config']->get('config', 'enable_reviews') && isset($_POST['review']) && is_array($_POST['review'])) {
             $error = false;
-
             foreach ($GLOBALS['hooks']->load('class.cubecart.review') as $hook) {
                 include $hook;
             }
-            $record = array_map(htmlToPlainText(...), $_POST['review']);
-            $record['anon'] = (isset($record['anon'])) ? 1 : 0;
+            $record = array_map(html_to_plain_text(...), $_POST['review']);
+            $record['anon'] = isset($record['anon']) ? 1 : 0;
             if ($GLOBALS['user']->is()) {
-                $record['name']   = $GLOBALS['user']->get('first_name').' '.$GLOBALS['user']->get('last_name');
-                $record['email']  = $GLOBALS['user']->get('email');
+                $record['name'] = $GLOBALS['user']->get('first_name') . ' ' . $GLOBALS['user']->get('last_name');
+                $record['email'] = $GLOBALS['user']->get('email');
                 $record['customer_id'] = $GLOBALS['user']->get('customer_id');
             } else {
                 $record['customer_id'] = 0;
-                $record['email']  = $_POST['review']['email'];
-                if (!$GLOBALS['session']->isEmpty('error', 'recaptcha')) {
-                    $GLOBALS['gui']->setError($GLOBALS['session']->get('error', 'recaptcha'));
+                $record['email'] = $_POST['review']['email'];
+                if (!$GLOBALS['session']->is_empty('error', 'recaptcha')) {
+                    $GLOBALS['gui']->set_error($GLOBALS['session']->get('error', 'recaptcha'));
                     $error = true;
                 }
             }
             $record['review'] = !empty($record['review']) ? nl2br((string) $record['review']) : $record['review'];
-            $record['rating']   = $_POST['rating'] ?? 0;
-            $record['product_id']  = (int)$_GET['product_id'];
-            $record['ip_address']  = get_ip_address();
-            $record['time']    = time();
-
+            $record['rating'] = $_POST['rating'] ?? 0;
+            $record['product_id'] = (int) $_GET['product_id'];
+            $record['ip_address'] = get_ip_address();
+            $record['time'] = time();
             // Validate array
             $required = ['email', 'name', 'review', 'title'];
             foreach ($required as $req) {
                 if (!isset($record[$req]) || empty($record[$req])) {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->common['error_fields_required']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->common['error_fields_required']);
                     $error = true;
                     break;
                 }
             }
             if ($record['rating'] == 0) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_rating_required']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_rating_required']);
                 $error = true;
             }
             if (!filter_var($record['email'], FILTER_VALIDATE_EMAIL)) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->common['error_email_invalid']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->common['error_email_invalid']);
                 $error = true;
             }
-
             if (!$error) {
                 if (($review_id = $GLOBALS['db']->insert('CubeCart_reviews', $record)) !== false) {
                     foreach ($GLOBALS['hooks']->load('class.cubecart.review.insert') as $hook) {
                         include $hook;
                     }
-
-                    $GLOBALS['gui']->setNotify($GLOBALS['language']->catalogue['notify_review_submit']);
-                    $mail     = new Mailer();
-                    $record['link']   = $GLOBALS['storeURL'].'/'.$GLOBALS['config']->get('config', 'adminFile').'?_g=products&node=reviews&edit='.$review_id;
+                    $GLOBALS['gui']->set_notify($GLOBALS['language']->catalogue['notify_review_submit']);
+                    $mail = new Mailer();
+                    $record['link'] = $GLOBALS['storeURL'] . '/' . $GLOBALS['config']->get('config', 'adminFile') . '?_g=products&node=reviews&edit=' . $review_id;
                     $record['product_name'] = $product['name'];
-                    $content    = $mail->loadContent('admin.review_added', $GLOBALS['language']->current(), $record);
+                    $content = $mail->load_content('admin.review_added', $GLOBALS['language']->current(), $record);
                     if (!empty($content)) {
-                        $mail->sendEmail($GLOBALS['config']->get('config', 'email_address'), $content);
+                        $mail->send_email($GLOBALS['config']->get('config', 'email_address'), $content);
                     }
                 } else {
-                    $GLOBALS['gui']->setError($GLOBALS['language']->catalogue['error_review_submit']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->catalogue['error_review_submit']);
                 }
-                httpredir(currentPage(null));
+                httpredir(current_page(null));
             } else {
                 foreach ($_POST['review'] as $key => $value) {
                     $_POST['review'][$key] = htmlspecialchars((string) $value);
@@ -3050,32 +2648,26 @@ class Cubecart
                 $GLOBALS['smarty']->assign('WRITE', $_POST['review']);
             }
         }
-
         /* Social Bookmarks */
-        $GLOBALS['smarty']->assign('SHARE', $this->_getSocial('product', 'getButtonHTML'));
+        $GLOBALS['smarty']->assign('SHARE', $this->_get_social('product', 'getButtonHTML'));
         /* Social Comments */
-        $GLOBALS['smarty']->assign('COMMENTS', $this->_getSocial('product', 'getCommunityHTML'));
-
-        $GLOBALS['catalogue']->displayProduct((int)$_GET['product_id'], !$GLOBALS['user']->isBot());
+        $GLOBALS['smarty']->assign('COMMENTS', $this->_get_social('product', 'getCommunityHTML'));
+        $GLOBALS['catalogue']->display_product((int) $_GET['product_id'], !$GLOBALS['user']->is_bot());
     }
-
     /**
      * Profile
      */
     private function _profile(): void
     {
         $GLOBALS['user']->is(true);
-
         if ($GLOBALS['session']->get('temp_profile_required')) {
-            $GLOBALS['gui']->setError($GLOBALS['language']->account['error_profile_incomplete']);
+            $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_profile_incomplete']);
             $GLOBALS['session']->delete('temp_profile_required');
         }
-
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['your_details'], currentPage());
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['your_account'], 'index.php?_a=account');
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['your_details'], current_page());
         $updated = false;
         $change_pass = false;
-
         if (isset($_POST['passold']) && isset($_POST['passnew']) && isset($_POST['passconf'])) {
             $change_pass = true;
             foreach ([$_POST['passold'], $_POST['passnew'], $_POST['passconf']] as $pass_value) {
@@ -3084,24 +2676,21 @@ class Cubecart
                 }
             }
             if ($change_pass) {
-                if ($change_pass = $GLOBALS['user']->changePassword()) {
+                if ($change_pass = $GLOBALS['user']->change_password()) {
                     $GLOBALS['user']->logout(true);
                 }
             }
         }
-
         if (isset($_POST['update'])) {
             if ($updated = $GLOBALS['user']->update()) {
-                $GLOBALS['gui']->setNotify($GLOBALS['language']->account['notify_details_updated']);
+                $GLOBALS['gui']->set_notify($GLOBALS['language']->account['notify_details_updated']);
             } elseif (!$change_pass) {
-                $GLOBALS['gui']->setError($GLOBALS['language']->account['error_details_updated']);
+                $GLOBALS['gui']->set_error($GLOBALS['language']->account['error_details_updated']);
             }
         }
-
         if ($updated || $change_pass || isset($_POST['update'])) {
             httpredir('?_a=profile');
         }
-
         $customer_data = $GLOBALS['user']->get();
         $GLOBALS['smarty']->assign('USER', $customer_data);
         if (!empty($customer_data['password'])) {
@@ -3114,35 +2703,28 @@ class Cubecart
         $GLOBALS['smarty']->assign('SECTION_NAME', 'account');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Receipt
      */
     private function _receipt(): void
     {
         if (isset($_GET['cart_order_id']) && ($GLOBALS['user']->is() || isset($_GET['email']))) {
-            $customer_id = $GLOBALS['user']->getId();
+            $customer_id = $GLOBALS['user']->get_id();
             if (!$customer_id) {
-                $customer_id = $GLOBALS['user']->getGhostId();
+                $customer_id = $GLOBALS['user']->get_ghost_id();
             }
             if (isset($_GET['email']) && filter_var($_GET['email'], FILTER_VALIDATE_EMAIL)) {
-                $where =  [
-                    'cart_order_id' => $_GET['cart_order_id'],
-                    'email' => $_GET['email'],
-                ];
+                $where = ['cart_order_id' => $_GET['cart_order_id'], 'email' => $_GET['email']];
             } else {
-                $where =  [
-                    'cart_order_id' => $_GET['cart_order_id'],
-                    'customer_id' => $customer_id,
-                ];
+                $where = ['cart_order_id' => $_GET['cart_order_id'], 'customer_id' => $customer_id];
             }
             if (($summaries = $GLOBALS['db']->select('CubeCart_order_summary', false, $where)) !== false) {
                 $summary = $summaries[0];
                 if (($products = $GLOBALS['db']->select('CubeCart_order_inventory', false, ['cart_order_id' => $_GET['cart_order_id']])) !== false) {
                     foreach ($products as $item) {
-                        $item['price_total'] = $GLOBALS['tax']->priceFormat(sprintf('%.2F', $item['price'] * $item['quantity']), true);
-                        $item['price'] = $GLOBALS['tax']->priceFormat($item['price'], true);
-                        $options = Order::getInstance()->unSerializeOptions($item['product_options']);
+                        $item['price_total'] = $GLOBALS['tax']->price_format(sprintf('%.2F', $item['price'] * $item['quantity']), true);
+                        $item['price'] = $GLOBALS['tax']->price_format($item['price'], true);
+                        $options = Order::get_instance()->un_serialize_options($item['product_options']);
                         $item['options'] = implode(' ', $options);
                         $summary['items'][] = $item;
                     }
@@ -3151,42 +2733,32 @@ class Cubecart
                 $format = ['discount', 'shipping', 'subtotal', 'total_tax', 'total'];
                 foreach ($format as $field) {
                     if (isset($summary[$field])) {
-                        $summary[$field] = $GLOBALS['tax']->priceFormat($summary[$field]);
+                        $summary[$field] = $GLOBALS['tax']->price_format($summary[$field]);
                     }
                 }
                 // Taxes
                 if (($taxes = $GLOBALS['db']->select('CubeCart_order_tax', false, ['cart_order_id' => $summary['cart_order_id']])) !== false) {
-                    $GLOBALS['tax']->loadTaxes($summary['country']);
+                    $GLOBALS['tax']->load_taxes($summary['country']);
                     foreach ($taxes as $vat) {
-                        $detail = $GLOBALS['tax']->fetchTaxDetails($vat['tax_id']);
-                        $summary['taxes'][] = ['name' => $detail['name'], 'value' => $GLOBALS['tax']->priceFormat($vat['amount'], true)];
+                        $detail = $GLOBALS['tax']->fetch_tax_details($vat['tax_id']);
+                        $summary['taxes'][] = ['name' => $detail['name'], 'value' => $GLOBALS['tax']->price_format($vat['amount'], true)];
                     }
                 } else {
-                    $summary['taxes'][] = ['name' => $GLOBALS['language']->basket['total_tax'], 'value' => $GLOBALS['tax']->priceFormat($summary['total_tax'])];
+                    $summary['taxes'][] = ['name' => $GLOBALS['language']->basket['total_tax'], 'value' => $GLOBALS['tax']->price_format($summary['total_tax'])];
                 }
                 // Delivery Address
-                $summary['state']  = getStateFormat($summary['state']);
-                $summary['country']  = getCountryFormat($summary['country']);
-                $summary['state_d']  = is_numeric($summary['state_d']) ? getStateFormat($summary['state_d']) : $summary['state_d'];
-                $summary['country_d'] = getCountryFormat($summary['country_d']);
-                $summary['order_status'] = $GLOBALS['language']->order_state['name_'.$summary['status']];
+                $summary['state'] = get_state_format($summary['state']);
+                $summary['country'] = get_country_format($summary['country']);
+                $summary['state_d'] = is_numeric($summary['state_d']) ? get_state_format($summary['state_d']) : $summary['state_d'];
+                $summary['country_d'] = get_country_format($summary['country_d']);
+                $summary['order_status'] = $GLOBALS['language']->order_state['name_' . $summary['status']];
                 $summary['vat_number'] = $GLOBALS['config']->get('config', 'tax_number');
-
-                $summary['order_date']  = formatTime($summary['order_date'], 'd F Y', true);
+                $summary['order_date'] = format_time($summary['order_date'], 'd F Y', true);
                 $var[] = $summary;
                 $GLOBALS['smarty']->assign('LIST_ORDERS', $var);
-
                 $GLOBALS['smarty']->assign('PAGE_TITLE', sprintf($GLOBALS['language']->orders['title_invoice_x'], $summary['cart_order_id']));
-                $GLOBALS['smarty']->assign(
-                    'STORE',
-                    [
-                        'address' => $GLOBALS['config']->get('config', 'store_address'),
-                        'county' => getStateFormat($GLOBALS['config']->get('config', 'store_zone')),
-                        'country' => getCountryFormat($GLOBALS['config']->get('config', 'store_country')),
-                        'postcode' => $GLOBALS['config']->get('config', 'store_postcode')]
-                );
-
-                $GLOBALS['smarty']->assign('STORE_LOGO', $GLOBALS['gui']->getLogo(true, 'invoices'));
+                $GLOBALS['smarty']->assign('STORE', ['address' => $GLOBALS['config']->get('config', 'store_address'), 'county' => get_state_format($GLOBALS['config']->get('config', 'store_zone')), 'country' => get_country_format($GLOBALS['config']->get('config', 'store_country')), 'postcode' => $GLOBALS['config']->get('config', 'store_postcode')]);
+                $GLOBALS['smarty']->assign('STORE_LOGO', $GLOBALS['gui']->get_logo(true, 'invoices'));
                 foreach ($GLOBALS['hooks']->load('class.cubecart.print.receipt') as $hook) {
                     include $hook;
                 }
@@ -3197,7 +2769,6 @@ class Cubecart
         }
         httpredir('?_a=login');
     }
-
     /**
      * Recover
      */
@@ -3205,95 +2776,78 @@ class Cubecart
     {
         // Cart recovery token takes priority over password reset
         if (isset($_GET['token']) && !empty($_GET['token'])) {
-            $this->_recoverCart();
+            $this->_recover_cart();
             return;
         }
-
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['recover_password'], currentPage());
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['recover_password'], current_page());
         $GLOBALS['seo']->set_meta_data(['description' => '', 'title' => $GLOBALS['language']->account['recover_password']]);
-
         $GLOBALS['smarty']->assign('SECTION_NAME', 'recover');
-
         $error = false;
         if (isset($_POST['email'])) {
-            if ($GLOBALS['gui']->recaptchaRequired()) {
+            if ($GLOBALS['gui']->recaptcha_required()) {
                 if (($message = $GLOBALS['session']->get('error', 'recaptcha')) === false) {
                     //If the error message from recaptcha fails for some reason:
-                    $GLOBALS['gui']->setError($GLOBALS['language']->form['verify_human_fail']);
+                    $GLOBALS['gui']->set_error($GLOBALS['language']->form['verify_human_fail']);
                 } else {
-                    $GLOBALS['gui']->setError($GLOBALS['session']->get('error', 'recaptcha'));
+                    $GLOBALS['gui']->set_error($GLOBALS['session']->get('error', 'recaptcha'));
                 }
                 $error = true;
             }
             // Send a recovery email
             if (!$error) {
-                $GLOBALS['user']->passwordRequest($_POST['email']);
-                $GLOBALS['gui']->setNotify($GLOBALS['language']->account['notify_password_recovery']);
+                $GLOBALS['user']->password_request($_POST['email']);
+                $GLOBALS['gui']->set_notify($GLOBALS['language']->account['notify_password_recovery']);
                 // Send them shopping whilst they wait for their email!
-                httpredir(currentPage(['_a']));
+                httpredir(current_page(['_a']));
             }
             // Reload the same page so they can try again
-            httpredir(currentPage());
+            httpredir(current_page());
         }
         $content = $GLOBALS['smarty']->fetch('templates/content.recover.php');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Recovery
      */
     private function _recovery(): void
     {
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['recover_password'], currentPage());
-
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['recover_password'], current_page());
         $GLOBALS['seo']->set_meta_data(['description' => '', 'title' => $GLOBALS['language']->account['recover_password']]);
-
         $GLOBALS['smarty']->assign('SECTION_NAME', 'recovery');
-
         if (isset($_POST['email']) && isset($_POST['validate']) && isset($_POST['password'])) {
-            $GLOBALS['user']->passwordReset((string)$_POST['email'], (string)$_POST['validate'], $_POST['password']);
+            $GLOBALS['user']->password_reset((string) $_POST['email'], (string) $_POST['validate'], $_POST['password']);
         }
-        $email  = (isset($_GET['email'])) ? (string)$_GET['email'] : null;
-        $validate = (isset($_GET['validate'])) ? (string)$_GET['validate'] : null;
-        $GLOBALS['smarty']->assign('DATA', [
-                'email'  => (isset($_POST['email'])) ? (string)$_POST['email'] : $email,
-                'validate' => (isset($_POST['validate'])) ? (string)$_POST['validate'] : $validate,
-            ]);
+        $email = isset($_GET['email']) ? (string) $_GET['email'] : null;
+        $validate = isset($_GET['validate']) ? (string) $_GET['validate'] : null;
+        $GLOBALS['smarty']->assign('DATA', ['email' => isset($_POST['email']) ? (string) $_POST['email'] : $email, 'validate' => isset($_POST['validate']) ? (string) $_POST['validate'] : $validate]);
         $content = $GLOBALS['smarty']->fetch('templates/content.recovery.php');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }
-
     /**
      * Register
      */
     private function _register(): void
     {
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->account['register'], $GLOBALS['seo']->buildURL('register'));
-
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->account['register'], $GLOBALS['seo']->build_url('register'));
         $GLOBALS['seo']->set_meta_data(['description' => '', 'title' => $GLOBALS['language']->account['register']]);
-
         foreach ($GLOBALS['hooks']->load('class.cubecart.construct.register') as $hook) {
             include $hook;
         }
-
         $login_html = [];
         foreach ($GLOBALS['hooks']->load('class.cubecart.login') as $hook) {
             include $hook;
         }
         $GLOBALS['smarty']->assign('LOGIN_HTML', $login_html);
-
         if (isset($_POST['register']) && !empty($_POST['register'])) {
-            $GLOBALS['user']->registerUser();
+            $GLOBALS['user']->register_user();
         }
-
         if (!$GLOBALS['user']->is()) {
             $GLOBALS['smarty']->assign('DATA', $_POST);
             if (($terms = $GLOBALS['db']->select('CubeCart_documents', false, ['doc_terms' => '1'])) !== false) {
-                $GLOBALS['smarty']->assign('TERMS_CONDITIONS', $GLOBALS['seo']->buildURL('doc', $terms[0]['doc_id'], '&'));
+                $GLOBALS['smarty']->assign('TERMS_CONDITIONS', $GLOBALS['seo']->build_url('doc', $terms[0]['doc_id'], '&'));
             } else {
                 $GLOBALS['smarty']->assign('TERMS_CONDITIONS', false);
             }
-
             $content = $GLOBALS['smarty']->fetch('templates/content.register.php');
             $GLOBALS['smarty']->assign('SECTION_NAME', 'register');
             $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
@@ -3307,7 +2861,6 @@ class Cubecart
             httpredir($redir);
         }
     }
-
     /**
      * Search
      */
@@ -3316,23 +2869,19 @@ class Cubecart
         foreach ($GLOBALS['hooks']->load('class.cubecart.construct.search') as $hook) {
             include $hook;
         }
-        $GLOBALS['gui']->addBreadcrumb($GLOBALS['language']->common['search'], currentPage());
-
+        $GLOBALS['gui']->add_breadcrumb($GLOBALS['language']->common['search'], current_page());
         $GLOBALS['smarty']->assign('SECTION_NAME', 'search');
-
         //Manufacturers
         if (($manufacturers = $GLOBALS['db']->select('CubeCart_manufacturers', false, false, ['name' => 'ASC'])) !== false) {
             $GLOBALS['smarty']->assign('MANUFACTURERS', $manufacturers);
         }
         // Sorting
-        if (($sorting = $GLOBALS['catalogue']->displaySort(true)) !== false) {
+        if (($sorting = $GLOBALS['catalogue']->display_sort(true)) !== false) {
             $GLOBALS['smarty']->assign('SORTERS', $sorting);
         }
-
         if ($GLOBALS['config']->get('config', 'hide_out_of_stock')) {
             $GLOBALS['smarty']->assign('OUT_OF_STOCK', 1);
         }
-
         $content = $GLOBALS['smarty']->fetch('templates/content.search.php');
         $GLOBALS['smarty']->assign('PAGE_CONTENT', $content);
     }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 /**
  * 3-D bin packer for shipping rate calculation.
  *
@@ -37,33 +36,26 @@ class Packer
 {
     /** @var array Box definitions sorted by volume ascending */
     private array $_box_defs = [];
-
     /** @var array Items waiting to be packed */
     private array $_items = [];
-
     /** @var PackerBox[] Open (in-progress) boxes */
     private array $_open = [];
-
     /** @var array Items too large for any available box */
     private $_overflow = [];
-
     // =========================================================== Constructor
-
     public function __construct()
     {
         $defs = $GLOBALS['config']->get('config', 'packaging_boxes');
         if (is_array($defs) && !empty($defs)) {
             usort($defs, function (array $a, array $b): int {
-                $va = (float)$a['l'] * (float)$a['w'] * (float)$a['h'];
-                $vb = (float)$b['l'] * (float)$b['w'] * (float)$b['h'];
+                $va = (float) $a['l'] * (float) $a['w'] * (float) $a['h'];
+                $vb = (float) $b['l'] * (float) $b['w'] * (float) $b['h'];
                 return $va <=> $vb;
             });
             $this->_box_defs = $defs;
         }
     }
-
     // ============================================================== Public API
-
     /**
      * Add one or more identical items to pack.
      *
@@ -74,19 +66,12 @@ class Packer
      * @param int    $qty    Number of this item (each packed individually)
      * @param string $name   Optional label (visible in result for inspection)
      */
-    public function addItem($l, $w, $h, $weight = 0.0, $qty = 1, $name = ''): void
+    public function add_item($l, $w, $h, $weight = 0.0, $qty = 1, $name = ''): void
     {
-        for ($i = 0; $i < (int)$qty; $i++) {
-            $this->_items[] = [
-                'l'      => (float)$l,
-                'w'      => (float)$w,
-                'h'      => (float)$h,
-                'weight' => (float)$weight,
-                'name'   => (string)$name,
-            ];
+        for ($i = 0; $i < (int) $qty; $i++) {
+            $this->_items[] = ['l' => (float) $l, 'w' => (float) $w, 'h' => (float) $h, 'weight' => (float) $weight, 'name' => (string) $name];
         }
     }
-
     /**
      * Run the packing algorithm.
      *
@@ -95,30 +80,25 @@ class Packer
      */
     public function pack()
     {
-        $this->_open     = [];
+        $this->_open = [];
         $this->_overflow = [];
-
         if (empty($this->_items) || empty($this->_box_defs)) {
             return [];
         }
-
         // Largest volume first — FFD heuristic gives better packing
         $items = $this->_items;
-        usort($items, fn (array $a, array $b) => ($b['l'] * $b['w'] * $b['h']) <=> ($a['l'] * $a['w'] * $a['h']));
-
+        usort($items, fn(array $a, array $b) => $b['l'] * $b['w'] * $b['h'] <=> $a['l'] * $a['w'] * $a['h']);
         foreach ($items as $item) {
-            if (!$this->_fitExisting($item) && !$this->_fitNewBox($item)) {
+            if (!$this->_fit_existing($item) && !$this->_fit_new_box($item)) {
                 $this->_overflow[] = $item;
             }
         }
-
-        return $this->getPacked();
+        return $this->get_packed();
     }
-
     /**
      * Return packed box results (same structure as pack()).
      */
-    public function getPacked(): array
+    public function get_packed(): array
     {
         $out = [];
         foreach ($this->_open as $box) {
@@ -126,72 +106,64 @@ class Packer
         }
         return $out;
     }
-
     /**
      * Number of boxes needed after pack().
      */
-    public function getBoxCount(): int
+    public function get_box_count(): int
     {
         return count($this->_open);
     }
-
     /**
      * Items that exceeded every available box size.
      *
      * @return array
      */
-    public function getOverflow()
+    public function get_overflow()
     {
         return $this->_overflow;
     }
-
     // ============================================================= Private
-
     /**
      * Try to place $item in one of the already-open boxes.
      */
-    private function _fitExisting(array $item): bool
+    private function _fit_existing(array $item): bool
     {
         foreach ($this->_open as $box) {
-            if ($box->tryPack($item)) {
+            if ($box->try_pack($item)) {
                 return true;
             }
         }
         return false;
     }
-
     /**
      * Open the smallest box definition that fits $item, pack the item into it.
      */
-    private function _fitNewBox(array $item): bool
+    private function _fit_new_box(array $item): bool
     {
         foreach ($this->_box_defs as $def) {
-            if ($this->_itemFitsDefinition($item, $def)) {
-                $box = new PackerBox($def);
-                $box->tryPack($item);
+            if ($this->_item_fits_definition($item, $def)) {
+                $box = new Packer_Box($def);
+                $box->try_pack($item);
                 $this->_open[] = $box;
                 return true;
             }
         }
         return false;
     }
-
     /**
      * Return true if $item can fit (in at least one rotation) within $def.
      * Uses sorted-dimension comparison to avoid checking all rotations explicitly.
      */
-    private function _itemFitsDefinition(array $item, array $def): bool
+    private function _item_fits_definition(array $item, array $def): bool
     {
-        $id = [(float)$item['l'], (float)$item['w'], (float)$item['h']];
-        $bd = [(float)$def['l'],  (float)$def['w'],  (float)$def['h']];
+        $id = [(float) $item['l'], (float) $item['w'], (float) $item['h']];
+        $bd = [(float) $def['l'], (float) $def['w'], (float) $def['h']];
         sort($id);
         sort($bd);
         return $id[0] <= $bd[0] && $id[1] <= $bd[1] && $id[2] <= $bd[2];
     }
 }
-
 // =============================================================================
-
 /**
  * Represents one box being filled.
  *
@@ -206,91 +178,60 @@ class Packer
  *
  * @internal  Used exclusively by Packer.
  */
-class PackerBox
+class Packer_Box
 {
-    public const EPS = 1e-6;
-
+    public const EPS = 1.0E-6;
     /** @var float Box inner dimensions */
     private $_L;
     private $_W;
     private $_H;
-
     /** @var array Placed items: each entry has x,y,z,l,w,h,item keys */
     private array $_placed = [];
-
     /** @var float Accumulated weight of packed items */
     private float $_weight = 0.0;
-
     /** @var float Accumulated volume of packed items */
-    private float $_usedVol = 0.0;
-
+    private float $_used_vol = 0.0;
     /** @var array Extreme points: each entry has x,y,z keys */
     private array $_eps = [];
-
     // =========================================================== Constructor
-
-    public function __construct(/** @var array Original box definition */
+    public function __construct(
+        /** @var array Original box definition */
         private array $_def
-    ) {
-        $this->_L   = (float)$this->_def['l'];
-        $this->_W   = (float)$this->_def['w'];
-        $this->_H   = (float)$this->_def['h'];
+    )
+    {
+        $this->_L = (float) $this->_def['l'];
+        $this->_W = (float) $this->_def['w'];
+        $this->_H = (float) $this->_def['h'];
         $this->_eps = [['x' => 0.0, 'y' => 0.0, 'z' => 0.0]];
     }
-
     // ============================================================== Public
-
     /**
      * Try to place $item somewhere in this box.
      * Attempts all six orientations at every extreme point.
      *
      * @return bool  True if the item was placed successfully.
      */
-    public function tryPack(array $item): bool
+    public function try_pack(array $item): bool
     {
         $rotations = $this->_rotations($item);
-        $eps       = $this->_sortedEps();
-
+        $eps = $this->_sorted_eps();
         foreach ($eps as $ep) {
             foreach ($rotations as $r) {
-                if ($this->_fits(
-                    $ep['x'],
-                    $ep['y'],
-                    $ep['z'],
-                    $r['l'],
-                    $r['w'],
-                    $r['h']
-                )) {
-                    $this->_place(
-                        $ep['x'],
-                        $ep['y'],
-                        $ep['z'],
-                        $r['l'],
-                        $r['w'],
-                        $r['h'],
-                        $item
-                    );
+                if ($this->_fits($ep['x'], $ep['y'], $ep['z'], $r['l'], $r['w'], $r['h'])) {
+                    $this->_place($ep['x'], $ep['y'], $ep['z'], $r['l'], $r['w'], $r['h'], $item);
                     return true;
                 }
             }
         }
         return false;
     }
-
     /**
      * Return a summary array for the packed box.
      */
     public function result(): array
     {
-        return [
-            'box'         => $this->_def,
-            'items'       => $this->_placed,
-            'weight'      => $this->_weight,
-            'used_volume' => $this->_usedVol,
-            'box_volume'  => $this->_L * $this->_W * $this->_H,
-        ];
+        return ['box' => $this->_def, 'items' => $this->_placed, 'weight' => $this->_weight, 'used_volume' => $this->_used_vol, 'box_volume' => $this->_L * $this->_W * $this->_H];
     }
-
     // ============================================================= Private
     /**
      * Return all unique orientations of $item, sorted by ascending height.
@@ -300,20 +241,11 @@ class PackerBox
      */
     private function _rotations(array $item): array
     {
-        $l = (float)$item['l'];
-        $w = (float)$item['w'];
-        $h = (float)$item['h'];
-
-        $all = [
-            ['l' => $l, 'w' => $w, 'h' => $h],
-            ['l' => $l, 'w' => $h, 'h' => $w],
-            ['l' => $w, 'w' => $l, 'h' => $h],
-            ['l' => $w, 'w' => $h, 'h' => $l],
-            ['l' => $h, 'w' => $l, 'h' => $w],
-            ['l' => $h, 'w' => $w, 'h' => $l],
-        ];
-
-        $seen   = [];
+        $l = (float) $item['l'];
+        $w = (float) $item['w'];
+        $h = (float) $item['h'];
+        $all = [['l' => $l, 'w' => $w, 'h' => $h], ['l' => $l, 'w' => $h, 'h' => $w], ['l' => $w, 'w' => $l, 'h' => $h], ['l' => $w, 'w' => $h, 'h' => $l], ['l' => $h, 'w' => $l, 'h' => $w], ['l' => $h, 'w' => $w, 'h' => $l]];
+        $seen = [];
         $unique = [];
         foreach ($all as $r) {
             $k = $r['l'] . ',' . $r['w'] . ',' . $r['h'];
@@ -322,17 +254,14 @@ class PackerBox
                 $unique[] = $r;
             }
         }
-
-        usort($unique, fn (array $a, array $b) => $a['h'] <=> $b['h']);
-
+        usort($unique, fn(array $a, array $b) => $a['h'] <=> $b['h']);
         return $unique;
     }
-
     /**
      * Return extreme points sorted bottom (z) → front (y) → left (x).
      * This greedy order makes items settle toward the floor first.
      */
-    private function _sortedEps()
+    private function _sorted_eps()
     {
         $eps = $this->_eps;
         usort($eps, function (array $a, array $b): int {
@@ -346,7 +275,6 @@ class PackerBox
         });
         return $eps;
     }
-
     /**
      * Return true if an item of dimensions ($l×$w×$h) placed at ($x,$y,$z):
      *   (a) stays within the box walls, and
@@ -363,44 +291,25 @@ class PackerBox
         if ($z + $h > $this->_H + self::EPS) {
             return false;
         }
-
         foreach ($this->_placed as $p) {
-            if ($x      < $p['x'] + $p['l'] - self::EPS &&
-                $p['x'] < $x      + $l      - self::EPS &&
-                $y      < $p['y'] + $p['w'] - self::EPS &&
-                $p['y'] < $y      + $w      - self::EPS &&
-                $z      < $p['z'] + $p['h'] - self::EPS &&
-                $p['z'] < $z      + $h      - self::EPS) {
+            if ($x < $p['x'] + $p['l'] - self::EPS && $p['x'] < $x + $l - self::EPS && $y < $p['y'] + $p['w'] - self::EPS && $p['y'] < $y + $w - self::EPS && $z < $p['z'] + $p['h'] - self::EPS && $p['z'] < $z + $h - self::EPS) {
                 return false;
             }
         }
         return true;
     }
-
     /**
      * Record the placement and extend the extreme-point set with the
      * three new points generated at the far faces of the placed item.
      */
     private function _place($x, $y, $z, $l, $w, $h, array $item): void
     {
-        $this->_placed[] = [
-            'x'    => $x, 'y' => $y, 'z' => $z,
-            'l'    => $l, 'w' => $w, 'h' => $h,
-            'item' => $item,
-        ];
-        $this->_weight   += (float)($item['weight'] ?? 0.0);
-        $this->_usedVol  += $l * $w * $h;
-
-        $candidates = [
-            ['x' => $x + $l, 'y' => $y,     'z' => $z    ],
-            ['x' => $x,      'y' => $y + $w, 'z' => $z    ],
-            ['x' => $x,      'y' => $y,      'z' => $z + $h],
-        ];
-
+        $this->_placed[] = ['x' => $x, 'y' => $y, 'z' => $z, 'l' => $l, 'w' => $w, 'h' => $h, 'item' => $item];
+        $this->_weight += (float) ($item['weight'] ?? 0.0);
+        $this->_used_vol += $l * $w * $h;
+        $candidates = [['x' => $x + $l, 'y' => $y, 'z' => $z], ['x' => $x, 'y' => $y + $w, 'z' => $z], ['x' => $x, 'y' => $y, 'z' => $z + $h]];
         foreach ($candidates as $ep) {
-            if ($ep['x'] <= $this->_L + self::EPS &&
-                $ep['y'] <= $this->_W + self::EPS &&
-                $ep['z'] <= $this->_H + self::EPS) {
+            if ($ep['x'] <= $this->_L + self::EPS && $ep['y'] <= $this->_W + self::EPS && $ep['z'] <= $this->_H + self::EPS) {
                 $this->_eps[] = $ep;
             }
         }

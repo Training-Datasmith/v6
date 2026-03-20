@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Resource String
  *
@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @author     Uwe Tews
  * @author     Rodney Rehm
  */
-
 /**
  * Smarty Internal Plugin Resource String
  * Implements the strings as resource for Smarty template
@@ -33,7 +32,6 @@ class Smarty_Internal_Resource_String extends Smarty_Resource
         $source->uid = $source->filepath = sha1($source->name . $source->smarty->_joined_template_dir);
         $source->timestamp = $source->exists = true;
     }
-
     /**
      * Load template's source from $resource_name into current template object
      *
@@ -43,11 +41,10 @@ class Smarty_Internal_Resource_String extends Smarty_Resource
      *
      * @return string                 template source
      */
-    public function getContent(Smarty_Template_Source $source)
+    public function get_content(Smarty_Template_Source $source)
     {
         return $this->decode($source->name);
     }
-
     /**
      * decode base64 and urlencode
      *
@@ -67,7 +64,6 @@ class Smarty_Internal_Resource_String extends Smarty_Resource
         }
         return $string;
     }
-
     /**
      * modify resource_name according to resource handlers specifications
      *
@@ -77,11 +73,10 @@ class Smarty_Internal_Resource_String extends Smarty_Resource
      *
      * @return string unique resource name
      */
-    public function buildUniqueResourceName(Smarty $smarty, $resource_name, $isConfig = false)
+    public function build_unique_resource_name(Smarty $smarty, $resource_name, $is_config = false)
     {
         return get_class($this) . '#' . $this->decode($resource_name);
     }
-
     /**
      * Determine basename for compiled filename
      * Always returns an empty string.
@@ -90,20 +85,19 @@ class Smarty_Internal_Resource_String extends Smarty_Resource
      *
      * @return string                 resource's basename
      */
-    public function getBasename(Smarty_Template_Source $source)
+    public function get_basename(Smarty_Template_Source $source)
     {
         return '';
     }
-
     /*
-        * Disable timestamp checks for string resource.
-        *
-        * @return bool
-        */
+     * Disable timestamp checks for string resource.
+     *
+     * @return bool
+     */
     /**
      * @return bool
      */
-    public function checkTimestamps()
+    public function check_timestamps()
     {
         return false;
     }

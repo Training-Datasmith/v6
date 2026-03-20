@@ -1,15 +1,13 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper retrieves stats from a /mail/send API call
  */
-
-namespace SendGrid\Stats;
+namespace Send_Grid\Stats;
 
 use DateTime;
 use Exception;
-
 /**
  * This class is used to retrieve stats from a /mail/send API call
  *
@@ -23,16 +21,12 @@ class Stats
     public const OPTIONS_SORT_DIRECTION = ['asc', 'desc'];
     /** @var string[] Available aggregate options */
     public const OPTIONS_AGGREGATED_BY = ['day', 'week', 'month'];
-
     /** @var string Starting date */
-    private $startDate;
-
+    private $start_date;
     /** @var string|null End date (optional) */
-    private $endDate;
-
+    private $end_date;
     /** @var string|null Desired aggregate option (optional) */
-    private $aggregatedBy;
-
+    private $aggregated_by;
     /**
      * Stats constructor
      *
@@ -41,37 +35,27 @@ class Stats
      * @param string $aggregatedBy day|week|month
      * @throws Exception
      */
-    public function __construct($startDate, $endDate = null, $aggregatedBy = null)
+    public function __construct($start_date, $end_date = null, $aggregated_by = null)
     {
-        $this->validateDateFormat($startDate);
-        if (null !== $endDate) {
-            $this->validateDateFormat($endDate);
+        $this->validate_date_format($start_date);
+        if (null !== $end_date) {
+            $this->validate_date_format($end_date);
         }
-        if (null !== $aggregatedBy) {
-            $this->validateOptions(
-                'aggregatedBy',
-                $aggregatedBy,
-                self::OPTIONS_AGGREGATED_BY
-            );
+        if (null !== $aggregated_by) {
+            $this->validate_options('aggregatedBy', $aggregated_by, self::OPTIONS_AGGREGATED_BY);
         }
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-        $this->aggregatedBy = $aggregatedBy;
+        $this->start_date = $start_date;
+        $this->end_date = $end_date;
+        $this->aggregated_by = $aggregated_by;
     }
-
     /**
      * Retrieve global stats parameters, start date, end date and
      * aggregated by
      */
-    public function getGlobal(): array
+    public function get_global(): array
     {
-        return [
-            'start_date' => $this->startDate,
-            'end_date' => $this->endDate,
-            'aggregated_by' => $this->aggregatedBy,
-        ];
+        return ['start_date' => $this->start_date, 'end_date' => $this->end_date, 'aggregated_by' => $this->aggregated_by];
     }
-
     /**
      * Retrieve an array of categories
      *
@@ -80,14 +64,13 @@ class Stats
      * @return array
      * @throws Exception
      */
-    public function getCategory($categories)
+    public function get_category($categories)
     {
-        $this->validateNumericArray('categories', $categories);
-        $stats = $this->getGlobal();
+        $this->validate_numeric_array('categories', $categories);
+        $stats = $this->get_global();
         $stats['categories'] = $categories;
         return $stats;
     }
-
     /**
      * Retrieve global stats parameters, start date, end date and
      * aggregated for the given set of subusers
@@ -97,14 +80,13 @@ class Stats
      * @return array
      * @throws Exception
      */
-    public function getSubuser($subusers)
+    public function get_subuser($subusers)
     {
-        $this->validateNumericArray('subusers', $subusers);
-        $stats = $this->getGlobal();
+        $this->validate_numeric_array('subusers', $subusers);
+        $stats = $this->get_global();
         $stats['subusers'] = $subusers;
         return $stats;
     }
-
     /**
      * Retrieve global stats parameters, start date, end date,
      * aggregated by, sort by metric, sort by direction, limit
@@ -125,27 +107,18 @@ class Stats
      * @return array
      * @throws Exception
      */
-    public function getSum(
-        $sortByMetric = 'delivered',
-        $sortByDirection = 'desc',
-        $limit = 5,
-        $offset = 0
-    ) {
-        $this->validateOptions(
-            'sortByDirection',
-            $sortByDirection,
-            self::OPTIONS_SORT_DIRECTION
-        );
-        $this->validateInteger('limit', $limit);
-        $this->validateInteger('offset', $offset);
-        $stats = $this->getGlobal();
-        $stats['sort_by_metric'] = $sortByMetric;
-        $stats['sort_by_direction'] = $sortByDirection;
+    public function get_sum($sort_by_metric = 'delivered', $sort_by_direction = 'desc', $limit = 5, $offset = 0)
+    {
+        $this->validate_options('sortByDirection', $sort_by_direction, self::OPTIONS_SORT_DIRECTION);
+        $this->validate_integer('limit', $limit);
+        $this->validate_integer('offset', $offset);
+        $stats = $this->get_global();
+        $stats['sort_by_metric'] = $sort_by_metric;
+        $stats['sort_by_direction'] = $sort_by_direction;
         $stats['limit'] = $limit;
         $stats['offset'] = $offset;
         return $stats;
     }
-
     /**
      * Retrieve monthly stats by subuser
      *
@@ -164,30 +137,13 @@ class Stats
      *
      * @throws Exception
      */
-    public function getSubuserMonthly(
-        $subuser = null,
-        $sortByMetric = 'delivered',
-        $sortByDirection = 'desc',
-        $limit = 5,
-        $offset = 0
-    ): array {
-        $this->validateOptions(
-            'sortByDirection',
-            $sortByDirection,
-            self::OPTIONS_SORT_DIRECTION
-        );
-        $this->validateInteger('limit', $limit);
-        $this->validateInteger('offset', $offset);
-        return [
-            'date' => $this->startDate,
-            'subuser' => $subuser,
-            'sort_by_metric' => $sortByMetric,
-            'sort_by_direction' => $sortByDirection,
-            'limit' => $limit,
-            'offset' => $offset,
-        ];
+    public function get_subuser_monthly($subuser = null, $sort_by_metric = 'delivered', $sort_by_direction = 'desc', $limit = 5, $offset = 0): array
+    {
+        $this->validate_options('sortByDirection', $sort_by_direction, self::OPTIONS_SORT_DIRECTION);
+        $this->validate_integer('limit', $limit);
+        $this->validate_integer('offset', $offset);
+        return ['date' => $this->start_date, 'subuser' => $subuser, 'sort_by_metric' => $sort_by_metric, 'sort_by_direction' => $sort_by_direction, 'limit' => $limit, 'offset' => $offset];
     }
-
     /**
      * Validate the date format
      *
@@ -195,13 +151,12 @@ class Stats
      *
      * @throws Exception
      */
-    protected function validateDateFormat($date)
+    protected function validate_date_format($date)
     {
-        if (false === DateTime::createFromFormat(self::DATE_FORMAT, $date)) {
+        if (false === DateTime::create_from_format(self::DATE_FORMAT, $date)) {
             throw new Exception('Date must be in the YYYY-MM-DD format.');
         }
     }
-
     /**
      * Validate options
      *
@@ -211,15 +166,12 @@ class Stats
      *
      * @throws Exception
      */
-    protected function validateOptions(string $name, $value, $options)
+    protected function validate_options(string $name, $value, $options)
     {
         if (!in_array($value, $options)) {
-            throw new Exception(
-                $name . ' must be one of: ' . implode(', ', $options)
-            );
+            throw new Exception($name . ' must be one of: ' . implode(', ', $options));
         }
     }
-
     /**
      * Validate integer
      *
@@ -228,13 +180,12 @@ class Stats
      *
      * @throws Exception
      */
-    protected function validateInteger(string $name, $value)
+    protected function validate_integer(string $name, $value)
     {
         if (!is_integer($value)) {
             throw new Exception($name . ' must be an integer.');
         }
     }
-
     /**
      * Validate a numeric array
      *
@@ -243,19 +194,18 @@ class Stats
      *
      * @throws Exception
      */
-    protected function validateNumericArray(string $name, $value)
+    protected function validate_numeric_array(string $name, $value)
     {
-        if (!\is_array($value) || empty($value) || !$this->isNumeric($value)) {
+        if (!\is_array($value) || empty($value) || !$this->is_numeric($value)) {
             throw new Exception($name . ' must be a non-empty numeric array.');
         }
     }
-
     /**
      * Determine if the array is numeric
      *
      * @param array $array Array of values
      */
-    protected function isNumeric(array $array): bool
+    protected function is_numeric(array $array): bool
     {
         return \array_keys($array) === range(0, \count($array) - 1);
     }

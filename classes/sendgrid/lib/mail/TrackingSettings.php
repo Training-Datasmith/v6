@@ -1,11 +1,10 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the TrackingSettings object for a /mail/send API call
  */
-
-namespace SendGrid\Mail;
+namespace Send_Grid\Mail;
 
 /**
  * This class is used to construct a TrackingSettings object for the
@@ -13,17 +12,16 @@ namespace SendGrid\Mail;
  *
  * @package SendGrid\Mail
  */
-class TrackingSettings implements \JsonSerializable
+class Tracking_Settings implements \JsonSerializable
 {
     /** @var $click_tracking ClickTracking object */
-    private ?\SendGrid\Mail\ClickTracking $click_tracking = null;
+    private ?\Send_Grid\Mail\Click_Tracking $click_tracking = null;
     /** @var $open_tracking OpenTracking object */
-    private ?\SendGrid\Mail\OpenTracking $open_tracking = null;
+    private ?\Send_Grid\Mail\Open_Tracking $open_tracking = null;
     /** @var $subscription_tracking SubscriptionTracking object */
-    private ?\SendGrid\Mail\SubscriptionTracking $subscription_tracking = null;
+    private ?\Send_Grid\Mail\Subscription_Tracking $subscription_tracking = null;
     /** @var $ganalytics Ganalytics object */
-    private ?\SendGrid\Mail\Ganalytics $ganalytics = null;
-
+    private ?\Send_Grid\Mail\Ganalytics $ganalytics = null;
     /**
      * Optional constructor
      *
@@ -35,26 +33,21 @@ class TrackingSettings implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function __construct(
-        $click_tracking = null,
-        $open_tracking = null,
-        $subscription_tracking = null,
-        $ganalytics = null
-    ) {
+    public function __construct($click_tracking = null, $open_tracking = null, $subscription_tracking = null, $ganalytics = null)
+    {
         if (isset($click_tracking)) {
-            $this->setClickTracking($click_tracking);
+            $this->set_click_tracking($click_tracking);
         }
         if (isset($open_tracking)) {
-            $this->setOpenTracking($open_tracking);
+            $this->set_open_tracking($open_tracking);
         }
         if (isset($subscription_tracking)) {
-            $this->setSubscriptionTracking($subscription_tracking);
+            $this->set_subscription_tracking($subscription_tracking);
         }
         if (isset($ganalytics)) {
-            $this->setGanalytics($ganalytics);
+            $this->set_ganalytics($ganalytics);
         }
     }
-
     /**
      * Set the click tracking settings on a TrackingSettings object
      *
@@ -66,26 +59,24 @@ class TrackingSettings implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setClickTracking($enable, $enable_text = null): void
+    public function set_click_tracking($enable, $enable_text = null): void
     {
-        if ($enable instanceof ClickTracking) {
+        if ($enable instanceof Click_Tracking) {
             $click_tracking = $enable;
             $this->click_tracking = $click_tracking;
             return;
         }
-        $this->click_tracking = new ClickTracking($enable, $enable_text);
+        $this->click_tracking = new Click_Tracking($enable, $enable_text);
     }
-
     /**
      * Retrieve the click tracking settings from a TrackingSettings object
      *
      * @return ClickTracking
      */
-    public function getClickTracking()
+    public function get_click_tracking()
     {
         return $this->click_tracking;
     }
-
     /**
      * Set the open tracking settings on a TrackingSettings object
      *
@@ -101,26 +92,24 @@ class TrackingSettings implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setOpenTracking($enable, $substitution_tag = null): void
+    public function set_open_tracking($enable, $substitution_tag = null): void
     {
-        if ($enable instanceof OpenTracking) {
+        if ($enable instanceof Open_Tracking) {
             $open_tracking = $enable;
             $this->open_tracking = $open_tracking;
             return;
         }
-        $this->open_tracking = new OpenTracking($enable, $substitution_tag);
+        $this->open_tracking = new Open_Tracking($enable, $substitution_tag);
     }
-
     /**
      * Retrieve the open tracking settings on a TrackingSettings object
      *
      * @return OpenTracking
      */
-    public function getOpenTracking()
+    public function get_open_tracking()
     {
         return $this->open_tracking;
     }
-
     /**
      * Set the subscription tracking settings on a TrackingSettings object
      *
@@ -154,30 +143,24 @@ class TrackingSettings implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSubscriptionTracking(
-        $enable,
-        $text = null,
-        $html = null,
-        $substitution_tag = null
-    ): void {
-        if ($enable instanceof SubscriptionTracking) {
+    public function set_subscription_tracking($enable, $text = null, $html = null, $substitution_tag = null): void
+    {
+        if ($enable instanceof Subscription_Tracking) {
             $subscription_tracking = $enable;
             $this->subscription_tracking = $subscription_tracking;
             return;
         }
-        $this->subscription_tracking = new SubscriptionTracking($enable, $text, $html, $substitution_tag);
+        $this->subscription_tracking = new Subscription_Tracking($enable, $text, $html, $substitution_tag);
     }
-
     /**
      * Retrieve the subscription tracking settings from a TrackingSettings object
      *
      * @return SubscriptionTracking
      */
-    public function getSubscriptionTracking()
+    public function get_subscription_tracking()
     {
         return $this->subscription_tracking;
     }
-
     /**
      * Set the Google analytics settings on a TrackingSettings object
      *
@@ -195,55 +178,32 @@ class TrackingSettings implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setGanalytics(
-        $enable,
-        $utm_source = null,
-        $utm_medium = null,
-        $utm_term = null,
-        $utm_content = null,
-        $utm_campaign = null
-    ): void {
+    public function set_ganalytics($enable, $utm_source = null, $utm_medium = null, $utm_term = null, $utm_content = null, $utm_campaign = null): void
+    {
         if ($enable instanceof Ganalytics) {
             $ganalytics = $enable;
             $this->ganalytics = $ganalytics;
             return;
         }
-        $this->ganalytics = new Ganalytics(
-            $enable,
-            $utm_source,
-            $utm_medium,
-            $utm_term,
-            $utm_content,
-            $utm_campaign
-        );
+        $this->ganalytics = new Ganalytics($enable, $utm_source, $utm_medium, $utm_term, $utm_content, $utm_campaign);
     }
-
     /**
      * Retrieve the Google analytics settings from a TrackingSettings object
      *
      * @return Ganalytics
      */
-    public function getGanalytics()
+    public function get_ganalytics()
     {
         return $this->ganalytics;
     }
-
     /**
      * Return an array representing a TrackingSettings object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'click_tracking' => $this->getClickTracking(),
-                'open_tracking' => $this->getOpenTracking(),
-                'subscription_tracking' => $this->getSubscriptionTracking(),
-                'ganalytics' => $this->getGanalytics(),
-            ],
-            fn (\SendGrid\Mail\ClickTracking|\SendGrid\Mail\OpenTracking|\SendGrid\Mail\SubscriptionTracking|\SendGrid\Mail\Ganalytics $value) => $value !== null
-        ) ?: null;
+        return array_filter(['click_tracking' => $this->get_click_tracking(), 'open_tracking' => $this->get_open_tracking(), 'subscription_tracking' => $this->get_subscription_tracking(), 'ganalytics' => $this->get_ganalytics()], fn(\Send_Grid\Mail\Click_Tracking|\Send_Grid\Mail\Open_Tracking|\Send_Grid\Mail\Subscription_Tracking|\Send_Grid\Mail\Ganalytics $value) => $value !== null) ?: null;
     }
 }

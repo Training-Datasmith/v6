@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Slm extends AbstractEndpoint
+class Slm extends Abstract_Endpoint
 {
     /**
      * Deletes an existing snapshot lifecycle policy.
@@ -49,19 +46,15 @@ class Slm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteLifecycle(array $params = [])
+    public function delete_lifecycle(array $params = [])
     {
-        $this->checkRequiredParameters(['policy_id'], $params);
+        $this->check_required_parameters(['policy_id'], $params);
         $url = '/_slm/policy/' . $this->encode($params['policy_id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Immediately creates a snapshot according to the lifecycle policy, without waiting for the scheduled time.
      *
@@ -83,19 +76,15 @@ class Slm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function executeLifecycle(array $params = [])
+    public function execute_lifecycle(array $params = [])
     {
-        $this->checkRequiredParameters(['policy_id'], $params);
+        $this->check_required_parameters(['policy_id'], $params);
         $url = '/_slm/policy/' . $this->encode($params['policy_id']) . '/_execute';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes any snapshots that are expired according to the policy's retention rules.
      *
@@ -115,18 +104,14 @@ class Slm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function executeRetention(array $params = [])
+    public function execute_retention(array $params = [])
     {
         $url = '/_slm/_execute_retention';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves one or more snapshot lifecycle policy definitions and information about the latest snapshot attempts.
      *
@@ -147,7 +132,7 @@ class Slm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getLifecycle(array $params = [])
+    public function get_lifecycle(array $params = [])
     {
         if (isset($params['policy_id'])) {
             $url = '/_slm/policy/' . $this->encode($params['policy_id']);
@@ -156,13 +141,10 @@ class Slm extends AbstractEndpoint
             $url = '/_slm/policy';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns global and policy-level statistics about actions taken by snapshot lifecycle management.
      *
@@ -182,18 +164,14 @@ class Slm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getStats(array $params = [])
+    public function get_stats(array $params = [])
     {
         $url = '/_slm/stats';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves the status of snapshot lifecycle management (SLM).
      *
@@ -213,18 +191,14 @@ class Slm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getStatus(array $params = [])
+    public function get_status(array $params = [])
     {
         $url = '/_slm/status';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates or updates a snapshot lifecycle policy.
      *
@@ -247,20 +221,15 @@ class Slm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putLifecycle(array $params = [])
+    public function put_lifecycle(array $params = [])
     {
-        $this->checkRequiredParameters(['policy_id'], $params);
+        $this->check_required_parameters(['policy_id'], $params);
         $url = '/_slm/policy/' . $this->encode($params['policy_id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Turns on snapshot lifecycle management (SLM).
      *
@@ -284,14 +253,10 @@ class Slm extends AbstractEndpoint
     {
         $url = '/_slm/start';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Turns off snapshot lifecycle management (SLM).
      *
@@ -315,11 +280,8 @@ class Slm extends AbstractEndpoint
     {
         $url = '/_slm/stop';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

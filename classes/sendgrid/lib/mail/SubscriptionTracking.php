@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the SubscriptionTracking object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a SubscriptionTracking object for
  * the /mail/send API call
@@ -20,7 +18,7 @@ use SendGrid\Helper\Assert;
  *
  * @package SendGrid\Mail
  */
-class SubscriptionTracking implements \JsonSerializable
+class Subscription_Tracking implements \JsonSerializable
 {
     /** @var $enable bool Indicates if this setting is enabled */
     private $enable;
@@ -45,7 +43,6 @@ class SubscriptionTracking implements \JsonSerializable
      * formatting
      */
     private $substitution_tag;
-
     /**
      * Optional constructor
      *
@@ -67,26 +64,21 @@ class SubscriptionTracking implements \JsonSerializable
      *                                      location, with no additional formatting
      * @throws \SendGrid\Mail\TypeException
      */
-    public function __construct(
-        $enable = null,
-        $text = null,
-        $html = null,
-        $substitution_tag = null
-    ) {
+    public function __construct($enable = null, $text = null, $html = null, $substitution_tag = null)
+    {
         if (isset($enable)) {
-            $this->setEnable($enable);
+            $this->set_enable($enable);
         }
         if (isset($text)) {
-            $this->setText($text);
+            $this->set_text($text);
         }
         if (isset($html)) {
-            $this->setHtml($html);
+            $this->set_html($html);
         }
         if (isset($substitution_tag)) {
-            $this->setSubstitutionTag($substitution_tag);
+            $this->set_substitution_tag($substitution_tag);
         }
     }
-
     /**
      * Update the enable setting on a SubscriptionTracking object
      *
@@ -94,23 +86,20 @@ class SubscriptionTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable): void
+    public function set_enable($enable): void
     {
         Assert::boolean($enable, 'enable');
-
         $this->enable = $enable;
     }
-
     /**
      * Retrieve the enable setting from a SubscriptionTracking object
      *
      * @return bool
      */
-    public function getEnable()
+    public function get_enable()
     {
         return $this->enable;
     }
-
     /**
      * Add text to a SubscriptionTracking object
      *
@@ -121,23 +110,20 @@ class SubscriptionTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setText($text): void
+    public function set_text($text): void
     {
         Assert::string($text, 'text');
-
         $this->text = $text;
     }
-
     /**
      * Retrieve text from a SubscriptionTracking object
      *
      * @return string
      */
-    public function getText()
+    public function get_text()
     {
         return $this->text;
     }
-
     /**
      * Add HTML to a SubscriptionTracking object
      *
@@ -148,23 +134,20 @@ class SubscriptionTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setHtml($html): void
+    public function set_html($html): void
     {
         Assert::string($html, 'html');
-
         $this->html = $html;
     }
-
     /**
      * Retrieve HTML from a SubscriptionTracking object
      *
      * @return string
      */
-    public function getHtml()
+    public function get_html()
     {
         return $this->html;
     }
-
     /**
      * Add a substitution tag to a SubscriptionTracking object
      *
@@ -178,40 +161,29 @@ class SubscriptionTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setSubstitutionTag($substitution_tag): void
+    public function set_substitution_tag($substitution_tag): void
     {
         Assert::string($substitution_tag, 'substitution_tag');
-
         $this->substitution_tag = $substitution_tag;
     }
-
     /**
      * Retrieve a substitution tag from a SubscriptionTracking object
      *
      * @return string
      */
-    public function getSubstitutionTag()
+    public function get_substitution_tag()
     {
         return $this->substitution_tag;
     }
-
     /**
      * Return an array representing a SubscriptionTracking object
      * for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'enable' => $this->getEnable(),
-                'text' => $this->getText(),
-                'html' => $this->getHtml(),
-                'substitution_tag' => $this->getSubstitutionTag(),
-            ],
-            fn (bool|string $value) => $value !== null
-        ) ?: null;
+        return array_filter(['enable' => $this->get_enable(), 'text' => $this->get_text(), 'html' => $this->get_html(), 'substitution_tag' => $this->get_substitution_tag()], fn(bool|string $value) => $value !== null) ?: null;
     }
 }

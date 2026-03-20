@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Plugin Data
  * This file contains the data object
@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @subpackage Template
  * @author     Uwe Tews
  */
-
 /**
  * class for the Smarty data object
  * The Smarty data object will hold Smarty variables in the current scope
@@ -25,21 +24,18 @@ class Smarty_Data extends Smarty_Internal_Data
      * @var int
      */
     public static $count = 0;
-
     /**
      * Data block name
      *
      * @var string
      */
-    public $dataObjectName = '';
-
+    public $data_object_name = '';
     /**
      * Smarty object
      *
      * @var Smarty
      */
     public $smarty = null;
-
     /**
      * create Smarty data object
      *
@@ -53,7 +49,7 @@ class Smarty_Data extends Smarty_Internal_Data
     {
         parent::__construct();
         self::$count++;
-        $this->dataObjectName = 'Data_object ' . (isset($name) ? "'{$name}'" : self::$count);
+        $this->data_object_name = 'Data_object ' . (isset($name) ? "'{$name}'" : self::$count);
         $this->smarty = $smarty;
         if (is_object($_parent)) {
             // when object set up back pointer
@@ -61,10 +57,10 @@ class Smarty_Data extends Smarty_Internal_Data
         } elseif (is_array($_parent)) {
             // set up variable values
             foreach ($_parent as $_key => $_val) {
-                $this->tpl_vars[ $_key ] = new Smarty_Variable($_val);
+                $this->tpl_vars[$_key] = new Smarty_Variable($_val);
             }
         } elseif ($_parent !== null) {
-            throw new SmartyException('Wrong type for template variables');
+            throw new Smarty_Exception('Wrong type for template variables');
         }
     }
 }

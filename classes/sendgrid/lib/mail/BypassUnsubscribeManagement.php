@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the BypassUnsubscribeManagement object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a BypassUnsubscribeManagement object for
  * the /mail/send API call
@@ -22,11 +20,10 @@ use SendGrid\Helper\Assert;
  *
  * @package SendGrid\Mail
  */
-class BypassUnsubscribeManagement implements \JsonSerializable
+class Bypass_Unsubscribe_Management implements \JsonSerializable
 {
     /** @var $enable bool Indicates if this setting is enabled */
     private $enable;
-
     /**
      * Optional constructor
      *
@@ -36,10 +33,9 @@ class BypassUnsubscribeManagement implements \JsonSerializable
     public function __construct($enable = null)
     {
         if (isset($enable)) {
-            $this->setEnable($enable);
+            $this->set_enable($enable);
         }
     }
-
     /**
      * Update the enable setting on a BypassUnsubscribeManagement object
      *
@@ -47,37 +43,29 @@ class BypassUnsubscribeManagement implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable): void
+    public function set_enable($enable): void
     {
         Assert::boolean($enable, 'enable');
-
         $this->enable = $enable;
     }
-
     /**
      * Retrieve the enable setting on a BypassUnsubscribeManagement object
      *
      * @return bool
      */
-    public function getEnable()
+    public function get_enable()
     {
         return $this->enable;
     }
-
     /**
      * Return an array representing a BypassUnsubscribeManagement object for
      * the SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'enable' => $this->getEnable(),
-            ],
-            fn (bool $value) => $value !== null
-        ) ?: null;
+        return array_filter(['enable' => $this->get_enable()], fn(bool $value) => $value !== null) ?: null;
     }
 }

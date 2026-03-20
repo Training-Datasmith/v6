@@ -11,21 +11,18 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Features extends AbstractEndpoint
+class Features extends Abstract_Endpoint
 {
     /**
      * Gets a list of features which can be included in snapshots using the feature_states field when creating a snapshot
@@ -47,18 +44,14 @@ class Features extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getFeatures(array $params = [])
+    public function get_features(array $params = [])
     {
         $url = '/_features';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Resets the internal state of features, usually by deleting system indices
      *
@@ -79,15 +72,12 @@ class Features extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function resetFeatures(array $params = [])
+    public function reset_features(array $params = [])
     {
         $url = '/_features/_reset';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

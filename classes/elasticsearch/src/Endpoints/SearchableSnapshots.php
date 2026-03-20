@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class SearchableSnapshots extends AbstractEndpoint
+class Searchable_Snapshots extends Abstract_Endpoint
 {
     /**
      * Retrieve node-level cache statistics about searchable snapshots.
@@ -49,7 +46,7 @@ class SearchableSnapshots extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function cacheStats(array $params = [])
+    public function cache_stats(array $params = [])
     {
         if (isset($params['node_id'])) {
             $url = '/_searchable_snapshots/' . $this->encode($params['node_id']) . '/cache/stats';
@@ -58,13 +55,10 @@ class SearchableSnapshots extends AbstractEndpoint
             $url = '/_searchable_snapshots/cache/stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Clear the cache of searchable snapshots.
      *
@@ -89,7 +83,7 @@ class SearchableSnapshots extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function clearCache(array $params = [])
+    public function clear_cache(array $params = [])
     {
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_searchable_snapshots/cache/clear';
@@ -98,13 +92,10 @@ class SearchableSnapshots extends AbstractEndpoint
             $url = '/_searchable_snapshots/cache/clear';
             $method = 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Mount a snapshot as a searchable index.
      *
@@ -133,18 +124,13 @@ class SearchableSnapshots extends AbstractEndpoint
      */
     public function mount(array $params = [])
     {
-        $this->checkRequiredParameters(['repository','snapshot','body'], $params);
+        $this->check_required_parameters(['repository', 'snapshot', 'body'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']) . '/' . $this->encode($params['snapshot']) . '/_mount';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','wait_for_completion','storage','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'wait_for_completion', 'storage', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieve shard-level statistics about searchable snapshots.
      *
@@ -175,10 +161,8 @@ class SearchableSnapshots extends AbstractEndpoint
             $url = '/_searchable_snapshots/stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['level','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['level', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

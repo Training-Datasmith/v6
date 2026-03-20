@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method UnregisterPlugin
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_UnregisterPlugin
+class Smarty_internal_method_unregister_Plugin
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * Registers plugin to be used in templates
      *
@@ -32,11 +30,11 @@ class Smarty_Internal_Method_UnregisterPlugin
      *
      * @return \Smarty|\Smarty_Internal_Template
      */
-    public function unregisterPlugin(Smarty_Internal_TemplateBase $obj, $type, $name)
+    public function unregister_plugin(Smarty_internal_template_Base $obj, $type, $name)
     {
-        $smarty = $obj->_getSmartyObj();
-        if (isset($smarty->registered_plugins[ $type ][ $name ])) {
-            unset($smarty->registered_plugins[ $type ][ $name ]);
+        $smarty = $obj->_get_smarty_obj();
+        if (isset($smarty->registered_plugins[$type][$name])) {
+            unset($smarty->registered_plugins[$type][$name]);
         }
         return $obj;
     }

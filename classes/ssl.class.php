@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 /**
  * Configuration controller
  *
@@ -26,28 +25,25 @@ class SSL
      * @var instance
      */
     protected static $_instance;
-
     ##############################################
     /**
      * Setup the instance (singleton)
      */
-    public static function getInstance(): self
+    public static function get_instance(): self
     {
-        if (!(self::$_instance instanceof self)) {
+        if (!self::$_instance instanceof self) {
             self::$_instance = new self();
         }
         return self::$_instance;
     }
-
     //=====[ Public ]=======================================
-
     /**
      * Validate redirect
      *
      * @param string $redir
      * @return bool
      */
-    public function validRedirect($redir): string|bool
+    public function valid_redirect($redir): string|bool
     {
         if (preg_match('#^http#iU', $redir)) {
             $standard_domain = preg_replace('#^https?://|^www\.#i', '', (string) $GLOBALS['config']->get('config', 'standard_url'));
@@ -55,7 +51,7 @@ class SSL
             $redir_host = strtolower(parse_url($redir, PHP_URL_HOST) ?? '');
             // Strip leading www. for comparison
             $redir_host = preg_replace('#^www\.#i', '', $redir_host);
-            return ($redir_host === $standard_domain || str_ends_with($redir_host, '.'.$standard_domain)) ? $redir : false;
+            return $redir_host === $standard_domain || str_ends_with($redir_host, '.' . $standard_domain) ? $redir : false;
         }
         return true;
     }

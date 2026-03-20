@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Snapshot extends AbstractEndpoint
+class Snapshot extends Abstract_Endpoint
 {
     /**
      * Removes stale data from repository.
@@ -51,19 +48,15 @@ class Snapshot extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function cleanupRepository(array $params = [])
+    public function cleanup_repository(array $params = [])
     {
-        $this->checkRequiredParameters(['repository'], $params);
+        $this->check_required_parameters(['repository'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']) . '/_cleanup';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Clones indices from one snapshot into another snapshot in the same repository.
      *
@@ -91,18 +84,13 @@ class Snapshot extends AbstractEndpoint
      */
     public function clone(array $params = [])
     {
-        $this->checkRequiredParameters(['repository','snapshot','target_snapshot','body'], $params);
+        $this->check_required_parameters(['repository', 'snapshot', 'target_snapshot', 'body'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']) . '/' . $this->encode($params['snapshot']) . '/_clone/' . $this->encode($params['target_snapshot']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a snapshot in a repository.
      *
@@ -130,18 +118,13 @@ class Snapshot extends AbstractEndpoint
      */
     public function create(array $params = [])
     {
-        $this->checkRequiredParameters(['repository','snapshot'], $params);
+        $this->check_required_parameters(['repository', 'snapshot'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']) . '/' . $this->encode($params['snapshot']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','wait_for_completion','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'wait_for_completion', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a repository.
      *
@@ -167,20 +150,15 @@ class Snapshot extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function createRepository(array $params = [])
+    public function create_repository(array $params = [])
     {
-        $this->checkRequiredParameters(['repository','body'], $params);
+        $this->check_required_parameters(['repository', 'body'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','timeout','verify','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'timeout', 'verify', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes one or more snapshots.
      *
@@ -206,17 +184,13 @@ class Snapshot extends AbstractEndpoint
      */
     public function delete(array $params = [])
     {
-        $this->checkRequiredParameters(['repository','snapshot'], $params);
+        $this->check_required_parameters(['repository', 'snapshot'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']) . '/' . $this->encode($params['snapshot']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes a repository.
      *
@@ -240,19 +214,15 @@ class Snapshot extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteRepository(array $params = [])
+    public function delete_repository(array $params = [])
     {
-        $this->checkRequiredParameters(['repository'], $params);
+        $this->check_required_parameters(['repository'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about a snapshot.
      *
@@ -290,17 +260,13 @@ class Snapshot extends AbstractEndpoint
      */
     public function get(array $params = [])
     {
-        $this->checkRequiredParameters(['repository','snapshot'], $params);
+        $this->check_required_parameters(['repository', 'snapshot'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']) . '/' . $this->encode($params['snapshot']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','ignore_unavailable','index_names','index_details','include_repository','sort','size','order','from_sort_value','after','offset','slm_policy_filter','verbose','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'ignore_unavailable', 'index_names', 'index_details', 'include_repository', 'sort', 'size', 'order', 'from_sort_value', 'after', 'offset', 'slm_policy_filter', 'verbose', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about a repository.
      *
@@ -323,7 +289,7 @@ class Snapshot extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getRepository(array $params = [])
+    public function get_repository(array $params = [])
     {
         if (isset($params['repository'])) {
             $url = '/_snapshot/' . $this->encode($params['repository']);
@@ -332,13 +298,10 @@ class Snapshot extends AbstractEndpoint
             $url = '/_snapshot';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['master_timeout','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Analyzes a repository for correctness and performance
      *
@@ -371,19 +334,15 @@ class Snapshot extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function repositoryAnalyze(array $params = [])
+    public function repository_analyze(array $params = [])
     {
-        $this->checkRequiredParameters(['repository'], $params);
+        $this->check_required_parameters(['repository'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']) . '/_analyze';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['blob_count','concurrency','read_node_count','early_read_node_count','seed','rare_action_probability','max_blob_size','max_total_data_size','timeout','detailed','rarely_abort_writes','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['blob_count', 'concurrency', 'read_node_count', 'early_read_node_count', 'seed', 'rare_action_probability', 'max_blob_size', 'max_total_data_size', 'timeout', 'detailed', 'rarely_abort_writes', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Restores a snapshot.
      *
@@ -411,18 +370,13 @@ class Snapshot extends AbstractEndpoint
      */
     public function restore(array $params = [])
     {
-        $this->checkRequiredParameters(['repository','snapshot'], $params);
+        $this->check_required_parameters(['repository', 'snapshot'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']) . '/' . $this->encode($params['snapshot']) . '/_restore';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','wait_for_completion','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'wait_for_completion', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about the status of a snapshot.
      *
@@ -458,13 +412,10 @@ class Snapshot extends AbstractEndpoint
             $url = '/_snapshot/_status';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['master_timeout','ignore_unavailable','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'ignore_unavailable', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Verifies a repository.
      *
@@ -488,16 +439,13 @@ class Snapshot extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function verifyRepository(array $params = [])
+    public function verify_repository(array $params = [])
     {
-        $this->checkRequiredParameters(['repository'], $params);
+        $this->check_required_parameters(['repository'], $params);
         $url = '/_snapshot/' . $this->encode($params['repository']) . '/_verify';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

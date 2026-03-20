@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Indices extends AbstractEndpoint
+class Indices extends Abstract_Endpoint
 {
     /**
      * Adds a block to an index.
@@ -55,19 +52,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function addBlock(array $params = [])
+    public function add_block(array $params = [])
     {
-        $this->checkRequiredParameters(['index','block'], $params);
+        $this->check_required_parameters(['index', 'block'], $params);
         $url = '/' . $this->encode($params['index']) . '/_block/' . $this->encode($params['block']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Performs the analysis process on a text and return the tokens breakdown of the text.
      *
@@ -98,14 +91,10 @@ class Indices extends AbstractEndpoint
             $url = '/_analyze';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Clears all or specific caches for one or more indices.
      *
@@ -133,7 +122,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function clearCache(array $params = [])
+    public function clear_cache(array $params = [])
     {
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_cache/clear';
@@ -142,13 +131,10 @@ class Indices extends AbstractEndpoint
             $url = '/_cache/clear';
             $method = 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['fielddata','fields','query','ignore_unavailable','allow_no_indices','expand_wildcards','request','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['fielddata', 'fields', 'query', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'request', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Clones an index
      *
@@ -177,18 +163,13 @@ class Indices extends AbstractEndpoint
      */
     public function clone(array $params = [])
     {
-        $this->checkRequiredParameters(['index','target'], $params);
+        $this->check_required_parameters(['index', 'target'], $params);
         $url = '/' . $this->encode($params['index']) . '/_clone/' . $this->encode($params['target']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','wait_for_active_shards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'wait_for_active_shards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Closes an index.
      *
@@ -218,17 +199,13 @@ class Indices extends AbstractEndpoint
      */
     public function close(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_close';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','ignore_unavailable','allow_no_indices','expand_wildcards','wait_for_active_shards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'wait_for_active_shards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates an index with optional settings and mappings.
      *
@@ -256,18 +233,13 @@ class Indices extends AbstractEndpoint
      */
     public function create(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_active_shards','timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_active_shards', 'timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a data stream
      *
@@ -289,19 +261,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function createDataStream(array $params = [])
+    public function create_data_stream(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_data_stream/' . $this->encode($params['name']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Provides statistics on operations happening in a data stream.
      *
@@ -322,7 +290,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function dataStreamsStats(array $params = [])
+    public function data_streams_stats(array $params = [])
     {
         if (isset($params['name'])) {
             $url = '/_data_stream/' . $this->encode($params['name']) . '/_stats';
@@ -331,13 +299,10 @@ class Indices extends AbstractEndpoint
             $url = '/_data_stream/_stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes an index.
      *
@@ -366,17 +331,13 @@ class Indices extends AbstractEndpoint
      */
     public function delete(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes an alias.
      *
@@ -401,19 +362,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteAlias(array $params = [])
+    public function delete_alias(array $params = [])
     {
-        $this->checkRequiredParameters(['index','name'], $params);
+        $this->check_required_parameters(['index', 'name'], $params);
         $url = '/' . $this->encode($params['index']) . '/_alias/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes a data stream.
      *
@@ -436,19 +393,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteDataStream(array $params = [])
+    public function delete_data_stream(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_data_stream/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes an index template.
      *
@@ -472,19 +425,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteIndexTemplate(array $params = [])
+    public function delete_index_template(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_index_template/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes an index template.
      *
@@ -508,19 +457,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteTemplate(array $params = [])
+    public function delete_template(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_template/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Analyzes the disk usage of each field of an index or data stream
      *
@@ -548,19 +493,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function diskUsage(array $params = [])
+    public function disk_usage(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_disk_usage';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['run_expensive_tasks','flush','ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['run_expensive_tasks', 'flush', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Downsample an index
      *
@@ -587,18 +528,13 @@ class Indices extends AbstractEndpoint
      */
     public function downsample(array $params = [])
     {
-        $this->checkRequiredParameters(['index','target_index','body'], $params);
+        $this->check_required_parameters(['index', 'target_index', 'body'], $params);
         $url = '/' . $this->encode($params['index']) . '/_downsample/' . $this->encode($params['target_index']);
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about whether a particular index exists.
      *
@@ -628,17 +564,13 @@ class Indices extends AbstractEndpoint
      */
     public function exists(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']);
         $method = 'HEAD';
-
-        $url = $this->addQueryString($url, $params, ['local','ignore_unavailable','allow_no_indices','expand_wildcards','flat_settings','include_defaults','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['local', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'flat_settings', 'include_defaults', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about whether a particular alias exists.
      *
@@ -665,9 +597,9 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function existsAlias(array $params = [])
+    public function exists_alias(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_alias/' . $this->encode($params['name']);
             $method = 'HEAD';
@@ -675,13 +607,10 @@ class Indices extends AbstractEndpoint
             $url = '/_alias/' . $this->encode($params['name']);
             $method = 'HEAD';
         }
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','expand_wildcards','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about whether a particular index template exists.
      *
@@ -706,19 +635,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function existsIndexTemplate(array $params = [])
+    public function exists_index_template(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_index_template/' . $this->encode($params['name']);
         $method = 'HEAD';
-
-        $url = $this->addQueryString($url, $params, ['flat_settings','master_timeout','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['flat_settings', 'master_timeout', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about whether a particular index template exists.
      *
@@ -743,19 +668,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function existsTemplate(array $params = [])
+    public function exists_template(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_template/' . $this->encode($params['name']);
         $method = 'HEAD';
-
-        $url = $this->addQueryString($url, $params, ['flat_settings','master_timeout','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['flat_settings', 'master_timeout', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns the field usage stats for each field of an index
      *
@@ -782,19 +703,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function fieldUsageStats(array $params = [])
+    public function field_usage_stats(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_field_usage_stats';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['fields','ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['fields', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Performs the flush operation on one or more indices.
      *
@@ -829,13 +746,10 @@ class Indices extends AbstractEndpoint
             $url = '/_flush';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['force','wait_if_ongoing','ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['force', 'wait_if_ongoing', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Performs the force merge operation on one or more indices.
      *
@@ -872,13 +786,10 @@ class Indices extends AbstractEndpoint
             $url = '/_forcemerge';
             $method = 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['flush','ignore_unavailable','allow_no_indices','expand_wildcards','max_num_segments','only_expunge_deletes','wait_for_completion','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['flush', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'max_num_segments', 'only_expunge_deletes', 'wait_for_completion', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about one or more indices.
      *
@@ -910,17 +821,13 @@ class Indices extends AbstractEndpoint
      */
     public function get(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['local','ignore_unavailable','allow_no_indices','expand_wildcards','features','flat_settings','include_defaults','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['local', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'features', 'flat_settings', 'include_defaults', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns an alias.
      *
@@ -946,7 +853,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getAlias(array $params = [])
+    public function get_alias(array $params = [])
     {
         if (isset($params['index']) && isset($params['name'])) {
             $url = '/' . $this->encode($params['index']) . '/_alias/' . $this->encode($params['name']);
@@ -961,13 +868,10 @@ class Indices extends AbstractEndpoint
             $url = '/_alias';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','expand_wildcards','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns data streams.
      *
@@ -989,7 +893,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getDataStream(array $params = [])
+    public function get_data_stream(array $params = [])
     {
         if (isset($params['name'])) {
             $url = '/_data_stream/' . $this->encode($params['name']);
@@ -998,13 +902,10 @@ class Indices extends AbstractEndpoint
             $url = '/_data_stream';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns mapping for one or more fields.
      *
@@ -1032,9 +933,9 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getFieldMapping(array $params = [])
+    public function get_field_mapping(array $params = [])
     {
-        $this->checkRequiredParameters(['fields'], $params);
+        $this->check_required_parameters(['fields'], $params);
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_mapping/field/' . $this->encode($params['fields']);
             $method = 'GET';
@@ -1042,13 +943,10 @@ class Indices extends AbstractEndpoint
             $url = '/_mapping/field/' . $this->encode($params['fields']);
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['include_defaults','ignore_unavailable','allow_no_indices','expand_wildcards','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['include_defaults', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns an index template.
      *
@@ -1072,7 +970,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getIndexTemplate(array $params = [])
+    public function get_index_template(array $params = [])
     {
         if (isset($params['name'])) {
             $url = '/_index_template/' . $this->encode($params['name']);
@@ -1081,13 +979,10 @@ class Indices extends AbstractEndpoint
             $url = '/_index_template';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['flat_settings','master_timeout','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['flat_settings', 'master_timeout', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns mappings for one or more indices.
      *
@@ -1113,7 +1008,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getMapping(array $params = [])
+    public function get_mapping(array $params = [])
     {
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_mapping';
@@ -1122,13 +1017,10 @@ class Indices extends AbstractEndpoint
             $url = '/_mapping';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','expand_wildcards','master_timeout','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'master_timeout', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns settings for one or more indices.
      *
@@ -1157,7 +1049,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getSettings(array $params = [])
+    public function get_settings(array $params = [])
     {
         if (isset($params['index']) && isset($params['name'])) {
             $url = '/' . $this->encode($params['index']) . '/_settings/' . $this->encode($params['name']);
@@ -1172,13 +1064,10 @@ class Indices extends AbstractEndpoint
             $url = '/_settings';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['master_timeout','ignore_unavailable','allow_no_indices','expand_wildcards','flat_settings','local','include_defaults','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'flat_settings', 'local', 'include_defaults', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns an index template.
      *
@@ -1202,7 +1091,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getTemplate(array $params = [])
+    public function get_template(array $params = [])
     {
         if (isset($params['name'])) {
             $url = '/_template/' . $this->encode($params['name']);
@@ -1211,13 +1100,10 @@ class Indices extends AbstractEndpoint
             $url = '/_template';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['flat_settings','master_timeout','local','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['flat_settings', 'master_timeout', 'local', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Migrates an alias to a data stream
      *
@@ -1239,19 +1125,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function migrateToDataStream(array $params = [])
+    public function migrate_to_data_stream(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_data_stream/_migrate/' . $this->encode($params['name']);
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Modifies a data stream
      *
@@ -1272,20 +1154,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function modifyDataStream(array $params = [])
+    public function modify_data_stream(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_data_stream/_modify';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Opens an index.
      *
@@ -1315,17 +1192,13 @@ class Indices extends AbstractEndpoint
      */
     public function open(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_open';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','ignore_unavailable','allow_no_indices','expand_wildcards','wait_for_active_shards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'wait_for_active_shards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Promotes a data stream from a replicated data stream managed by CCR to a regular data stream
      *
@@ -1347,19 +1220,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function promoteDataStream(array $params = [])
+    public function promote_data_stream(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_data_stream/_promote/' . $this->encode($params['name']);
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates or updates an alias.
      *
@@ -1385,20 +1254,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putAlias(array $params = [])
+    public function put_alias(array $params = [])
     {
-        $this->checkRequiredParameters(['index','name'], $params);
+        $this->check_required_parameters(['index', 'name'], $params);
         $url = '/' . $this->encode($params['index']) . '/_alias/' . $this->encode($params['name']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates or updates an index template.
      *
@@ -1424,20 +1288,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putIndexTemplate(array $params = [])
+    public function put_index_template(array $params = [])
     {
-        $this->checkRequiredParameters(['name','body'], $params);
+        $this->check_required_parameters(['name', 'body'], $params);
         $url = '/_index_template/' . $this->encode($params['name']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['create','cause','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['create', 'cause', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates the index mappings.
      *
@@ -1466,20 +1325,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putMapping(array $params = [])
+    public function put_mapping(array $params = [])
     {
-        $this->checkRequiredParameters(['index','body'], $params);
+        $this->check_required_parameters(['index', 'body'], $params);
         $url = '/' . $this->encode($params['index']) . '/_mapping';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','ignore_unavailable','allow_no_indices','expand_wildcards','write_index_only','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'write_index_only', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates the index settings.
      *
@@ -1508,9 +1362,9 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putSettings(array $params = [])
+    public function put_settings(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_settings';
             $method = 'PUT';
@@ -1518,14 +1372,10 @@ class Indices extends AbstractEndpoint
             $url = '/_settings';
             $method = 'PUT';
         }
-        $url = $this->addQueryString($url, $params, ['master_timeout','timeout','preserve_existing','ignore_unavailable','allow_no_indices','expand_wildcards','flat_settings','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'timeout', 'preserve_existing', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'flat_settings', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates or updates an index template.
      *
@@ -1551,20 +1401,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putTemplate(array $params = [])
+    public function put_template(array $params = [])
     {
-        $this->checkRequiredParameters(['name','body'], $params);
+        $this->check_required_parameters(['name', 'body'], $params);
         $url = '/_template/' . $this->encode($params['name']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['order','create','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['order', 'create', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about ongoing index shard recoveries.
      *
@@ -1596,13 +1441,10 @@ class Indices extends AbstractEndpoint
             $url = '/_recovery';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['detailed','active_only','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['detailed', 'active_only', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Performs the refresh operation in one or more indices.
      *
@@ -1635,13 +1477,10 @@ class Indices extends AbstractEndpoint
             $url = '/_refresh';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Reloads an index's search analyzers and their resources.
      *
@@ -1666,19 +1505,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function reloadSearchAnalyzers(array $params = [])
+    public function reload_search_analyzers(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_reload_search_analyzers';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about any matching indices, aliases, and data streams
      *
@@ -1701,19 +1536,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function resolveIndex(array $params = [])
+    public function resolve_index(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_resolve/index/' . $this->encode($params['name']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates an alias to point to a new index when the existing index
      * is considered to be too large or too old.
@@ -1744,7 +1575,7 @@ class Indices extends AbstractEndpoint
      */
     public function rollover(array $params = [])
     {
-        $this->checkRequiredParameters(['alias'], $params);
+        $this->check_required_parameters(['alias'], $params);
         if (isset($params['new_index'])) {
             $url = '/' . $this->encode($params['alias']) . '/_rollover/' . $this->encode($params['new_index']);
             $method = 'POST';
@@ -1752,14 +1583,10 @@ class Indices extends AbstractEndpoint
             $url = '/' . $this->encode($params['alias']) . '/_rollover';
             $method = 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['timeout','dry_run','master_timeout','wait_for_active_shards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'dry_run', 'master_timeout', 'wait_for_active_shards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Provides low-level information about segments in a Lucene index.
      *
@@ -1793,13 +1620,10 @@ class Indices extends AbstractEndpoint
             $url = '/_segments';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','expand_wildcards','verbose','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'verbose', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Provides store information for shard copies of indices.
      *
@@ -1824,7 +1648,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function shardStores(array $params = [])
+    public function shard_stores(array $params = [])
     {
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_shard_stores';
@@ -1833,13 +1657,10 @@ class Indices extends AbstractEndpoint
             $url = '/_shard_stores';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['status','ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['status', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allow to shrink an existing index into a new index with fewer primary shards.
      *
@@ -1868,18 +1689,13 @@ class Indices extends AbstractEndpoint
      */
     public function shrink(array $params = [])
     {
-        $this->checkRequiredParameters(['index','target'], $params);
+        $this->check_required_parameters(['index', 'target'], $params);
         $url = '/' . $this->encode($params['index']) . '/_shrink/' . $this->encode($params['target']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','wait_for_active_shards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'wait_for_active_shards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Simulate matching the given index name against the index templates in the system
      *
@@ -1905,20 +1721,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function simulateIndexTemplate(array $params = [])
+    public function simulate_index_template(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_index_template/_simulate_index/' . $this->encode($params['name']);
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['create','cause','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['create', 'cause', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Simulate resolving the given template name or body
      *
@@ -1943,7 +1754,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function simulateTemplate(array $params = [])
+    public function simulate_template(array $params = [])
     {
         if (isset($params['name'])) {
             $url = '/_index_template/_simulate/' . $this->encode($params['name']);
@@ -1952,14 +1763,10 @@ class Indices extends AbstractEndpoint
             $url = '/_index_template/_simulate';
             $method = 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['create','cause','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['create', 'cause', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows you to split an existing index into a new index with more primary shards.
      *
@@ -1988,18 +1795,13 @@ class Indices extends AbstractEndpoint
      */
     public function split(array $params = [])
     {
-        $this->checkRequiredParameters(['index','target'], $params);
+        $this->check_required_parameters(['index', 'target'], $params);
         $url = '/' . $this->encode($params['index']) . '/_split/' . $this->encode($params['target']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','wait_for_active_shards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'wait_for_active_shards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Provides statistics on operations happening in an index.
      *
@@ -2045,13 +1847,10 @@ class Indices extends AbstractEndpoint
             $url = '/_stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['completion_fields','fielddata_fields','fields','groups','level','include_segment_file_sizes','include_unloaded_segments','expand_wildcards','forbid_closed_indices','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['completion_fields', 'fielddata_fields', 'fields', 'groups', 'level', 'include_segment_file_sizes', 'include_unloaded_segments', 'expand_wildcards', 'forbid_closed_indices', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Unfreezes an index. When a frozen index is unfrozen, the index goes through the normal recovery process and becomes writeable again.
      *
@@ -2081,17 +1880,13 @@ class Indices extends AbstractEndpoint
      */
     public function unfreeze(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_unfreeze';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','ignore_unavailable','allow_no_indices','expand_wildcards','wait_for_active_shards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'wait_for_active_shards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates index aliases.
      *
@@ -2114,20 +1909,15 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function updateAliases(array $params = [])
+    public function update_aliases(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_aliases';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows a user to validate a potentially expensive query without executing it.
      *
@@ -2161,7 +1951,7 @@ class Indices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function validateQuery(array $params = [])
+    public function validate_query(array $params = [])
     {
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_validate/query';
@@ -2170,11 +1960,8 @@ class Indices extends AbstractEndpoint
             $url = '/_validate/query';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['explain','ignore_unavailable','allow_no_indices','expand_wildcards','q','analyzer','analyze_wildcard','default_operator','df','lenient','rewrite','all_shards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['explain', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'q', 'analyzer', 'analyze_wildcard', 'default_operator', 'df', 'lenient', 'rewrite', 'all_shards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

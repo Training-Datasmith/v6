@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Resource PHP
  * Implements the file system as resource for PHP templates
@@ -19,21 +18,18 @@ class Smarty_Internal_Resource_Php extends Smarty_Internal_Resource_File
      * @var bool
      */
     public $uncompiled = true;
-
     /**
      * Resource does implement populateCompiledFilepath() method
      *
      * @var bool
      */
-    public $hasCompiledHandler = true;
-
+    public $has_compiled_handler = true;
     /**
      * container for short_open_tag directive's value before executing PHP templates
      *
      * @var string
      */
     protected $short_open_tag;
-
     /**
      * Create a new PHP Resource
      */
@@ -41,7 +37,6 @@ class Smarty_Internal_Resource_Php extends Smarty_Internal_Resource_File
     {
         $this->short_open_tag = function_exists('ini_get') ? ini_get('short_open_tag') : 1;
     }
-
     /**
      * Load template's source from file into current template object
      *
@@ -50,33 +45,26 @@ class Smarty_Internal_Resource_Php extends Smarty_Internal_Resource_File
      * @return string                 template source
      * @throws SmartyException        if source cannot be loaded
      */
-    public function getContent(Smarty_Template_Source $source)
+    public function get_content(Smarty_Template_Source $source)
     {
         if ($source->exists) {
             return '';
         }
-        throw new SmartyException("Unable to read template {$source->type} '{$source->name}'");
+        throw new Smarty_Exception("Unable to read template {$source->type} '{$source->name}'");
     }
-
     /**
      * populate compiled object with compiled filepath
      *
      * @param Smarty_Template_Compiled $compiled  compiled object
      * @param Smarty_Internal_Template $_template template object (is ignored)
      */
-    public function populateCompiledFilepath(Smarty_Template_Compiled $compiled, Smarty_Internal_Template $_template)
+    public function populate_compiled_filepath(Smarty_Template_Compiled $compiled, Smarty_Internal_Template $_template)
     {
         $compiled->filepath = $_template->source->filepath;
         $compiled->timestamp = $_template->source->timestamp;
         $compiled->exists = $_template->source->exists;
-        $compiled->file_dependency[ $_template->source->uid ] =
-            [
-                $compiled->filepath,
-                $compiled->timestamp,
-                $_template->source->type,
-            ];
+        $compiled->file_dependency[$_template->source->uid] = [$compiled->filepath, $compiled->timestamp, $_template->source->type];
     }
-
     /**
      * Render and output the template (without using the compiler)
      *
@@ -86,19 +74,16 @@ class Smarty_Internal_Resource_Php extends Smarty_Internal_Resource_File
      * @return void
      * @throws SmartyException          if template cannot be loaded or allow_php_templates is disabled
      */
-    public function renderUncompiled(Smarty_Template_Source $source, Smarty_Internal_Template $_template)
+    public function render_uncompiled(Smarty_Template_Source $source, Smarty_Internal_Template $_template)
     {
         if (!$source->smarty->allow_php_templates) {
-            throw new SmartyException('PHP templates are disabled');
+            throw new Smarty_Exception('PHP templates are disabled');
         }
         if (!$source->exists) {
-            throw new SmartyException(
-                "Unable to load template '{$source->type}:{$source->name}'" .
-                ($_template->_isSubTpl() ? " in '{$_template->parent->template_resource}'" : '')
-            );
+            throw new Smarty_Exception("Unable to load template '{$source->type}:{$source->name}'" . ($_template->_is_sub_tpl() ? " in '{$_template->parent->template_resource}'" : ''));
         }
         // prepare variables
-        extract($_template->getTemplateVars());
+        extract($_template->get_template_vars());
         // include PHP template with short open tags enabled
         if (function_exists('ini_set')) {
             ini_set('short_open_tag', '1');

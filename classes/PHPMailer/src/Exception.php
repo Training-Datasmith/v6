@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * PHPMailer Exception class.
  * PHP Version 5.5.
@@ -20,8 +19,7 @@ declare(strict_types=1);
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.
  */
-
-namespace PHPMailer\PHPMailer;
+namespace Php_Mailer\Php_Mailer;
 
 /**
  * PHPMailer exception handler.
@@ -33,8 +31,8 @@ class Exception extends \Exception
     /**
      * Prettify error message output.
      */
-    public function errorMessage(): string
+    public function error_message(): string
     {
-        return '<strong>' . htmlspecialchars($this->getMessage()) . "</strong><br />\n";
+        return '<strong>' . htmlspecialchars($this->get_message()) . "</strong><br />\n";
     }
 }

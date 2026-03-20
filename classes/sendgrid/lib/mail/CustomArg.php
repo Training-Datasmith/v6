@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the CustomArg object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a CustomArg object for the /mail/send API call
  *
@@ -21,13 +19,12 @@ use SendGrid\Helper\Assert;
  *
  * @package SendGrid\Mail
  */
-class CustomArg implements \JsonSerializable
+class Custom_Arg implements \JsonSerializable
 {
     /** @var $key string Custom arg key */
     private $key;
     /** @var $value string Custom arg value */
     private $value;
-
     /**
      * Optional constructor
      *
@@ -38,13 +35,12 @@ class CustomArg implements \JsonSerializable
     public function __construct($key = null, $value = null)
     {
         if (isset($key)) {
-            $this->setKey($key);
+            $this->set_key($key);
         }
         if (isset($value)) {
-            $this->setValue($value);
+            $this->set_value($value);
         }
     }
-
     /**
      * Add a custom arg key on a CustomArg object
      *
@@ -52,23 +48,20 @@ class CustomArg implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setKey($key): void
+    public function set_key($key): void
     {
         Assert::string($key, 'key');
-
         $this->key = $key;
     }
-
     /**
      * Retrieve a custom arg key on a CustomArg object
      *
      * @return string
      */
-    public function getKey()
+    public function get_key()
     {
         return $this->key;
     }
-
     /**
      * Add a custom arg value on a CustomArg object
      *
@@ -76,37 +69,28 @@ class CustomArg implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setValue($value): void
+    public function set_value($value): void
     {
         Assert::string($value, 'value');
-
         $this->value = $value;
     }
-
     /**
      * Retrieve a custom arg key on a CustomArg object
      *
      * @return string
      */
-    public function getValue()
+    public function get_value()
     {
         return $this->value;
     }
-
     /**
      * Return an array representing a CustomArg object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'key' => $this->getKey(),
-                'value' => $this->getValue(),
-            ],
-            fn (string $value) => $value !== null
-        ) ?: null;
+        return array_filter(['key' => $this->get_key(), 'value' => $this->get_value()], fn(string $value) => $value !== null) ?: null;
     }
 }

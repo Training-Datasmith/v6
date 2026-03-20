@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method ClearAllAssign
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_ClearAllAssign
+class Smarty_internal_method_clear_All_Assign
 {
     /**
      * Valid for all objects
      *
      * @var int
      */
-    public $objMap = 7;
-
+    public $obj_map = 7;
     /**
      * clear all the assigned template variables.
      *
@@ -30,7 +28,7 @@ class Smarty_Internal_Method_ClearAllAssign
      *
      * @return \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty
      */
-    public function clearAllAssign(Smarty_Internal_Data $data)
+    public function clear_all_assign(Smarty_Internal_Data $data)
     {
         $data->tpl_vars = [];
         return $data;

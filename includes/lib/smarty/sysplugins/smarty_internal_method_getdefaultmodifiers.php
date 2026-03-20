@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method GetDefaultModifiers
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_GetDefaultModifiers
+class Smarty_internal_method_get_Default_Modifiers
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * Get default modifiers
      *
@@ -29,9 +27,9 @@ class Smarty_Internal_Method_GetDefaultModifiers
      *
      * @return array list of default modifiers
      */
-    public function getDefaultModifiers(Smarty_Internal_TemplateBase $obj)
+    public function get_default_modifiers(Smarty_internal_template_Base $obj)
     {
-        $smarty = $obj->_getSmartyObj();
+        $smarty = $obj->_get_smarty_obj();
         return $smarty->default_modifiers;
     }
 }

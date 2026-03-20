@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method GetConfigVariable
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_GetConfigVariable
+class Smarty_internal_method_get_Config_Variable
 {
     /**
      * Valid for all objects
      *
      * @var int
      */
-    public $objMap = 7;
-
+    public $obj_map = 7;
     /**
      * gets  a config variable value
      *
@@ -29,8 +27,8 @@ class Smarty_Internal_Method_GetConfigVariable
      *
      * @return null|string  the value of the config variable
      */
-    public function getConfigVariable(Smarty_Internal_Data $data, $varName = null, $errorEnable = true)
+    public function get_config_variable(Smarty_Internal_Data $data, $var_name = null, $error_enable = true)
     {
-        return $data->ext->configLoad->_getConfigVariable($data, $varName, $errorEnable);
+        return $data->ext->config_load->_get_config_variable($data, $var_name, $error_enable);
     }
 }

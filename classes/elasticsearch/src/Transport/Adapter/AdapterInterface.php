@@ -11,13 +11,11 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Transport\Adapter;
 
-use Psr\Http\Client\ClientInterface;
-
-interface AdapterInterface
+use Psr\Http\Client\Client_Interface;
+interface Adapter_Interface
 {
-    public function setConfig(ClientInterface $client, array $config, array $clientOptions): ClientInterface;
+    public function set_config(Client_Interface $client, array $config, array $client_options): Client_Interface;
 }

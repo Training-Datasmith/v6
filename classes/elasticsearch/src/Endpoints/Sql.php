@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Sql extends AbstractEndpoint
+class Sql extends Abstract_Endpoint
 {
     /**
      * Clears the SQL cursor
@@ -48,20 +45,15 @@ class Sql extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function clearCursor(array $params = [])
+    public function clear_cursor(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_sql/close';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes an async SQL search or a stored synchronous SQL search. If the search is still running, the API cancels it.
      *
@@ -83,19 +75,15 @@ class Sql extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteAsync(array $params = [])
+    public function delete_async(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_sql/async/delete/' . $this->encode($params['id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns the current status and available results for an async SQL search or stored synchronous SQL search
      *
@@ -121,19 +109,15 @@ class Sql extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getAsync(array $params = [])
+    public function get_async(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_sql/async/' . $this->encode($params['id']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['delimiter','format','keep_alive','wait_for_completion_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['delimiter', 'format', 'keep_alive', 'wait_for_completion_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns the current status of an async SQL search or a stored synchronous SQL search
      *
@@ -155,19 +139,15 @@ class Sql extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getAsyncStatus(array $params = [])
+    public function get_async_status(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_sql/async/status/' . $this->encode($params['id']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Executes a SQL request
      *
@@ -191,18 +171,13 @@ class Sql extends AbstractEndpoint
      */
     public function query(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_sql';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['format','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Translates SQL into Elasticsearch queries
      *
@@ -225,15 +200,11 @@ class Sql extends AbstractEndpoint
      */
     public function translate(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_sql/translate';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

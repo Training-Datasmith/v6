@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Traits;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-trait ClientEndpointsTrait
+trait Client_Endpoints_Trait
 {
     /**
      * Allows to perform multiple index/update/delete operations in a single request.
@@ -61,7 +58,7 @@ trait ClientEndpointsTrait
      */
     public function bulk(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_bulk';
             $method = 'POST';
@@ -69,14 +66,10 @@ trait ClientEndpointsTrait
             $url = '/_bulk';
             $method = 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['wait_for_active_shards','refresh','routing','timeout','type','_source','_source_excludes','_source_includes','pipeline','require_alias','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/x-ndjson',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_active_shards', 'refresh', 'routing', 'timeout', 'type', '_source', '_source_excludes', '_source_includes', 'pipeline', 'require_alias', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/x-ndjson'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Explicitly clears the search context for a scroll.
      *
@@ -98,7 +91,7 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function clearScroll(array $params = [])
+    public function clear_scroll(array $params = [])
     {
         if (isset($params['scroll_id'])) {
             $url = '/_search/scroll/' . $this->encode($params['scroll_id']);
@@ -107,14 +100,10 @@ trait ClientEndpointsTrait
             $url = '/_search/scroll';
             $method = 'DELETE';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Close a point in time
      *
@@ -135,19 +124,14 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function closePointInTime(array $params = [])
+    public function close_point_in_time(array $params = [])
     {
         $url = '/_pit';
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns number of documents matching a query.
      *
@@ -192,14 +176,10 @@ trait ClientEndpointsTrait
             $url = '/_count';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','ignore_throttled','allow_no_indices','expand_wildcards','min_score','preference','routing','q','analyzer','analyze_wildcard','default_operator','df','lenient','terminate_after','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'ignore_throttled', 'allow_no_indices', 'expand_wildcards', 'min_score', 'preference', 'routing', 'q', 'analyzer', 'analyze_wildcard', 'default_operator', 'df', 'lenient', 'terminate_after', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a new document in the index.
      *
@@ -234,18 +214,13 @@ trait ClientEndpointsTrait
      */
     public function create(array $params = [])
     {
-        $this->checkRequiredParameters(['id','index','body'], $params);
+        $this->check_required_parameters(['id', 'index', 'body'], $params);
         $url = '/' . $this->encode($params['index']) . '/_create/' . $this->encode($params['id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_active_shards','refresh','routing','timeout','version','version_type','pipeline','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_active_shards', 'refresh', 'routing', 'timeout', 'version', 'version_type', 'pipeline', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Removes a document from the index.
      *
@@ -278,17 +253,13 @@ trait ClientEndpointsTrait
      */
     public function delete(array $params = [])
     {
-        $this->checkRequiredParameters(['id','index'], $params);
+        $this->check_required_parameters(['id', 'index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_doc/' . $this->encode($params['id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_active_shards','refresh','routing','timeout','if_seq_no','if_primary_term','version','version_type','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_active_shards', 'refresh', 'routing', 'timeout', 'if_seq_no', 'if_primary_term', 'version', 'version_type', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes documents matching the provided query.
      *
@@ -340,20 +311,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteByQuery(array $params = [])
+    public function delete_by_query(array $params = [])
     {
-        $this->checkRequiredParameters(['index','body'], $params);
+        $this->check_required_parameters(['index', 'body'], $params);
         $url = '/' . $this->encode($params['index']) . '/_delete_by_query';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['analyzer','analyze_wildcard','default_operator','df','from','ignore_unavailable','allow_no_indices','conflicts','expand_wildcards','lenient','preference','q','routing','scroll','search_type','search_timeout','max_docs','sort','terminate_after','stats','version','request_cache','refresh','timeout','wait_for_active_shards','scroll_size','wait_for_completion','requests_per_second','slices','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['analyzer', 'analyze_wildcard', 'default_operator', 'df', 'from', 'ignore_unavailable', 'allow_no_indices', 'conflicts', 'expand_wildcards', 'lenient', 'preference', 'q', 'routing', 'scroll', 'search_type', 'search_timeout', 'max_docs', 'sort', 'terminate_after', 'stats', 'version', 'request_cache', 'refresh', 'timeout', 'wait_for_active_shards', 'scroll_size', 'wait_for_completion', 'requests_per_second', 'slices', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Changes the number of requests per second for a particular Delete By Query operation.
      *
@@ -376,19 +342,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteByQueryRethrottle(array $params = [])
+    public function delete_by_query_rethrottle(array $params = [])
     {
-        $this->checkRequiredParameters(['task_id','requests_per_second'], $params);
+        $this->check_required_parameters(['task_id', 'requests_per_second'], $params);
         $url = '/_delete_by_query/' . $this->encode($params['task_id']) . '/_rethrottle';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['requests_per_second','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['requests_per_second', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes a script.
      *
@@ -412,19 +374,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteScript(array $params = [])
+    public function delete_script(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_scripts/' . $this->encode($params['id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about whether a document exists in an index.
      *
@@ -459,17 +417,13 @@ trait ClientEndpointsTrait
      */
     public function exists(array $params = [])
     {
-        $this->checkRequiredParameters(['id','index'], $params);
+        $this->check_required_parameters(['id', 'index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_doc/' . $this->encode($params['id']);
         $method = 'HEAD';
-
-        $url = $this->addQueryString($url, $params, ['stored_fields','preference','realtime','refresh','routing','_source','_source_excludes','_source_includes','version','version_type','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['stored_fields', 'preference', 'realtime', 'refresh', 'routing', '_source', '_source_excludes', '_source_includes', 'version', 'version_type', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about whether a document source exists in an index.
      *
@@ -501,19 +455,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function existsSource(array $params = [])
+    public function exists_source(array $params = [])
     {
-        $this->checkRequiredParameters(['id','index'], $params);
+        $this->check_required_parameters(['id', 'index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_source/' . $this->encode($params['id']);
         $method = 'HEAD';
-
-        $url = $this->addQueryString($url, $params, ['preference','realtime','refresh','routing','_source','_source_excludes','_source_includes','version','version_type','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['preference', 'realtime', 'refresh', 'routing', '_source', '_source_excludes', '_source_includes', 'version', 'version_type', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about why a specific matches (or doesn't match) a query.
      *
@@ -551,18 +501,13 @@ trait ClientEndpointsTrait
      */
     public function explain(array $params = [])
     {
-        $this->checkRequiredParameters(['id','index'], $params);
+        $this->check_required_parameters(['id', 'index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_explain/' . $this->encode($params['id']);
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['analyze_wildcard','analyzer','default_operator','df','stored_fields','lenient','preference','q','routing','_source','_source_excludes','_source_includes','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['analyze_wildcard', 'analyzer', 'default_operator', 'df', 'stored_fields', 'lenient', 'preference', 'q', 'routing', '_source', '_source_excludes', '_source_includes', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns the information about the capabilities of fields among multiple indices.
      *
@@ -591,7 +536,7 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function fieldCaps(array $params = [])
+    public function field_caps(array $params = [])
     {
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_field_caps';
@@ -600,14 +545,10 @@ trait ClientEndpointsTrait
             $url = '/_field_caps';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['fields','ignore_unavailable','allow_no_indices','expand_wildcards','include_unmapped','filters','types','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['fields', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'include_unmapped', 'filters', 'types', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns a document.
      *
@@ -643,17 +584,13 @@ trait ClientEndpointsTrait
      */
     public function get(array $params = [])
     {
-        $this->checkRequiredParameters(['id','index'], $params);
+        $this->check_required_parameters(['id', 'index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_doc/' . $this->encode($params['id']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['force_synthetic_source','stored_fields','preference','realtime','refresh','routing','_source','_source_excludes','_source_includes','version','version_type','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['force_synthetic_source', 'stored_fields', 'preference', 'realtime', 'refresh', 'routing', '_source', '_source_excludes', '_source_includes', 'version', 'version_type', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns a script.
      *
@@ -676,19 +613,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function getScript(array $params = [])
+    public function get_script(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_scripts/' . $this->encode($params['id']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns all script contexts.
      *
@@ -708,18 +641,14 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function getScriptContext(array $params = [])
+    public function get_script_context(array $params = [])
     {
         $url = '/_script_context';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns available script types, languages and contexts
      *
@@ -739,18 +668,14 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function getScriptLanguages(array $params = [])
+    public function get_script_languages(array $params = [])
     {
         $url = '/_script_language';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns the source of a document.
      *
@@ -782,19 +707,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function getSource(array $params = [])
+    public function get_source(array $params = [])
     {
-        $this->checkRequiredParameters(['id','index'], $params);
+        $this->check_required_parameters(['id', 'index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_source/' . $this->encode($params['id']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['preference','realtime','refresh','routing','_source','_source_excludes','_source_includes','version','version_type','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['preference', 'realtime', 'refresh', 'routing', '_source', '_source_excludes', '_source_includes', 'version', 'version_type', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates or updates a document in an index.
      *
@@ -831,7 +752,7 @@ trait ClientEndpointsTrait
      */
     public function index(array $params = [])
     {
-        $this->checkRequiredParameters(['index','body'], $params);
+        $this->check_required_parameters(['index', 'body'], $params);
         if (isset($params['id'])) {
             $url = '/' . $this->encode($params['index']) . '/_doc/' . $this->encode($params['id']);
             $method = 'PUT';
@@ -839,14 +760,10 @@ trait ClientEndpointsTrait
             $url = '/' . $this->encode($params['index']) . '/_doc';
             $method = 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['wait_for_active_shards','op_type','refresh','routing','timeout','version','version_type','if_seq_no','if_primary_term','pipeline','require_alias','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_active_shards', 'op_type', 'refresh', 'routing', 'timeout', 'version', 'version_type', 'if_seq_no', 'if_primary_term', 'pipeline', 'require_alias', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns basic information about the cluster.
      *
@@ -870,14 +787,10 @@ trait ClientEndpointsTrait
     {
         $url = '/';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Performs a kNN search.
      *
@@ -902,20 +815,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function knnSearch(array $params = [])
+    public function knn_search(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_knn_search';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['routing','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['routing', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows to get multiple documents in one request.
      *
@@ -948,7 +856,7 @@ trait ClientEndpointsTrait
      */
     public function mget(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_mget';
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -956,14 +864,10 @@ trait ClientEndpointsTrait
             $url = '/_mget';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['force_synthetic_source','stored_fields','preference','realtime','refresh','routing','_source','_source_excludes','_source_includes','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['force_synthetic_source', 'stored_fields', 'preference', 'realtime', 'refresh', 'routing', '_source', '_source_excludes', '_source_includes', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows to execute several search operations in one request.
      *
@@ -994,7 +898,7 @@ trait ClientEndpointsTrait
      */
     public function msearch(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_msearch';
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -1002,14 +906,10 @@ trait ClientEndpointsTrait
             $url = '/_msearch';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['search_type','max_concurrent_searches','typed_keys','pre_filter_shard_size','max_concurrent_shard_requests','rest_total_hits_as_int','ccs_minimize_roundtrips','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/x-ndjson',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['search_type', 'max_concurrent_searches', 'typed_keys', 'pre_filter_shard_size', 'max_concurrent_shard_requests', 'rest_total_hits_as_int', 'ccs_minimize_roundtrips', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/x-ndjson'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows to execute several search template operations in one request.
      *
@@ -1036,9 +936,9 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function msearchTemplate(array $params = [])
+    public function msearch_template(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_msearch/template';
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -1046,14 +946,10 @@ trait ClientEndpointsTrait
             $url = '/_msearch/template';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['search_type','typed_keys','max_concurrent_searches','rest_total_hits_as_int','ccs_minimize_roundtrips','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/x-ndjson',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['search_type', 'typed_keys', 'max_concurrent_searches', 'rest_total_hits_as_int', 'ccs_minimize_roundtrips', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/x-ndjson'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns multiple termvectors in one request.
      *
@@ -1096,14 +992,10 @@ trait ClientEndpointsTrait
             $url = '/_mtermvectors';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['ids','term_statistics','field_statistics','fields','offsets','positions','payloads','preference','routing','realtime','version','version_type','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ids', 'term_statistics', 'field_statistics', 'fields', 'offsets', 'positions', 'payloads', 'preference', 'routing', 'realtime', 'version', 'version_type', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Open a point in time that can be used in subsequent searches
      *
@@ -1130,19 +1022,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function openPointInTime(array $params = [])
+    public function open_point_in_time(array $params = [])
     {
-        $this->checkRequiredParameters(['index','keep_alive'], $params);
+        $this->check_required_parameters(['index', 'keep_alive'], $params);
         $url = '/' . $this->encode($params['index']) . '/_pit';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['preference','routing','ignore_unavailable','expand_wildcards','keep_alive','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['preference', 'routing', 'ignore_unavailable', 'expand_wildcards', 'keep_alive', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns whether the cluster is running.
      *
@@ -1166,14 +1054,10 @@ trait ClientEndpointsTrait
     {
         $url = '/';
         $method = 'HEAD';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates or updates a script.
      *
@@ -1199,9 +1083,9 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function putScript(array $params = [])
+    public function put_script(array $params = [])
     {
-        $this->checkRequiredParameters(['id','body'], $params);
+        $this->check_required_parameters(['id', 'body'], $params);
         if (isset($params['context'])) {
             $url = '/_scripts/' . $this->encode($params['id']) . '/' . $this->encode($params['context']);
             $method = 'PUT';
@@ -1209,14 +1093,10 @@ trait ClientEndpointsTrait
             $url = '/_scripts/' . $this->encode($params['id']);
             $method = 'PUT';
         }
-        $url = $this->addQueryString($url, $params, ['timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows to evaluate the quality of ranked search results over a set of typical search queries
      *
@@ -1242,9 +1122,9 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function rankEval(array $params = [])
+    public function rank_eval(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_rank_eval';
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -1252,14 +1132,10 @@ trait ClientEndpointsTrait
             $url = '/_rank_eval';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','expand_wildcards','search_type','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'search_type', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows to copy documents from one index to another, optionally filtering the source
      * documents by a query, changing the destination index settings, or fetching the
@@ -1292,18 +1168,13 @@ trait ClientEndpointsTrait
      */
     public function reindex(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_reindex';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['refresh','timeout','wait_for_active_shards','wait_for_completion','requests_per_second','scroll','slices','max_docs','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'timeout', 'wait_for_active_shards', 'wait_for_completion', 'requests_per_second', 'scroll', 'slices', 'max_docs', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Changes the number of requests per second for a particular Reindex operation.
      *
@@ -1326,19 +1197,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function reindexRethrottle(array $params = [])
+    public function reindex_rethrottle(array $params = [])
     {
-        $this->checkRequiredParameters(['task_id','requests_per_second'], $params);
+        $this->check_required_parameters(['task_id', 'requests_per_second'], $params);
         $url = '/_reindex/' . $this->encode($params['task_id']) . '/_rethrottle';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['requests_per_second','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['requests_per_second', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows to use the Mustache language to pre-render a search definition.
      *
@@ -1360,7 +1227,7 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function renderSearchTemplate(array $params = [])
+    public function render_search_template(array $params = [])
     {
         if (isset($params['id'])) {
             $url = '/_render/template/' . $this->encode($params['id']);
@@ -1369,14 +1236,10 @@ trait ClientEndpointsTrait
             $url = '/_render/template';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows an arbitrary script to be executed and a result to be returned
      *
@@ -1398,19 +1261,14 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function scriptsPainlessExecute(array $params = [])
+    public function scripts_painless_execute(array $params = [])
     {
         $url = '/_scripts/painless/_execute';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows to retrieve a large numbers of results from a single search request.
      *
@@ -1443,14 +1301,10 @@ trait ClientEndpointsTrait
             $url = '/_search/scroll';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['scroll','rest_total_hits_as_int','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['scroll', 'rest_total_hits_as_int', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns results matching a query.
      *
@@ -1525,14 +1379,10 @@ trait ClientEndpointsTrait
             $url = '/_search';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['analyzer','analyze_wildcard','ccs_minimize_roundtrips','default_operator','df','explain','stored_fields','docvalue_fields','from','force_synthetic_source','ignore_unavailable','ignore_throttled','allow_no_indices','expand_wildcards','lenient','preference','q','routing','scroll','search_type','size','sort','_source','_source_excludes','_source_includes','terminate_after','stats','suggest_field','suggest_mode','suggest_size','suggest_text','timeout','track_scores','track_total_hits','allow_partial_search_results','typed_keys','version','seq_no_primary_term','request_cache','batched_reduce_size','max_concurrent_shard_requests','pre_filter_shard_size','rest_total_hits_as_int','min_compatible_shard_node','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['analyzer', 'analyze_wildcard', 'ccs_minimize_roundtrips', 'default_operator', 'df', 'explain', 'stored_fields', 'docvalue_fields', 'from', 'force_synthetic_source', 'ignore_unavailable', 'ignore_throttled', 'allow_no_indices', 'expand_wildcards', 'lenient', 'preference', 'q', 'routing', 'scroll', 'search_type', 'size', 'sort', '_source', '_source_excludes', '_source_includes', 'terminate_after', 'stats', 'suggest_field', 'suggest_mode', 'suggest_size', 'suggest_text', 'timeout', 'track_scores', 'track_total_hits', 'allow_partial_search_results', 'typed_keys', 'version', 'seq_no_primary_term', 'request_cache', 'batched_reduce_size', 'max_concurrent_shard_requests', 'pre_filter_shard_size', 'rest_total_hits_as_int', 'min_compatible_shard_node', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Searches a vector tile for geospatial values. Returns results as a binary Mapbox vector tile.
      *
@@ -1567,20 +1417,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function searchMvt(array $params = [])
+    public function search_mvt(array $params = [])
     {
-        $this->checkRequiredParameters(['index','field','zoom','x','y'], $params);
+        $this->check_required_parameters(['index', 'field', 'zoom', 'x', 'y'], $params);
         $url = '/' . $this->encode($params['index']) . '/_mvt/' . $this->encode($params['field']) . '/' . $this->encode($params['zoom']) . '/' . $this->encode($params['x']) . '/' . $this->encode($params['y']);
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['exact_bounds','extent','grid_precision','grid_type','size','track_total_hits','with_labels','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/vnd.mapbox-vector-tile',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['exact_bounds', 'extent', 'grid_precision', 'grid_type', 'size', 'track_total_hits', 'with_labels', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/vnd.mapbox-vector-tile', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about the indices and shards that a search request would be executed against.
      *
@@ -1607,7 +1452,7 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function searchShards(array $params = [])
+    public function search_shards(array $params = [])
     {
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_search_shards';
@@ -1616,13 +1461,10 @@ trait ClientEndpointsTrait
             $url = '/_search_shards';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['preference','routing','local','ignore_unavailable','allow_no_indices','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['preference', 'routing', 'local', 'ignore_unavailable', 'allow_no_indices', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows to use the Mustache language to pre-render a search definition.
      *
@@ -1657,9 +1499,9 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function searchTemplate(array $params = [])
+    public function search_template(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['index'])) {
             $url = '/' . $this->encode($params['index']) . '/_search/template';
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -1667,14 +1509,10 @@ trait ClientEndpointsTrait
             $url = '/_search/template';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','ignore_throttled','allow_no_indices','expand_wildcards','preference','routing','scroll','search_type','explain','profile','typed_keys','rest_total_hits_as_int','ccs_minimize_roundtrips','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'ignore_throttled', 'allow_no_indices', 'expand_wildcards', 'preference', 'routing', 'scroll', 'search_type', 'explain', 'profile', 'typed_keys', 'rest_total_hits_as_int', 'ccs_minimize_roundtrips', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * The terms enum API  can be used to discover terms in the index that begin with the provided string. It is designed for low-latency look-ups used in auto-complete scenarios.
      *
@@ -1697,20 +1535,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function termsEnum(array $params = [])
+    public function terms_enum(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_terms_enum';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information and statistics about terms in the fields of a particular document.
      *
@@ -1747,7 +1580,7 @@ trait ClientEndpointsTrait
      */
     public function termvectors(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         if (isset($params['id'])) {
             $url = '/' . $this->encode($params['index']) . '/_termvectors/' . $this->encode($params['id']);
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -1755,14 +1588,10 @@ trait ClientEndpointsTrait
             $url = '/' . $this->encode($params['index']) . '/_termvectors';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['term_statistics','field_statistics','fields','offsets','positions','payloads','preference','routing','realtime','version','version_type','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['term_statistics', 'field_statistics', 'fields', 'offsets', 'positions', 'payloads', 'preference', 'routing', 'realtime', 'version', 'version_type', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates a document with a script or partial document.
      *
@@ -1800,18 +1629,13 @@ trait ClientEndpointsTrait
      */
     public function update(array $params = [])
     {
-        $this->checkRequiredParameters(['id','index','body'], $params);
+        $this->check_required_parameters(['id', 'index', 'body'], $params);
         $url = '/' . $this->encode($params['index']) . '/_update/' . $this->encode($params['id']);
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_active_shards','_source','_source_excludes','_source_includes','lang','refresh','retry_on_conflict','routing','timeout','if_seq_no','if_primary_term','require_alias','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_active_shards', '_source', '_source_excludes', '_source_includes', 'lang', 'refresh', 'retry_on_conflict', 'routing', 'timeout', 'if_seq_no', 'if_primary_term', 'require_alias', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Performs an update on every document in the index without changing the source,
      * for example to pick up a mapping change.
@@ -1866,20 +1690,15 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function updateByQuery(array $params = [])
+    public function update_by_query(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_update_by_query';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['analyzer','analyze_wildcard','default_operator','df','from','ignore_unavailable','allow_no_indices','conflicts','expand_wildcards','lenient','pipeline','preference','q','routing','scroll','search_type','search_timeout','max_docs','sort','terminate_after','stats','version','version_type','request_cache','refresh','timeout','wait_for_active_shards','scroll_size','wait_for_completion','requests_per_second','slices','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['analyzer', 'analyze_wildcard', 'default_operator', 'df', 'from', 'ignore_unavailable', 'allow_no_indices', 'conflicts', 'expand_wildcards', 'lenient', 'pipeline', 'preference', 'q', 'routing', 'scroll', 'search_type', 'search_timeout', 'max_docs', 'sort', 'terminate_after', 'stats', 'version', 'version_type', 'request_cache', 'refresh', 'timeout', 'wait_for_active_shards', 'scroll_size', 'wait_for_completion', 'requests_per_second', 'slices', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Changes the number of requests per second for a particular Update By Query operation.
      *
@@ -1902,16 +1721,13 @@ trait ClientEndpointsTrait
      *
      * @return Elasticsearch|Promise
      */
-    public function updateByQueryRethrottle(array $params = [])
+    public function update_by_query_rethrottle(array $params = [])
     {
-        $this->checkRequiredParameters(['task_id','requests_per_second'], $params);
+        $this->check_required_parameters(['task_id', 'requests_per_second'], $params);
         $url = '/_update_by_query/' . $this->encode($params['task_id']) . '/_rethrottle';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['requests_per_second','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['requests_per_second', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

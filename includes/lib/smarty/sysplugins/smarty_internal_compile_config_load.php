@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Compile Config Load
  * Compiles the {config load} tag
@@ -9,14 +9,13 @@ declare(strict_types=1);
  * @subpackage Compiler
  * @author     Uwe Tews
  */
-
 /**
  * Smarty Internal Plugin Compile Config Load Class
  *
  * @package    Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Config_Load extends Smarty_Internal_CompileBase
+class Smarty_Internal_Compile_Config_Load extends Smarty_internal_compile_Base
 {
     /**
      * Attribute definition: Overwrites base class.
@@ -25,7 +24,6 @@ class Smarty_Internal_Compile_Config_Load extends Smarty_Internal_CompileBase
      * @see Smarty_Internal_CompileBase
      */
     public $required_attributes = ['file'];
-
     /**
      * Attribute definition: Overwrites base class.
      *
@@ -33,7 +31,6 @@ class Smarty_Internal_Compile_Config_Load extends Smarty_Internal_CompileBase
      * @see Smarty_Internal_CompileBase
      */
     public $shorttag_order = ['file', 'section'];
-
     /**
      * Attribute definition: Overwrites base class.
      *
@@ -41,7 +38,6 @@ class Smarty_Internal_Compile_Config_Load extends Smarty_Internal_CompileBase
      * @see Smarty_Internal_CompileBase
      */
     public $optional_attributes = ['section', 'scope'];
-
     /**
      * Attribute definition: Overwrites base class.
      *
@@ -49,18 +45,12 @@ class Smarty_Internal_Compile_Config_Load extends Smarty_Internal_CompileBase
      * @see Smarty_Internal_CompileBase
      */
     public $option_flags = ['nocache', 'noscope'];
-
     /**
      * Valid scope names
      *
      * @var array
      */
-    public $valid_scopes = [
-        'local'  => Smarty::SCOPE_LOCAL, 'parent' => Smarty::SCOPE_PARENT,
-        'root'   => Smarty::SCOPE_ROOT, 'tpl_root' => Smarty::SCOPE_TPL_ROOT,
-        'smarty' => Smarty::SCOPE_SMARTY, 'global' => Smarty::SCOPE_SMARTY,
-    ];
-
+    public $valid_scopes = ['local' => Smarty::SCOPE_LOCAL, 'parent' => Smarty::SCOPE_PARENT, 'root' => Smarty::SCOPE_ROOT, 'tpl_root' => Smarty::SCOPE_TPL_ROOT, 'smarty' => Smarty::SCOPE_SMARTY, 'global' => Smarty::SCOPE_SMARTY];
     /**
      * Compiles code for the {config_load} tag
      *
@@ -70,29 +60,28 @@ class Smarty_Internal_Compile_Config_Load extends Smarty_Internal_CompileBase
      * @return string compiled code
      * @throws \SmartyCompilerException
      */
-    public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
+    public function compile($args, Smarty_internal_template_Compiler_Base $compiler)
     {
         // check and get attributes
-        $_attr = $this->getAttributes($compiler, $args);
-        if ($_attr[ 'nocache' ] === true) {
+        $_attr = $this->get_attributes($compiler, $args);
+        if ($_attr['nocache'] === true) {
             $compiler->trigger_template_error('nocache option not allowed', null, true);
         }
         // save possible attributes
-        $conf_file = $_attr[ 'file' ];
-        if (isset($_attr[ 'section' ])) {
-            $section = $_attr[ 'section' ];
+        $conf_file = $_attr['file'];
+        if (isset($_attr['section'])) {
+            $section = $_attr['section'];
         } else {
             $section = 'null';
         }
         // scope setup
-        if ($_attr[ 'noscope' ]) {
+        if ($_attr['noscope']) {
             $_scope = -1;
         } else {
-            $_scope = $compiler->convertScope($_attr, $this->valid_scopes);
+            $_scope = $compiler->convert_scope($_attr, $this->valid_scopes);
         }
         // create config object
-        $_output =
-            "<?php\n\$_smarty_tpl->smarty->ext->configLoad->_loadConfigFile(\$_smarty_tpl, {$conf_file}, {$section}, {$_scope});\n?>\n";
+        $_output = "<?php\n\$_smarty_tpl->smarty->ext->configLoad->_loadConfigFile(\$_smarty_tpl, {$conf_file}, {$section}, {$_scope});\n?>\n";
         return $_output;
     }
 }

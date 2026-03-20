@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the Category object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a Category object for the /mail/send API call
  *
@@ -18,7 +16,6 @@ class Category implements \JsonSerializable
 {
     /** @var $category string A category name for an email message. Each category name may not exceed 255 characters */
     private $category;
-
     /**
      * Optional constructor
      *
@@ -30,10 +27,9 @@ class Category implements \JsonSerializable
     public function __construct($category = null)
     {
         if (isset($category)) {
-            $this->setCategory($category);
+            $this->set_category($category);
         }
     }
-
     /**
      * Add a category to a Category object
      *
@@ -43,31 +39,28 @@ class Category implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setCategory($category): void
+    public function set_category($category): void
     {
-        Assert::maxLength($category, 'category', 255);
-
+        Assert::max_length($category, 'category', 255);
         $this->category = $category;
     }
-
     /**
      * Retrieve a category from a Category object
      *
      * @return string
      */
-    public function getCategory()
+    public function get_category()
     {
         return $this->category;
     }
-
     /**
      * Return an array representing a Category object for the Twilio SendGrid API
      *
      * @return string
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return $this->getCategory();
+        return $this->get_category();
     }
 }

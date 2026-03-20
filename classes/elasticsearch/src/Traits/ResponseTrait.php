@@ -11,23 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Traits;
 
-use Psr\Http\Message\ResponseInterface;
-
-trait ResponseTrait
+use Psr\Http\Message\Response_Interface;
+trait Response_Trait
 {
-    protected ResponseInterface $response;
-
-    public function setResponse(ResponseInterface $response): self
+    protected Response_Interface $response;
+    public function set_response(Response_Interface $response): self
     {
         $this->response = $response;
         return $this;
     }
-
-    public function getResponse(): ResponseInterface
+    public function get_response(): Response_Interface
     {
         return $this->response;
     }

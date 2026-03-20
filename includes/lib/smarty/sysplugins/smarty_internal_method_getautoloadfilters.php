@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method GetAutoloadFilters
  *
@@ -11,7 +10,7 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_GetAutoloadFilters extends Smarty_Internal_Method_SetAutoloadFilters
+class Smarty_internal_method_get_Autoload_Filters extends Smarty_internal_method_set_Autoload_Filters
 {
     /**
      * Get autoload filters
@@ -27,12 +26,12 @@ class Smarty_Internal_Method_GetAutoloadFilters extends Smarty_Internal_Method_S
      *                was specified
      * @throws \SmartyException
      */
-    public function getAutoloadFilters(Smarty_Internal_TemplateBase $obj, $type = null)
+    public function get_autoload_filters(Smarty_internal_template_Base $obj, $type = null)
     {
-        $smarty = $obj->_getSmartyObj();
+        $smarty = $obj->_get_smarty_obj();
         if ($type !== null) {
-            $this->_checkFilterType($type);
-            return isset($smarty->autoload_filters[ $type ]) ? $smarty->autoload_filters[ $type ] : [];
+            $this->_check_filter_type($type);
+            return isset($smarty->autoload_filters[$type]) ? $smarty->autoload_filters[$type] : [];
         }
         return $smarty->autoload_filters;
     }

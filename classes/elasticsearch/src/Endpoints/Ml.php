@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Ml extends AbstractEndpoint
+class Ml extends Abstract_Endpoint
 {
     /**
      * Clear the cached results from a trained model deployment
@@ -49,20 +46,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function clearTrainedModelDeploymentCache(array $params = [])
+    public function clear_trained_model_deployment_cache(array $params = [])
     {
-        $this->checkRequiredParameters(['model_id'], $params);
+        $this->check_required_parameters(['model_id'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']) . '/deployment/cache/_clear';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Closes one or more anomaly detection jobs. A job can be opened and closed multiple times throughout its lifecycle.
      *
@@ -88,20 +80,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function closeJob(array $params = [])
+    public function close_job(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/_close';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['allow_no_match','force','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'force', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes a calendar.
      *
@@ -123,19 +110,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteCalendar(array $params = [])
+    public function delete_calendar(array $params = [])
     {
-        $this->checkRequiredParameters(['calendar_id'], $params);
+        $this->check_required_parameters(['calendar_id'], $params);
         $url = '/_ml/calendars/' . $this->encode($params['calendar_id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes scheduled events from a calendar.
      *
@@ -158,19 +141,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteCalendarEvent(array $params = [])
+    public function delete_calendar_event(array $params = [])
     {
-        $this->checkRequiredParameters(['calendar_id','event_id'], $params);
+        $this->check_required_parameters(['calendar_id', 'event_id'], $params);
         $url = '/_ml/calendars/' . $this->encode($params['calendar_id']) . '/events/' . $this->encode($params['event_id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes anomaly detection jobs from a calendar.
      *
@@ -193,19 +172,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteCalendarJob(array $params = [])
+    public function delete_calendar_job(array $params = [])
     {
-        $this->checkRequiredParameters(['calendar_id','job_id'], $params);
+        $this->check_required_parameters(['calendar_id', 'job_id'], $params);
         $url = '/_ml/calendars/' . $this->encode($params['calendar_id']) . '/jobs/' . $this->encode($params['job_id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes an existing data frame analytics job.
      *
@@ -229,19 +204,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteDataFrameAnalytics(array $params = [])
+    public function delete_data_frame_analytics(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_ml/data_frame/analytics/' . $this->encode($params['id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['force','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['force', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes an existing datafeed.
      *
@@ -264,19 +235,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteDatafeed(array $params = [])
+    public function delete_datafeed(array $params = [])
     {
-        $this->checkRequiredParameters(['datafeed_id'], $params);
+        $this->check_required_parameters(['datafeed_id'], $params);
         $url = '/_ml/datafeeds/' . $this->encode($params['datafeed_id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['force','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['force', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes expired and unused machine learning data.
      *
@@ -300,7 +267,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteExpiredData(array $params = [])
+    public function delete_expired_data(array $params = [])
     {
         if (isset($params['job_id'])) {
             $url = '/_ml/_delete_expired_data/' . $this->encode($params['job_id']);
@@ -309,14 +276,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/_delete_expired_data';
             $method = 'DELETE';
         }
-        $url = $this->addQueryString($url, $params, ['requests_per_second','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['requests_per_second', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes a filter.
      *
@@ -338,19 +301,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteFilter(array $params = [])
+    public function delete_filter(array $params = [])
     {
-        $this->checkRequiredParameters(['filter_id'], $params);
+        $this->check_required_parameters(['filter_id'], $params);
         $url = '/_ml/filters/' . $this->encode($params['filter_id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes forecasts from a machine learning job.
      *
@@ -375,9 +334,9 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteForecast(array $params = [])
+    public function delete_forecast(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         if (isset($params['forecast_id'])) {
             $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/_forecast/' . $this->encode($params['forecast_id']);
             $method = 'DELETE';
@@ -385,13 +344,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/_forecast';
             $method = 'DELETE';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_forecasts','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_forecasts', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes an existing anomaly detection job.
      *
@@ -415,19 +371,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteJob(array $params = [])
+    public function delete_job(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['force','wait_for_completion','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['force', 'wait_for_completion', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes an existing model snapshot.
      *
@@ -450,19 +402,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteModelSnapshot(array $params = [])
+    public function delete_model_snapshot(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id','snapshot_id'], $params);
+        $this->check_required_parameters(['job_id', 'snapshot_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/model_snapshots/' . $this->encode($params['snapshot_id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes an existing trained inference model that is currently not referenced by an ingest pipeline.
      *
@@ -486,19 +434,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteTrainedModel(array $params = [])
+    public function delete_trained_model(array $params = [])
     {
-        $this->checkRequiredParameters(['model_id'], $params);
+        $this->check_required_parameters(['model_id'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['timeout','force','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'force', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes a model alias that refers to the trained model
      *
@@ -521,20 +465,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteTrainedModelAlias(array $params = [])
+    public function delete_trained_model_alias(array $params = [])
     {
-        $this->checkRequiredParameters(['model_alias','model_id'], $params);
+        $this->check_required_parameters(['model_alias', 'model_id'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']) . '/model_aliases/' . $this->encode($params['model_alias']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Estimates the model memory
      *
@@ -555,20 +494,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function estimateModelMemory(array $params = [])
+    public function estimate_model_memory(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_ml/anomaly_detectors/_estimate_model_memory';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Evaluates the data frame analytics for an annotated index.
      *
@@ -589,20 +523,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function evaluateDataFrame(array $params = [])
+    public function evaluate_data_frame(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_ml/data_frame/_evaluate';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Explains a data frame analytics config.
      *
@@ -624,7 +553,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function explainDataFrameAnalytics(array $params = [])
+    public function explain_data_frame_analytics(array $params = [])
     {
         if (isset($params['id'])) {
             $url = '/_ml/data_frame/analytics/' . $this->encode($params['id']) . '/_explain';
@@ -633,14 +562,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/data_frame/analytics/_explain';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Forces any buffered data to be processed by the job.
      *
@@ -668,20 +593,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function flushJob(array $params = [])
+    public function flush_job(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/_flush';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['calc_interim','start','end','advance_time','skip_time','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['calc_interim', 'start', 'end', 'advance_time', 'skip_time', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Predicts the future behavior of a time series by using its historical behavior.
      *
@@ -709,18 +629,13 @@ class Ml extends AbstractEndpoint
      */
     public function forecast(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/_forecast';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['duration','expires_in','max_model_memory','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['duration', 'expires_in', 'max_model_memory', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves anomaly detection job results for one or more buckets.
      *
@@ -753,9 +668,9 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getBuckets(array $params = [])
+    public function get_buckets(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         if (isset($params['timestamp'])) {
             $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/results/buckets/' . $this->encode($params['timestamp']);
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -763,14 +678,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/results/buckets';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['expand','exclude_interim','from','size','start','end','anomaly_score','sort','desc','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['expand', 'exclude_interim', 'from', 'size', 'start', 'end', 'anomaly_score', 'sort', 'desc', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves information about the scheduled events in calendars.
      *
@@ -797,19 +708,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getCalendarEvents(array $params = [])
+    public function get_calendar_events(array $params = [])
     {
-        $this->checkRequiredParameters(['calendar_id'], $params);
+        $this->check_required_parameters(['calendar_id'], $params);
         $url = '/_ml/calendars/' . $this->encode($params['calendar_id']) . '/events';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['job_id','start','end','from','size','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['job_id', 'start', 'end', 'from', 'size', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves configuration information for calendars.
      *
@@ -833,7 +740,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getCalendars(array $params = [])
+    public function get_calendars(array $params = [])
     {
         if (isset($params['calendar_id'])) {
             $url = '/_ml/calendars/' . $this->encode($params['calendar_id']);
@@ -842,14 +749,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/calendars';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['from','size','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['from', 'size', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves anomaly detection job results for one or more categories.
      *
@@ -876,9 +779,9 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getCategories(array $params = [])
+    public function get_categories(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         if (isset($params['category_id'])) {
             $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/results/categories/' . $this->encode($params['category_id']);
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -886,14 +789,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/results/categories/';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['from','size','partition_field_value','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['from', 'size', 'partition_field_value', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves configuration information for data frame analytics jobs.
      *
@@ -918,7 +817,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getDataFrameAnalytics(array $params = [])
+    public function get_data_frame_analytics(array $params = [])
     {
         if (isset($params['id'])) {
             $url = '/_ml/data_frame/analytics/' . $this->encode($params['id']);
@@ -927,13 +826,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/data_frame/analytics';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','from','size','exclude_generated','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'from', 'size', 'exclude_generated', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves usage information for data frame analytics jobs.
      *
@@ -958,7 +854,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getDataFrameAnalyticsStats(array $params = [])
+    public function get_data_frame_analytics_stats(array $params = [])
     {
         if (isset($params['id'])) {
             $url = '/_ml/data_frame/analytics/' . $this->encode($params['id']) . '/_stats';
@@ -967,13 +863,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/data_frame/analytics/_stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','from','size','verbose','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'from', 'size', 'verbose', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves usage information for datafeeds.
      *
@@ -995,7 +888,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getDatafeedStats(array $params = [])
+    public function get_datafeed_stats(array $params = [])
     {
         if (isset($params['datafeed_id'])) {
             $url = '/_ml/datafeeds/' . $this->encode($params['datafeed_id']) . '/_stats';
@@ -1004,13 +897,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/datafeeds/_stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves configuration information for datafeeds.
      *
@@ -1033,7 +923,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getDatafeeds(array $params = [])
+    public function get_datafeeds(array $params = [])
     {
         if (isset($params['datafeed_id'])) {
             $url = '/_ml/datafeeds/' . $this->encode($params['datafeed_id']);
@@ -1042,13 +932,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/datafeeds';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','exclude_generated','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'exclude_generated', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves filters.
      *
@@ -1071,7 +958,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getFilters(array $params = [])
+    public function get_filters(array $params = [])
     {
         if (isset($params['filter_id'])) {
             $url = '/_ml/filters/' . $this->encode($params['filter_id']);
@@ -1080,13 +967,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/filters';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['from','size','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['from', 'size', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves anomaly detection job results for one or more influencers.
      *
@@ -1117,20 +1001,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getInfluencers(array $params = [])
+    public function get_influencers(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/results/influencers';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['exclude_interim','from','size','start','end','influencer_score','sort','desc','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['exclude_interim', 'from', 'size', 'start', 'end', 'influencer_score', 'sort', 'desc', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves usage information for anomaly detection jobs.
      *
@@ -1152,7 +1031,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getJobStats(array $params = [])
+    public function get_job_stats(array $params = [])
     {
         if (isset($params['job_id'])) {
             $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/_stats';
@@ -1161,13 +1040,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/anomaly_detectors/_stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves configuration information for anomaly detection jobs.
      *
@@ -1190,7 +1066,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getJobs(array $params = [])
+    public function get_jobs(array $params = [])
     {
         if (isset($params['job_id'])) {
             $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']);
@@ -1199,13 +1075,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/anomaly_detectors';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','exclude_generated','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'exclude_generated', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information on how ML is using memory.
      *
@@ -1228,7 +1101,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getMemoryStats(array $params = [])
+    public function get_memory_stats(array $params = [])
     {
         if (isset($params['node_id'])) {
             $url = '/_ml/memory/' . $this->encode($params['node_id']) . '/_stats';
@@ -1237,13 +1110,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/memory/_stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['master_timeout','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['master_timeout', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Gets stats for anomaly detection job model snapshot upgrades that are in progress.
      *
@@ -1267,19 +1137,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getModelSnapshotUpgradeStats(array $params = [])
+    public function get_model_snapshot_upgrade_stats(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id','snapshot_id'], $params);
+        $this->check_required_parameters(['job_id', 'snapshot_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/model_snapshots/' . $this->encode($params['snapshot_id']) . '/_upgrade/_stats';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['allow_no_match','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves information about model snapshots.
      *
@@ -1309,9 +1175,9 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getModelSnapshots(array $params = [])
+    public function get_model_snapshots(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         if (isset($params['snapshot_id'])) {
             $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/model_snapshots/' . $this->encode($params['snapshot_id']);
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -1319,14 +1185,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/model_snapshots';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['from','size','start','end','sort','desc','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['from', 'size', 'start', 'end', 'sort', 'desc', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves overall bucket results that summarize the bucket results of multiple anomaly detection jobs.
      *
@@ -1356,20 +1218,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getOverallBuckets(array $params = [])
+    public function get_overall_buckets(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/results/overall_buckets';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['top_n','bucket_span','overall_score','exclude_interim','start','end','allow_no_match','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['top_n', 'bucket_span', 'overall_score', 'exclude_interim', 'start', 'end', 'allow_no_match', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves anomaly records for an anomaly detection job.
      *
@@ -1400,20 +1257,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getRecords(array $params = [])
+    public function get_records(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/results/records';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['exclude_interim','from','size','start','end','record_score','sort','desc','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['exclude_interim', 'from', 'size', 'start', 'end', 'record_score', 'sort', 'desc', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves configuration information for a trained inference model.
      *
@@ -1442,7 +1294,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getTrainedModels(array $params = [])
+    public function get_trained_models(array $params = [])
     {
         if (isset($params['model_id'])) {
             $url = '/_ml/trained_models/' . $this->encode($params['model_id']);
@@ -1451,13 +1303,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/trained_models';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','include','include_model_definition','decompress_definition','from','size','tags','exclude_generated','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'include', 'include_model_definition', 'decompress_definition', 'from', 'size', 'tags', 'exclude_generated', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves usage information for trained inference models.
      *
@@ -1481,7 +1330,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getTrainedModelsStats(array $params = [])
+    public function get_trained_models_stats(array $params = [])
     {
         if (isset($params['model_id'])) {
             $url = '/_ml/trained_models/' . $this->encode($params['model_id']) . '/_stats';
@@ -1490,13 +1339,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/trained_models/_stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','from','size','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'from', 'size', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Evaluate a trained model.
      *
@@ -1520,20 +1366,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function inferTrainedModel(array $params = [])
+    public function infer_trained_model(array $params = [])
     {
-        $this->checkRequiredParameters(['model_id','body'], $params);
+        $this->check_required_parameters(['model_id', 'body'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']) . '/_infer';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns defaults and limits used by machine learning.
      *
@@ -1557,14 +1398,10 @@ class Ml extends AbstractEndpoint
     {
         $url = '/_ml/info';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Opens one or more anomaly detection jobs.
      *
@@ -1587,20 +1424,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function openJob(array $params = [])
+    public function open_job(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/_open';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Posts scheduled events in a calendar.
      *
@@ -1623,20 +1455,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function postCalendarEvents(array $params = [])
+    public function post_calendar_events(array $params = [])
     {
-        $this->checkRequiredParameters(['calendar_id','body'], $params);
+        $this->check_required_parameters(['calendar_id', 'body'], $params);
         $url = '/_ml/calendars/' . $this->encode($params['calendar_id']) . '/events';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Sends data to an anomaly detection job for analysis.
      *
@@ -1661,20 +1488,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function postData(array $params = [])
+    public function post_data(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id','body'], $params);
+        $this->check_required_parameters(['job_id', 'body'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/_data';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['reset_start','reset_end','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => isset($params['body']) && (is_string($params['body']) || $this->isAssociativeArray($params['body'])) ? 'application/json' : 'application/x-ndjson',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['reset_start', 'reset_end', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => isset($params['body']) && (is_string($params['body']) || $this->is_associative_array($params['body'])) ? 'application/json' : 'application/x-ndjson'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Previews that will be analyzed given a data frame analytics config.
      *
@@ -1696,7 +1518,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function previewDataFrameAnalytics(array $params = [])
+    public function preview_data_frame_analytics(array $params = [])
     {
         if (isset($params['id'])) {
             $url = '/_ml/data_frame/analytics/' . $this->encode($params['id']) . '/_preview';
@@ -1705,14 +1527,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/data_frame/analytics/_preview';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Previews a datafeed.
      *
@@ -1736,7 +1554,7 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function previewDatafeed(array $params = [])
+    public function preview_datafeed(array $params = [])
     {
         if (isset($params['datafeed_id'])) {
             $url = '/_ml/datafeeds/' . $this->encode($params['datafeed_id']) . '/_preview';
@@ -1745,14 +1563,10 @@ class Ml extends AbstractEndpoint
             $url = '/_ml/datafeeds/_preview';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['start','end','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['start', 'end', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Instantiates a calendar.
      *
@@ -1775,20 +1589,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putCalendar(array $params = [])
+    public function put_calendar(array $params = [])
     {
-        $this->checkRequiredParameters(['calendar_id'], $params);
+        $this->check_required_parameters(['calendar_id'], $params);
         $url = '/_ml/calendars/' . $this->encode($params['calendar_id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Adds an anomaly detection job to a calendar.
      *
@@ -1811,19 +1620,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putCalendarJob(array $params = [])
+    public function put_calendar_job(array $params = [])
     {
-        $this->checkRequiredParameters(['calendar_id','job_id'], $params);
+        $this->check_required_parameters(['calendar_id', 'job_id'], $params);
         $url = '/_ml/calendars/' . $this->encode($params['calendar_id']) . '/jobs/' . $this->encode($params['job_id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Instantiates a data frame analytics job.
      *
@@ -1846,20 +1651,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putDataFrameAnalytics(array $params = [])
+    public function put_data_frame_analytics(array $params = [])
     {
-        $this->checkRequiredParameters(['id','body'], $params);
+        $this->check_required_parameters(['id', 'body'], $params);
         $url = '/_ml/data_frame/analytics/' . $this->encode($params['id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Instantiates a datafeed.
      *
@@ -1886,20 +1686,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putDatafeed(array $params = [])
+    public function put_datafeed(array $params = [])
     {
-        $this->checkRequiredParameters(['datafeed_id','body'], $params);
+        $this->check_required_parameters(['datafeed_id', 'body'], $params);
         $url = '/_ml/datafeeds/' . $this->encode($params['datafeed_id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','ignore_throttled','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'ignore_throttled', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Instantiates a filter.
      *
@@ -1922,20 +1717,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putFilter(array $params = [])
+    public function put_filter(array $params = [])
     {
-        $this->checkRequiredParameters(['filter_id','body'], $params);
+        $this->check_required_parameters(['filter_id', 'body'], $params);
         $url = '/_ml/filters/' . $this->encode($params['filter_id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Instantiates an anomaly detection job.
      *
@@ -1962,20 +1752,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putJob(array $params = [])
+    public function put_job(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id','body'], $params);
+        $this->check_required_parameters(['job_id', 'body'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','ignore_throttled','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'ignore_throttled', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates an inference trained model.
      *
@@ -1999,20 +1784,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putTrainedModel(array $params = [])
+    public function put_trained_model(array $params = [])
     {
-        $this->checkRequiredParameters(['model_id','body'], $params);
+        $this->check_required_parameters(['model_id', 'body'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['defer_definition_decompression','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['defer_definition_decompression', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a new model alias (or reassigns an existing one) to refer to the trained model
      *
@@ -2036,20 +1816,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putTrainedModelAlias(array $params = [])
+    public function put_trained_model_alias(array $params = [])
     {
-        $this->checkRequiredParameters(['model_alias','model_id'], $params);
+        $this->check_required_parameters(['model_alias', 'model_id'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']) . '/model_aliases/' . $this->encode($params['model_alias']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['reassign','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['reassign', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates part of a trained model definition
      *
@@ -2073,20 +1848,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putTrainedModelDefinitionPart(array $params = [])
+    public function put_trained_model_definition_part(array $params = [])
     {
-        $this->checkRequiredParameters(['model_id','part','body'], $params);
+        $this->check_required_parameters(['model_id', 'part', 'body'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']) . '/definition/' . $this->encode($params['part']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a trained model vocabulary
      *
@@ -2109,20 +1879,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putTrainedModelVocabulary(array $params = [])
+    public function put_trained_model_vocabulary(array $params = [])
     {
-        $this->checkRequiredParameters(['model_id','body'], $params);
+        $this->check_required_parameters(['model_id', 'body'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']) . '/vocabulary';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Resets an existing anomaly detection job.
      *
@@ -2145,19 +1910,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function resetJob(array $params = [])
+    public function reset_job(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id'], $params);
+        $this->check_required_parameters(['job_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/_reset';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['wait_for_completion','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['wait_for_completion', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Reverts to a specific snapshot.
      *
@@ -2182,20 +1943,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function revertModelSnapshot(array $params = [])
+    public function revert_model_snapshot(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id','snapshot_id'], $params);
+        $this->check_required_parameters(['job_id', 'snapshot_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/model_snapshots/' . $this->encode($params['snapshot_id']) . '/_revert';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['delete_intervening_results','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['delete_intervening_results', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Sets a cluster wide upgrade_mode setting that prepares machine learning indices for an upgrade.
      *
@@ -2217,18 +1973,14 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function setUpgradeMode(array $params = [])
+    public function set_upgrade_mode(array $params = [])
     {
         $url = '/_ml/set_upgrade_mode';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['enabled','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['enabled', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Starts a data frame analytics job.
      *
@@ -2252,20 +2004,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function startDataFrameAnalytics(array $params = [])
+    public function start_data_frame_analytics(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_ml/data_frame/analytics/' . $this->encode($params['id']) . '/_start';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Starts one or more datafeeds.
      *
@@ -2291,20 +2038,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function startDatafeed(array $params = [])
+    public function start_datafeed(array $params = [])
     {
-        $this->checkRequiredParameters(['datafeed_id'], $params);
+        $this->check_required_parameters(['datafeed_id'], $params);
         $url = '/_ml/datafeeds/' . $this->encode($params['datafeed_id']) . '/_start';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['start','end','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['start', 'end', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Start a trained model deployment.
      *
@@ -2333,20 +2075,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function startTrainedModelDeployment(array $params = [])
+    public function start_trained_model_deployment(array $params = [])
     {
-        $this->checkRequiredParameters(['model_id'], $params);
+        $this->check_required_parameters(['model_id'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']) . '/deployment/_start';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['cache_size','number_of_allocations','threads_per_allocation','priority','queue_capacity','timeout','wait_for','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['cache_size', 'number_of_allocations', 'threads_per_allocation', 'priority', 'queue_capacity', 'timeout', 'wait_for', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Stops one or more data frame analytics jobs.
      *
@@ -2372,20 +2109,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function stopDataFrameAnalytics(array $params = [])
+    public function stop_data_frame_analytics(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_ml/data_frame/analytics/' . $this->encode($params['id']) . '/_stop';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['allow_no_match','force','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'force', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Stops one or more datafeeds.
      *
@@ -2412,20 +2144,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function stopDatafeed(array $params = [])
+    public function stop_datafeed(array $params = [])
     {
-        $this->checkRequiredParameters(['datafeed_id'], $params);
+        $this->check_required_parameters(['datafeed_id'], $params);
         $url = '/_ml/datafeeds/' . $this->encode($params['datafeed_id']) . '/_stop';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['allow_no_match','allow_no_datafeeds','force','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'allow_no_datafeeds', 'force', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Stop a trained model deployment.
      *
@@ -2450,20 +2177,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function stopTrainedModelDeployment(array $params = [])
+    public function stop_trained_model_deployment(array $params = [])
     {
-        $this->checkRequiredParameters(['model_id'], $params);
+        $this->check_required_parameters(['model_id'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']) . '/deployment/_stop';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['allow_no_match','force','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'force', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates certain properties of a data frame analytics job.
      *
@@ -2486,20 +2208,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function updateDataFrameAnalytics(array $params = [])
+    public function update_data_frame_analytics(array $params = [])
     {
-        $this->checkRequiredParameters(['id','body'], $params);
+        $this->check_required_parameters(['id', 'body'], $params);
         $url = '/_ml/data_frame/analytics/' . $this->encode($params['id']) . '/_update';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates certain properties of a datafeed.
      *
@@ -2526,20 +2243,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function updateDatafeed(array $params = [])
+    public function update_datafeed(array $params = [])
     {
-        $this->checkRequiredParameters(['datafeed_id','body'], $params);
+        $this->check_required_parameters(['datafeed_id', 'body'], $params);
         $url = '/_ml/datafeeds/' . $this->encode($params['datafeed_id']) . '/_update';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['ignore_unavailable','allow_no_indices','ignore_throttled','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['ignore_unavailable', 'allow_no_indices', 'ignore_throttled', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates the description of a filter, adds items, or removes items.
      *
@@ -2562,20 +2274,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function updateFilter(array $params = [])
+    public function update_filter(array $params = [])
     {
-        $this->checkRequiredParameters(['filter_id','body'], $params);
+        $this->check_required_parameters(['filter_id', 'body'], $params);
         $url = '/_ml/filters/' . $this->encode($params['filter_id']) . '/_update';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates certain properties of an anomaly detection job.
      *
@@ -2598,20 +2305,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function updateJob(array $params = [])
+    public function update_job(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id','body'], $params);
+        $this->check_required_parameters(['job_id', 'body'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/_update';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates certain properties of a snapshot.
      *
@@ -2635,20 +2337,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function updateModelSnapshot(array $params = [])
+    public function update_model_snapshot(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id','snapshot_id','body'], $params);
+        $this->check_required_parameters(['job_id', 'snapshot_id', 'body'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/model_snapshots/' . $this->encode($params['snapshot_id']) . '/_update';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates certain properties of trained model deployment.
      *
@@ -2671,20 +2368,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function updateTrainedModelDeployment(array $params = [])
+    public function update_trained_model_deployment(array $params = [])
     {
-        $this->checkRequiredParameters(['model_id','body'], $params);
+        $this->check_required_parameters(['model_id', 'body'], $params);
         $url = '/_ml/trained_models/' . $this->encode($params['model_id']) . '/deployment/_update';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Upgrades a given job snapshot to the current major version.
      *
@@ -2709,19 +2401,15 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function upgradeJobSnapshot(array $params = [])
+    public function upgrade_job_snapshot(array $params = [])
     {
-        $this->checkRequiredParameters(['job_id','snapshot_id'], $params);
+        $this->check_required_parameters(['job_id', 'snapshot_id'], $params);
         $url = '/_ml/anomaly_detectors/' . $this->encode($params['job_id']) . '/model_snapshots/' . $this->encode($params['snapshot_id']) . '/_upgrade';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['timeout','wait_for_completion','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'wait_for_completion', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Validates an anomaly detection job.
      *
@@ -2744,18 +2432,13 @@ class Ml extends AbstractEndpoint
      */
     public function validate(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_ml/anomaly_detectors/_validate';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Validates an anomaly detection detector.
      *
@@ -2776,17 +2459,13 @@ class Ml extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function validateDetector(array $params = [])
+    public function validate_detector(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_ml/anomaly_detectors/_validate/detector';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

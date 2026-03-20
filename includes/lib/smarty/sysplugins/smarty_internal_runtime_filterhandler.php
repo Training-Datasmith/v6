@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Filter Handler
  * Smarty filter handler class
@@ -9,14 +9,13 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-
 /**
  * Class for filter processing
  *
  * @package    Smarty
  * @subpackage PluginsInternal
  */
-class Smarty_Internal_Runtime_FilterHandler
+class Smarty_internal_runtime_filter_Handler
 {
     /**
      * Run filters over content
@@ -32,17 +31,17 @@ class Smarty_Internal_Runtime_FilterHandler
      * @throws SmartyException
      * @return string                   the filtered content
      */
-    public function runFilter($type, $content, Smarty_Internal_Template $template)
+    public function run_filter($type, $content, Smarty_Internal_Template $template)
     {
         // loop over autoload filters of specified type
-        if (!empty($template->smarty->autoload_filters[ $type ])) {
-            foreach ((array)$template->smarty->autoload_filters[ $type ] as $name) {
+        if (!empty($template->smarty->autoload_filters[$type])) {
+            foreach ((array) $template->smarty->autoload_filters[$type] as $name) {
                 $plugin_name = "Smarty_{$type}filter_{$name}";
                 if (function_exists($plugin_name)) {
                     $callback = $plugin_name;
                 } elseif (class_exists($plugin_name, false) && is_callable([$plugin_name, 'execute'])) {
                     $callback = [$plugin_name, 'execute'];
-                } elseif ($template->smarty->loadPlugin($plugin_name, false)) {
+                } elseif ($template->smarty->load_plugin($plugin_name, false)) {
                     if (function_exists($plugin_name)) {
                         // use loaded Smarty2 style plugin
                         $callback = $plugin_name;
@@ -50,19 +49,19 @@ class Smarty_Internal_Runtime_FilterHandler
                         // loaded class of filter plugin
                         $callback = [$plugin_name, 'execute'];
                     } else {
-                        throw new SmartyException("Auto load {$type}-filter plugin method '{$plugin_name}::execute' not callable");
+                        throw new Smarty_Exception("Auto load {$type}-filter plugin method '{$plugin_name}::execute' not callable");
                     }
                 } else {
                     // nothing found, throw exception
-                    throw new SmartyException("Unable to auto load {$type}-filter plugin '{$plugin_name}'");
+                    throw new Smarty_Exception("Unable to auto load {$type}-filter plugin '{$plugin_name}'");
                 }
                 $content = call_user_func($callback, $content, $template);
             }
         }
         // loop over registered filters of specified type
-        if (!empty($template->smarty->registered_filters[ $type ])) {
-            foreach ($template->smarty->registered_filters[ $type ] as $key => $name) {
-                $content = call_user_func($template->smarty->registered_filters[ $type ][ $key ], $content, $template);
+        if (!empty($template->smarty->registered_filters[$type])) {
+            foreach ($template->smarty->registered_filters[$type] as $key => $name) {
+                $content = call_user_func($template->smarty->registered_filters[$type][$key], $content, $template);
             }
         }
         // return filtered output

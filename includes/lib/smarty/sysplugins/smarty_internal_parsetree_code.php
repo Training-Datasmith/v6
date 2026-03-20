@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Templateparser Parse Tree
  * These are classes to build parse trees in the template parser
@@ -10,7 +10,6 @@ declare(strict_types=1);
  * @author     Thue Kristensen
  * @author     Uwe Tews
  */
-
 /**
  * Code fragment inside a tag .
  *
@@ -18,7 +17,7 @@ declare(strict_types=1);
  * @subpackage Compiler
  * @ignore
  */
-class Smarty_Internal_ParseTree_Code extends Smarty_Internal_ParseTree
+class Smarty_internal_parse_Tree_code extends Smarty_internal_parse_Tree
 {
     /**
      * Create parse tree buffer for code fragment
@@ -29,7 +28,6 @@ class Smarty_Internal_ParseTree_Code extends Smarty_Internal_ParseTree
     {
         $this->data = $data;
     }
-
     /**
      * Return buffer content in parentheses
      *

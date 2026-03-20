@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method ClearConfig
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_ClearConfig
+class Smarty_internal_method_clear_Config
 {
     /**
      * Valid for all objects
      *
      * @var int
      */
-    public $objMap = 7;
-
+    public $obj_map = 7;
     /**
      * clear a single or all config variables
      *
@@ -31,10 +29,10 @@ class Smarty_Internal_Method_ClearConfig
      *
      * @return \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty
      */
-    public function clearConfig(Smarty_Internal_Data $data, $name = null)
+    public function clear_config(Smarty_Internal_Data $data, $name = null)
     {
         if (isset($name)) {
-            unset($data->config_vars[ $name ]);
+            unset($data->config_vars[$name]);
         } else {
             $data->config_vars = [];
         }

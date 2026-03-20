@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Resource Stream
  * Implements the streams as resource for Smarty template
@@ -10,7 +10,6 @@ declare(strict_types=1);
  * @author     Uwe Tews
  * @author     Rodney Rehm
  */
-
 /**
  * Smarty Internal Plugin Resource Stream
  * Implements the streams as resource for Smarty template
@@ -37,10 +36,9 @@ class Smarty_Internal_Resource_Stream extends Smarty_Resource_Recompiled
             $source->filepath = str_replace(':', '://', $source->resource);
         }
         $source->uid = false;
-        $source->content = $this->getContent($source);
+        $source->content = $this->get_content($source);
         $source->timestamp = $source->exists = !!$source->content;
     }
-
     /**
      * Load template's source from stream into current template object
      *
@@ -48,7 +46,7 @@ class Smarty_Internal_Resource_Stream extends Smarty_Resource_Recompiled
      *
      * @return string template source
      */
-    public function getContent(Smarty_Template_Source $source)
+    public function get_content(Smarty_Template_Source $source)
     {
         $t = '';
         // the availability of the stream has already been checked in Smarty_Resource::fetch()
@@ -63,7 +61,6 @@ class Smarty_Internal_Resource_Stream extends Smarty_Resource_Recompiled
             return false;
         }
     }
-
     /**
      * modify resource_name according to resource handlers specifications
      *
@@ -73,7 +70,7 @@ class Smarty_Internal_Resource_Stream extends Smarty_Resource_Recompiled
      *
      * @return string unique resource name
      */
-    public function buildUniqueResourceName(Smarty $smarty, $resource_name, $isConfig = false)
+    public function build_unique_resource_name(Smarty $smarty, $resource_name, $is_config = false)
     {
         return get_class($this) . '#' . $resource_name;
     }

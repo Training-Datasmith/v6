@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method UnloadFilter
  *
@@ -11,7 +10,7 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_UnloadFilter extends Smarty_Internal_Method_LoadFilter
+class Smarty_internal_method_unload_Filter extends Smarty_internal_method_load_Filter
 {
     /**
      * load a filter of specified type and name
@@ -27,16 +26,16 @@ class Smarty_Internal_Method_UnloadFilter extends Smarty_Internal_Method_LoadFil
      * @return Smarty_Internal_TemplateBase
      * @throws \SmartyException
      */
-    public function unloadFilter(Smarty_Internal_TemplateBase $obj, $type, $name)
+    public function unload_filter(Smarty_internal_template_Base $obj, $type, $name)
     {
-        $smarty = $obj->_getSmartyObj();
-        $this->_checkFilterType($type);
-        if (isset($smarty->registered_filters[ $type ])) {
+        $smarty = $obj->_get_smarty_obj();
+        $this->_check_filter_type($type);
+        if (isset($smarty->registered_filters[$type])) {
             $_filter_name = "smarty_{$type}filter_{$name}";
-            if (isset($smarty->registered_filters[ $type ][ $_filter_name ])) {
-                unset($smarty->registered_filters[ $type ][ $_filter_name ]);
-                if (empty($smarty->registered_filters[ $type ])) {
-                    unset($smarty->registered_filters[ $type ]);
+            if (isset($smarty->registered_filters[$type][$_filter_name])) {
+                unset($smarty->registered_filters[$type][$_filter_name]);
+                if (empty($smarty->registered_filters[$type])) {
+                    unset($smarty->registered_filters[$type]);
                 }
             }
         }

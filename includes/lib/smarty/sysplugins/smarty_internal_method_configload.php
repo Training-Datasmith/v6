@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method ConfigLoad
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_ConfigLoad
+class Smarty_internal_method_config_Load
 {
     /**
      * Valid for all objects
      *
      * @var int
      */
-    public $objMap = 7;
-
+    public $obj_map = 7;
     /**
      * load a config file, optionally load just selected sections
      *
@@ -34,12 +32,11 @@ class Smarty_Internal_Method_ConfigLoad
      * @return \Smarty|\Smarty_Internal_Data|\Smarty_Internal_Template
      * @throws \Exception
      */
-    public function configLoad(Smarty_Internal_Data $data, $config_file, $sections = null)
+    public function config_load(Smarty_Internal_Data $data, $config_file, $sections = null)
     {
-        $this->_loadConfigFile($data, $config_file, $sections, null);
+        $this->_load_config_file($data, $config_file, $sections, null);
         return $data;
     }
-
     /**
      * load a config file, optionally load just selected sections
      *
@@ -55,57 +52,54 @@ class Smarty_Internal_Method_ConfigLoad
      *
      * @throws \Exception
      */
-    public function _loadConfigFile(Smarty_Internal_Data $data, $config_file, $sections = null, $scope = 0)
+    public function _load_config_file(Smarty_Internal_Data $data, $config_file, $sections = null, $scope = 0)
     {
         /* @var \Smarty $smarty */
-        $smarty = $data->_getSmartyObj();
+        $smarty = $data->_get_smarty_obj();
         /* @var \Smarty_Internal_Template $confObj */
-        $confObj = new Smarty_Internal_Template($config_file, $smarty, $data, null, null, null, null, true);
-        $confObj->caching = Smarty::CACHING_OFF;
-        $confObj->source->config_sections = $sections;
-        $confObj->source->scope = $scope;
-        $confObj->compiled = Smarty_Template_Compiled::load($confObj);
-        $confObj->compiled->render($confObj);
-        if ($data->_isTplObj()) {
-            $data->compiled->file_dependency[ $confObj->source->uid ] =
-                [$confObj->source->filepath, $confObj->source->getTimeStamp(), $confObj->source->type];
+        $conf_obj = new Smarty_Internal_Template($config_file, $smarty, $data, null, null, null, null, true);
+        $conf_obj->caching = Smarty::CACHING_OFF;
+        $conf_obj->source->config_sections = $sections;
+        $conf_obj->source->scope = $scope;
+        $conf_obj->compiled = Smarty_Template_Compiled::load($conf_obj);
+        $conf_obj->compiled->render($conf_obj);
+        if ($data->_is_tpl_obj()) {
+            $data->compiled->file_dependency[$conf_obj->source->uid] = [$conf_obj->source->filepath, $conf_obj->source->get_time_stamp(), $conf_obj->source->type];
         }
     }
-
     /**
      * load config variables into template object
      *
      * @param \Smarty_Internal_Template $tpl
      * @param array                     $new_config_vars
      */
-    public function _loadConfigVars(Smarty_Internal_Template $tpl, $new_config_vars)
+    public function _load_config_vars(Smarty_Internal_Template $tpl, $new_config_vars)
     {
-        $this->_assignConfigVars($tpl->parent->config_vars, $tpl, $new_config_vars);
-        $tagScope = $tpl->source->scope;
-        if ($tagScope >= 0) {
-            if ($tagScope === Smarty::SCOPE_LOCAL) {
-                $this->_updateVarStack($tpl, $new_config_vars);
-                $tagScope = 0;
+        $this->_assign_config_vars($tpl->parent->config_vars, $tpl, $new_config_vars);
+        $tag_scope = $tpl->source->scope;
+        if ($tag_scope >= 0) {
+            if ($tag_scope === Smarty::SCOPE_LOCAL) {
+                $this->_update_var_stack($tpl, $new_config_vars);
+                $tag_scope = 0;
                 if (!$tpl->scope) {
                     return;
                 }
             }
-            if ($tpl->parent->_isTplObj() && ($tagScope || $tpl->parent->scope)) {
-                $mergedScope = $tagScope | $tpl->scope;
-                if ($mergedScope) {
+            if ($tpl->parent->_is_tpl_obj() && ($tag_scope || $tpl->parent->scope)) {
+                $merged_scope = $tag_scope | $tpl->scope;
+                if ($merged_scope) {
                     // update scopes
                     /* @var \Smarty_Internal_Template|\Smarty|\Smarty_Internal_Data $ptr */
-                    foreach ($tpl->smarty->ext->_updateScope->_getAffectedScopes($tpl->parent, $mergedScope) as $ptr) {
-                        $this->_assignConfigVars($ptr->config_vars, $tpl, $new_config_vars);
-                        if ($tagScope && $ptr->_isTplObj() && isset($tpl->_cache[ 'varStack' ])) {
-                            $this->_updateVarStack($tpl, $new_config_vars);
+                    foreach ($tpl->smarty->ext->_update_scope->_get_affected_scopes($tpl->parent, $merged_scope) as $ptr) {
+                        $this->_assign_config_vars($ptr->config_vars, $tpl, $new_config_vars);
+                        if ($tag_scope && $ptr->_is_tpl_obj() && isset($tpl->_cache['varStack'])) {
+                            $this->_update_var_stack($tpl, $new_config_vars);
                         }
                     }
                 }
             }
         }
     }
-
     /**
      * Assign all config variables in given scope
      *
@@ -113,48 +107,46 @@ class Smarty_Internal_Method_ConfigLoad
      * @param \Smarty_Internal_Template $tpl
      * @param array                     $new_config_vars loaded config variables
      */
-    public function _assignConfigVars(&$config_vars, Smarty_Internal_Template $tpl, $new_config_vars)
+    public function _assign_config_vars(&$config_vars, Smarty_Internal_Template $tpl, $new_config_vars)
     {
         // copy global config vars
-        foreach ($new_config_vars[ 'vars' ] as $variable => $value) {
-            if ($tpl->smarty->config_overwrite || !isset($config_vars[ $variable ])) {
-                $config_vars[ $variable ] = $value;
+        foreach ($new_config_vars['vars'] as $variable => $value) {
+            if ($tpl->smarty->config_overwrite || !isset($config_vars[$variable])) {
+                $config_vars[$variable] = $value;
             } else {
-                $config_vars[ $variable ] = array_merge((array)$config_vars[ $variable ], (array)$value);
+                $config_vars[$variable] = array_merge((array) $config_vars[$variable], (array) $value);
             }
         }
         // scan sections
         $sections = $tpl->source->config_sections;
         if (!empty($sections)) {
-            foreach ((array)$sections as $tpl_section) {
-                if (isset($new_config_vars[ 'sections' ][ $tpl_section ])) {
-                    foreach ($new_config_vars[ 'sections' ][ $tpl_section ][ 'vars' ] as $variable => $value) {
-                        if ($tpl->smarty->config_overwrite || !isset($config_vars[ $variable ])) {
-                            $config_vars[ $variable ] = $value;
+            foreach ((array) $sections as $tpl_section) {
+                if (isset($new_config_vars['sections'][$tpl_section])) {
+                    foreach ($new_config_vars['sections'][$tpl_section]['vars'] as $variable => $value) {
+                        if ($tpl->smarty->config_overwrite || !isset($config_vars[$variable])) {
+                            $config_vars[$variable] = $value;
                         } else {
-                            $config_vars[ $variable ] = array_merge((array)$config_vars[ $variable ], (array)$value);
+                            $config_vars[$variable] = array_merge((array) $config_vars[$variable], (array) $value);
                         }
                     }
                 }
             }
         }
     }
-
     /**
      * Update config variables in template local variable stack
      *
      * @param \Smarty_Internal_Template $tpl
      * @param array                     $config_vars
      */
-    public function _updateVarStack(Smarty_Internal_Template $tpl, $config_vars)
+    public function _update_var_stack(Smarty_Internal_Template $tpl, $config_vars)
     {
         $i = 0;
-        while (isset($tpl->_cache[ 'varStack' ][ $i ])) {
-            $this->_assignConfigVars($tpl->_cache[ 'varStack' ][ $i ][ 'config' ], $tpl, $config_vars);
+        while (isset($tpl->_cache['varStack'][$i])) {
+            $this->_assign_config_vars($tpl->_cache['varStack'][$i]['config'], $tpl, $config_vars);
             $i++;
         }
     }
-
     /**
      * gets  a config variable value
      *
@@ -164,20 +156,20 @@ class Smarty_Internal_Method_ConfigLoad
      *
      * @return null|string  the value of the config variable
      */
-    public function _getConfigVariable(Smarty_Internal_Data $data, $varName, $errorEnable = true)
+    public function _get_config_variable(Smarty_Internal_Data $data, $var_name, $error_enable = true)
     {
         $_ptr = $data;
         while ($_ptr !== null) {
-            if (isset($_ptr->config_vars[ $varName ])) {
+            if (isset($_ptr->config_vars[$var_name])) {
                 // found it, return it
-                return $_ptr->config_vars[ $varName ];
+                return $_ptr->config_vars[$var_name];
             }
             // not found, try at parent
             $_ptr = $_ptr->parent;
         }
-        if ($data->smarty->error_unassigned && $errorEnable) {
+        if ($data->smarty->error_unassigned && $error_enable) {
             // force a notice
-            $x = $$varName;
+            $x = ${$var_name};
         }
         return null;
     }

@@ -1,47 +1,38 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 // Next line will load dependencies to run this example
 // Please refer to the README how to use in your project
 require_once __DIR__ . '/../../sendgrid-php.php';
-
-$apiKey = getenv('SENDGRID_API_KEY');
-$sg = new \SendGrid($apiKey);
-
+$api_key = getenv('SENDGRID_API_KEY');
+$sg = new \Send_Grid($api_key);
 ////////////////////////////////////////////////////
 // Create a batch ID #
 // POST /mail/batch #
-
 try {
     $response = $sg->client->mail()->batch()->post();
-    print $response->statusCode() . "\n";
+    print $response->status_code() . "\n";
     print_r($response->headers());
     print $response->body() . "\n";
 } catch (Exception $e) {
-    echo 'Caught exception: ',  $e->getMessage(), "\n";
+    echo 'Caught exception: ', $e->get_message(), "\n";
 }
-
 ////////////////////////////////////////////////////
 // Validate batch ID #
 // GET /mail/batch/{batch_id} #
-
 $batch_id = 'test_url_param';
-
 try {
     $response = $sg->client->mail()->batch()->_($batch_id)->get();
-    print $response->statusCode() . "\n";
+    print $response->status_code() . "\n";
     print_r($response->headers());
     print $response->body() . "\n";
 } catch (Exception $e) {
-    echo 'Caught exception: ',  $e->getMessage(), "\n";
+    echo 'Caught exception: ', $e->get_message(), "\n";
 }
-
 ////////////////////////////////////////////////////
 // v3 Mail Send #
 // POST /mail/send #
 // This endpoint has a helper, check it out [here](https://github.com/sendgrid/sendgrid-php/blob/HEAD/lib/mail/README.md).
-
 $request_body = json_decode('{
   "asm": {
     "group_id": 1,
@@ -189,12 +180,11 @@ $request_body = json_decode('{
     }
   }
 }');
-
 try {
     $response = $sg->client->mail()->send()->post($request_body);
-    print $response->statusCode() . "\n";
+    print $response->status_code() . "\n";
     print_r($response->headers());
     print $response->body() . "\n";
 } catch (Exception $e) {
-    echo 'Caught exception: ',  $e->getMessage(), "\n";
+    echo 'Caught exception: ', $e->get_message(), "\n";
 }

@@ -1,18 +1,17 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds theContent object for a /mail/send API call
  */
-
-namespace SendGrid\Mail;
+namespace Send_Grid\Mail;
 
 /**
  * This class is used to construct a Content object for the /mail/send API call
  *
  * @package SendGrid\Mail
  */
-class PlainTextContent extends Content
+class Plain_Text_Content extends Content
 {
     /**
      * Create a Content object with a plain text mime type
@@ -23,6 +22,6 @@ class PlainTextContent extends Content
      */
     public function __construct($value)
     {
-        parent::__construct(MimeType::TEXT, $value);
+        parent::__construct(Mime_Type::TEXT, $value);
     }
 }

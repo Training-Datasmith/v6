@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Compile Rdelim
  * Compiles the {rdelim} tag
@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @subpackage Compiler
  * @author     Uwe Tews
  */
-
 /**
  * Smarty Internal Plugin Compile Rdelim Class
  *
@@ -28,7 +27,7 @@ class Smarty_Internal_Compile_Rdelim extends Smarty_Internal_Compile_Ldelim
      * @return string compiled code
      * @throws \SmartyCompilerException
      */
-    public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
+    public function compile($args, Smarty_internal_template_Compiler_Base $compiler)
     {
         parent::compile($args, $compiler);
         return $compiler->smarty->right_delimiter;

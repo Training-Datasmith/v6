@@ -11,16 +11,14 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Response;
 
-use Psr\Http\Message\ResponseInterface;
-
-interface ElasticsearchInterface
+use Psr\Http\Message\Response_Interface;
+interface Elasticsearch_Interface
 {
     /**
      * Set the HTTP PSR-7 response
      */
-    public function setResponse(ResponseInterface $response, bool $throwException = true): void;
+    public function set_response(Response_Interface $response, bool $throw_exception = true): void;
 }

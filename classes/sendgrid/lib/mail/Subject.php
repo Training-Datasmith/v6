@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the Subject object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a Subject object for the /mail/send API call
  *
@@ -18,7 +16,6 @@ class Subject implements \JsonSerializable
 {
     /** @var $subject string The email subject */
     private $subject;
-
     /**
      * Optional constructor
      *
@@ -29,10 +26,9 @@ class Subject implements \JsonSerializable
     public function __construct($subject = null)
     {
         if (isset($subject)) {
-            $this->setSubject($subject);
+            $this->set_subject($subject);
         }
     }
-
     /**
      * Set the subject on a Subject object
      *
@@ -40,29 +36,26 @@ class Subject implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function setSubject($subject): void
+    public function set_subject($subject): void
     {
-        Assert::minLength($subject, 'subject', 1);
-
+        Assert::min_length($subject, 'subject', 1);
         $this->subject = $subject;
     }
-
     /**
      * Retrieve the subject from a Subject object
      */
-    public function getSubject(): string
+    public function get_subject(): string
     {
-        return mb_convert_encoding((string)$this->subject, 'UTF-8', 'UTF-8');
+        return mb_convert_encoding((string) $this->subject, 'UTF-8', 'UTF-8');
     }
-
     /**
      * Return an array representing a Subject object for the Twilio SendGrid API
      *
      * @return string
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return $this->getSubject();
+        return $this->get_subject();
     }
 }

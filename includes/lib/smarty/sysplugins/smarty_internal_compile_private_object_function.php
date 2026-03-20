@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Compile Object Function
  * Compiles code for registered objects as function
@@ -9,14 +9,13 @@ declare(strict_types=1);
  * @subpackage Compiler
  * @author     Uwe Tews
  */
-
 /**
  * Smarty Internal Plugin Compile Object Function Class
  *
  * @package    Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Private_Object_Function extends Smarty_Internal_CompileBase
+class Smarty_Internal_Compile_Private_Object_Function extends Smarty_internal_compile_Base
 {
     /**
      * Attribute definition: Overwrites base class.
@@ -25,7 +24,6 @@ class Smarty_Internal_Compile_Private_Object_Function extends Smarty_Internal_Co
      * @see Smarty_Internal_CompileBase
      */
     public $optional_attributes = ['_any'];
-
     /**
      * Compiles code for the execution of function plugin
      *
@@ -39,29 +37,29 @@ class Smarty_Internal_Compile_Private_Object_Function extends Smarty_Internal_Co
      * @throws \SmartyCompilerException
      * @throws \SmartyException
      */
-    public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter, $tag, $method)
+    public function compile($args, Smarty_internal_template_Compiler_Base $compiler, $parameter, $tag, $method)
     {
         // check and get attributes
-        $_attr = $this->getAttributes($compiler, $args);
-        unset($_attr[ 'nocache' ]);
+        $_attr = $this->get_attributes($compiler, $args);
+        unset($_attr['nocache']);
         $_assign = null;
-        if (isset($_attr[ 'assign' ])) {
-            $_assign = $_attr[ 'assign' ];
-            unset($_attr[ 'assign' ]);
+        if (isset($_attr['assign'])) {
+            $_assign = $_attr['assign'];
+            unset($_attr['assign']);
         }
         // method or property ?
-        if (is_callable([$compiler->smarty->registered_objects[ $tag ][ 0 ], $method])) {
+        if (is_callable([$compiler->smarty->registered_objects[$tag][0], $method])) {
             // convert attributes into parameter array string
-            if ($compiler->smarty->registered_objects[ $tag ][ 2 ]) {
-                $_paramsArray = [];
+            if ($compiler->smarty->registered_objects[$tag][2]) {
+                $_params_array = [];
                 foreach ($_attr as $_key => $_value) {
                     if (is_int($_key)) {
-                        $_paramsArray[] = "$_key=>$_value";
+                        $_params_array[] = "{$_key}=>{$_value}";
                     } else {
-                        $_paramsArray[] = "'$_key'=>$_value";
+                        $_params_array[] = "'{$_key}'=>{$_value}";
                     }
                 }
-                $_params = 'array(' . implode(',', $_paramsArray) . ')';
+                $_params = 'array(' . implode(',', $_params_array) . ')';
                 $output = "\$_smarty_tpl->smarty->registered_objects['{$tag}'][0]->{$method}({$_params},\$_smarty_tpl)";
             } else {
                 $_params = implode(',', $_attr);
@@ -71,12 +69,8 @@ class Smarty_Internal_Compile_Private_Object_Function extends Smarty_Internal_Co
             // object property
             $output = "\$_smarty_tpl->smarty->registered_objects['{$tag}'][0]->{$method}";
         }
-        if (!empty($parameter[ 'modifierlist' ])) {
-            $output = $compiler->compileTag(
-                'private_modifier',
-                [],
-                ['modifierlist' => $parameter[ 'modifierlist' ], 'value' => $output]
-            );
+        if (!empty($parameter['modifierlist'])) {
+            $output = $compiler->compile_tag('private_modifier', [], ['modifierlist' => $parameter['modifierlist'], 'value' => $output]);
         }
         if (empty($_assign)) {
             return "<?php echo {$output};?>\n";

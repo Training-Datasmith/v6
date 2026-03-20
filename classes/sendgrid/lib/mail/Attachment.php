@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the Attachment object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a Attachment object for the /mail/send API call
  *
@@ -26,7 +24,6 @@ class Attachment implements \JsonSerializable
     private $disposition;
     /** @var $content_id string Used when disposition is inline to display the file within the body of the email */
     private $content_id;
-
     /**
      * Optional constructor
      *
@@ -39,30 +36,24 @@ class Attachment implements \JsonSerializable
      *                            file within the body of the email
      * @throws \SendGrid\Mail\TypeException
      */
-    public function __construct(
-        $content = null,
-        $type = null,
-        $filename = null,
-        $disposition = null,
-        $content_id = null
-    ) {
+    public function __construct($content = null, $type = null, $filename = null, $disposition = null, $content_id = null)
+    {
         if (isset($content)) {
-            $this->setContent($content);
+            $this->set_content($content);
         }
         if (isset($type)) {
-            $this->setType($type);
+            $this->set_type($type);
         }
         if (isset($filename)) {
-            $this->setFilename($filename);
+            $this->set_filename($filename);
         }
         if (isset($disposition)) {
-            $this->setDisposition($disposition);
+            $this->set_disposition($disposition);
         }
         if (isset($content_id)) {
-            $this->setContentID($content_id);
+            $this->set_content_id($content_id);
         }
     }
-
     /**
      * Add the content to a Attachment object
      *
@@ -70,27 +61,24 @@ class Attachment implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setContent($content): void
+    public function set_content($content): void
     {
-        Assert::minLength($content, 'content', 1);
-
-        if (!$this->isBase64($content)) {
+        Assert::min_length($content, 'content', 1);
+        if (!$this->is_base64($content)) {
             $this->content = base64_encode($content);
         } else {
             $this->content = $content;
         }
     }
-
     /**
      * Retrieve the content from a Attachment object
      *
      * @return string
      */
-    public function getContent()
+    public function get_content()
     {
         return $this->content;
     }
-
     /**
      * Add the mime type to a Attachment object
      *
@@ -98,23 +86,20 @@ class Attachment implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setType($type): void
+    public function set_type($type): void
     {
-        Assert::minLength($type, 'type', 1);
-
+        Assert::min_length($type, 'type', 1);
         $this->type = $type;
     }
-
     /**
      * Retrieve the mime type from a Attachment object
      *
      * @return string
      */
-    public function getType()
+    public function get_type()
     {
         return $this->type;
     }
-
     /**
      * Add the file name to a Attachment object
      *
@@ -122,23 +107,20 @@ class Attachment implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setFilename($filename): void
+    public function set_filename($filename): void
     {
         Assert::string($filename, 'filename');
-
         $this->filename = $filename;
     }
-
     /**
      * Retrieve the file name from a Attachment object
      *
      * @return string
      */
-    public function getFilename()
+    public function get_filename()
     {
         return $this->filename;
     }
-
     /**
      * Add the disposition to a Attachment object
      *
@@ -147,23 +129,20 @@ class Attachment implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setDisposition($disposition): void
+    public function set_disposition($disposition): void
     {
-        Assert::anyOf($disposition, 'disposition', ['inline', 'attachment']);
-
+        Assert::any_of($disposition, 'disposition', ['inline', 'attachment']);
         $this->disposition = $disposition;
     }
-
     /**
      * Retrieve the disposition from a Attachment object
      *
      * @return string
      */
-    public function getDisposition()
+    public function get_disposition()
     {
         return $this->disposition;
     }
-
     /**
      * Add the content id to a Attachment object
      *
@@ -171,29 +150,26 @@ class Attachment implements \JsonSerializable
      *                           the file within the body of the email
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setContentID($content_id): void
+    public function set_content_id($content_id): void
     {
         Assert::string($content_id, 'content_id');
-
         $this->content_id = $content_id;
     }
-
     /**
      * Retrieve the content id from a Attachment object
      *
      * @return string
      */
-    public function getContentID()
+    public function get_content_id()
     {
         return $this->content_id;
     }
-
     /**
      *  Verifies whether or not the provided string is a valid base64 string
      *
      * @param $string string The string that has to be checked
      */
-    private function isBase64($string): bool
+    private function is_base64($string): bool
     {
         $decoded_data = base64_decode((string) $string, true);
         $encoded_data = base64_encode($decoded_data);
@@ -202,24 +178,14 @@ class Attachment implements \JsonSerializable
         }
         return true;
     }
-
     /**
      * Return an array representing a Attachment object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'content' => $this->getContent(),
-                'type' => $this->getType(),
-                'filename' => $this->getFilename(),
-                'disposition' => $this->getDisposition(),
-                'content_id' => $this->getContentID(),
-            ],
-            fn (string $value) => $value !== null
-        ) ?: null;
+        return array_filter(['content' => $this->get_content(), 'type' => $this->get_type(), 'filename' => $this->get_filename(), 'disposition' => $this->get_disposition(), 'content_id' => $this->get_content_id()], fn(string $value) => $value !== null) ?: null;
     }
 }

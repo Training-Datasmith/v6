@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 /**
  * Password class
  *
@@ -22,94 +21,82 @@ declare(strict_types=1);
  */
 class Request
 {
-    private readonly \CurlHandle|bool $_curl;
+    private readonly \Curl_Handle|bool $_curl;
     private $_fp;
     private string|array|null $_request_url = null;
     private int $_request_port;
-    private $_proxy_host   = false;
-    private $_proxy_port   = false;
-    private $_proxy_username  = false;
-    private $_proxy_password  = false;
-    private $_send_headers   = true;
+    private $_proxy_host = false;
+    private $_proxy_port = false;
+    private $_proxy_username = false;
+    private $_proxy_password = false;
+    private $_send_headers = true;
     private bool $_request_cache;
-    private ?string $_request_hash   = null;
-    private $_request_headers  = [];
-    private string $_response_headers  = '';
-    private $_add_request_headers  = [];
+    private ?string $_request_hash = null;
+    private $_request_headers = [];
+    private string $_response_headers = '';
+    private $_add_request_headers = [];
     private $_custom_request_headers = [];
     private $_request_body;
     private $_request_path = '';
     private readonly bool $_request_return;
-    private string $_request_method  = 'post';
-    private string $_request_protocol  = 'http';
+    private string $_request_method = 'post';
+    private string $_request_protocol = 'http';
     private string $_fsock_protocol = 'tcp';
     private $_request_http_version = '1.0';
     private int $_request_timeout;
     private readonly bool $_request_return_headers;
-    private $_curl_options  = [];
-    private bool $_log    = true;
-
+    private $_curl_options = [];
+    private bool $_log = true;
     private array $_success_responses = [200, 201, 202, 203, 204, 205, 206, 207, 208, 226];
-
     public $server_response_code;
-
     ##############################################
-
     public function __construct($url, $path = '/', $port = 80, $return_headers = false, $return_transfer = true, $timeout = 15, $cache = false)
     {
         ## Is cURL available?
-        $this->_curl   = (function_exists('curl_init')) ? curl_init() : false;
-
-        $data = (strstr((string) $url, '/')) ? explode('/', (string) $url, 2) : false;
-        $this->_request_url    = preg_replace('#^[\w]+://#iu', '', (is_array($data)) ? $data[0] : $url);
-        $this->_request_path   = (is_array($data) && $path = '/') ? $path.$data[1] : $path;
-
-        $this->_request_port   = (int)$port;
-        $this->_request_return_headers = (bool)$return_headers;
-        $this->_request_return   = (bool)$return_transfer;
-        $this->_request_timeout   = (int)$timeout;
-        $this->_request_cache   = (bool)$cache;
-
+        $this->_curl = function_exists('curl_init') ? curl_init() : false;
+        $data = strstr((string) $url, '/') ? explode('/', (string) $url, 2) : false;
+        $this->_request_url = preg_replace('#^[\w]+://#iu', '', is_array($data) ? $data[0] : $url);
+        $this->_request_path = is_array($data) && ($path = '/') ? $path . $data[1] : $path;
+        $this->_request_port = (int) $port;
+        $this->_request_return_headers = (bool) $return_headers;
+        $this->_request_return = (bool) $return_transfer;
+        $this->_request_timeout = (int) $timeout;
+        $this->_request_cache = (bool) $cache;
         if ($this->_curl) {
-            $this->_curl_options[CURLOPT_HTTPHEADER] = ['User-Agent: CubeCart/'.CC_VERSION];
-            $this->_curl_options[CURLOPT_HEADER]    = $this->_request_return_headers;
-            $this->_curl_options[CURLOPT_RETURNTRANSFER]  = $this->_request_return;
-            $this->_curl_options[CURLOPT_VERBOSE]    = false;
+            $this->_curl_options[CURLOPT_HTTPHEADER] = ['User-Agent: CubeCart/' . CC_VERSION];
+            $this->_curl_options[CURLOPT_HEADER] = $this->_request_return_headers;
+            $this->_curl_options[CURLOPT_RETURNTRANSFER] = $this->_request_return;
+            $this->_curl_options[CURLOPT_VERBOSE] = false;
             //$this->_curl_options[CURLOPT_FAILONERROR]   = true;
         }
     }
-
     public function __destruct()
     {
         if (!$this->_curl) {
             fclose($this->_fp);
         }
     }
-
     //=====[ Public ]=======================================
-
     /**
      * Appand headers into request
      *
      * @param string $header
      */
-    public function appendHeaders($header): void
+    public function append_headers($header): void
     {
         $this->_add_request_headers[] = $header;
     }
-
     /**
      * Authentication for request
      */
     public function authenticate(string $username, string $password): void
     {
         if ($this->_curl) {
-            $this->_curl_options[CURLOPT_USERPWD] = $username.':'.$password;
+            $this->_curl_options[CURLOPT_USERPWD] = $username . ':' . $password;
         } else {
-            $this->_request_headers[] = 'Authorization: Basic '.base64_encode($username.':'.$password);
+            $this->_request_headers[] = 'Authorization: Basic ' . base64_encode($username . ':' . $password);
         }
     }
-
     /**
      * Authentication for request
      *
@@ -119,64 +106,70 @@ class Request
     public function cache($status = null)
     {
         if (!is_null($status)) {
-            $this->_request_cache = (bool)$status;
+            $this->_request_cache = (bool) $status;
         }
         return $this->_request_cache;
     }
-
     /**
      * Add headers REMOVING default ones
      *
      * @param text $header
      */
-    public function customHeaders($header): void
+    public function custom_headers($header): void
     {
         $this->_custom_request_headers[] = $header;
     }
-
     /**
      * Add cURL options
      *
      * @param string $optionName
      * @param string $optionValue
      */
-    public function customOption($optionName, $optionValue): void
+    public function custom_option($option_name, $option_value): void
     {
-        $this->_curl_options[$optionName] = $optionValue;
+        $this->_curl_options[$option_name] = $option_value;
     }
-
     /**
      * Get Server Code Descripton
      * Taken from http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
      *
      * @param int/string $responseCode
      */
-    public static function getResponseCodeDescription($responseCode): string
+    public static function get_response_code_description($response_code): string
     {
-        $responseCode = (int)$responseCode;
+        $response_code = (int) $response_code;
         $response_code_description = [
             100 => 'Continue',
             101 => 'Switching Protocols',
-            102 => 'Processing', // WebDAV; RFC 2518
+            102 => 'Processing',
+            // WebDAV; RFC 2518
             200 => 'OK',
             201 => 'Created',
             202 => 'Accepted',
-            203 => 'Non-Authoritative Information', // since HTTP/1.1
+            203 => 'Non-Authoritative Information',
+            // since HTTP/1.1
             204 => 'No Content',
             205 => 'Reset Content',
             206 => 'Partial Content',
-            207 => 'Multi-Status', // WebDAV; RFC 4918
-            208 => 'Already Reported', // WebDAV; RFC 5842
-            226 => 'IM Used', // RFC 3229
+            207 => 'Multi-Status',
+            // WebDAV; RFC 4918
+            208 => 'Already Reported',
+            // WebDAV; RFC 5842
+            226 => 'IM Used',
+            // RFC 3229
             300 => 'Multiple Choices',
             301 => 'Moved Permanently',
             302 => 'Found',
-            303 => 'See Other', // since HTTP/1.1
+            303 => 'See Other',
+            // since HTTP/1.1
             304 => 'Not Modified',
-            305 => 'Use Proxy', // since HTTP/1.1
+            305 => 'Use Proxy',
+            // since HTTP/1.1
             306 => 'Switch Proxy',
-            307 => 'Temporary Redirect', // since HTTP/1.1
-            308 => 'Permanent Redirect', // approved as experimental RFC
+            307 => 'Temporary Redirect',
+            // since HTTP/1.1
+            308 => 'Permanent Redirect',
+            // approved as experimental RFC
             400 => 'Bad Request',
             401 => 'Unauthorized',
             402 => 'Payment Required',
@@ -195,48 +188,73 @@ class Request
             415 => 'Unsupported Media Type',
             416 => 'Requested Range Not Satisfiable',
             417 => 'Expectation Failed',
-            418 => 'I\'m a teapot', // RFC 2324
-            419 => 'Authentication Timeout', // Twitter
-            420 => 'Method Failure', // Spring Framework
-            422 => 'Unprocessable Entity', // WebDAV; RFC 4918
-            423 => 'Locked', // WebDAV; RFC 4918
-            424 => 'Method Failure', // WebDAV)
-            425 => 'Unordered Collection', // Internet draft
-            426 => 'Upgrade Required', // RFC 2817
-            428 => 'Precondition Required', // RFC 6585
-            429 => 'Too Many Requests', // RFC 6585
-            431 => 'Request Header Fields Too Large', // RFC 6585
-            444 => 'No Response', // Nginx
-            449 => 'Retry With', // Microsoft
-            450 => 'Blocked by Windows Parental Controls', // Microsoft
-            451 => 'Unavailable For Legal Reasons', // Internet draft
-            494 => 'Request Header Too Large', // Nginx
-            495 => 'Cert Error', // Nginx
-            496 => 'No Cert', // Nginx
-            497 => 'HTTP to HTTPS', // Nginx
-            499 => 'Client Closed Request', // Nginx
+            418 => 'I\'m a teapot',
+            // RFC 2324
+            419 => 'Authentication Timeout',
+            // Twitter
+            420 => 'Method Failure',
+            // Spring Framework
+            422 => 'Unprocessable Entity',
+            // WebDAV; RFC 4918
+            423 => 'Locked',
+            // WebDAV; RFC 4918
+            424 => 'Method Failure',
+            // WebDAV)
+            425 => 'Unordered Collection',
+            // Internet draft
+            426 => 'Upgrade Required',
+            // RFC 2817
+            428 => 'Precondition Required',
+            // RFC 6585
+            429 => 'Too Many Requests',
+            // RFC 6585
+            431 => 'Request Header Fields Too Large',
+            // RFC 6585
+            444 => 'No Response',
+            // Nginx
+            449 => 'Retry With',
+            // Microsoft
+            450 => 'Blocked by Windows Parental Controls',
+            // Microsoft
+            451 => 'Unavailable For Legal Reasons',
+            // Internet draft
+            494 => 'Request Header Too Large',
+            // Nginx
+            495 => 'Cert Error',
+            // Nginx
+            496 => 'No Cert',
+            // Nginx
+            497 => 'HTTP to HTTPS',
+            // Nginx
+            499 => 'Client Closed Request',
+            // Nginx
             500 => 'Internal Server Error',
             501 => 'Not Implemented',
             502 => 'Bad Gateway',
             503 => 'Service Unavailable',
             504 => 'Gateway Timeout',
             505 => 'HTTP Version Not Supported',
-            506 => 'Variant Also Negotiates', // RFC 2295
-            507 => 'Insufficient Storage', // WebDAV; RFC 4918
-            508 => 'Loop Detected', // WebDAV; RFC 5842
-            509 => 'Bandwidth Limit Exceeded', // Apache bw/limited extension
-            510 => 'Not Extended', // RFC 2774
-            511 => 'Network Authentication Required', // RFC 6585
-            598 => 'Network read timeout error', // Unknown
-            599 => 'Network connect timeout error', // Unknown
+            506 => 'Variant Also Negotiates',
+            // RFC 2295
+            507 => 'Insufficient Storage',
+            // WebDAV; RFC 4918
+            508 => 'Loop Detected',
+            // WebDAV; RFC 5842
+            509 => 'Bandwidth Limit Exceeded',
+            // Apache bw/limited extension
+            510 => 'Not Extended',
+            // RFC 2774
+            511 => 'Network Authentication Required',
+            // RFC 6585
+            598 => 'Network read timeout error',
+            // Unknown
+            599 => 'Network connect timeout error',
         ];
-
-        if (array_key_exists($responseCode, $response_code_description)) {
-            return $response_code_description[$responseCode];
+        if (array_key_exists($response_code, $response_code_description)) {
+            return $response_code_description[$response_code];
         }
         return '';
     }
-
     /**
      * Log the request and response
      *
@@ -249,25 +267,16 @@ class Request
         if (!$this->_log) {
             return false;
         }
-        $data = [
-            'request_url'       => $this->_request_protocol.'://'.$this->_request_url.$this->_request_path,
-            'request'           => (!empty($request)) ? $this->mask_cc($request) : '',
-            'result'    	    => $this->mask_cc($result),
-            'response_code'     => (string)$this->server_response_code,
-            'error'   		    => $error,
-            'is_curl'           => $this->_curl ? 1 : 0,
-            'request_headers'   => implode(' ', $this->_request_headers),
-            'response_headers'  => $this->_request_return_headers ? $this->_response_headers : null,
-        ];
+        $data = ['request_url' => $this->_request_protocol . '://' . $this->_request_url . $this->_request_path, 'request' => !empty($request) ? $this->mask_cc($request) : '', 'result' => $this->mask_cc($result), 'response_code' => (string) $this->server_response_code, 'error' => $error, 'is_curl' => $this->_curl ? 1 : 0, 'request_headers' => implode(' ', $this->_request_headers), 'response_headers' => $this->_request_return_headers ? $this->_response_headers : null];
         $log_days = $GLOBALS['config']->get('config', 'r_request');
-        if (ctype_digit((string)$log_days) &&  $log_days > 0) {
-            if (executionChance(2)) { // 2% probability
-                $GLOBALS['db']->delete('CubeCart_request_log', 'time < DATE_SUB(NOW(), INTERVAL '.$log_days.' DAY)', 500);
+        if (ctype_digit((string) $log_days) && $log_days > 0) {
+            if (execution_chance(2)) {
+                // 2% probability
+                $GLOBALS['db']->delete('CubeCart_request_log', 'time < DATE_SUB(NOW(), INTERVAL ' . $log_days . ' DAY)', 500);
             }
         }
         $GLOBALS['db']->insert('CubeCart_request_log', $data);
     }
-
     /**
      * Mask credit card from request
      *
@@ -279,50 +288,47 @@ class Request
     {
         if (preg_match('/([0-9]{12,16})/', $string, $matches)) {
             $replacement = preg_replace('/(?!^.?)[0-9](?!(.){0,3}$)/', $mask_char, $matches[0]);
-            return preg_replace('/'.$matches[0].'/', (string) $replacement, $string);
+            return preg_replace('/' . $matches[0] . '/', (string) $replacement, $string);
         }
         return $string;
     }
-
     /**
      * Set the request data
      *
      * @param array $dataArray
      */
-    public function setData($dataArray = null): void
+    public function set_data($data_array = null): void
     {
-        if (is_array($dataArray)) {
-            $this->_request_body = strip_tags(http_build_query($dataArray, '', '&'));
+        if (is_array($data_array)) {
+            $this->_request_body = strip_tags(http_build_query($data_array, '', '&'));
         } else {
-            $this->_request_body = $dataArray;
+            $this->_request_body = $data_array;
         }
         ## Generate headers
         $this->_request_headers = [];
-        $this->_request_http_version = (!empty($this->_proxy_username) && !empty($this->_proxy_password)) ? 1.1 : $this->_request_http_version;
+        $this->_request_http_version = !empty($this->_proxy_username) && !empty($this->_proxy_password) ? 1.1 : $this->_request_http_version;
         if ($this->_send_headers) {
             if ($this->_request_method == 'post') {
                 $this->_request_headers[] = sprintf('POST %s HTTP/%s', $this->_request_path, $this->_request_http_version);
                 $this->_request_headers[] = 'Content-Type: application/x-www-form-urlencoded';
                 if (!empty($this->_request_body)) {
-                    $this->_request_headers[] = 'Content-Length: '.strlen($this->_request_body);
+                    $this->_request_headers[] = 'Content-Length: ' . strlen($this->_request_body);
                 }
             } else {
-                $this->_request_headers[] = sprintf('GET %s HTTP/%s', (!empty($this->_request_body) ? $this->_request_path.'?'.$this->_request_body : $this->_request_path), $this->_request_http_version);
+                $this->_request_headers[] = sprintf('GET %s HTTP/%s', !empty($this->_request_body) ? $this->_request_path . '?' . $this->_request_body : $this->_request_path, $this->_request_http_version);
             }
-            $this->_request_headers[]  = 'Host: '.$this->_request_url;
-            $this->_request_headers[]  = 'Connection: Close';
-
+            $this->_request_headers[] = 'Host: ' . $this->_request_url;
+            $this->_request_headers[] = 'Connection: Close';
             if (count($this->_custom_request_headers)) {
-                $this->_request_headers  = $this->_custom_request_headers;
+                $this->_request_headers = $this->_custom_request_headers;
             } elseif (count($this->_add_request_headers)) {
-                $this->_request_headers  = array_merge($this->_request_headers, $this->_add_request_headers);
+                $this->_request_headers = array_merge($this->_request_headers, $this->_add_request_headers);
             }
-            $this->_request_hash   = md5($this->_request_url.$this->_request_body.implode('', $this->_request_headers));
+            $this->_request_hash = md5($this->_request_url . $this->_request_body . implode('', $this->_request_headers));
         } else {
-            $this->_request_hash   = md5($this->_request_url.$this->_request_body);
+            $this->_request_hash = md5($this->_request_url . $this->_request_body);
         }
     }
-
     /**
      * Send request via cURL or fsock
      *
@@ -332,19 +338,16 @@ class Request
      */
     public function send($timeout = null)
     {
-
         // if $_request_hash is still null then setData method hasn't been run
         if ($this->_request_hash === null) {
-            $this->setData();
+            $this->set_data();
         }
-
         if (!empty($timeout)) {
-            $this->_request_timeout = (int)$timeout;
+            $this->_request_timeout = (int) $timeout;
         }
-        if ($this->_request_cache && $GLOBALS['cache']->exists('request.'.$this->_request_hash)) {
-            return $GLOBALS['cache']->read('request.'.$this->_request_hash);
+        if ($this->_request_cache && $GLOBALS['cache']->exists('request.' . $this->_request_hash)) {
+            return $GLOBALS['cache']->read('request.' . $this->_request_hash);
         }
-
         if ($this->_curl) {
             ## Use cURL
             if ($this->_request_method == 'post') {
@@ -353,52 +356,51 @@ class Request
                     $this->_curl_options[CURLOPT_POSTFIELDS] = $this->_request_body;
                 }
             } elseif (!empty($this->_request_body)) {
-                $this->_request_path .= '?'.$this->_request_body;
+                $this->_request_path .= '?' . $this->_request_body;
             }
             if ($this->_send_headers) {
                 $this->_curl_options[CURLOPT_HTTPHEADER] = $this->_request_headers;
             }
-            $this->_curl_options[CURLOPT_PORT]     = $this->_request_port;
-            $this->_curl_options[CURLOPT_URL]     = $this->_request_protocol.'://'.$this->_request_url.$this->_request_path;
-            $this->_curl_options[CURLOPT_TIMEOUT]    = $this->_request_timeout;
-            $this->_curl_options[CURLOPT_CONNECTTIMEOUT]  = $this->_request_timeout;
+            $this->_curl_options[CURLOPT_PORT] = $this->_request_port;
+            $this->_curl_options[CURLOPT_URL] = $this->_request_protocol . '://' . $this->_request_url . $this->_request_path;
+            $this->_curl_options[CURLOPT_TIMEOUT] = $this->_request_timeout;
+            $this->_curl_options[CURLOPT_CONNECTTIMEOUT] = $this->_request_timeout;
             ## Some hosts disable curl and curl_exec spits out a warning so we need to supress it and detect if it returns false
             curl_setopt_array($this->_curl, $this->_curl_options);
             $return = curl_exec($this->_curl);
             $error = curl_error($this->_curl);
             $this->server_response_code = curl_getinfo($this->_curl, CURLINFO_RESPONSE_CODE);
-            $headerSize = curl_getinfo($this->_curl, CURLINFO_HEADER_SIZE);
-            $this->_response_headers = substr($return, 0, $headerSize);
+            $header_size = curl_getinfo($this->_curl, CURLINFO_HEADER_SIZE);
+            $this->_response_headers = substr($return, 0, $header_size);
             // A server doesn't always return a response body or the response may be empty or false like
             if (in_array($this->server_response_code, $this->_success_responses)) {
                 if ($this->_request_cache) {
-                    $GLOBALS['cache']->write($return, 'request.'.$this->_request_hash);
+                    $GLOBALS['cache']->write($return, 'request.' . $this->_request_hash);
                 }
                 $this->log($this->_request_body, $return);
                 return $return;
             }
             $error = curl_error($this->_curl);
-            $this->log($this->_request_body, (string)$return, $error ?: 'HTTP '.$this->server_response_code);
+            $this->log($this->_request_body, (string) $return, $error ?: 'HTTP ' . $this->server_response_code);
             return false;
         }
         ## Fallback to fsockopen
-        $this->_fp = fsockopen(($this->_proxy_host) ? $this->_fsock_protocol.'://'.$this->_proxy_host : $this->_fsock_protocol.'://'.$this->_request_url, $this->_proxy_port ?: $this->_request_port, $error_no, $error_str, $this->_request_timeout);
+        $this->_fp = fsockopen($this->_proxy_host ? $this->_fsock_protocol . '://' . $this->_proxy_host : $this->_fsock_protocol . '://' . $this->_request_url, $this->_proxy_port ?: $this->_request_port, $error_no, $error_str, $this->_request_timeout);
         if (!empty($error_no) || !empty($error_str)) {
             trigger_error(sprintf('fsockopen Error (%d): %s', $error_no, $error_str));
         }
         if ($this->_fp) {
-            fwrite($this->_fp, implode("\r\n", $this->_request_headers)."\r\n\r\n".$this->_request_body);
+            fwrite($this->_fp, implode("\r\n", $this->_request_headers) . "\r\n\r\n" . $this->_request_body);
             $return = '';
             while (!feof($this->_fp)) {
                 $return .= fread($this->_fp, 8024);
             }
-
             if (!empty($return)) {
                 if (!$this->_request_return_headers) {
-                    [$header, $return] = preg_split("/\R\R/", $return, 2);
+                    [$header, $return] = preg_split("/\\R\\R/", $return, 2);
                 }
                 if ($this->_request_cache) {
-                    $GLOBALS['cache']->write($return, 'request.'.$this->_request_hash);
+                    $GLOBALS['cache']->write($return, 'request.' . $this->_request_hash);
                 }
                 $this->log($this->_request_body, $return);
                 return $return;
@@ -406,33 +408,30 @@ class Request
         }
         return false;
     }
-
     /**
      * Send request headers
      *
      * @param bool $bool
      */
-    public function sendHeaders($bool = true): void
+    public function send_headers($bool = true): void
     {
-        $this->_send_headers =  $bool;
+        $this->_send_headers = $bool;
     }
-
     /**
      * Set HTTP protocol version
      *
      * @param float (as a string) $version
      */
-    public function setHTTPVersion($version = '1.0'): void
+    public function set_http_version($version = '1.0'): void
     {
         $this->_request_http_version = $version;
     }
-
     /**
      * Set request method of post or get
      *
      * @param string $method
      */
-    public function setMethod($method = 'post'): bool
+    public function set_method($method = 'post'): bool
     {
         switch (strtolower($method)) {
             case 'get':
@@ -444,7 +443,6 @@ class Request
         }
         return true;
     }
-
     /**
      * Set up proxy server route if it exists (rare)
      *
@@ -452,25 +450,24 @@ class Request
      * @param string $username
      * @param string $password
      */
-    public function setProxy(string $proxy_host, $proxy_port = 80, $username = null, $password = null): void
+    public function set_proxy(string $proxy_host, $proxy_port = 80, $username = null, $password = null): void
     {
         if ($this->_curl) {
             if (!empty($username) && !empty($password)) {
-                $this->_curl_options[CURLOPT_PROXYUSERPWD] = $username.':'.$password;
+                $this->_curl_options[CURLOPT_PROXYUSERPWD] = $username . ':' . $password;
             }
-            $this->_curl_options[CURLOPT_HTTPHEADER] = ['Host: '.$this->_request_url];
-            $this->_curl_options[CURLOPT_PROXY] = $proxy_host.':'.$proxy_port;
+            $this->_curl_options[CURLOPT_HTTPHEADER] = ['Host: ' . $this->_request_url];
+            $this->_curl_options[CURLOPT_PROXY] = $proxy_host . ':' . $proxy_port;
         } else {
             $this->_proxy_host = $proxy_host;
             $this->_proxy_port = $proxy_port;
             if (!empty($username) && !empty($password)) {
-                $this->_proxy_username  = $password;
-                $this->_proxy_password  = $username;
-                $this->_request_headers[] = 'Proxy-Authorization: Basic '.base64_encode($username.':'.$password);
+                $this->_proxy_username = $password;
+                $this->_proxy_password = $username;
+                $this->_request_headers[] = 'Proxy-Authorization: Basic ' . base64_encode($username . ':' . $password);
             }
         }
     }
-
     /**
      * Set protocol/port for SSL
      *
@@ -479,9 +476,8 @@ class Request
      * @param string $username
      * @param string $password
      */
-    public function setSSL($verify_peer = true, $verify_host = 2, $cert = null): void
+    public function set_ssl($verify_peer = true, $verify_host = 2, $cert = null): void
     {
-
         ## Some systems use custom ports, so only redefine it if not already specified e.g. https://dev.psigate.com:7989
         if ($this->_request_port == 80) {
             $this->_request_port = 443;
@@ -501,19 +497,17 @@ class Request
             $this->_fsock_protocol = 'ssl';
         }
     }
-
     /**
      * Set request useragent
      */
-    public function setUserAgent(string $user_agent): void
+    public function set_user_agent(string $user_agent): void
     {
         if ($this->_curl) {
             $this->_curl_options[CURLOPT_USERAGENT] = $user_agent;
         } else {
-            $this->_request_headers[] = 'User-Agent: '.$user_agent;
+            $this->_request_headers[] = 'User-Agent: ' . $user_agent;
         }
     }
-
     /**
      * Use to prevent request logging
      *

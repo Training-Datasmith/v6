@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method RegisterClass
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_RegisterClass
+class Smarty_internal_method_register_Class
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * Registers static classes to be used in templates
      *
@@ -34,15 +32,15 @@ class Smarty_Internal_Method_RegisterClass
      * @return \Smarty|\Smarty_Internal_Template
      * @throws \SmartyException
      */
-    public function registerClass(Smarty_Internal_TemplateBase $obj, $class_name, $class_impl)
+    public function register_class(Smarty_internal_template_Base $obj, $class_name, $class_impl)
     {
-        $smarty = $obj->_getSmartyObj();
+        $smarty = $obj->_get_smarty_obj();
         // test if exists
         if (!class_exists($class_impl)) {
-            throw new SmartyException("Undefined class '$class_impl' in register template class");
+            throw new Smarty_Exception("Undefined class '{$class_impl}' in register template class");
         }
         // register the class
-        $smarty->registered_classes[ $class_name ] = $class_impl;
+        $smarty->registered_classes[$class_name] = $class_impl;
         return $obj;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Resource Plugin
  *
@@ -8,7 +8,6 @@ declare(strict_types=1);
  * @subpackage TemplateResources
  * @author     Rodney Rehm
  */
-
 /**
  * Smarty Resource Plugin
  * Base implementation for resource plugins that don't use the compiler
@@ -24,28 +23,25 @@ abstract class Smarty_Resource_Uncompiled extends Smarty_Resource
      * @var bool
      */
     public $uncompiled = true;
-
     /**
      * Resource does implement populateCompiledFilepath() method
      *
      * @var bool
      */
-    public $hasCompiledHandler = true;
-
+    public $has_compiled_handler = true;
     /**
      * populate compiled object with compiled filepath
      *
      * @param Smarty_Template_Compiled $compiled  compiled object
      * @param Smarty_Internal_Template $_template template object
      */
-    public function populateCompiledFilepath(Smarty_Template_Compiled $compiled, Smarty_Internal_Template $_template)
+    public function populate_compiled_filepath(Smarty_Template_Compiled $compiled, Smarty_Internal_Template $_template)
     {
         $compiled->filepath = $_template->source->filepath;
         $compiled->timestamp = $_template->source->timestamp;
         $compiled->exists = $_template->source->exists;
-        if ($_template->smarty->merge_compiled_includes || $_template->source->handler->checkTimestamps()) {
-            $compiled->file_dependency[ $_template->source->uid ] =
-                [$compiled->filepath, $compiled->timestamp, $_template->source->type,];
+        if ($_template->smarty->merge_compiled_includes || $_template->source->handler->check_timestamps()) {
+            $compiled->file_dependency[$_template->source->uid] = [$compiled->filepath, $compiled->timestamp, $_template->source->type];
         }
     }
 }

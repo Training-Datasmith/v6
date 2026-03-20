@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method GetRegisteredObject
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_GetRegisteredObject
+class Smarty_internal_method_get_Registered_Object
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * return a reference to a registered object
      *
@@ -32,15 +30,15 @@ class Smarty_Internal_Method_GetRegisteredObject
      * @return object
      * @throws \SmartyException if no such object is found
      */
-    public function getRegisteredObject(Smarty_Internal_TemplateBase $obj, $object_name)
+    public function get_registered_object(Smarty_internal_template_Base $obj, $object_name)
     {
-        $smarty = $obj->_getSmartyObj();
-        if (!isset($smarty->registered_objects[ $object_name ])) {
-            throw new SmartyException("'$object_name' is not a registered object");
+        $smarty = $obj->_get_smarty_obj();
+        if (!isset($smarty->registered_objects[$object_name])) {
+            throw new Smarty_Exception("'{$object_name}' is not a registered object");
         }
-        if (!is_object($smarty->registered_objects[ $object_name ][ 0 ])) {
-            throw new SmartyException("registered '$object_name' is not an object");
+        if (!is_object($smarty->registered_objects[$object_name][0])) {
+            throw new Smarty_Exception("registered '{$object_name}' is not an object");
         }
-        return $smarty->registered_objects[ $object_name ][ 0 ];
+        return $smarty->registered_objects[$object_name][0];
     }
 }

@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method GetLiterals
  *
@@ -18,8 +17,7 @@ class Smarty_Internal_Method_Literals
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * Get literals
      *
@@ -29,12 +27,11 @@ class Smarty_Internal_Method_Literals
      *
      * @return array list of literals
      */
-    public function getLiterals(Smarty_Internal_TemplateBase $obj)
+    public function get_literals(Smarty_internal_template_Base $obj)
     {
-        $smarty = $obj->_getSmartyObj();
-        return (array)$smarty->literals;
+        $smarty = $obj->_get_smarty_obj();
+        return (array) $smarty->literals;
     }
-
     /**
      * Add literals
      *
@@ -47,14 +44,13 @@ class Smarty_Internal_Method_Literals
      * @return \Smarty|\Smarty_Internal_Template
      * @throws \SmartyException
      */
-    public function addLiterals(Smarty_Internal_TemplateBase $obj, $literals = null)
+    public function add_literals(Smarty_internal_template_Base $obj, $literals = null)
     {
         if (isset($literals)) {
-            $this->set($obj->_getSmartyObj(), (array)$literals);
+            $this->set($obj->_get_smarty_obj(), (array) $literals);
         }
         return $obj;
     }
-
     /**
      * Set literals
      *
@@ -67,16 +63,15 @@ class Smarty_Internal_Method_Literals
      * @return \Smarty|\Smarty_Internal_Template
      * @throws \SmartyException
      */
-    public function setLiterals(Smarty_Internal_TemplateBase $obj, $literals = null)
+    public function set_literals(Smarty_internal_template_Base $obj, $literals = null)
     {
-        $smarty = $obj->_getSmartyObj();
+        $smarty = $obj->_get_smarty_obj();
         $smarty->literals = [];
         if (!empty($literals)) {
-            $this->set($smarty, (array)$literals);
+            $this->set($smarty, (array) $literals);
         }
         return $obj;
     }
-
     /**
      * common setter for literals for easier handling of duplicates the
      * Smarty::$literals array gets filled with identical key values
@@ -89,14 +84,11 @@ class Smarty_Internal_Method_Literals
     private function set(Smarty $smarty, $literals)
     {
         $literals = array_combine($literals, $literals);
-        $error = isset($literals[ $smarty->left_delimiter ]) ? [$smarty->left_delimiter] : [];
-        $error = isset($literals[ $smarty->right_delimiter ]) ? $error[] = $smarty->right_delimiter : $error;
+        $error = isset($literals[$smarty->left_delimiter]) ? [$smarty->left_delimiter] : [];
+        $error = isset($literals[$smarty->right_delimiter]) ? $error[] = $smarty->right_delimiter : $error;
         if (!empty($error)) {
-            throw new SmartyException(
-                'User defined literal(s) "' . $error .
-                '" may not be identical with left or right delimiter'
-            );
+            throw new Smarty_Exception('User defined literal(s) "' . $error . '" may not be identical with left or right delimiter');
         }
-        $smarty->literals = array_merge((array)$smarty->literals, (array)$literals);
+        $smarty->literals = array_merge((array) $smarty->literals, (array) $literals);
     }
 }

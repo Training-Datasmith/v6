@@ -1,20 +1,18 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the SendAt object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a SendAt object for the /mail/send API call
  *
  * @package SendGrid\Mail
  */
-class SendAt implements \JsonSerializable
+class Send_At implements \JsonSerializable
 {
     /**
      * @var $send_at int A unix timestamp allowing you to specify when you want your email
@@ -27,7 +25,6 @@ class SendAt implements \JsonSerializable
      * at the same times as everyone else's mail
      */
     private $send_at;
-
     /**
      * Optional constructor
      *
@@ -47,10 +44,9 @@ class SendAt implements \JsonSerializable
     public function __construct($send_at = null)
     {
         if (isset($send_at)) {
-            $this->setSendAt($send_at);
+            $this->set_send_at($send_at);
         }
     }
-
     /**
      * Add the send at value to a SendAt object
      *
@@ -68,31 +64,28 @@ class SendAt implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setSendAt($send_at): void
+    public function set_send_at($send_at): void
     {
         Assert::integer($send_at, 'send_at');
-
         $this->send_at = $send_at;
     }
-
     /**
      * Retrieve the send at value from a SendAt object
      *
      * @return int
      */
-    public function getSendAt()
+    public function get_send_at()
     {
         return $this->send_at;
     }
-
     /**
      * Return an array representing a SendAt object for the Twilio SendGrid API
      *
      * @return int
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return $this->getSendAt();
+        return $this->get_send_at();
     }
 }

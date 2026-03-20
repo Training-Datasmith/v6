@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Internal Undefined
  *
@@ -19,7 +18,6 @@ class Smarty_Internal_Undefined
      * @var string|null
      */
     public $class = null;
-
     /**
      * Smarty_Internal_Undefined constructor.
      *
@@ -29,7 +27,6 @@ class Smarty_Internal_Undefined
     {
         $this->class = $class;
     }
-
     /**
      * Wrapper for obsolete class Smarty_Internal_Runtime_ValidateCompiled
      *
@@ -39,16 +36,15 @@ class Smarty_Internal_Undefined
      *
      * @return bool false
      */
-    public function decodeProperties(Smarty_Internal_Template $tpl, $properties, $cache = false)
+    public function decode_properties(Smarty_Internal_Template $tpl, $properties, $cache = false)
     {
         if ($cache) {
             $tpl->cached->valid = false;
         } else {
-            $tpl->mustCompile = true;
+            $tpl->must_compile = true;
         }
         return false;
     }
-
     /**
      * Call error handler for undefined method
      *
@@ -65,9 +61,9 @@ class Smarty_Internal_Undefined
             debug_print_backtrace();
             $backtrace = ob_get_contents();
             ob_end_clean();
-            throw new SmartyException("undefined extension class '{$this->class}'\n".$backtrace);
+            throw new Smarty_Exception("undefined extension class '{$this->class}'\n" . $backtrace);
         } else {
-            throw new SmartyException(get_class($args[ 0 ]) . "->{$name}() undefined method");
+            throw new Smarty_Exception(get_class($args[0]) . "->{$name}() undefined method");
         }
     }
 }

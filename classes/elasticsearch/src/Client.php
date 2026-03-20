@@ -11,165 +11,139 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch;
 
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Elasticsearch\Traits\ClientEndpointsTrait;
-use Elastic\Elasticsearch\Traits\EndpointTrait;
-use Elastic\Elasticsearch\Traits\NamespaceTrait;
-use Elastic\Elasticsearch\Transport\AsyncOnSuccess;
-use Elastic\Elasticsearch\Transport\AsyncOnSuccessNoException;
+use Elastic\Elasticsearch\Traits\Client_Endpoints_Trait;
+use Elastic\Elasticsearch\Traits\Endpoint_Trait;
+use Elastic\Elasticsearch\Traits\Namespace_Trait;
+use Elastic\Elasticsearch\Transport\Async_On_Success;
+use Elastic\Elasticsearch\Transport\Async_On_Success_No_Exception;
 use Elastic\Transport\Transport;
 use Http\Promise\Promise;
-use Psr\Http\Message\RequestInterface;
-use Psr\Log\LoggerInterface;
-
-final class Client implements ClientInterface
+use Psr\Http\Message\Request_Interface;
+use Psr\Log\Logger_Interface;
+final class Client implements Client_Interface
 {
-    use ClientEndpointsTrait;
-    use EndpointTrait;
-    use NamespaceTrait;
+    use Client_Endpoints_Trait;
+    use Endpoint_Trait;
+    use Namespace_Trait;
     public const CLIENT_NAME = 'es';
     public const VERSION = '8.6.1';
     public const API_COMPATIBILITY_HEADER_7 = '%s/vnd.elasticsearch+%s; compatible-with=7';
     public const API_COMPATIBILITY_HEADER_8 = '%s/vnd.elasticsearch+%s; compatible-with=8';
-
     /**
      * Flag to indicate if the client is connected to Searchly
      */
-    public static bool $isSearchly = false;
-
+    public static bool $is_searchly = false;
     /**
      * Specify is the request is asyncronous
      */
     protected bool $async = false;
-
     /**
      * Enable or disable the x-elastic-meta-header
      */
-    protected bool $elasticMetaHeader = true;
-
+    protected bool $elastic_meta_header = true;
     /**
      * Enable or disable the response Exception
      */
-    protected bool $responseException = true;
-
+    protected bool $response_exception = true;
     /**
      * The endpoint namespace storage
      */
     protected array $namespace;
-
-    public function __construct(
-        protected Transport $transport,
-        protected LoggerInterface $logger
-    ) {
-        $this->defaultTransportSettings($this->transport);
+    public function __construct(protected Transport $transport, protected Logger_Interface $logger)
+    {
+        $this->default_transport_settings($this->transport);
     }
-
     /**
      * @inheritdoc
      */
-    public function getTransport(): Transport
+    public function get_transport(): Transport
     {
         return $this->transport;
     }
-
     /**
      * @inheritdoc
      */
-    public function getLogger(): LoggerInterface
+    public function get_logger(): Logger_Interface
     {
         return $this->logger;
     }
-
     /**
      * Set the default settings for Elasticsearch
      */
-    protected function defaultTransportSettings(Transport $transport): void
+    protected function default_transport_settings(Transport $transport): void
     {
-        $transport->setUserAgent('elasticsearch-php', self::VERSION);
+        $transport->set_user_agent('elasticsearch-php', self::VERSION);
     }
-
     /**
      * @inheritdoc
      */
-    public function setAsync(bool $async): self
+    public function set_async(bool $async): self
     {
         $this->async = $async;
         return $this;
     }
-
     /**
      * @inheritdoc
      */
-    public function getAsync(): bool
+    public function get_async(): bool
     {
         return $this->async;
     }
-
     /**
      * @inheritdoc
      */
-    public function setElasticMetaHeader(bool $active): self
+    public function set_elastic_meta_header(bool $active): self
     {
-        $this->elasticMetaHeader = $active;
+        $this->elastic_meta_header = $active;
         return $this;
     }
-
     /**
      * @inheritdoc
      */
-    public function getElasticMetaHeader(): bool
+    public function get_elastic_meta_header(): bool
     {
-        return $this->elasticMetaHeader;
+        return $this->elastic_meta_header;
     }
-
     /**
      * @inheritdoc
      */
-    public function setResponseException(bool $active): self
+    public function set_response_exception(bool $active): self
     {
-        $this->responseException = $active;
+        $this->response_exception = $active;
         return $this;
     }
-
     /**
      * @inheritdoc
      */
-    public function getResponseException(): bool
+    public function get_response_exception(): bool
     {
-        return $this->responseException;
+        return $this->response_exception;
     }
-
     /**
      * @inheritdoc
      */
-    public function sendRequest(RequestInterface $request): \Http\Promise\Promise|\Elastic\Elasticsearch\Response\Elasticsearch
+    public function send_request(Request_Interface $request): \Http\Promise\Promise|\Elastic\Elasticsearch\Response\Elasticsearch
     {
         // If async returns a Promise
-        if ($this->getAsync()) {
-            if ($this->getElasticMetaHeader()) {
-                $this->transport->setElasticMetaHeader(Client::CLIENT_NAME, Client::VERSION, true);
+        if ($this->get_async()) {
+            if ($this->get_elastic_meta_header()) {
+                $this->transport->set_elastic_meta_header(Client::CLIENT_NAME, Client::VERSION, true);
             }
-            $this->transport->setAsyncOnSuccess(
-                $request->getMethod() === 'HEAD'
-                    ? new AsyncOnSuccessNoException()
-                    : ($this->getResponseException() ? new AsyncOnSuccess() : new AsyncOnSuccessNoException())
-            );
-            return $this->transport->sendAsyncRequest($request);
+            $this->transport->set_async_on_success($request->get_method() === 'HEAD' ? new Async_On_Success_No_Exception() : ($this->get_response_exception() ? new Async_On_Success() : new Async_On_Success_No_Exception()));
+            return $this->transport->send_async_request($request);
         }
-
-        if ($this->getElasticMetaHeader()) {
-            $this->transport->setElasticMetaHeader(Client::CLIENT_NAME, Client::VERSION, false);
+        if ($this->get_elastic_meta_header()) {
+            $this->transport->set_elastic_meta_header(Client::CLIENT_NAME, Client::VERSION, false);
         }
         $start = microtime(true);
-        $response = $this->transport->sendRequest($request);
+        $response = $this->transport->send_request($request);
         $this->logger->info(sprintf('Response time in %.3f sec', microtime(true) - $start));
-
         $result = new Elasticsearch();
-        $result->setResponse($response, $request->getMethod() === 'HEAD' ? false : $this->getResponseException());
+        $result->set_response($response, $request->get_method() === 'HEAD' ? false : $this->get_response_exception());
         return $result;
     }
 }

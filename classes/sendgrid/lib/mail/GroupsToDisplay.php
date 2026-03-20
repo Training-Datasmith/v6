@@ -1,28 +1,25 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the GroupsToDisplay object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a GroupsToDisplay object for
  * the /mail/send API call
  *
  * @package SendGrid\Mail
  */
-class GroupsToDisplay implements \JsonSerializable
+class Groups_To_Display implements \JsonSerializable
 {
     /**
      * @var $groups_to_display int[] An array containing the unsubscribe groups that you would like to be displayed
      *                               on the unsubscribe preferences page. Maximum of 25
      */
     private $groups_to_display;
-
     /**
      * Optional constructor
      *
@@ -37,10 +34,9 @@ class GroupsToDisplay implements \JsonSerializable
     public function __construct($groups_to_display = null)
     {
         if (isset($groups_to_display)) {
-            $this->setGroupsToDisplay($groups_to_display);
+            $this->set_groups_to_display($groups_to_display);
         }
     }
-
     /**
      * Set groups list to display on a GroupsToDisplay object
      *
@@ -51,13 +47,11 @@ class GroupsToDisplay implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setGroupsToDisplay($groups_to_display): void
+    public function set_groups_to_display($groups_to_display): void
     {
-        Assert::maxItems($groups_to_display, 'groups_to_display', 25);
-
+        Assert::max_items($groups_to_display, 'groups_to_display', 25);
         $this->groups_to_display = $groups_to_display;
     }
-
     /**
      * Add group to display on a GroupsToDisplay object
      *
@@ -68,7 +62,7 @@ class GroupsToDisplay implements \JsonSerializable
      *
      * @throws TypeException
      */
-    public function addGroupToDisplay($group_to_display): void
+    public function add_group_to_display($group_to_display): void
     {
         Assert::integer($group_to_display, 'group_to_display');
         Assert::accept($group_to_display, 'group_to_display', function (): bool {
@@ -78,28 +72,25 @@ class GroupsToDisplay implements \JsonSerializable
             }
             return \count($groups) < 25;
         }, 'Number of elements in "$groups_to_display" can not be more than 25.');
-
         $this->groups_to_display[] = $group_to_display;
     }
-
     /**
      * Return the group(s) to display on a GroupsToDisplay object
      *
      * @return int[]
      */
-    public function getGroupsToDisplay()
+    public function get_groups_to_display()
     {
         return $this->groups_to_display;
     }
-
     /**
      * Return an array representing a GroupsToDisplay object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return $this->getGroupsToDisplay();
+        return $this->get_groups_to_display();
     }
 }

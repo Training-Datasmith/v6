@@ -11,35 +11,33 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Transport\Adapter;
 
-use Elastic\Elasticsearch\Transport\RequestOptions;
-use GuzzleHttp\RequestOptions as GuzzleOptions;
-use Psr\Http\Client\ClientInterface;
-
-class Guzzle implements AdapterInterface
+use Elastic\Elasticsearch\Transport\Request_Options;
+use Guzzle_Http\Request_Options as GuzzleOptions;
+use Psr\Http\Client\Client_Interface;
+class Guzzle implements Adapter_Interface
 {
-    public function setConfig(ClientInterface $client, array $config, array $clientOptions): ClientInterface
+    public function set_config(Client_Interface $client, array $config, array $client_options): Client_Interface
     {
-        $guzzleConfig = [];
+        $guzzle_config = [];
         foreach ($config as $key => $value) {
             switch ($key) {
-                case RequestOptions::SSL_CERT:
-                    $guzzleConfig[GuzzleOptions::CERT] = $value;
+                case Request_Options::SSL_CERT:
+                    $guzzle_config[Guzzle_Options::CERT] = $value;
                     break;
-                case RequestOptions::SSL_KEY:
-                    $guzzleConfig[GuzzleOptions::SSL_KEY] = $value;
+                case Request_Options::SSL_KEY:
+                    $guzzle_config[Guzzle_Options::SSL_KEY] = $value;
                     break;
-                case RequestOptions::SSL_VERIFY:
-                    $guzzleConfig[GuzzleOptions::VERIFY] = $value;
+                case Request_Options::SSL_VERIFY:
+                    $guzzle_config[Guzzle_Options::VERIFY] = $value;
                     break;
-                case RequestOptions::SSL_CA:
-                    $guzzleConfig[GuzzleOptions::VERIFY] = $value;
+                case Request_Options::SSL_CA:
+                    $guzzle_config[Guzzle_Options::VERIFY] = $value;
             }
         }
         $class = $client::class;
-        return new $class(array_merge($clientOptions, $guzzleConfig));
+        return new $class(array_merge($client_options, $guzzle_config));
     }
 }

@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Security extends AbstractEndpoint
+class Security extends Abstract_Endpoint
 {
     /**
      * Creates or updates the user profile on behalf of another user.
@@ -48,20 +45,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function activateUserProfile(array $params = [])
+    public function activate_user_profile(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/profile/_activate';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Enables authentication as a user and retrieve information about the authenticated user.
      *
@@ -85,14 +77,10 @@ class Security extends AbstractEndpoint
     {
         $url = '/_security/_authenticate';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates the attributes of multiple existing API keys.
      *
@@ -113,20 +101,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function bulkUpdateApiKeys(array $params = [])
+    public function bulk_update_api_keys(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/api_key/_bulk_update';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Changes the passwords of users in the native realm and built-in users.
      *
@@ -149,9 +132,9 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function changePassword(array $params = [])
+    public function change_password(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['username'])) {
             $url = '/_security/user/' . $this->encode($params['username']) . '/_password';
             $method = 'PUT';
@@ -159,14 +142,10 @@ class Security extends AbstractEndpoint
             $url = '/_security/user/_password';
             $method = 'PUT';
         }
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Clear a subset or all entries from the API key cache.
      *
@@ -188,19 +167,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function clearApiKeyCache(array $params = [])
+    public function clear_api_key_cache(array $params = [])
     {
-        $this->checkRequiredParameters(['ids'], $params);
+        $this->check_required_parameters(['ids'], $params);
         $url = '/_security/api_key/' . $this->encode($params['ids']) . '/_clear_cache';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Evicts application privileges from the native application privileges cache.
      *
@@ -222,19 +197,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function clearCachedPrivileges(array $params = [])
+    public function clear_cached_privileges(array $params = [])
     {
-        $this->checkRequiredParameters(['application'], $params);
+        $this->check_required_parameters(['application'], $params);
         $url = '/_security/privilege/' . $this->encode($params['application']) . '/_clear_cache';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Evicts users from the user cache. Can completely clear the cache or evict specific users.
      *
@@ -257,19 +228,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function clearCachedRealms(array $params = [])
+    public function clear_cached_realms(array $params = [])
     {
-        $this->checkRequiredParameters(['realms'], $params);
+        $this->check_required_parameters(['realms'], $params);
         $url = '/_security/realm/' . $this->encode($params['realms']) . '/_clear_cache';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['usernames','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['usernames', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Evicts roles from the native role cache.
      *
@@ -291,19 +258,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function clearCachedRoles(array $params = [])
+    public function clear_cached_roles(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_security/role/' . $this->encode($params['name']) . '/_clear_cache';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Evicts tokens from the service account token caches.
      *
@@ -327,19 +290,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function clearCachedServiceTokens(array $params = [])
+    public function clear_cached_service_tokens(array $params = [])
     {
-        $this->checkRequiredParameters(['namespace','service','name'], $params);
+        $this->check_required_parameters(['namespace', 'service', 'name'], $params);
         $url = '/_security/service/' . $this->encode($params['namespace']) . '/' . $this->encode($params['service']) . '/credential/token/' . $this->encode($params['name']) . '/_clear_cache';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates an API key for access without requiring basic authentication.
      *
@@ -361,20 +320,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function createApiKey(array $params = [])
+    public function create_api_key(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/api_key';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a service account token for access without requiring basic authentication.
      *
@@ -399,9 +353,9 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function createServiceToken(array $params = [])
+    public function create_service_token(array $params = [])
     {
-        $this->checkRequiredParameters(['namespace','service'], $params);
+        $this->check_required_parameters(['namespace', 'service'], $params);
         if (isset($params['name'])) {
             $url = '/_security/service/' . $this->encode($params['namespace']) . '/' . $this->encode($params['service']) . '/credential/token/' . $this->encode($params['name']);
             $method = 'PUT';
@@ -409,13 +363,10 @@ class Security extends AbstractEndpoint
             $url = '/_security/service/' . $this->encode($params['namespace']) . '/' . $this->encode($params['service']) . '/credential/token';
             $method = 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Removes application privileges.
      *
@@ -439,19 +390,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deletePrivileges(array $params = [])
+    public function delete_privileges(array $params = [])
     {
-        $this->checkRequiredParameters(['application','name'], $params);
+        $this->check_required_parameters(['application', 'name'], $params);
         $url = '/_security/privilege/' . $this->encode($params['application']) . '/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Removes roles in the native realm.
      *
@@ -474,19 +421,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteRole(array $params = [])
+    public function delete_role(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_security/role/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Removes role mappings.
      *
@@ -509,19 +452,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteRoleMapping(array $params = [])
+    public function delete_role_mapping(array $params = [])
     {
-        $this->checkRequiredParameters(['name'], $params);
+        $this->check_required_parameters(['name'], $params);
         $url = '/_security/role_mapping/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes a service account token.
      *
@@ -546,19 +485,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteServiceToken(array $params = [])
+    public function delete_service_token(array $params = [])
     {
-        $this->checkRequiredParameters(['namespace','service','name'], $params);
+        $this->check_required_parameters(['namespace', 'service', 'name'], $params);
         $url = '/_security/service/' . $this->encode($params['namespace']) . '/' . $this->encode($params['service']) . '/credential/token/' . $this->encode($params['name']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deletes users from the native realm.
      *
@@ -581,19 +516,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteUser(array $params = [])
+    public function delete_user(array $params = [])
     {
-        $this->checkRequiredParameters(['username'], $params);
+        $this->check_required_parameters(['username'], $params);
         $url = '/_security/user/' . $this->encode($params['username']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Disables users in the native realm.
      *
@@ -616,19 +547,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function disableUser(array $params = [])
+    public function disable_user(array $params = [])
     {
-        $this->checkRequiredParameters(['username'], $params);
+        $this->check_required_parameters(['username'], $params);
         $url = '/_security/user/' . $this->encode($params['username']) . '/_disable';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Disables a user profile so it's not visible in user profile searches.
      *
@@ -651,19 +578,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function disableUserProfile(array $params = [])
+    public function disable_user_profile(array $params = [])
     {
-        $this->checkRequiredParameters(['uid'], $params);
+        $this->check_required_parameters(['uid'], $params);
         $url = '/_security/profile/' . $this->encode($params['uid']) . '/_disable';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Enables users in the native realm.
      *
@@ -686,19 +609,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function enableUser(array $params = [])
+    public function enable_user(array $params = [])
     {
-        $this->checkRequiredParameters(['username'], $params);
+        $this->check_required_parameters(['username'], $params);
         $url = '/_security/user/' . $this->encode($params['username']) . '/_enable';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Enables a user profile so it's visible in user profile searches.
      *
@@ -721,19 +640,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function enableUserProfile(array $params = [])
+    public function enable_user_profile(array $params = [])
     {
-        $this->checkRequiredParameters(['uid'], $params);
+        $this->check_required_parameters(['uid'], $params);
         $url = '/_security/profile/' . $this->encode($params['uid']) . '/_enable';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows a kibana instance to configure itself to communicate with a secured elasticsearch cluster.
      *
@@ -753,19 +668,14 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function enrollKibana(array $params = [])
+    public function enroll_kibana(array $params = [])
     {
         $url = '/_security/enroll/kibana';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Allows a new node to enroll to an existing cluster with security enabled.
      *
@@ -785,19 +695,14 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function enrollNode(array $params = [])
+    public function enroll_node(array $params = [])
     {
         $url = '/_security/enroll/node';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves information for one or more API keys.
      *
@@ -823,18 +728,14 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getApiKey(array $params = [])
+    public function get_api_key(array $params = [])
     {
         $url = '/_security/api_key';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['id','name','username','realm_name','owner','with_limited_by','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['id', 'name', 'username', 'realm_name', 'owner', 'with_limited_by', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves the list of cluster privileges and index privileges that are available in this version of Elasticsearch.
      *
@@ -854,18 +755,14 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getBuiltinPrivileges(array $params = [])
+    public function get_builtin_privileges(array $params = [])
     {
         $url = '/_security/privilege/_builtin';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves application privileges.
      *
@@ -887,7 +784,7 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getPrivileges(array $params = [])
+    public function get_privileges(array $params = [])
     {
         if (isset($params['application']) && isset($params['name'])) {
             $url = '/_security/privilege/' . $this->encode($params['application']) . '/' . $this->encode($params['name']);
@@ -899,13 +796,10 @@ class Security extends AbstractEndpoint
             $url = '/_security/privilege';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves roles in the native realm.
      *
@@ -926,7 +820,7 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getRole(array $params = [])
+    public function get_role(array $params = [])
     {
         if (isset($params['name'])) {
             $url = '/_security/role/' . $this->encode($params['name']);
@@ -935,13 +829,10 @@ class Security extends AbstractEndpoint
             $url = '/_security/role';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves role mappings.
      *
@@ -962,7 +853,7 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getRoleMapping(array $params = [])
+    public function get_role_mapping(array $params = [])
     {
         if (isset($params['name'])) {
             $url = '/_security/role_mapping/' . $this->encode($params['name']);
@@ -971,13 +862,10 @@ class Security extends AbstractEndpoint
             $url = '/_security/role_mapping';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves information about service accounts.
      *
@@ -999,7 +887,7 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getServiceAccounts(array $params = [])
+    public function get_service_accounts(array $params = [])
     {
         if (isset($params['namespace']) && isset($params['service'])) {
             $url = '/_security/service/' . $this->encode($params['namespace']) . '/' . $this->encode($params['service']);
@@ -1011,13 +899,10 @@ class Security extends AbstractEndpoint
             $url = '/_security/service';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves information of all service credentials for a service account.
      *
@@ -1040,19 +925,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getServiceCredentials(array $params = [])
+    public function get_service_credentials(array $params = [])
     {
-        $this->checkRequiredParameters(['namespace','service'], $params);
+        $this->check_required_parameters(['namespace', 'service'], $params);
         $url = '/_security/service/' . $this->encode($params['namespace']) . '/' . $this->encode($params['service']) . '/credential';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a bearer token for access without requiring basic authentication.
      *
@@ -1073,20 +954,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getToken(array $params = [])
+    public function get_token(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/oauth2/token';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves information about users in the native realm and built-in users.
      *
@@ -1108,7 +984,7 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getUser(array $params = [])
+    public function get_user(array $params = [])
     {
         if (isset($params['username'])) {
             $url = '/_security/user/' . $this->encode($params['username']);
@@ -1117,13 +993,10 @@ class Security extends AbstractEndpoint
             $url = '/_security/user';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['with_profile_uid','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['with_profile_uid', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves security privileges for the logged in user.
      *
@@ -1143,18 +1016,14 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getUserPrivileges(array $params = [])
+    public function get_user_privileges(array $params = [])
     {
         $url = '/_security/user/_privileges';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves user profiles for the given unique ID(s).
      *
@@ -1177,19 +1046,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getUserProfile(array $params = [])
+    public function get_user_profile(array $params = [])
     {
-        $this->checkRequiredParameters(['uid'], $params);
+        $this->check_required_parameters(['uid'], $params);
         $url = '/_security/profile/' . $this->encode($params['uid']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['data','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['data', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates an API key on behalf of another user.
      *
@@ -1211,20 +1076,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function grantApiKey(array $params = [])
+    public function grant_api_key(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/api_key/grant';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Determines whether the specified user has a specified list of privileges.
      *
@@ -1246,9 +1106,9 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function hasPrivileges(array $params = [])
+    public function has_privileges(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         if (isset($params['user'])) {
             $url = '/_security/user/' . $this->encode($params['user']) . '/_has_privileges';
             $method = empty($params['body']) ? 'GET' : 'POST';
@@ -1256,14 +1116,10 @@ class Security extends AbstractEndpoint
             $url = '/_security/user/_has_privileges';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Determines whether the users associated with the specified profile IDs have all the requested privileges.
      *
@@ -1284,20 +1140,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function hasPrivilegesUserProfile(array $params = [])
+    public function has_privileges_user_profile(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/profile/_has_privileges';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Invalidates one or more API keys.
      *
@@ -1318,20 +1169,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function invalidateApiKey(array $params = [])
+    public function invalidate_api_key(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/api_key';
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Invalidates one or more access tokens or refresh tokens.
      *
@@ -1352,20 +1198,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function invalidateToken(array $params = [])
+    public function invalidate_token(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/oauth2/token';
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Exchanges an OpenID Connection authentication response message for an Elasticsearch access token and refresh token pair
      *
@@ -1386,20 +1227,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function oidcAuthenticate(array $params = [])
+    public function oidc_authenticate(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/oidc/authenticate';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Invalidates a refresh token and access token that was generated from the OpenID Connect Authenticate API
      *
@@ -1420,20 +1256,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function oidcLogout(array $params = [])
+    public function oidc_logout(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/oidc/logout';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates an OAuth 2.0 authentication request as a URL string
      *
@@ -1454,20 +1285,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function oidcPrepareAuthentication(array $params = [])
+    public function oidc_prepare_authentication(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/oidc/prepare';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Adds or updates application privileges.
      *
@@ -1489,20 +1315,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putPrivileges(array $params = [])
+    public function put_privileges(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/privilege/';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Adds and updates roles in the native realm.
      *
@@ -1526,20 +1347,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putRole(array $params = [])
+    public function put_role(array $params = [])
     {
-        $this->checkRequiredParameters(['name','body'], $params);
+        $this->check_required_parameters(['name', 'body'], $params);
         $url = '/_security/role/' . $this->encode($params['name']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates and updates role mappings.
      *
@@ -1563,20 +1379,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putRoleMapping(array $params = [])
+    public function put_role_mapping(array $params = [])
     {
-        $this->checkRequiredParameters(['name','body'], $params);
+        $this->check_required_parameters(['name', 'body'], $params);
         $url = '/_security/role_mapping/' . $this->encode($params['name']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Adds and updates users in the native realm. These users are commonly referred to as native users.
      *
@@ -1600,20 +1411,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putUser(array $params = [])
+    public function put_user(array $params = [])
     {
-        $this->checkRequiredParameters(['username','body'], $params);
+        $this->check_required_parameters(['username', 'body'], $params);
         $url = '/_security/user/' . $this->encode($params['username']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves information for API keys using a subset of query DSL
      *
@@ -1635,19 +1441,14 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function queryApiKeys(array $params = [])
+    public function query_api_keys(array $params = [])
     {
         $url = '/_security/_query/api_key';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['with_limited_by','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['with_limited_by', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Exchanges a SAML Response message for an Elasticsearch access token and refresh token pair
      *
@@ -1668,20 +1469,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function samlAuthenticate(array $params = [])
+    public function saml_authenticate(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/saml/authenticate';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Verifies the logout response sent from the SAML IdP
      *
@@ -1702,20 +1498,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function samlCompleteLogout(array $params = [])
+    public function saml_complete_logout(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/saml/complete_logout';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Consumes a SAML LogoutRequest
      *
@@ -1736,20 +1527,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function samlInvalidate(array $params = [])
+    public function saml_invalidate(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/saml/invalidate';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Invalidates an access token and a refresh token that were generated via the SAML Authenticate API
      *
@@ -1770,20 +1556,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function samlLogout(array $params = [])
+    public function saml_logout(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/saml/logout';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a SAML authentication request
      *
@@ -1804,20 +1585,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function samlPrepareAuthentication(array $params = [])
+    public function saml_prepare_authentication(array $params = [])
     {
-        $this->checkRequiredParameters(['body'], $params);
+        $this->check_required_parameters(['body'], $params);
         $url = '/_security/saml/prepare';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Generates SAML metadata for the Elastic stack SAML 2.0 Service Provider
      *
@@ -1839,20 +1615,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function samlServiceProviderMetadata(array $params = [])
+    public function saml_service_provider_metadata(array $params = [])
     {
-        $this->checkRequiredParameters(['realm_name'], $params);
+        $this->check_required_parameters(['realm_name'], $params);
         $url = '/_security/saml/metadata/' . $this->encode($params['realm_name']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Get suggestions for user profiles that match specified search criteria.
      *
@@ -1874,19 +1645,14 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function suggestUserProfiles(array $params = [])
+    public function suggest_user_profiles(array $params = [])
     {
         $url = '/_security/profile/_suggest';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['data','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['data', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates attributes of an existing API key.
      *
@@ -1909,20 +1675,15 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function updateApiKey(array $params = [])
+    public function update_api_key(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_security/api_key/' . $this->encode($params['id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Update application specific data for the user profile of the given unique ID.
      *
@@ -1948,17 +1709,13 @@ class Security extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function updateUserProfileData(array $params = [])
+    public function update_user_profile_data(array $params = [])
     {
-        $this->checkRequiredParameters(['uid','body'], $params);
+        $this->check_required_parameters(['uid', 'body'], $params);
         $url = '/_security/profile/' . $this->encode($params['uid']) . '/_data';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['if_seq_no','if_primary_term','refresh','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['if_seq_no', 'if_primary_term', 'refresh', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

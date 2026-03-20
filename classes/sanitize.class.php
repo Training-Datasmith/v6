@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Email:  hello@cubecart.com
  * License:  GPL-3.0 https://www.gnu.org/licenses/quick-guide-gplv3.html
  */
-
 /**
  * Santize class
  *
@@ -25,14 +24,14 @@ class Sanitize
     /**
      * Checks GET & POSTs for valid security token
      */
-    public static function checkToken(): void
+    public static function check_token(): void
     {
         // Check defined CSRF on speficfied GET
         if (ADMIN_CP) {
             global $glob;
-            $csrf_path = CC_ROOT_DIR.'/'.$glob['adminFolder'].'/skins/'.$GLOBALS['config']->get('config', 'admin_skin').'/csrf.inc.php';
+            $csrf_path = CC_ROOT_DIR . '/' . $glob['adminFolder'] . '/skins/' . $GLOBALS['config']->get('config', 'admin_skin') . '/csrf.inc.php';
             if (file_exists($csrf_path)) {
-                require_once($csrf_path);
+                require_once $csrf_path;
                 if (is_array($csrf_maps)) {
                     // All CRSF mappings are lowercase
                     $g = [];
@@ -45,19 +44,18 @@ class Sanitize
                         if (is_array($csrf_map)) {
                             $csrf_check = false;
                             foreach ($csrf_map as $key => $value) {
-                                if ((!$value && isset($g[$key])) || (isset($g[$key]) && $g[$key] == $value)) {
+                                if (!$value && isset($g[$key]) || isset($g[$key]) && $g[$key] == $value) {
                                     $csrf_check = true;
                                 } else {
                                     $csrf_check = false;
                                     break;
                                 }
                             }
-
                             if ($csrf_check) {
-                                if (!isset($_GET['token']) || !$GLOBALS['session']->checkToken($_GET['token'])) {
+                                if (!isset($_GET['token']) || !$GLOBALS['session']->check_token($_GET['token'])) {
                                     //Make a new token just to insure that it doesn't get used again
-                                    $GLOBALS['session']->getToken(true);
-                                    self::_stopToken();
+                                    $GLOBALS['session']->get_token(true);
+                                    self::_stop_token();
                                 }
                                 break;
                             }
@@ -66,45 +64,34 @@ class Sanitize
                 }
             }
         }
-
         if (!empty($_POST)) {
             $csrf_exception = false;
             // Exception for payment gateways
-            if (!isset($_GET['_a']) && isset($_GET['_g'], $_GET['type'], $_GET['cmd'], $_GET['module']) && in_array($_GET['_g'], ['remote','rm']) && $_GET['type'] == 'gateway' && in_array($_GET['cmd'], ['call', 'process']) && !empty($_GET['module'])) {
+            if (!isset($_GET['_a']) && isset($_GET['_g'], $_GET['type'], $_GET['cmd'], $_GET['module']) && in_array($_GET['_g'], ['remote', 'rm']) && $_GET['type'] == 'gateway' && in_array($_GET['cmd'], ['call', 'process']) && !empty($_GET['module'])) {
                 $csrf_exception = true;
             } elseif (isset($_GET['_a']) && $_GET['_a'] == 'complete' && !isset($_GET['_g'])) {
                 $csrf_exception = true;
             }
-
             //Validate the POST token
-            if (!$csrf_exception && (!isset($_POST['token']) || !$GLOBALS['session']->checkToken($_POST['token']))) {
+            if (!$csrf_exception && (!isset($_POST['token']) || !$GLOBALS['session']->check_token($_POST['token']))) {
                 //Make a new token just to insure that it doesn't get used again
-                $GLOBALS['session']->getToken(true);
-                self::_stopToken();
+                $GLOBALS['session']->get_token(true);
+                self::_stop_token();
             }
         }
     }
-
     /**
      * Clean all the global varaibles
      */
-    public static function cleanGlobals(): void
+    public static function clean_globals(): void
     {
-        $GLOBALS['RAW'] = [
-            'GET' 		=> $_GET,
-            'POST' 		=> $_POST,
-            'COOKIE' 	=> $_COOKIE,
-            'REQUEST' 	=> $_REQUEST,
-        ];
-
+        $GLOBALS['RAW'] = ['GET' => $_GET, 'POST' => $_POST, 'COOKIE' => $_COOKIE, 'REQUEST' => $_REQUEST];
         self::_clean($_GET);
         self::_clean($_POST);
         self::_clean($_COOKIE);
         self::_clean($_REQUEST);
     }
-
     //=====[ Private ]=======================================
-
     /**
      * Clean a variable
      *
@@ -119,23 +106,20 @@ class Sanitize
             foreach ($data as $key => $value) {
                 //Make sure the variable's key name is a valid one
                 if (preg_match('#([^a-z0-9\-\_\:\@\|])#i', urldecode((string) $key))) {
-                    trigger_error('Security Warning: Illegal array key "'.htmlentities((string) $key).'" was detected and was removed.', E_USER_WARNING);
+                    trigger_error('Security Warning: Illegal array key "' . htmlentities((string) $key) . '" was detected and was removed.', E_USER_WARNING);
                     unset($data[$key]);
                     continue;
                 }
                 if (is_array($value)) {
                     self::_clean($data[$key]);
-                } else {
-                    if (!empty($value)) {
-                        $data[$key] = self::_safety($value);
-                    }
+                } else if (!empty($value)) {
+                    $data[$key] = self::_safety($value);
                 }
             }
         } else {
             $data = self::_safety($data);
         }
     }
-
     /**
      * Sanitize a string for HTML
      *
@@ -145,12 +129,11 @@ class Sanitize
     {
         return htmlspecialchars(html_entity_decode($value));
     }
-
     /**
      * Clears POST and triggers error
      * Used when the POST token is not valid
      */
-    private static function _stopToken(): void
+    private static function _stop_token(): void
     {
         $_POST = $_GET = $_REQUEST = [];
         $message = 'Security Alert: Possible Cross-Site Request Forgery (CSRF). <a href="https://support.cubecart.com/hc/en-gb/articles/360003831797">Learn more</a>.';

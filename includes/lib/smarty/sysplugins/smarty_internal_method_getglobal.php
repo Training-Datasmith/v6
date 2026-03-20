@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method GetGlobal
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_GetGlobal
+class Smarty_internal_method_get_Global
 {
     /**
      * Valid for all objects
      *
      * @var int
      */
-    public $objMap = 7;
-
+    public $obj_map = 7;
     /**
      * Returns a single or all global  variables
      *
@@ -30,18 +28,18 @@ class Smarty_Internal_Method_GetGlobal
      *
      * @return string|array variable value or or array of variables
      */
-    public function getGlobal(Smarty_Internal_Data $data, $varName = null)
+    public function get_global(Smarty_Internal_Data $data, $var_name = null)
     {
-        if (isset($varName)) {
-            if (isset(Smarty::$global_tpl_vars[ $varName ])) {
-                return Smarty::$global_tpl_vars[ $varName ]->value;
+        if (isset($var_name)) {
+            if (isset(Smarty::$global_tpl_vars[$var_name])) {
+                return Smarty::$global_tpl_vars[$var_name]->value;
             } else {
                 return '';
             }
         } else {
             $_result = [];
             foreach (Smarty::$global_tpl_vars as $key => $var) {
-                $_result[ $key ] = $var->value;
+                $_result[$key] = $var->value;
             }
             return $_result;
         }

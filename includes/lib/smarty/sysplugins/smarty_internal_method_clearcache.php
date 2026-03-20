@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method ClearCache
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_ClearCache
+class Smarty_internal_method_clear_Cache
 {
     /**
      * Valid for Smarty object
      *
      * @var int
      */
-    public $objMap = 1;
-
+    public $obj_map = 1;
     /**
      * Empty cache for a specific template
      *
@@ -36,17 +34,11 @@ class Smarty_Internal_Method_ClearCache
      * @return int number of cache files deleted
      * @throws \SmartyException
      */
-    public function clearCache(
-        Smarty $smarty,
-        $template_name,
-        $cache_id = null,
-        $compile_id = null,
-        $exp_time = null,
-        $type = null
-    ) {
-        $smarty->_clearTemplateCache();
+    public function clear_cache(Smarty $smarty, $template_name, $cache_id = null, $compile_id = null, $exp_time = null, $type = null)
+    {
+        $smarty->_clear_template_cache();
         // load cache resource and call clear
-        $_cache_resource = Smarty_CacheResource::load($smarty, $type);
+        $_cache_resource = Smarty_cache_Resource::load($smarty, $type);
         return $_cache_resource->clear($smarty, $template_name, $cache_id, $compile_id, $exp_time);
     }
 }

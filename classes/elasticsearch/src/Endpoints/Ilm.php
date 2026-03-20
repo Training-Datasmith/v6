@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Ilm extends AbstractEndpoint
+class Ilm extends Abstract_Endpoint
 {
     /**
      * Deletes the specified lifecycle policy definition. A currently used policy cannot be deleted.
@@ -49,19 +46,15 @@ class Ilm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteLifecycle(array $params = [])
+    public function delete_lifecycle(array $params = [])
     {
-        $this->checkRequiredParameters(['policy'], $params);
+        $this->check_required_parameters(['policy'], $params);
         $url = '/_ilm/policy/' . $this->encode($params['policy']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves information about the index's current lifecycle state, such as the currently executing phase, action, and step.
      *
@@ -85,19 +78,15 @@ class Ilm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function explainLifecycle(array $params = [])
+    public function explain_lifecycle(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_ilm/explain';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['only_managed','only_errors','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['only_managed', 'only_errors', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns the specified policy definition. Includes the policy version and last modified date.
      *
@@ -118,7 +107,7 @@ class Ilm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getLifecycle(array $params = [])
+    public function get_lifecycle(array $params = [])
     {
         if (isset($params['policy'])) {
             $url = '/_ilm/policy/' . $this->encode($params['policy']);
@@ -127,13 +116,10 @@ class Ilm extends AbstractEndpoint
             $url = '/_ilm/policy';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves the current index lifecycle management (ILM) status.
      *
@@ -153,18 +139,14 @@ class Ilm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getStatus(array $params = [])
+    public function get_status(array $params = [])
     {
         $url = '/_ilm/status';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Migrates the indices and ILM policies away from custom node attribute allocation routing to data tiers routing
      *
@@ -186,19 +168,14 @@ class Ilm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function migrateToDataTiers(array $params = [])
+    public function migrate_to_data_tiers(array $params = [])
     {
         $url = '/_ilm/migrate_to_data_tiers';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['dry_run','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['dry_run', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Manually moves an index into the specified step and executes that step.
      *
@@ -221,20 +198,15 @@ class Ilm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function moveToStep(array $params = [])
+    public function move_to_step(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/_ilm/move/' . $this->encode($params['index']);
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a lifecycle policy
      *
@@ -257,20 +229,15 @@ class Ilm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putLifecycle(array $params = [])
+    public function put_lifecycle(array $params = [])
     {
-        $this->checkRequiredParameters(['policy'], $params);
+        $this->check_required_parameters(['policy'], $params);
         $url = '/_ilm/policy/' . $this->encode($params['policy']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Removes the assigned lifecycle policy and stops managing the specified index
      *
@@ -292,19 +259,15 @@ class Ilm extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function removePolicy(array $params = [])
+    public function remove_policy(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_ilm/remove';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retries executing the policy for an index that is in the ERROR step.
      *
@@ -328,17 +291,13 @@ class Ilm extends AbstractEndpoint
      */
     public function retry(array $params = [])
     {
-        $this->checkRequiredParameters(['index'], $params);
+        $this->check_required_parameters(['index'], $params);
         $url = '/' . $this->encode($params['index']) . '/_ilm/retry';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Start the index lifecycle management (ILM) plugin.
      *
@@ -362,14 +321,10 @@ class Ilm extends AbstractEndpoint
     {
         $url = '/_ilm/start';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Halts all lifecycle management operations and stops the index lifecycle management (ILM) plugin
      *
@@ -393,11 +348,8 @@ class Ilm extends AbstractEndpoint
     {
         $url = '/_ilm/stop';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

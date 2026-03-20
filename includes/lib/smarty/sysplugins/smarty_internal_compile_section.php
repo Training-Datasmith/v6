@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Compile Section
  * Compiles the {section} {sectionelse} {/section} tags
@@ -9,14 +9,13 @@ declare(strict_types=1);
  * @subpackage Compiler
  * @author     Uwe Tews
  */
-
 /**
  * Smarty Internal Plugin Compile Section Class
  *
  * @package    Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Section extends Smarty_Internal_Compile_Private_ForeachSection
+class Smarty_Internal_Compile_Section extends Smarty_internal_compile_private_foreach_Section
 {
     /**
      * Attribute definition: Overwrites base class.
@@ -25,7 +24,6 @@ class Smarty_Internal_Compile_Section extends Smarty_Internal_Compile_Private_Fo
      * @see Smarty_Internal_CompileBase
      */
     public $required_attributes = ['name', 'loop'];
-
     /**
      * Attribute definition: Overwrites base class.
      *
@@ -33,7 +31,6 @@ class Smarty_Internal_Compile_Section extends Smarty_Internal_Compile_Private_Fo
      * @see Smarty_Internal_CompileBase
      */
     public $shorttag_order = ['name', 'loop'];
-
     /**
      * Attribute definition: Overwrites base class.
      *
@@ -41,45 +38,36 @@ class Smarty_Internal_Compile_Section extends Smarty_Internal_Compile_Private_Fo
      * @see Smarty_Internal_CompileBase
      */
     public $optional_attributes = ['start', 'step', 'max', 'show', 'properties'];
-
     /**
      * counter
      *
      * @var int
      */
     public $counter = 0;
-
     /**
      * Name of this tag
      *
      * @var string
      */
-    public $tagName = 'section';
-
+    public $tag_name = 'section';
     /**
      * Valid properties of $smarty.section.name.xxx variable
      *
      * @var array
      */
-    public $nameProperties = [
-        'first', 'last', 'index', 'iteration', 'show', 'total', 'rownum', 'index_prev',
-        'index_next', 'loop',
-    ];
-
+    public $name_properties = ['first', 'last', 'index', 'iteration', 'show', 'total', 'rownum', 'index_prev', 'index_next', 'loop'];
     /**
      * {section} tag has no item properties
      *
      * @var array
      */
-    public $itemProperties = null;
-
+    public $item_properties = null;
     /**
      * {section} tag has always name attribute
      *
      * @var bool
      */
-    public $isNamed = true;
-
+    public $is_named = true;
     /**
      * Compiles code for the {section} tag
      *
@@ -90,61 +78,58 @@ class Smarty_Internal_Compile_Section extends Smarty_Internal_Compile_Private_Fo
      * @throws \SmartyCompilerException
      * @throws \SmartyException
      */
-    public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
+    public function compile($args, Smarty_internal_template_Compiler_Base $compiler)
     {
-        $compiler->loopNesting++;
+        $compiler->loop_nesting++;
         // check and get attributes
-        $_attr = $this->getAttributes($compiler, $args);
-        $attributes = ['name' => $compiler->getId($_attr[ 'name' ])];
-        unset($_attr[ 'name' ]);
+        $_attr = $this->get_attributes($compiler, $args);
+        $attributes = ['name' => $compiler->get_id($_attr['name'])];
+        unset($_attr['name']);
         foreach ($attributes as $a => $v) {
             if ($v === false) {
                 $compiler->trigger_template_error("'{$a}' attribute/variable has illegal value", null, true);
             }
         }
         $local = "\$__section_{$attributes['name']}_" . $this->counter++ . '_';
-        $sectionVar = "\$_smarty_tpl->tpl_vars['__smarty_section_{$attributes['name']}']";
-        $this->openTag($compiler, 'section', ['section', $compiler->nocache, $local, $sectionVar]);
+        $section_var = "\$_smarty_tpl->tpl_vars['__smarty_section_{$attributes['name']}']";
+        $this->open_tag($compiler, 'section', ['section', $compiler->nocache, $local, $section_var]);
         // maybe nocache because of nocache variables
         $compiler->nocache = $compiler->nocache | $compiler->tag_nocache;
-        $initLocal = [];
-        $initNamedProperty = [];
-        $initFor = [];
-        $incFor = [];
-        $cmpFor = [];
-        $propValue = [
-            'index'     => "{$sectionVar}->value['index']", 'show' => 'true', 'step' => 1,
-            'iteration' => "{$local}iteration",
-        ];
-        $propType = ['index' => 2, 'iteration' => 2, 'show' => 0, 'step' => 0,];
+        $init_local = [];
+        $init_named_property = [];
+        $init_for = [];
+        $inc_for = [];
+        $cmp_for = [];
+        $prop_value = ['index' => "{$section_var}->value['index']", 'show' => 'true', 'step' => 1, 'iteration' => "{$local}iteration"];
+        $prop_type = ['index' => 2, 'iteration' => 2, 'show' => 0, 'step' => 0];
         // search for used tag attributes
-        $this->scanForProperties($attributes, $compiler);
-        if (!empty($this->matchResults[ 'named' ])) {
-            $namedAttr = $this->matchResults[ 'named' ];
+        $this->scan_for_properties($attributes, $compiler);
+        if (!empty($this->match_results['named'])) {
+            $named_attr = $this->match_results['named'];
         }
-        if (isset($_attr[ 'properties' ]) && preg_match_all("/['](.*?)[']/", $_attr[ 'properties' ], $match)) {
-            foreach ($match[ 1 ] as $prop) {
-                if (in_array($prop, $this->nameProperties)) {
-                    $namedAttr[ $prop ] = true;
+        if (isset($_attr['properties']) && preg_match_all("/['](.*?)[']/", $_attr['properties'], $match)) {
+            foreach ($match[1] as $prop) {
+                if (in_array($prop, $this->name_properties)) {
+                    $named_attr[$prop] = true;
                 } else {
                     $compiler->trigger_template_error("Invalid property '{$prop}'", null, true);
                 }
             }
         }
-        $namedAttr[ 'index' ] = true;
+        $named_attr['index'] = true;
         $output = "<?php\n";
         foreach ($_attr as $attr_name => $attr_value) {
             switch ($attr_name) {
                 case 'loop':
                     if (is_numeric($attr_value)) {
-                        $v = (int)$attr_value;
+                        $v = (int) $attr_value;
                         $t = 0;
                     } else {
-                        $v = "(is_array(@\$_loop=$attr_value) ? count(\$_loop) : max(0, (int) \$_loop))";
+                        $v = "(is_array(@\$_loop={$attr_value}) ? count(\$_loop) : max(0, (int) \$_loop))";
                         $t = 1;
                     }
                     if ($t === 1) {
-                        $initLocal[ 'loop' ] = $v;
+                        $init_local['loop'] = $v;
                         $v = "{$local}loop";
                     }
                     break;
@@ -153,261 +138,225 @@ class Smarty_Internal_Compile_Section extends Smarty_Internal_Compile_Private_Fo
                         $v = $attr_value ? 'true' : 'false';
                         $t = 0;
                     } else {
-                        $v = "(bool) $attr_value";
+                        $v = "(bool) {$attr_value}";
                         $t = 3;
                     }
                     break;
                 case 'step':
                     if (is_numeric($attr_value)) {
-                        $v = (int)$attr_value;
-                        $v = ($v === 0) ? 1 : $v;
+                        $v = (int) $attr_value;
+                        $v = $v === 0 ? 1 : $v;
                         $t = 0;
                         break;
                     }
-                    $initLocal[ 'step' ] = "((int)@$attr_value) === 0 ? 1 : (int)@$attr_value";
+                    $init_local['step'] = "((int)@{$attr_value}) === 0 ? 1 : (int)@{$attr_value}";
                     $v = "{$local}step";
                     $t = 2;
                     break;
                 case 'max':
                 case 'start':
                     if (is_numeric($attr_value)) {
-                        $v = (int)$attr_value;
+                        $v = (int) $attr_value;
                         $t = 0;
                         break;
                     }
-                    $v = "(int)@$attr_value";
+                    $v = "(int)@{$attr_value}";
                     $t = 3;
                     break;
             }
-            if ($t === 3 && $compiler->getId($attr_value)) {
+            if ($t === 3 && $compiler->get_id($attr_value)) {
                 $t = 1;
             }
-            $propValue[ $attr_name ] = $v;
-            $propType[ $attr_name ] = $t;
+            $prop_value[$attr_name] = $v;
+            $prop_type[$attr_name] = $t;
         }
-        if (isset($namedAttr[ 'step' ])) {
-            $initNamedProperty[ 'step' ] = $propValue[ 'step' ];
+        if (isset($named_attr['step'])) {
+            $init_named_property['step'] = $prop_value['step'];
         }
-        if (isset($namedAttr[ 'iteration' ])) {
-            $propValue[ 'iteration' ] = "{$sectionVar}->value['iteration']";
+        if (isset($named_attr['iteration'])) {
+            $prop_value['iteration'] = "{$section_var}->value['iteration']";
         }
-        $incFor[ 'iteration' ] = "{$propValue['iteration']}++";
-        $initFor[ 'iteration' ] = "{$propValue['iteration']} = 1";
-        if ($propType[ 'step' ] === 0) {
-            if ($propValue[ 'step' ] === 1) {
-                $incFor[ 'index' ] = "{$sectionVar}->value['index']++";
-            } elseif ($propValue[ 'step' ] > 1) {
-                $incFor[ 'index' ] = "{$sectionVar}->value['index'] += {$propValue['step']}";
+        $inc_for['iteration'] = "{$prop_value['iteration']}++";
+        $init_for['iteration'] = "{$prop_value['iteration']} = 1";
+        if ($prop_type['step'] === 0) {
+            if ($prop_value['step'] === 1) {
+                $inc_for['index'] = "{$section_var}->value['index']++";
+            } elseif ($prop_value['step'] > 1) {
+                $inc_for['index'] = "{$section_var}->value['index'] += {$prop_value['step']}";
             } else {
-                $incFor[ 'index' ] = "{$sectionVar}->value['index'] -= " . -$propValue[ 'step' ];
+                $inc_for['index'] = "{$section_var}->value['index'] -= " . -$prop_value['step'];
             }
         } else {
-            $incFor[ 'index' ] = "{$sectionVar}->value['index'] += {$propValue['step']}";
+            $inc_for['index'] = "{$section_var}->value['index'] += {$prop_value['step']}";
         }
-        if (!isset($propValue[ 'max' ])) {
-            $propValue[ 'max' ] = $propValue[ 'loop' ];
-            $propType[ 'max' ] = $propType[ 'loop' ];
-        } elseif ($propType[ 'max' ] !== 0) {
-            $propValue[ 'max' ] = "{$propValue['max']} < 0 ? {$propValue['loop']} : {$propValue['max']}";
-            $propType[ 'max' ] = 1;
-        } else {
-            if ($propValue[ 'max' ] < 0) {
-                $propValue[ 'max' ] = $propValue[ 'loop' ];
-                $propType[ 'max' ] = $propType[ 'loop' ];
-            }
+        if (!isset($prop_value['max'])) {
+            $prop_value['max'] = $prop_value['loop'];
+            $prop_type['max'] = $prop_type['loop'];
+        } elseif ($prop_type['max'] !== 0) {
+            $prop_value['max'] = "{$prop_value['max']} < 0 ? {$prop_value['loop']} : {$prop_value['max']}";
+            $prop_type['max'] = 1;
+        } else if ($prop_value['max'] < 0) {
+            $prop_value['max'] = $prop_value['loop'];
+            $prop_type['max'] = $prop_type['loop'];
         }
-        if (!isset($propValue[ 'start' ])) {
-            $start_code =
-                [1 => "{$propValue['step']} > 0 ? ", 2 => '0', 3 => ' : ', 4 => $propValue[ 'loop' ], 5 => ' - 1'];
-            if ($propType[ 'loop' ] === 0) {
-                $start_code[ 5 ] = '';
-                $start_code[ 4 ] = $propValue[ 'loop' ] - 1;
+        if (!isset($prop_value['start'])) {
+            $start_code = [1 => "{$prop_value['step']} > 0 ? ", 2 => '0', 3 => ' : ', 4 => $prop_value['loop'], 5 => ' - 1'];
+            if ($prop_type['loop'] === 0) {
+                $start_code[5] = '';
+                $start_code[4] = $prop_value['loop'] - 1;
             }
-            if ($propType[ 'step' ] === 0) {
-                if ($propValue[ 'step' ] > 0) {
+            if ($prop_type['step'] === 0) {
+                if ($prop_value['step'] > 0) {
                     $start_code = [1 => '0'];
-                    $propType[ 'start' ] = 0;
+                    $prop_type['start'] = 0;
                 } else {
-                    $start_code[ 1 ] = $start_code[ 2 ] = $start_code[ 3 ] = '';
-                    $propType[ 'start' ] = $propType[ 'loop' ];
+                    $start_code[1] = $start_code[2] = $start_code[3] = '';
+                    $prop_type['start'] = $prop_type['loop'];
                 }
             } else {
-                $propType[ 'start' ] = 1;
+                $prop_type['start'] = 1;
             }
-            $propValue[ 'start' ] = join('', $start_code);
+            $prop_value['start'] = join('', $start_code);
         } else {
-            $start_code =
-                [
-                    1  => "{$propValue['start']} < 0 ? ", 2 => 'max(', 3 => "{$propValue['step']} > 0 ? ", 4 => '0',
-                    5  => ' : ', 6 => '-1', 7 => ', ', 8 => "{$propValue['start']} + {$propValue['loop']}", 10 => ')',
-                    11 => ' : ', 12 => 'min(', 13 => $propValue[ 'start' ], 14 => ', ',
-                    15 => "{$propValue['step']} > 0 ? ", 16 => $propValue[ 'loop' ], 17 => ' : ',
-                    18 => $propType[ 'loop' ] === 0 ? $propValue[ 'loop' ] - 1 : "{$propValue['loop']} - 1",
-                    19 => ')',
-                ];
-            if ($propType[ 'step' ] === 0) {
-                $start_code[ 3 ] = $start_code[ 5 ] = $start_code[ 15 ] = $start_code[ 17 ] = '';
-                if ($propValue[ 'step' ] > 0) {
-                    $start_code[ 6 ] = $start_code[ 18 ] = '';
+            $start_code = [1 => "{$prop_value['start']} < 0 ? ", 2 => 'max(', 3 => "{$prop_value['step']} > 0 ? ", 4 => '0', 5 => ' : ', 6 => '-1', 7 => ', ', 8 => "{$prop_value['start']} + {$prop_value['loop']}", 10 => ')', 11 => ' : ', 12 => 'min(', 13 => $prop_value['start'], 14 => ', ', 15 => "{$prop_value['step']} > 0 ? ", 16 => $prop_value['loop'], 17 => ' : ', 18 => $prop_type['loop'] === 0 ? $prop_value['loop'] - 1 : "{$prop_value['loop']} - 1", 19 => ')'];
+            if ($prop_type['step'] === 0) {
+                $start_code[3] = $start_code[5] = $start_code[15] = $start_code[17] = '';
+                if ($prop_value['step'] > 0) {
+                    $start_code[6] = $start_code[18] = '';
                 } else {
-                    $start_code[ 4 ] = $start_code[ 16 ] = '';
+                    $start_code[4] = $start_code[16] = '';
                 }
             }
-            if ($propType[ 'start' ] === 0) {
-                if ($propType[ 'loop' ] === 0) {
-                    $start_code[ 8 ] = $propValue[ 'start' ] + $propValue[ 'loop' ];
+            if ($prop_type['start'] === 0) {
+                if ($prop_type['loop'] === 0) {
+                    $start_code[8] = $prop_value['start'] + $prop_value['loop'];
                 }
-                $propType[ 'start' ] = $propType[ 'step' ] + $propType[ 'loop' ];
-                $start_code[ 1 ] = '';
-                if ($propValue[ 'start' ] < 0) {
+                $prop_type['start'] = $prop_type['step'] + $prop_type['loop'];
+                $start_code[1] = '';
+                if ($prop_value['start'] < 0) {
                     for ($i = 11; $i <= 19; $i++) {
-                        $start_code[ $i ] = '';
+                        $start_code[$i] = '';
                     }
-                    if ($propType[ 'start' ] === 0) {
-                        $start_code = [
-                            max(
-                                $propValue[ 'step' ] > 0 ? 0 : -1,
-                                $propValue[ 'start' ] + $propValue[ 'loop' ]
-                            ),
-                        ];
+                    if ($prop_type['start'] === 0) {
+                        $start_code = [max($prop_value['step'] > 0 ? 0 : -1, $prop_value['start'] + $prop_value['loop'])];
                     }
                 } else {
                     for ($i = 1; $i <= 11; $i++) {
-                        $start_code[ $i ] = '';
+                        $start_code[$i] = '';
                     }
-                    if ($propType[ 'start' ] === 0) {
-                        $start_code =
-                            [
-                                min(
-                                    $propValue[ 'step' ] > 0 ? $propValue[ 'loop' ] : $propValue[ 'loop' ] - 1,
-                                    $propValue[ 'start' ]
-                                ),
-                            ];
+                    if ($prop_type['start'] === 0) {
+                        $start_code = [min($prop_value['step'] > 0 ? $prop_value['loop'] : $prop_value['loop'] - 1, $prop_value['start'])];
                     }
                 }
             }
-            $propValue[ 'start' ] = join('', $start_code);
+            $prop_value['start'] = join('', $start_code);
         }
-        if ($propType[ 'start' ] !== 0) {
-            $initLocal[ 'start' ] = $propValue[ 'start' ];
-            $propValue[ 'start' ] = "{$local}start";
+        if ($prop_type['start'] !== 0) {
+            $init_local['start'] = $prop_value['start'];
+            $prop_value['start'] = "{$local}start";
         }
-        $initFor[ 'index' ] = "{$sectionVar}->value['index'] = {$propValue['start']}";
-        if (!isset($_attr[ 'start' ]) && !isset($_attr[ 'step' ]) && !isset($_attr[ 'max' ])) {
-            $propValue[ 'total' ] = $propValue[ 'loop' ];
-            $propType[ 'total' ] = $propType[ 'loop' ];
+        $init_for['index'] = "{$section_var}->value['index'] = {$prop_value['start']}";
+        if (!isset($_attr['start']) && !isset($_attr['step']) && !isset($_attr['max'])) {
+            $prop_value['total'] = $prop_value['loop'];
+            $prop_type['total'] = $prop_type['loop'];
         } else {
-            $propType[ 'total' ] =
-                $propType[ 'start' ] + $propType[ 'loop' ] + $propType[ 'step' ] + $propType[ 'max' ];
-            if ($propType[ 'total' ] === 0) {
-                $propValue[ 'total' ] =
-                    min(
-                        ceil(
-                            ($propValue[ 'step' ] > 0 ? $propValue[ 'loop' ] - $propValue[ 'start' ] :
-                                (int)$propValue[ 'start' ] + 1) / abs($propValue[ 'step' ])
-                        ),
-                        $propValue[ 'max' ]
-                    );
+            $prop_type['total'] = $prop_type['start'] + $prop_type['loop'] + $prop_type['step'] + $prop_type['max'];
+            if ($prop_type['total'] === 0) {
+                $prop_value['total'] = min(ceil(($prop_value['step'] > 0 ? $prop_value['loop'] - $prop_value['start'] : (int) $prop_value['start'] + 1) / abs($prop_value['step'])), $prop_value['max']);
             } else {
-                $total_code = [
-                    1  => 'min(', 2 => 'ceil(', 3 => '(', 4 => "{$propValue['step']} > 0 ? ",
-                    5  => $propValue[ 'loop' ], 6 => ' - ', 7 => $propValue[ 'start' ], 8 => ' : ',
-                    9  => $propValue[ 'start' ], 10 => '+ 1', 11 => ')', 12 => '/ ', 13 => 'abs(',
-                    14 => $propValue[ 'step' ], 15 => ')', 16 => ')', 17 => ", {$propValue['max']})",
-                ];
-                if (!isset($propValue[ 'max' ])) {
-                    $total_code[ 1 ] = $total_code[ 17 ] = '';
+                $total_code = [1 => 'min(', 2 => 'ceil(', 3 => '(', 4 => "{$prop_value['step']} > 0 ? ", 5 => $prop_value['loop'], 6 => ' - ', 7 => $prop_value['start'], 8 => ' : ', 9 => $prop_value['start'], 10 => '+ 1', 11 => ')', 12 => '/ ', 13 => 'abs(', 14 => $prop_value['step'], 15 => ')', 16 => ')', 17 => ", {$prop_value['max']})"];
+                if (!isset($prop_value['max'])) {
+                    $total_code[1] = $total_code[17] = '';
                 }
-                if ($propType[ 'loop' ] + $propType[ 'start' ] === 0) {
-                    $total_code[ 5 ] = $propValue[ 'loop' ] - $propValue[ 'start' ];
-                    $total_code[ 6 ] = $total_code[ 7 ] = '';
+                if ($prop_type['loop'] + $prop_type['start'] === 0) {
+                    $total_code[5] = $prop_value['loop'] - $prop_value['start'];
+                    $total_code[6] = $total_code[7] = '';
                 }
-                if ($propType[ 'start' ] === 0) {
-                    $total_code[ 9 ] = (int)$propValue[ 'start' ] + 1;
-                    $total_code[ 10 ] = '';
+                if ($prop_type['start'] === 0) {
+                    $total_code[9] = (int) $prop_value['start'] + 1;
+                    $total_code[10] = '';
                 }
-                if ($propType[ 'step' ] === 0) {
-                    $total_code[ 13 ] = $total_code[ 15 ] = '';
-                    if ($propValue[ 'step' ] === 1 || $propValue[ 'step' ] === -1) {
-                        $total_code[ 2 ] = $total_code[ 12 ] = $total_code[ 14 ] = $total_code[ 16 ] = '';
-                    } elseif ($propValue[ 'step' ] < 0) {
-                        $total_code[ 14 ] = -$propValue[ 'step' ];
+                if ($prop_type['step'] === 0) {
+                    $total_code[13] = $total_code[15] = '';
+                    if ($prop_value['step'] === 1 || $prop_value['step'] === -1) {
+                        $total_code[2] = $total_code[12] = $total_code[14] = $total_code[16] = '';
+                    } elseif ($prop_value['step'] < 0) {
+                        $total_code[14] = -$prop_value['step'];
                     }
-                    $total_code[ 4 ] = '';
-                    if ($propValue[ 'step' ] > 0) {
-                        $total_code[ 8 ] = $total_code[ 9 ] = $total_code[ 10 ] = '';
+                    $total_code[4] = '';
+                    if ($prop_value['step'] > 0) {
+                        $total_code[8] = $total_code[9] = $total_code[10] = '';
                     } else {
-                        $total_code[ 5 ] = $total_code[ 6 ] = $total_code[ 7 ] = $total_code[ 8 ] = '';
+                        $total_code[5] = $total_code[6] = $total_code[7] = $total_code[8] = '';
                     }
                 }
-                $propValue[ 'total' ] = join('', $total_code);
+                $prop_value['total'] = join('', $total_code);
             }
         }
-        if (isset($namedAttr[ 'loop' ])) {
-            $initNamedProperty[ 'loop' ] = "'loop' => {$propValue['loop']}";
+        if (isset($named_attr['loop'])) {
+            $init_named_property['loop'] = "'loop' => {$prop_value['loop']}";
         }
-        if (isset($namedAttr[ 'total' ])) {
-            $initNamedProperty[ 'total' ] = "'total' => {$propValue['total']}";
-            if ($propType[ 'total' ] > 0) {
-                $propValue[ 'total' ] = "{$sectionVar}->value['total']";
+        if (isset($named_attr['total'])) {
+            $init_named_property['total'] = "'total' => {$prop_value['total']}";
+            if ($prop_type['total'] > 0) {
+                $prop_value['total'] = "{$section_var}->value['total']";
             }
-        } elseif ($propType[ 'total' ] > 0) {
-            $initLocal[ 'total' ] = $propValue[ 'total' ];
-            $propValue[ 'total' ] = "{$local}total";
+        } elseif ($prop_type['total'] > 0) {
+            $init_local['total'] = $prop_value['total'];
+            $prop_value['total'] = "{$local}total";
         }
-        $cmpFor[ 'iteration' ] = "{$propValue['iteration']} <= {$propValue['total']}";
-        foreach ($initLocal as $key => $code) {
+        $cmp_for['iteration'] = "{$prop_value['iteration']} <= {$prop_value['total']}";
+        foreach ($init_local as $key => $code) {
             $output .= "{$local}{$key} = {$code};\n";
         }
-        $_vars = 'array(' . join(', ', $initNamedProperty) . ')';
-        $output .= "{$sectionVar} = new Smarty_Variable({$_vars});\n";
-        $cond_code = "{$propValue['total']} !== 0";
-        if ($propType[ 'total' ] === 0) {
-            if ($propValue[ 'total' ] === 0) {
+        $_vars = 'array(' . join(', ', $init_named_property) . ')';
+        $output .= "{$section_var} = new Smarty_Variable({$_vars});\n";
+        $cond_code = "{$prop_value['total']} !== 0";
+        if ($prop_type['total'] === 0) {
+            if ($prop_value['total'] === 0) {
                 $cond_code = 'false';
             } else {
                 $cond_code = 'true';
             }
         }
-        if ($propType[ 'show' ] > 0) {
-            $output .= "{$local}show = {$propValue['show']} ? {$cond_code} : false;\n";
+        if ($prop_type['show'] > 0) {
+            $output .= "{$local}show = {$prop_value['show']} ? {$cond_code} : false;\n";
             $output .= "if ({$local}show) {\n";
-        } elseif ($propValue[ 'show' ] === 'true') {
+        } elseif ($prop_value['show'] === 'true') {
             $output .= "if ({$cond_code}) {\n";
         } else {
             $output .= "if (false) {\n";
         }
-        $jinit = join(', ', $initFor);
-        $jcmp = join(', ', $cmpFor);
-        $jinc = join(', ', $incFor);
+        $jinit = join(', ', $init_for);
+        $jcmp = join(', ', $cmp_for);
+        $jinc = join(', ', $inc_for);
         $output .= "for ({$jinit}; {$jcmp}; {$jinc}){\n";
-        if (isset($namedAttr[ 'rownum' ])) {
-            $output .= "{$sectionVar}->value['rownum'] = {$propValue['iteration']};\n";
+        if (isset($named_attr['rownum'])) {
+            $output .= "{$section_var}->value['rownum'] = {$prop_value['iteration']};\n";
         }
-        if (isset($namedAttr[ 'index_prev' ])) {
-            $output .= "{$sectionVar}->value['index_prev'] = {$propValue['index']} - {$propValue['step']};\n";
+        if (isset($named_attr['index_prev'])) {
+            $output .= "{$section_var}->value['index_prev'] = {$prop_value['index']} - {$prop_value['step']};\n";
         }
-        if (isset($namedAttr[ 'index_next' ])) {
-            $output .= "{$sectionVar}->value['index_next'] = {$propValue['index']} + {$propValue['step']};\n";
+        if (isset($named_attr['index_next'])) {
+            $output .= "{$section_var}->value['index_next'] = {$prop_value['index']} + {$prop_value['step']};\n";
         }
-        if (isset($namedAttr[ 'first' ])) {
-            $output .= "{$sectionVar}->value['first'] = ({$propValue['iteration']} === 1);\n";
+        if (isset($named_attr['first'])) {
+            $output .= "{$section_var}->value['first'] = ({$prop_value['iteration']} === 1);\n";
         }
-        if (isset($namedAttr[ 'last' ])) {
-            $output .= "{$sectionVar}->value['last'] = ({$propValue['iteration']} === {$propValue['total']});\n";
+        if (isset($named_attr['last'])) {
+            $output .= "{$section_var}->value['last'] = ({$prop_value['iteration']} === {$prop_value['total']});\n";
         }
         $output .= '?>';
         return $output;
     }
 }
-
 /**
  * Smarty Internal Plugin Compile Sectionelse Class
  *
  * @package    Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Sectionelse extends Smarty_Internal_CompileBase
+class Smarty_Internal_Compile_Sectionelse extends Smarty_internal_compile_Base
 {
     /**
      * Compiles code for the {sectionelse} tag
@@ -417,23 +366,22 @@ class Smarty_Internal_Compile_Sectionelse extends Smarty_Internal_CompileBase
      *
      * @return string compiled code
      */
-    public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
+    public function compile($args, Smarty_internal_template_Compiler_Base $compiler)
     {
         // check and get attributes
-        $_attr = $this->getAttributes($compiler, $args);
-        list($openTag, $nocache, $local, $sectionVar) = $this->closeTag($compiler, ['section']);
-        $this->openTag($compiler, 'sectionelse', ['sectionelse', $nocache, $local, $sectionVar]);
+        $_attr = $this->get_attributes($compiler, $args);
+        list($open_tag, $nocache, $local, $section_var) = $this->close_tag($compiler, ['section']);
+        $this->open_tag($compiler, 'sectionelse', ['sectionelse', $nocache, $local, $section_var]);
         return "<?php }} else {\n ?>";
     }
 }
-
 /**
  * Smarty Internal Plugin Compile Sectionclose Class
  *
  * @package    Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Sectionclose extends Smarty_Internal_CompileBase
+class Smarty_Internal_Compile_Sectionclose extends Smarty_internal_compile_Base
 {
     /**
      * Compiles code for the {/section} tag
@@ -443,17 +391,16 @@ class Smarty_Internal_Compile_Sectionclose extends Smarty_Internal_CompileBase
      *
      * @return string compiled code
      */
-    public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
+    public function compile($args, Smarty_internal_template_Compiler_Base $compiler)
     {
-        $compiler->loopNesting--;
+        $compiler->loop_nesting--;
         // must endblock be nocache?
         if ($compiler->nocache) {
             $compiler->tag_nocache = true;
         }
-        list($openTag, $compiler->nocache, $local, $sectionVar) =
-            $this->closeTag($compiler, ['section', 'sectionelse']);
+        list($open_tag, $compiler->nocache, $local, $section_var) = $this->close_tag($compiler, ['section', 'sectionelse']);
         $output = "<?php\n";
-        if ($openTag === 'sectionelse') {
+        if ($open_tag === 'sectionelse') {
             $output .= "}\n";
         } else {
             $output .= "}\n}\n";

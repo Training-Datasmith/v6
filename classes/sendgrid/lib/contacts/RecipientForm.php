@@ -1,12 +1,11 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds a html form and provides a submission endpoint
  * for the form that makes a /contactdb/recipients API call.
  */
-
-namespace SendGrid\Contacts;
+namespace Send_Grid\Contacts;
 
 /**
  * This class is used to build a html form and provides a submission
@@ -14,11 +13,10 @@ namespace SendGrid\Contacts;
  *
  * @package SendGrid\Contacts
  */
-class RecipientForm implements \Stringable
+class Recipient_Form implements \Stringable
 {
     /** @var $html string HTML content for the form */
     private readonly string $html;
-
     /**
      * Form constructor
      *
@@ -34,7 +32,6 @@ class RecipientForm implements \Stringable
 </form>';
         $this->html = $html;
     }
-
     /**
      * Return the HTML form
      */

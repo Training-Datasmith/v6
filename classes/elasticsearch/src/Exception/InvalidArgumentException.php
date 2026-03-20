@@ -11,12 +11,10 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Exception;
 
 use InvalidArgumentException as InvalidArgument;
-
-class InvalidArgumentException extends InvalidArgument implements ElasticsearchException
+class InvalidArgumentException extends Invalid_Argument implements Elasticsearch_Exception
 {
 }

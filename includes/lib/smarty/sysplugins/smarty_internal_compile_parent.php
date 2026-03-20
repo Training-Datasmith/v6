@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This file is part of Smarty.
  *
@@ -9,7 +9,6 @@ declare(strict_types=1);
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 /**
  * Smarty Internal Plugin Compile Parent Class
  *
@@ -23,11 +22,10 @@ class Smarty_Internal_Compile_Parent extends Smarty_Internal_Compile_Child
      * @var string
      */
     public $tag = 'parent';
-
     /**
      * Block type
      *
      * @var string
      */
-    public $blockType = 'Parent';
+    public $block_type = 'Parent';
 }

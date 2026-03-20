@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Resource Plugin
  *
@@ -8,7 +8,6 @@ declare(strict_types=1);
  * @subpackage TemplateResources
  * @author     Rodney Rehm
  */
-
 /**
  * Smarty Resource Plugin
  * Base implementation for resource plugins
@@ -27,36 +26,25 @@ abstract class Smarty_Resource
      *
      * @var array
      */
-    public static $sysplugins = [
-        'file'    => 'smarty_internal_resource_file.php',
-        'string'  => 'smarty_internal_resource_string.php',
-        'extends' => 'smarty_internal_resource_extends.php',
-        'stream'  => 'smarty_internal_resource_stream.php',
-        'eval'    => 'smarty_internal_resource_eval.php',
-        'php'     => 'smarty_internal_resource_php.php',
-    ];
-
+    public static $sysplugins = ['file' => 'smarty_internal_resource_file.php', 'string' => 'smarty_internal_resource_string.php', 'extends' => 'smarty_internal_resource_extends.php', 'stream' => 'smarty_internal_resource_stream.php', 'eval' => 'smarty_internal_resource_eval.php', 'php' => 'smarty_internal_resource_php.php'];
     /**
      * Source is bypassing compiler
      *
      * @var boolean
      */
     public $uncompiled = false;
-
     /**
      * Source must be recompiled on every occasion
      *
      * @var boolean
      */
     public $recompiled = false;
-
     /**
      * Flag if resource does implement populateCompiledFilepath() method
      *
      * @var bool
      */
-    public $hasCompiledHandler = false;
-
+    public $has_compiled_handler = false;
     /**
      * Load Resource Handler
      *
@@ -69,31 +57,25 @@ abstract class Smarty_Resource
     public static function load(Smarty $smarty, $type)
     {
         // try smarty's cache
-        if (isset($smarty->_cache[ 'resource_handlers' ][ $type ])) {
-            return $smarty->_cache[ 'resource_handlers' ][ $type ];
+        if (isset($smarty->_cache['resource_handlers'][$type])) {
+            return $smarty->_cache['resource_handlers'][$type];
         }
         // try registered resource
-        if (isset($smarty->registered_resources[ $type ])) {
-            return $smarty->_cache[ 'resource_handlers' ][ $type ] = $smarty->registered_resources[ $type ];
+        if (isset($smarty->registered_resources[$type])) {
+            return $smarty->_cache['resource_handlers'][$type] = $smarty->registered_resources[$type];
         }
         // try sysplugins dir
-        if (isset(self::$sysplugins[ $type ])) {
+        if (isset(self::$sysplugins[$type])) {
             $_resource_class = 'Smarty_Internal_Resource_' . smarty_ucfirst_ascii($type);
-            return $smarty->_cache[ 'resource_handlers' ][ $type ] = new $_resource_class();
+            return $smarty->_cache['resource_handlers'][$type] = new $_resource_class();
         }
         // try plugins dir
         $_resource_class = 'Smarty_Resource_' . smarty_ucfirst_ascii($type);
-        if ($smarty->loadPlugin($_resource_class)) {
+        if ($smarty->load_plugin($_resource_class)) {
             if (class_exists($_resource_class, false)) {
-                return $smarty->_cache[ 'resource_handlers' ][ $type ] = new $_resource_class();
+                return $smarty->_cache['resource_handlers'][$type] = new $_resource_class();
             } else {
-                $smarty->registerResource(
-                    $type,
-                    [
-                        "smarty_resource_{$type}_source", "smarty_resource_{$type}_timestamp",
-                        "smarty_resource_{$type}_secure", "smarty_resource_{$type}_trusted",
-                    ]
-                );
+                $smarty->register_resource($type, ["smarty_resource_{$type}_source", "smarty_resource_{$type}_timestamp", "smarty_resource_{$type}_secure", "smarty_resource_{$type}_trusted"]);
                 // give it another try, now that the resource is registered properly
                 return self::load($smarty, $type);
             }
@@ -103,15 +85,14 @@ abstract class Smarty_Resource
         if (in_array($type, $_known_stream)) {
             // is known stream
             if (is_object($smarty->security_policy)) {
-                $smarty->security_policy->isTrustedStream($type);
+                $smarty->security_policy->is_trusted_stream($type);
             }
-            return $smarty->_cache[ 'resource_handlers' ][ $type ] = new Smarty_Internal_Resource_Stream();
+            return $smarty->_cache['resource_handlers'][$type] = new Smarty_Internal_Resource_Stream();
         }
         // TODO: try default_(template|config)_handler
         // give up
-        throw new SmartyException("Unknown resource type '{$type}'");
+        throw new Smarty_Exception("Unknown resource type '{$type}'");
     }
-
     /**
      * extract resource_type and resource_name from template_resource and config_resource
      *
@@ -122,11 +103,11 @@ abstract class Smarty_Resource
      *
      * @return array with parsed resource name and type
      */
-    public static function parseResourceName($resource_name, $default_resource)
+    public static function parse_resource_name($resource_name, $default_resource)
     {
         if (preg_match('/^([A-Za-z0-9_\-]{2,})[:]/', $resource_name, $match)) {
-            $type = $match[ 1 ];
-            $name = substr($resource_name, strlen($match[ 0 ]));
+            $type = $match[1];
+            $name = substr($resource_name, strlen($match[0]));
         } else {
             // no resource given, use default
             // or single character before the colon is not a resource type, but part of the filepath
@@ -135,7 +116,6 @@ abstract class Smarty_Resource
         }
         return [$name, $type];
     }
-
     /**
      * modify template_resource according to resource handlers specifications
      *
@@ -146,22 +126,19 @@ abstract class Smarty_Resource
      * @return string unique resource name
      * @throws \SmartyException
      */
-    public static function getUniqueTemplateName($obj, $template_resource)
+    public static function get_unique_template_name($obj, $template_resource)
     {
-        $smarty = $obj->_getSmartyObj();
-        list($name, $type) = self::parseResourceName($template_resource, $smarty->default_resource_type);
+        $smarty = $obj->_get_smarty_obj();
+        list($name, $type) = self::parse_resource_name($template_resource, $smarty->default_resource_type);
         // TODO: optimize for Smarty's internal resource types
         $resource = Smarty_Resource::load($smarty, $type);
         // go relative to a given template?
-        $_file_is_dotted = $name[ 0 ] === '.' && ($name[ 1 ] === '.' || $name[ 1 ] === '/');
-        if ($obj->_isTplObj() && $_file_is_dotted
-            && ($obj->source->type === 'file' || $obj->parent->source->type === 'extends')
-        ) {
+        $_file_is_dotted = $name[0] === '.' && ($name[1] === '.' || $name[1] === '/');
+        if ($obj->_is_tpl_obj() && $_file_is_dotted && ($obj->source->type === 'file' || $obj->parent->source->type === 'extends')) {
             $name = $smarty->_realpath(dirname($obj->parent->source->filepath) . DIRECTORY_SEPARATOR . $name);
         }
-        return $resource->buildUniqueResourceName($smarty, $name);
+        return $resource->build_unique_resource_name($smarty, $name);
     }
-
     /**
      * initialize Source Object for given resource
      * wrapper for backward compatibility to versions < 3.1.22
@@ -174,14 +151,10 @@ abstract class Smarty_Resource
      * @return \Smarty_Template_Source Source Object
      * @throws \SmartyException
      */
-    public static function source(
-        Smarty_Internal_Template $_template = null,
-        Smarty $smarty = null,
-        $template_resource = null
-    ) {
+    public static function source(Smarty_Internal_Template $_template = null, Smarty $smarty = null, $template_resource = null)
+    {
         return Smarty_Template_Source::load($_template, $smarty, $template_resource);
     }
-
     /**
      * Load template's source into current template object
      *
@@ -190,8 +163,7 @@ abstract class Smarty_Resource
      * @return string                 template source
      * @throws SmartyException        if source cannot be loaded
      */
-    abstract public function getContent(Smarty_Template_Source $source);
-
+    abstract public function get_content(Smarty_Template_Source $source);
     /**
      * populate Source Object with meta data from Resource
      *
@@ -199,17 +171,15 @@ abstract class Smarty_Resource
      * @param Smarty_Internal_Template $_template template object
      */
     abstract public function populate(Smarty_Template_Source $source, Smarty_Internal_Template $_template = null);
-
     /**
      * populate Source Object with timestamp and exists from Resource
      *
      * @param Smarty_Template_Source $source source object
      */
-    public function populateTimestamp(Smarty_Template_Source $source)
+    public function populate_timestamp(Smarty_Template_Source $source)
     {
         // intentionally left blank
     }
-
     /**
      * modify resource_name according to resource handlers specifications
      *
@@ -219,21 +189,20 @@ abstract class Smarty_Resource
      *
      * @return string unique resource name
      */
-    public function buildUniqueResourceName(Smarty $smarty, $resource_name, $isConfig = false)
+    public function build_unique_resource_name(Smarty $smarty, $resource_name, $is_config = false)
     {
-        if ($isConfig) {
+        if ($is_config) {
             if (!isset($smarty->_joined_config_dir)) {
-                $smarty->getTemplateDir(null, true);
+                $smarty->get_template_dir(null, true);
             }
             return get_class($this) . '#' . $smarty->_joined_config_dir . '#' . $resource_name;
         } else {
             if (!isset($smarty->_joined_template_dir)) {
-                $smarty->getTemplateDir();
+                $smarty->get_template_dir();
             }
             return get_class($this) . '#' . $smarty->_joined_template_dir . '#' . $resource_name;
         }
     }
-
     /*
      * Check if resource must check time stamps when when loading complied or cached templates.
      * Resources like 'extends' which use source components my disable timestamp checks on own resource.
@@ -247,15 +216,14 @@ abstract class Smarty_Resource
      *
      * @return string                 resource's basename
      */
-    public function getBasename(Smarty_Template_Source $source)
+    public function get_basename(Smarty_Template_Source $source)
     {
         return basename(preg_replace('![^\w]+!', '_', $source->name));
     }
-
     /**
      * @return bool
      */
-    public function checkTimestamps()
+    public function check_timestamps()
     {
         return true;
     }

@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-class TypeException extends \Exception
+class Type_Exception extends \Exception
 {
 }

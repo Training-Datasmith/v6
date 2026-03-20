@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Transform extends AbstractEndpoint
+class Transform extends Abstract_Endpoint
 {
     /**
      * Deletes an existing transform.
@@ -51,19 +48,15 @@ class Transform extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteTransform(array $params = [])
+    public function delete_transform(array $params = [])
     {
-        $this->checkRequiredParameters(['transform_id'], $params);
+        $this->check_required_parameters(['transform_id'], $params);
         $url = '/_transform/' . $this->encode($params['transform_id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['force','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['force', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves configuration information for transforms.
      *
@@ -88,7 +81,7 @@ class Transform extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getTransform(array $params = [])
+    public function get_transform(array $params = [])
     {
         if (isset($params['transform_id'])) {
             $url = '/_transform/' . $this->encode($params['transform_id']);
@@ -97,13 +90,10 @@ class Transform extends AbstractEndpoint
             $url = '/_transform';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['from','size','allow_no_match','exclude_generated','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['from', 'size', 'allow_no_match', 'exclude_generated', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves usage information for transforms.
      *
@@ -128,19 +118,15 @@ class Transform extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getTransformStats(array $params = [])
+    public function get_transform_stats(array $params = [])
     {
-        $this->checkRequiredParameters(['transform_id'], $params);
+        $this->check_required_parameters(['transform_id'], $params);
         $url = '/_transform/' . $this->encode($params['transform_id']) . '/_stats';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['from','size','allow_no_match','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['from', 'size', 'allow_no_match', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Previews a transform.
      *
@@ -163,7 +149,7 @@ class Transform extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function previewTransform(array $params = [])
+    public function preview_transform(array $params = [])
     {
         if (isset($params['transform_id'])) {
             $url = '/_transform/' . $this->encode($params['transform_id']) . '/_preview';
@@ -172,14 +158,10 @@ class Transform extends AbstractEndpoint
             $url = '/_transform/_preview';
             $method = empty($params['body']) ? 'GET' : 'POST';
         }
-        $url = $this->addQueryString($url, $params, ['timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Instantiates a transform.
      *
@@ -204,20 +186,15 @@ class Transform extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putTransform(array $params = [])
+    public function put_transform(array $params = [])
     {
-        $this->checkRequiredParameters(['transform_id','body'], $params);
+        $this->check_required_parameters(['transform_id', 'body'], $params);
         $url = '/_transform/' . $this->encode($params['transform_id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['defer_validation','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['defer_validation', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Resets an existing transform.
      *
@@ -241,19 +218,15 @@ class Transform extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function resetTransform(array $params = [])
+    public function reset_transform(array $params = [])
     {
-        $this->checkRequiredParameters(['transform_id'], $params);
+        $this->check_required_parameters(['transform_id'], $params);
         $url = '/_transform/' . $this->encode($params['transform_id']) . '/_reset';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['force','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['force', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Starts one or more transforms.
      *
@@ -276,19 +249,15 @@ class Transform extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function startTransform(array $params = [])
+    public function start_transform(array $params = [])
     {
-        $this->checkRequiredParameters(['transform_id'], $params);
+        $this->check_required_parameters(['transform_id'], $params);
         $url = '/_transform/' . $this->encode($params['transform_id']) . '/_start';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Stops one or more transforms.
      *
@@ -315,19 +284,15 @@ class Transform extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function stopTransform(array $params = [])
+    public function stop_transform(array $params = [])
     {
-        $this->checkRequiredParameters(['transform_id'], $params);
+        $this->check_required_parameters(['transform_id'], $params);
         $url = '/_transform/' . $this->encode($params['transform_id']) . '/_stop';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['force','wait_for_completion','timeout','allow_no_match','wait_for_checkpoint','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['force', 'wait_for_completion', 'timeout', 'allow_no_match', 'wait_for_checkpoint', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Updates certain properties of a transform.
      *
@@ -352,20 +317,15 @@ class Transform extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function updateTransform(array $params = [])
+    public function update_transform(array $params = [])
     {
-        $this->checkRequiredParameters(['transform_id','body'], $params);
+        $this->check_required_parameters(['transform_id', 'body'], $params);
         $url = '/_transform/' . $this->encode($params['transform_id']) . '/_update';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['defer_validation','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['defer_validation', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Upgrades all transforms.
      *
@@ -387,16 +347,12 @@ class Transform extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function upgradeTransforms(array $params = [])
+    public function upgrade_transforms(array $params = [])
     {
         $url = '/_transform/_upgrade';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['dry_run','timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['dry_run', 'timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

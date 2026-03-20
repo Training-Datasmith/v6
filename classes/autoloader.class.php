@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -27,25 +27,21 @@ class Autoloader
      * @var array of paths
      */
     private static $_paths;
-
     //=====[ Public ]=======================================
-
     /**
      * Append a path to the path array
      *
      * @param string $path
      */
-    public static function appendPaths($path): void
+    public static function append_paths($path): void
     {
         if (is_null(self::$_paths)) {
             self::$_paths = explode(CC_PS, ini_get('include_path'));
         }
-
         if (is_dir($path) && file_exists($path)) {
             self::$_paths[] = $path;
         }
     }
-
     /**
      * Autoload a class
      *
@@ -57,78 +53,67 @@ class Autoloader
         if (empty($class)) {
             return false;
         }
-
         //Don't double load
         if (class_exists($class)) {
             return true;
         }
-
         //If its a cache class use the cache method
         if ($class == 'Cache') {
             return self::autoload_cache();
         }
-
         //If its a DB class use the db method
         if ($class == 'Database') {
-            include CC_ROOT_DIR.'/classes/db/mysqli.class.php';
+            include CC_ROOT_DIR . '/classes/db/mysqli.class.php';
             return true;
         }
-
         //If its smarty we need to use the smarty loader
         if ($class == 'Smarty') {
-            require_once CC_INCLUDES_DIR.'lib/smarty/Smarty.class.php';
+            require_once CC_INCLUDES_DIR . 'lib/smarty/Smarty.class.php';
             return true;
         }
-
         //Try classes first
-        if (file_exists(CC_CLASSES_DIR.strtolower($class).'.class.php')) {
-            include_once CC_CLASSES_DIR.strtolower($class).'.class.php';
+        if (file_exists(CC_CLASSES_DIR . strtolower($class) . '.class.php')) {
+            include_once CC_CLASSES_DIR . strtolower($class) . '.class.php';
             return true;
         }
-
         //Get the paths if needed
         if (!self::$_paths) {
             self::$_paths = explode(CC_PS, ini_get('include_path'));
         }
-
         //Loop through the include paths
         if (is_array(self::$_paths)) {
             foreach (self::$_paths as $path) {
                 if (empty($path)) {
                     continue;
                 }
-                if (file_exists($path.'/'.strtolower($class).'.class.php')) {
-                    include_once $path.'/'.strtolower($class).'.class.php';
+                if (file_exists($path . '/' . strtolower($class) . '.class.php')) {
+                    include_once $path . '/' . strtolower($class) . '.class.php';
                     return true;
                 }
-                if (file_exists($path.'/'.$class.'.php')) {
-                    include_once $path.'/'.$class.'.php';
+                if (file_exists($path . '/' . $class . '.php')) {
+                    include_once $path . '/' . $class . '.php';
                     return true;
                 }
             }
         }
         return false;
     }
-
     /**
      * Autoload the correct cache class
      */
     public static function autoload_cache(): bool
     {
         global $glob;
-
         if (isset($glob['cache']) && !empty($glob['cache'])) {
-            if (file_exists(CC_ROOT_DIR.'/classes/cache/'.$glob['cache'].'.class.php')) {
-                include CC_ROOT_DIR.'/classes/cache/'.$glob['cache'].'.class.php';
+            if (file_exists(CC_ROOT_DIR . '/classes/cache/' . $glob['cache'] . '.class.php')) {
+                include CC_ROOT_DIR . '/classes/cache/' . $glob['cache'] . '.class.php';
                 return true;
             }
         }
-
         //Default to file cache
-        include CC_ROOT_DIR.'/classes/cache/file.class.php';
+        include CC_ROOT_DIR . '/classes/cache/file.class.php';
         return true;
     }
-
     /**
      * Register autoload function
      *
@@ -139,55 +124,48 @@ class Autoloader
         if (!function_exists('spl_autoload_functions')) {
             trigger_error("!function_exists('spl_autoload_functions')", E_USER_ERROR);
         }
-
         //If there is not function we shouldn't be here
         if (!$function) {
-            return ;
+            return;
         }
-
         //If the function is really a class->method try to load that
         if (is_array($function)) {
             [$class, $method] = $function;
             if (!method_exists($class, $method)) {
-                return ;
+                return;
             }
         } elseif (!function_exists($function)) {
-            return ;
+            return;
         }
-
         //If the spl_autoload is implemented get the functions if not
         if (($callbacks = spl_autoload_functions()) === false) {
             //Register our function
             spl_autoload_register($function);
-            return ;
+            return;
         }
         //If there are no call backs we do not need to continue
         if (empty($callbacks)) {
             spl_autoload_register($function);
-            return ;
+            return;
         }
-
         //Lop through the call backs and unload them
         $key = array_keys($callbacks);
         $size = sizeof($key);
         for ($i = 0; $i < $size; ++$i) {
             spl_autoload_unregister($callbacks[$key[$i]]);
         }
-
         //Register our function
         spl_autoload_register($function);
-
         //Reload the previous functions
         for ($i = 0; $i < $size; ++$i) {
             spl_autoload_register($callbacks[$key[$i]]);
         }
     }
-
     /**
      * Reload all the paths from the include_path
      * Should not need to run unless you add more paths to the include_path
      */
-    public static function reloadPaths(): void
+    public static function reload_paths(): void
     {
         self::$_paths = explode(CC_PS, ini_get('include_path'));
     }

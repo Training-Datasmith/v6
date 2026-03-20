@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method GetStreamVariable
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_GetStreamVariable
+class Smarty_internal_method_get_Stream_Variable
 {
     /**
      * Valid for all objects
      *
      * @var int
      */
-    public $objMap = 7;
-
+    public $obj_map = 7;
     /**
      * gets  a stream variable
      *
@@ -31,7 +29,7 @@ class Smarty_Internal_Method_GetStreamVariable
      * @return mixed
      * @throws \SmartyException
      */
-    public function getStreamVariable(Smarty_Internal_Data $data, $variable)
+    public function get_stream_variable(Smarty_Internal_Data $data, $variable)
     {
         $_result = '';
         $fp = fopen($variable, 'r+');
@@ -44,7 +42,7 @@ class Smarty_Internal_Method_GetStreamVariable
         }
         $smarty = isset($data->smarty) ? $data->smarty : $data;
         if ($smarty->error_unassigned) {
-            throw new SmartyException('Undefined stream variable "' . $variable . '"');
+            throw new Smarty_Exception('Undefined stream variable "' . $variable . '"');
         } else {
             return null;
         }

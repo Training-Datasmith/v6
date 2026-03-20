@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method UnregisterResource
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_UnregisterResource
+class Smarty_internal_method_unregister_Resource
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * Registers a resource to fetch a template
      *
@@ -31,11 +29,11 @@ class Smarty_Internal_Method_UnregisterResource
      *
      * @return \Smarty|\Smarty_Internal_Template
      */
-    public function unregisterResource(Smarty_Internal_TemplateBase $obj, $type)
+    public function unregister_resource(Smarty_internal_template_Base $obj, $type)
     {
-        $smarty = $obj->_getSmartyObj();
-        if (isset($smarty->registered_resources[ $type ])) {
-            unset($smarty->registered_resources[ $type ]);
+        $smarty = $obj->_get_smarty_obj();
+        if (isset($smarty->registered_resources[$type])) {
+            unset($smarty->registered_resources[$type]);
         }
         return $obj;
     }

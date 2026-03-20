@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Watcher extends AbstractEndpoint
+class Watcher extends Abstract_Endpoint
 {
     /**
      * Acknowledges a watch, manually throttling the execution of the watch's actions.
@@ -50,9 +47,9 @@ class Watcher extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function ackWatch(array $params = [])
+    public function ack_watch(array $params = [])
     {
-        $this->checkRequiredParameters(['watch_id'], $params);
+        $this->check_required_parameters(['watch_id'], $params);
         if (isset($params['action_id'])) {
             $url = '/_watcher/watch/' . $this->encode($params['watch_id']) . '/_ack/' . $this->encode($params['action_id']);
             $method = 'PUT';
@@ -60,13 +57,10 @@ class Watcher extends AbstractEndpoint
             $url = '/_watcher/watch/' . $this->encode($params['watch_id']) . '/_ack';
             $method = 'PUT';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Activates a currently inactive watch.
      *
@@ -88,19 +82,15 @@ class Watcher extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function activateWatch(array $params = [])
+    public function activate_watch(array $params = [])
     {
-        $this->checkRequiredParameters(['watch_id'], $params);
+        $this->check_required_parameters(['watch_id'], $params);
         $url = '/_watcher/watch/' . $this->encode($params['watch_id']) . '/_activate';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Deactivates a currently active watch.
      *
@@ -122,19 +112,15 @@ class Watcher extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deactivateWatch(array $params = [])
+    public function deactivate_watch(array $params = [])
     {
-        $this->checkRequiredParameters(['watch_id'], $params);
+        $this->check_required_parameters(['watch_id'], $params);
         $url = '/_watcher/watch/' . $this->encode($params['watch_id']) . '/_deactivate';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Removes a watch from Watcher.
      *
@@ -156,19 +142,15 @@ class Watcher extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteWatch(array $params = [])
+    public function delete_watch(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_watcher/watch/' . $this->encode($params['id']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Forces the execution of a stored watch.
      *
@@ -191,7 +173,7 @@ class Watcher extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function executeWatch(array $params = [])
+    public function execute_watch(array $params = [])
     {
         if (isset($params['id'])) {
             $url = '/_watcher/watch/' . $this->encode($params['id']) . '/_execute';
@@ -200,14 +182,10 @@ class Watcher extends AbstractEndpoint
             $url = '/_watcher/watch/_execute';
             $method = 'PUT';
         }
-        $url = $this->addQueryString($url, $params, ['debug','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['debug', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves a watch by its ID.
      *
@@ -229,19 +207,15 @@ class Watcher extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getWatch(array $params = [])
+    public function get_watch(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_watcher/watch/' . $this->encode($params['id']);
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Creates a new watch, or updates an existing one.
      *
@@ -268,20 +242,15 @@ class Watcher extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putWatch(array $params = [])
+    public function put_watch(array $params = [])
     {
-        $this->checkRequiredParameters(['id'], $params);
+        $this->check_required_parameters(['id'], $params);
         $url = '/_watcher/watch/' . $this->encode($params['id']);
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['active','version','if_seq_no','if_primary_term','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['active', 'version', 'if_seq_no', 'if_primary_term', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves stored watches.
      *
@@ -302,19 +271,14 @@ class Watcher extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function queryWatches(array $params = [])
+    public function query_watches(array $params = [])
     {
         $url = '/_watcher/_query/watches';
         $method = empty($params['body']) ? 'GET' : 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Starts Watcher if it is not already running.
      *
@@ -338,14 +302,10 @@ class Watcher extends AbstractEndpoint
     {
         $url = '/_watcher/_start';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieves the current Watcher metrics.
      *
@@ -376,13 +336,10 @@ class Watcher extends AbstractEndpoint
             $url = '/_watcher/stats';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['emit_stacktraces','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['emit_stacktraces', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Stops Watcher if it is running.
      *
@@ -406,11 +363,8 @@ class Watcher extends AbstractEndpoint
     {
         $url = '/_watcher/_stop';
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

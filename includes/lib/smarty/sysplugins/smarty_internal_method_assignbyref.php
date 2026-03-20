@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method AssignByRef
  *
@@ -11,7 +10,7 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_AssignByRef
+class Smarty_internal_method_assign_By_Ref
 {
     /**
      * assigns values to template variables by reference
@@ -24,13 +23,13 @@ class Smarty_Internal_Method_AssignByRef
      *
      * @return \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty
      */
-    public function assignByRef(Smarty_Internal_Data $data, $tpl_var, &$value, $nocache)
+    public function assign_by_ref(Smarty_Internal_Data $data, $tpl_var, &$value, $nocache)
     {
         if ($tpl_var !== '') {
-            $data->tpl_vars[ $tpl_var ] = new Smarty_Variable(null, $nocache);
-            $data->tpl_vars[ $tpl_var ]->value = &$value;
-            if ($data->_isTplObj() && $data->scope) {
-                $data->ext->_updateScope->_updateScope($data, $tpl_var);
+            $data->tpl_vars[$tpl_var] = new Smarty_Variable(null, $nocache);
+            $data->tpl_vars[$tpl_var]->value =& $value;
+            if ($data->_is_tpl_obj() && $data->scope) {
+                $data->ext->_update_scope->_update_scope($data, $tpl_var);
             }
         }
         return $data;

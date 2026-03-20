@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Shutdown extends AbstractEndpoint
+class Shutdown extends Abstract_Endpoint
 {
     /**
      * Removes a node from the shutdown list. Designed for indirect use by ECE/ESS and ECK. Direct use is not supported.
@@ -49,20 +46,15 @@ class Shutdown extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteNode(array $params = [])
+    public function delete_node(array $params = [])
     {
-        $this->checkRequiredParameters(['node_id'], $params);
+        $this->check_required_parameters(['node_id'], $params);
         $url = '/_nodes/' . $this->encode($params['node_id']) . '/shutdown';
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Retrieve status of a node or nodes that are currently marked as shutting down. Designed for indirect use by ECE/ESS and ECK. Direct use is not supported.
      *
@@ -83,7 +75,7 @@ class Shutdown extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function getNode(array $params = [])
+    public function get_node(array $params = [])
     {
         if (isset($params['node_id'])) {
             $url = '/_nodes/' . $this->encode($params['node_id']) . '/shutdown';
@@ -92,14 +84,10 @@ class Shutdown extends AbstractEndpoint
             $url = '/_nodes/shutdown';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Adds a node to be shut down. Designed for indirect use by ECE/ESS and ECK. Direct use is not supported.
      *
@@ -122,17 +110,13 @@ class Shutdown extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function putNode(array $params = [])
+    public function put_node(array $params = [])
     {
-        $this->checkRequiredParameters(['node_id','body'], $params);
+        $this->check_required_parameters(['node_id', 'body'], $params);
         $url = '/_nodes/' . $this->encode($params['node_id']) . '/shutdown';
         $method = 'PUT';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json', 'Content-Type' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

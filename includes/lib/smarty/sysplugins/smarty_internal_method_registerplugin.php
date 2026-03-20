@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method RegisterPlugin
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_RegisterPlugin
+class Smarty_internal_method_register_Plugin
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * Registers plugin to be used in templates
      *
@@ -37,23 +35,17 @@ class Smarty_Internal_Method_RegisterPlugin
      * @return \Smarty|\Smarty_Internal_Template
      * @throws SmartyException              when the plugin tag is invalid
      */
-    public function registerPlugin(
-        Smarty_Internal_TemplateBase $obj,
-        $type,
-        $name,
-        $callback,
-        $cacheable = true,
-        $cache_attr = null
-    ) {
-        $smarty = $obj->_getSmartyObj();
-        if (isset($smarty->registered_plugins[ $type ][ $name ])) {
-            throw new SmartyException("Plugin tag '{$name}' already registered");
+    public function register_plugin(Smarty_internal_template_Base $obj, $type, $name, $callback, $cacheable = true, $cache_attr = null)
+    {
+        $smarty = $obj->_get_smarty_obj();
+        if (isset($smarty->registered_plugins[$type][$name])) {
+            throw new Smarty_Exception("Plugin tag '{$name}' already registered");
         } elseif (!is_callable($callback)) {
-            throw new SmartyException("Plugin '{$name}' not callable");
+            throw new Smarty_Exception("Plugin '{$name}' not callable");
         } elseif ($cacheable && $cache_attr) {
-            throw new SmartyException("Cannot set caching attributes for plugin '{$name}' when it is cacheable.");
+            throw new Smarty_Exception("Cannot set caching attributes for plugin '{$name}' when it is cacheable.");
         } else {
-            $smarty->registered_plugins[ $type ][ $name ] = [$callback, (bool)$cacheable, (array)$cache_attr];
+            $smarty->registered_plugins[$type][$name] = [$callback, (bool) $cacheable, (array) $cache_attr];
         }
         return $obj;
     }

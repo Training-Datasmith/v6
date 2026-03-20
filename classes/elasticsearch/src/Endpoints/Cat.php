@@ -11,21 +11,18 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class Cat extends AbstractEndpoint
+class Cat extends Abstract_Endpoint
 {
     /**
      * Shows information about currently configured aliases to indices including filter and routing infos.
@@ -63,13 +60,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/aliases';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','local','h','help','s','v','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'local', 'h', 'help', 's', 'v', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Provides a snapshot of how many shards are allocated to each data node and how much disk space they are using.
      *
@@ -107,13 +101,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/allocation';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','bytes','local','master_timeout','h','help','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'bytes', 'local', 'master_timeout', 'h', 'help', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about existing component_templates templates.
      *
@@ -141,7 +132,7 @@ class Cat extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function componentTemplates(array $params = [])
+    public function component_templates(array $params = [])
     {
         if (isset($params['name'])) {
             $url = '/_cat/component_templates/' . $this->encode($params['name']);
@@ -150,13 +141,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/component_templates';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','local','master_timeout','h','help','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'local', 'master_timeout', 'h', 'help', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Provides quick access to the document count of the entire cluster, or individual indices.
      *
@@ -191,13 +179,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/count';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','h','help','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'h', 'help', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Shows how much heap memory is currently being used by fielddata on every data node in the cluster.
      *
@@ -233,13 +218,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/fielddata';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','bytes','h','help','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'bytes', 'h', 'help', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns a concise representation of the cluster health.
      *
@@ -270,14 +252,10 @@ class Cat extends AbstractEndpoint
     {
         $url = '/_cat/health';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['format','h','help','s','time','ts','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'h', 'help', 's', 'time', 'ts', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns help for the Cat APIs.
      *
@@ -303,14 +281,10 @@ class Cat extends AbstractEndpoint
     {
         $url = '/_cat';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['help','s','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['help', 's', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about indices: number of primaries and replicas, document counts, disk size, ...
      *
@@ -352,13 +326,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/indices';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','bytes','master_timeout','h','health','help','pri','s','time','v','include_unloaded_segments','expand_wildcards','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'bytes', 'master_timeout', 'h', 'health', 'help', 'pri', 's', 'time', 'v', 'include_unloaded_segments', 'expand_wildcards', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about the master node.
      *
@@ -389,14 +360,10 @@ class Cat extends AbstractEndpoint
     {
         $url = '/_cat/master';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['format','local','master_timeout','h','help','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'local', 'master_timeout', 'h', 'help', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Gets configuration and usage information about data frame analytics jobs.
      *
@@ -425,7 +392,7 @@ class Cat extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function mlDataFrameAnalytics(array $params = [])
+    public function ml_data_frame_analytics(array $params = [])
     {
         if (isset($params['id'])) {
             $url = '/_cat/ml/data_frame/analytics/' . $this->encode($params['id']);
@@ -434,13 +401,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/ml/data_frame/analytics';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','bytes','format','h','help','s','time','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'bytes', 'format', 'h', 'help', 's', 'time', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Gets configuration and usage information about datafeeds.
      *
@@ -468,7 +432,7 @@ class Cat extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function mlDatafeeds(array $params = [])
+    public function ml_datafeeds(array $params = [])
     {
         if (isset($params['datafeed_id'])) {
             $url = '/_cat/ml/datafeeds/' . $this->encode($params['datafeed_id']);
@@ -477,13 +441,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/ml/datafeeds';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','format','h','help','s','time','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'format', 'h', 'help', 's', 'time', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Gets configuration and usage information about anomaly detection jobs.
      *
@@ -512,7 +473,7 @@ class Cat extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function mlJobs(array $params = [])
+    public function ml_jobs(array $params = [])
     {
         if (isset($params['job_id'])) {
             $url = '/_cat/ml/anomaly_detectors/' . $this->encode($params['job_id']);
@@ -521,13 +482,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/ml/anomaly_detectors';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','bytes','format','h','help','s','time','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'bytes', 'format', 'h', 'help', 's', 'time', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Gets configuration and usage information about inference trained models.
      *
@@ -558,7 +516,7 @@ class Cat extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function mlTrainedModels(array $params = [])
+    public function ml_trained_models(array $params = [])
     {
         if (isset($params['model_id'])) {
             $url = '/_cat/ml/trained_models/' . $this->encode($params['model_id']);
@@ -567,13 +525,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/ml/trained_models';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['allow_no_match','from','size','bytes','format','h','help','s','time','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['allow_no_match', 'from', 'size', 'bytes', 'format', 'h', 'help', 's', 'time', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about custom node attributes.
      *
@@ -604,14 +559,10 @@ class Cat extends AbstractEndpoint
     {
         $url = '/_cat/nodeattrs';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['format','local','master_timeout','h','help','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'local', 'master_timeout', 'h', 'help', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns basic statistics about performance of cluster nodes.
      *
@@ -645,14 +596,10 @@ class Cat extends AbstractEndpoint
     {
         $url = '/_cat/nodes';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['bytes','format','full_id','master_timeout','h','help','s','time','v','include_unloaded_segments','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['bytes', 'format', 'full_id', 'master_timeout', 'h', 'help', 's', 'time', 'v', 'include_unloaded_segments', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns a concise representation of the cluster pending tasks.
      *
@@ -680,18 +627,14 @@ class Cat extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function pendingTasks(array $params = [])
+    public function pending_tasks(array $params = [])
     {
         $url = '/_cat/pending_tasks';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['format','local','master_timeout','h','help','s','time','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'local', 'master_timeout', 'h', 'help', 's', 'time', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about installed plugins across nodes node.
      *
@@ -723,14 +666,10 @@ class Cat extends AbstractEndpoint
     {
         $url = '/_cat/plugins';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['format','local','master_timeout','h','help','include_bootstrap','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'local', 'master_timeout', 'h', 'help', 'include_bootstrap', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about index shard recoveries, both on-going completed.
      *
@@ -769,13 +708,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/recovery';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','active_only','bytes','detailed','h','help','s','time','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'active_only', 'bytes', 'detailed', 'h', 'help', 's', 'time', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about snapshot repositories registered in the cluster.
      *
@@ -806,14 +742,10 @@ class Cat extends AbstractEndpoint
     {
         $url = '/_cat/repositories';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['format','local','master_timeout','h','help','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'local', 'master_timeout', 'h', 'help', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Provides low-level information about the segments in the shards of an index.
      *
@@ -849,13 +781,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/segments';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','bytes','h','help','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'bytes', 'h', 'help', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Provides a detailed view of shard allocation on nodes.
      *
@@ -893,13 +822,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/shards';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','bytes','master_timeout','h','help','s','time','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'bytes', 'master_timeout', 'h', 'help', 's', 'time', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns all snapshots in a specific repository.
      *
@@ -937,13 +863,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/snapshots';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','ignore_unavailable','master_timeout','h','help','s','time','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'ignore_unavailable', 'master_timeout', 'h', 'help', 's', 'time', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about the tasks currently executing on one or more nodes in the cluster.
      *
@@ -978,14 +901,10 @@ class Cat extends AbstractEndpoint
     {
         $url = '/_cat/tasks';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['format','nodes','actions','detailed','parent_task_id','h','help','s','time','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'nodes', 'actions', 'detailed', 'parent_task_id', 'h', 'help', 's', 'time', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns information about existing templates.
      *
@@ -1022,13 +941,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/templates';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','local','master_timeout','h','help','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'local', 'master_timeout', 'h', 'help', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns cluster-wide thread pool statistics per node.
      * By default the active, queue and rejected statistics are returned for all thread pools.
@@ -1058,7 +974,7 @@ class Cat extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function threadPool(array $params = [])
+    public function thread_pool(array $params = [])
     {
         if (isset($params['thread_pool_patterns'])) {
             $url = '/_cat/thread_pool/' . $this->encode($params['thread_pool_patterns']);
@@ -1067,13 +983,10 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/thread_pool';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['format','time','local','master_timeout','h','help','s','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['format', 'time', 'local', 'master_timeout', 'h', 'help', 's', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Gets configuration and usage information about transforms.
      *
@@ -1112,10 +1025,8 @@ class Cat extends AbstractEndpoint
             $url = '/_cat/transforms';
             $method = 'GET';
         }
-        $url = $this->addQueryString($url, $params, ['from','size','allow_no_match','format','h','help','s','time','v','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'text/plain,application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['from', 'size', 'allow_no_match', 'format', 'h', 'help', 's', 'time', 'v', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'text/plain,application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * class for the Smarty variable object
  * This class defines the Smarty variable object
@@ -9,7 +8,7 @@ declare(strict_types=1);
  * @package    Smarty
  * @subpackage Template
  */
-#[\AllowDynamicProperties]
+#[\Allow_Dynamic_Properties]
 class Smarty_Variable
 {
     /**
@@ -18,14 +17,12 @@ class Smarty_Variable
      * @var mixed
      */
     public $value = null;
-
     /**
      * if true any output of this variable will be not cached
      *
      * @var boolean
      */
     public $nocache = false;
-
     /**
      * create Smarty variable object
      *
@@ -37,7 +34,6 @@ class Smarty_Variable
         $this->value = $value;
         $this->nocache = $nocache;
     }
-
     /**
      * <<magic>> String conversion
      *
@@ -45,6 +41,6 @@ class Smarty_Variable
      */
     public function __toString()
     {
-        return (string)$this->value;
+        return (string) $this->value;
     }
 }

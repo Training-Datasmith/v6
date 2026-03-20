@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the Asm object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a Asm object for the /mail/send API call
  *
@@ -23,7 +21,6 @@ class Asm implements \JsonSerializable
      * would like to be displayed on the unsubscribe preferences page.
      */
     private $groups_to_display;
-
     /**
      * Optional constructor
      *
@@ -40,18 +37,15 @@ class Asm implements \JsonSerializable
      *                                                      preferences page.
      * @throws \SendGrid\Mail\TypeException
      */
-    public function __construct(
-        $group_id = null,
-        $groups_to_display = null
-    ) {
+    public function __construct($group_id = null, $groups_to_display = null)
+    {
         if (isset($group_id)) {
-            $this->setGroupId($group_id);
+            $this->set_group_id($group_id);
         }
         if (isset($groups_to_display)) {
-            $this->setGroupsToDisplay($groups_to_display);
+            $this->set_groups_to_display($groups_to_display);
         }
     }
-
     /**
      * Add the group id to a Asm object
      *
@@ -60,21 +54,15 @@ class Asm implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setGroupId($group_id): void
+    public function set_group_id($group_id): void
     {
-        if ($group_id instanceof GroupId) {
-            $this->group_id = $group_id->getGroupId();
+        if ($group_id instanceof Group_Id) {
+            $this->group_id = $group_id->get_group_id();
         } else {
-            Assert::integer(
-                $group_id,
-                'group_id',
-                'Value "$group_id" must be an instance of SendGrid\Mail\GroupId or an integer.'
-            );
-
-            $this->group_id = new GroupId($group_id);
+            Assert::integer($group_id, 'group_id', 'Value "$group_id" must be an instance of SendGrid\Mail\GroupId or an integer.');
+            $this->group_id = new Group_Id($group_id);
         }
     }
-
     /**
      * Retrieve the GroupId object from a Asm object
      *
@@ -82,11 +70,10 @@ class Asm implements \JsonSerializable
      *
      * @return int
      */
-    public function getGroupId()
+    public function get_group_id()
     {
         return $this->group_id;
     }
-
     /**
      * Add the groups to display id(s) to a Asm object
      *
@@ -101,46 +88,33 @@ class Asm implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setGroupsToDisplay($groups_to_display): void
+    public function set_groups_to_display($groups_to_display): void
     {
-        if ($groups_to_display instanceof GroupsToDisplay) {
-            $this->groups_to_display = $groups_to_display->getGroupsToDisplay();
+        if ($groups_to_display instanceof Groups_To_Display) {
+            $this->groups_to_display = $groups_to_display->get_groups_to_display();
         } else {
-            Assert::isArray(
-                $groups_to_display,
-                'groups_to_display',
-                'Value "$groups_to_display" must be an instance of SendGrid\Mail\GroupsToDisplay or an array.'
-            );
-            Assert::maxItems($groups_to_display, 'groups_to_display', 25);
-
-            $this->groups_to_display = new GroupsToDisplay($groups_to_display);
+            Assert::is_array($groups_to_display, 'groups_to_display', 'Value "$groups_to_display" must be an instance of SendGrid\Mail\GroupsToDisplay or an array.');
+            Assert::max_items($groups_to_display, 'groups_to_display', 25);
+            $this->groups_to_display = new Groups_To_Display($groups_to_display);
         }
     }
-
     /**
      * Retrieve the groups to display id(s) from a Asm object
      *
      * @return int[]
      */
-    public function getGroupsToDisplay()
+    public function get_groups_to_display()
     {
         return $this->groups_to_display;
     }
-
     /**
      * Return an array representing a Asm object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'group_id' => $this->getGroupId(),
-                'groups_to_display' => $this->getGroupsToDisplay(),
-            ],
-            fn (int|array $value) => $value !== null
-        ) ?: null;
+        return array_filter(['group_id' => $this->get_group_id(), 'groups_to_display' => $this->get_groups_to_display()], fn(int|array $value) => $value !== null) ?: null;
     }
 }

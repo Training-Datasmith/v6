@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Internal Plugin Compile Debug
  * Compiles the {debug} tag.
@@ -10,14 +10,13 @@ declare(strict_types=1);
  * @subpackage Compiler
  * @author     Uwe Tews
  */
-
 /**
  * Smarty Internal Plugin Compile Debug Class
  *
  * @package    Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Debug extends Smarty_Internal_CompileBase
+class Smarty_Internal_Compile_Debug extends Smarty_internal_compile_Base
 {
     /**
      * Compiles code for the {debug} tag
@@ -30,12 +29,11 @@ class Smarty_Internal_Compile_Debug extends Smarty_Internal_CompileBase
     public function compile($args, $compiler)
     {
         // check and get attributes
-        $_attr = $this->getAttributes($compiler, $args);
+        $_attr = $this->get_attributes($compiler, $args);
         // compile always as nocache
         $compiler->tag_nocache = true;
         // display debug template
-        $_output =
-            "<?php \$_smarty_debug = new Smarty_Internal_Debug;\n \$_smarty_debug->display_debug(\$_smarty_tpl);\n";
+        $_output = "<?php \$_smarty_debug = new Smarty_Internal_Debug;\n \$_smarty_debug->display_debug(\$_smarty_tpl);\n";
         $_output .= "unset(\$_smarty_debug);\n?>";
         return $_output;
     }

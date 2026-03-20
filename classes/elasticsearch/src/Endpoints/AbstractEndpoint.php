@@ -11,18 +11,15 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\ClientInterface;
-use Elastic\Elasticsearch\Traits\EndpointTrait;
-
-abstract class AbstractEndpoint
+use Elastic\Elasticsearch\Client_Interface;
+use Elastic\Elasticsearch\Traits\Endpoint_Trait;
+abstract class Abstract_Endpoint
 {
-    use EndpointTrait;
-
-    public function __construct(protected ClientInterface $client)
+    use Endpoint_Trait;
+    public function __construct(protected Client_Interface $client)
     {
     }
 }

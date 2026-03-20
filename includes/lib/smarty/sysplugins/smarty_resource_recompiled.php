@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty Resource Plugin
  *
@@ -8,7 +8,6 @@ declare(strict_types=1);
  * @subpackage TemplateResources
  * @author     Rodney Rehm
  */
-
 /**
  * Smarty Resource Plugin
  * Base implementation for resource plugins that don't compile cache
@@ -24,14 +23,12 @@ abstract class Smarty_Resource_Recompiled extends Smarty_Resource
      * @var bool
      */
     public $recompiled = true;
-
     /**
      * Resource does implement populateCompiledFilepath() method
      *
      * @var bool
      */
-    public $hasCompiledHandler = true;
-
+    public $has_compiled_handler = true;
     /**
      * compile template from source
      *
@@ -41,17 +38,17 @@ abstract class Smarty_Resource_Recompiled extends Smarty_Resource
      */
     public function process(Smarty_Internal_Template $_smarty_tpl)
     {
-        $compiled = &$_smarty_tpl->compiled;
+        $compiled =& $_smarty_tpl->compiled;
         $compiled->file_dependency = [];
         $compiled->includes = [];
         $compiled->nocache_hash = null;
         $compiled->unifunc = null;
         $level = ob_get_level();
         ob_start();
-        $_smarty_tpl->loadCompiler();
+        $_smarty_tpl->load_compiler();
         // call compiler
         try {
-            eval('?>' . $_smarty_tpl->compiler->compileTemplate($_smarty_tpl));
+            eval('?>' . $_smarty_tpl->compiler->compile_template($_smarty_tpl));
         } catch (Exception $e) {
             unset($_smarty_tpl->compiler);
             while (ob_get_level() > $level) {
@@ -65,7 +62,6 @@ abstract class Smarty_Resource_Recompiled extends Smarty_Resource
         $compiled->timestamp = time();
         $compiled->exists = true;
     }
-
     /**
      * populate Compiled Object with compiled filepath
      *
@@ -74,22 +70,21 @@ abstract class Smarty_Resource_Recompiled extends Smarty_Resource
      *
      * @return void
      */
-    public function populateCompiledFilepath(Smarty_Template_Compiled $compiled, Smarty_Internal_Template $_template)
+    public function populate_compiled_filepath(Smarty_Template_Compiled $compiled, Smarty_Internal_Template $_template)
     {
         $compiled->filepath = false;
         $compiled->timestamp = false;
         $compiled->exists = false;
     }
-
     /*
-       * Disable timestamp checks for recompiled resource.
-       *
-       * @return bool
-       */
+     * Disable timestamp checks for recompiled resource.
+     *
+     * @return bool
+     */
     /**
      * @return bool
      */
-    public function checkTimestamps()
+    public function check_timestamps()
     {
         return false;
     }

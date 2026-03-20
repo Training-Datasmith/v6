@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty error handler to fix new error levels in PHP8 for backwards compatibility
  *
@@ -10,22 +9,19 @@ declare(strict_types=1);
  * @author     Simon Wisselink
  *
  */
-class Smarty_Internal_ErrorHandler
+class Smarty_internal_error_Handler
 {
     /**
      * Allows {$foo} where foo is unset.
      * @var bool
      */
-    public $allowUndefinedVars = true;
-
+    public $allow_undefined_vars = true;
     /**
      * Allows {$foo.bar} where bar is unset and {$foo.bar1.bar2} where either bar1 or bar2 is unset.
      * @var bool
      */
-    public $allowUndefinedArrayKeys = true;
-
-    private $previousErrorHandler = null;
-
+    public $allow_undefined_array_keys = true;
+    private $previous_error_handler = null;
     /**
      * Enable error handler to intercept errors
      */
@@ -34,7 +30,7 @@ class Smarty_Internal_ErrorHandler
         /*
             Error muting is done because some people implemented custom error_handlers using
             https://php.net/set_error_handler and for some reason did not understand the following paragraph:
-
+        
             It is important to remember that the standard PHP error handler is completely bypassed for the
             error types specified by error_types unless the callback function returns FALSE.
             error_reporting() settings will have no effect and your error handler will be called regardless -
@@ -42,18 +38,16 @@ class Smarty_Internal_ErrorHandler
             Of particular note is that this value will be 0 if the statement that caused the error was
             prepended by the @ error-control operator.
         */
-        $this->previousErrorHandler = set_error_handler([$this, 'handleError']);
+        $this->previous_error_handler = set_error_handler([$this, 'handleError']);
     }
-
     /**
      * Disable error handler
      */
     public function deactivate()
     {
         restore_error_handler();
-        $this->previousErrorHandler = null;
+        $this->previous_error_handler = null;
     }
-
     /**
      * Error Handler to mute expected messages
      *
@@ -67,21 +61,17 @@ class Smarty_Internal_ErrorHandler
      *
      * @return bool
      */
-    public function handleError($errno, $errstr, $errfile, $errline, $errcontext = [])
+    public function handle_error($errno, $errstr, $errfile, $errline, $errcontext = [])
     {
-        if ($this->allowUndefinedVars && $errstr == 'Attempt to read property "value" on null') {
-            return; // suppresses this error
+        if ($this->allow_undefined_vars && $errstr == 'Attempt to read property "value" on null') {
+            return;
+            // suppresses this error
         }
-
-        if ($this->allowUndefinedArrayKeys && preg_match(
-            '/^(Undefined array key|Trying to access array offset on value of type null)/',
-            $errstr
-        )) {
-            return; // suppresses this error
+        if ($this->allow_undefined_array_keys && preg_match('/^(Undefined array key|Trying to access array offset on value of type null)/', $errstr)) {
+            return;
+            // suppresses this error
         }
-
         // pass all other errors through to the previous error handler or to the default PHP error handler
-        return $this->previousErrorHandler ?
-            call_user_func($this->previousErrorHandler, $errno, $errstr, $errfile, $errline, $errcontext) : false;
+        return $this->previous_error_handler ? call_user_func($this->previous_error_handler, $errno, $errstr, $errfile, $errline, $errcontext) : false;
     }
 }

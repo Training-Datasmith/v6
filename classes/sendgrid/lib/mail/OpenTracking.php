@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the OpenTracking object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a OpenTracking object for the /mail/send API call
  *
@@ -18,7 +16,7 @@ use SendGrid\Helper\Assert;
  *
  * @package SendGrid\Mail
  */
-class OpenTracking implements \JsonSerializable
+class Open_Tracking implements \JsonSerializable
 {
     /** @var $enable bool Indicates if this setting is enabled */
     private $enable;
@@ -28,7 +26,6 @@ class OpenTracking implements \JsonSerializable
      *                               open tracking pixel
      */
     private $substitution_tag;
-
     /**
      * Optional constructor
      *
@@ -43,13 +40,12 @@ class OpenTracking implements \JsonSerializable
     public function __construct($enable = null, $substitution_tag = null)
     {
         if (isset($enable)) {
-            $this->setEnable($enable);
+            $this->set_enable($enable);
         }
         if (isset($substitution_tag)) {
-            $this->setSubstitutionTag($substitution_tag);
+            $this->set_substitution_tag($substitution_tag);
         }
     }
-
     /**
      * Update the enable setting on a OpenTracking object
      *
@@ -57,23 +53,20 @@ class OpenTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable): void
+    public function set_enable($enable): void
     {
         Assert::boolean($enable, 'enable');
-
         $this->enable = $enable;
     }
-
     /**
      * Retrieve the enable setting on a OpenTracking object
      *
      * @return bool
      */
-    public function getEnable()
+    public function get_enable()
     {
         return $this->enable;
     }
-
     /**
      * Set the substitution tag on a OpenTracking object
      *
@@ -85,37 +78,28 @@ class OpenTracking implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setSubstitutionTag($substitution_tag): void
+    public function set_substitution_tag($substitution_tag): void
     {
         Assert::string($substitution_tag, 'substitution_tag');
-
         $this->substitution_tag = $substitution_tag;
     }
-
     /**
      * Retrieve the substitution tag from a OpenTracking object
      *
      * @return string
      */
-    public function getSubstitutionTag()
+    public function get_substitution_tag()
     {
         return $this->substitution_tag;
     }
-
     /**
      * Return an array representing a OpenTracking object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'enable' => $this->getEnable(),
-                'substitution_tag' => $this->getSubstitutionTag(),
-            ],
-            fn (bool|string $value) => $value !== null
-        ) ?: null;
+        return array_filter(['enable' => $this->get_enable(), 'substitution_tag' => $this->get_substitution_tag()], fn(bool|string $value) => $value !== null) ?: null;
     }
 }

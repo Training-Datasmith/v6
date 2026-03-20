@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method CreateData
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_CreateData
+class Smarty_internal_method_create_Data
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * creates a data object
      *
@@ -33,14 +31,14 @@ class Smarty_Internal_Method_CreateData
      *
      * @return \Smarty_Data data object
      */
-    public function createData(Smarty_Internal_TemplateBase $obj, Smarty_Internal_Data $parent = null, $name = null)
+    public function create_data(Smarty_internal_template_Base $obj, Smarty_Internal_Data $parent = null, $name = null)
     {
         /* @var Smarty $smarty */
-        $smarty = $obj->_getSmartyObj();
-        $dataObj = new Smarty_Data($parent, $smarty, $name);
+        $smarty = $obj->_get_smarty_obj();
+        $data_obj = new Smarty_Data($parent, $smarty, $name);
         if ($smarty->debugging) {
-            Smarty_Internal_Debug::register_data($dataObj);
+            Smarty_Internal_Debug::register_data($data_obj);
         }
-        return $dataObj;
+        return $data_obj;
     }
 }

@@ -1,20 +1,18 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the TemplateId object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a TemplateId object for the /mail/send API call
  *
  * @package SendGrid\Mail
  */
-class TemplateId implements \JsonSerializable
+class Template_Id implements \JsonSerializable
 {
     /**
      * @var $template_id string The id of a template that you would like to use. If you use a
@@ -22,7 +20,6 @@ class TemplateId implements \JsonSerializable
      * not need to specify those at the personalizations nor message level
      */
     private $template_id;
-
     /**
      * Optional constructor
      *
@@ -36,10 +33,9 @@ class TemplateId implements \JsonSerializable
     public function __construct($template_id = null)
     {
         if (isset($template_id)) {
-            $this->setTemplateId($template_id);
+            $this->set_template_id($template_id);
         }
     }
-
     /**
      * Add a template id to a TemplateId object
      *
@@ -51,31 +47,28 @@ class TemplateId implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setTemplateId($template_id): void
+    public function set_template_id($template_id): void
     {
         Assert::string($template_id, 'template_id');
-
         $this->template_id = $template_id;
     }
-
     /**
      * Retrieve a template id from a TemplateId object
      *
      * @return string
      */
-    public function getTemplateId()
+    public function get_template_id()
     {
         return $this->template_id;
     }
-
     /**
      * Return an array representing a TemplateId object for the Twilio SendGrid API
      *
      * @return string
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return $this->getTemplateId();
+        return $this->get_template_id();
     }
 }

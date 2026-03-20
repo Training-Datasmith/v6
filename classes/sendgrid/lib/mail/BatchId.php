@@ -1,24 +1,21 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the BatchId object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a BatchId object for the /mail/send API call
  *
  * @package SendGrid\Mail
  */
-class BatchId implements \JsonSerializable
+class Batch_Id implements \JsonSerializable
 {
     /** @var $batch_id string This ID represents a batch of emails to be sent at the same time */
     private $batch_id;
-
     /**
      * Optional constructor
      *
@@ -29,10 +26,9 @@ class BatchId implements \JsonSerializable
     public function __construct($batch_id = null)
     {
         if (isset($batch_id)) {
-            $this->setBatchId($batch_id);
+            $this->set_batch_id($batch_id);
         }
     }
-
     /**
      * Add the batch id to a BatchId object
      *
@@ -41,31 +37,28 @@ class BatchId implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setBatchId($batch_id): void
+    public function set_batch_id($batch_id): void
     {
         Assert::string($batch_id, 'batch_id');
-
         $this->batch_id = $batch_id;
     }
-
     /**
      * Return the batch id from a BatchId object
      *
      * @return string
      */
-    public function getBatchId()
+    public function get_batch_id()
     {
         return $this->batch_id;
     }
-
     /**
      * Return an array representing a BatchId object for the Twilio SendGrid API
      *
      * @return null|string
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return $this->getBatchId();
+        return $this->get_batch_id();
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty plugin
  *
@@ -21,17 +21,14 @@ declare(strict_types=1);
 function smarty_literal_compiler_param($params, $index, $default = null)
 {
     // not set, go default
-    if (!isset($params[ $index ])) {
+    if (!isset($params[$index])) {
         return $default;
     }
     // test if param is a literal
-    if (!preg_match('/^([\'"]?)[a-zA-Z0-9-]+(\\1)$/', $params[ $index ])) {
-        throw new SmartyException(
-            '$param[' . $index .
-            '] is not a literal and is thus not evaluatable at compile time'
-        );
+    if (!preg_match('/^([\'"]?)[a-zA-Z0-9-]+(\1)$/', $params[$index])) {
+        throw new Smarty_Exception('$param[' . $index . '] is not a literal and is thus not evaluatable at compile time');
     }
     $t = null;
-    eval('$t = ' . $params[ $index ] . ';');
+    eval('$t = ' . $params[$index] . ';');
     return $t;
 }

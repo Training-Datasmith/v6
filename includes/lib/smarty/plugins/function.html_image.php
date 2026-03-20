@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Smarty plugin
  *
@@ -38,14 +38,7 @@ declare(strict_types=1);
  */
 function smarty_function_html_image($params, Smarty_Internal_Template $template)
 {
-    $template->_checkPlugins(
-        [
-            [
-                'function' => 'smarty_function_escape_special_chars',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php',
-            ],
-        ]
-    );
+    $template->_check_plugins([['function' => 'smarty_function_escape_special_chars', 'file' => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php']]);
     $alt = '';
     $file = '';
     $height = '';
@@ -54,7 +47,7 @@ function smarty_function_html_image($params, Smarty_Internal_Template $template)
     $prefix = '';
     $suffix = '';
     $path_prefix = '';
-    $basedir = isset($_SERVER[ 'DOCUMENT_ROOT' ]) ? $_SERVER[ 'DOCUMENT_ROOT' ] : '';
+    $basedir = isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] : '';
     foreach ($params as $_key => $_val) {
         switch ($_key) {
             case 'file':
@@ -63,16 +56,13 @@ function smarty_function_html_image($params, Smarty_Internal_Template $template)
             case 'dpi':
             case 'path_prefix':
             case 'basedir':
-                $$_key = $_val;
+                ${$_key} = $_val;
                 break;
             case 'alt':
                 if (!is_array($_val)) {
-                    $$_key = smarty_function_escape_special_chars($_val);
+                    ${$_key} = smarty_function_escape_special_chars($_val);
                 } else {
-                    throw new SmartyException(
-                        "html_image: extra attribute '{$_key}' cannot be an array",
-                        E_USER_NOTICE
-                    );
+                    throw new Smarty_Exception("html_image: extra attribute '{$_key}' cannot be an array", E_USER_NOTICE);
                 }
                 break;
             case 'link':
@@ -84,10 +74,7 @@ function smarty_function_html_image($params, Smarty_Internal_Template $template)
                 if (!is_array($_val)) {
                     $extra .= ' ' . $_key . '="' . smarty_function_escape_special_chars($_val) . '"';
                 } else {
-                    throw new SmartyException(
-                        "html_image: extra attribute '{$_key}' cannot be an array",
-                        E_USER_NOTICE
-                    );
+                    throw new Smarty_Exception("html_image: extra attribute '{$_key}' cannot be an array", E_USER_NOTICE);
                 }
                 break;
         }
@@ -96,33 +83,30 @@ function smarty_function_html_image($params, Smarty_Internal_Template $template)
         trigger_error('html_image: missing \'file\' parameter', E_USER_NOTICE);
         return;
     }
-    if ($file[ 0 ] === '/') {
+    if ($file[0] === '/') {
         $_image_path = $basedir . $file;
     } else {
         $_image_path = $file;
     }
     // strip file protocol
-    if (stripos($params[ 'file' ], 'file://') === 0) {
-        $params[ 'file' ] = substr($params[ 'file' ], 7);
+    if (stripos($params['file'], 'file://') === 0) {
+        $params['file'] = substr($params['file'], 7);
     }
-    $protocol = strpos($params[ 'file' ], '://');
+    $protocol = strpos($params['file'], '://');
     if ($protocol !== false) {
-        $protocol = strtolower(substr($params[ 'file' ], 0, $protocol));
+        $protocol = strtolower(substr($params['file'], 0, $protocol));
     }
     if (isset($template->smarty->security_policy)) {
         if ($protocol) {
             // remote resource (or php stream, …)
-            if (!$template->smarty->security_policy->isTrustedUri($params[ 'file' ])) {
+            if (!$template->smarty->security_policy->is_trusted_uri($params['file'])) {
                 return;
             }
-        } else {
-            // local file
-            if (!$template->smarty->security_policy->isTrustedResourceDir($_image_path)) {
-                return;
-            }
+        } else if (!$template->smarty->security_policy->is_trusted_resource_dir($_image_path)) {
+            return;
         }
     }
-    if (!isset($params[ 'width' ]) || !isset($params[ 'height' ])) {
+    if (!isset($params['width']) || !isset($params['height'])) {
         // FIXME: (rodneyrehm) getimagesize() loads the complete file off a remote resource, use custom [jpg,png,gif]header reader!
         if (!$_image_data = @getimagesize($_image_path)) {
             if (!file_exists($_image_path)) {
@@ -136,25 +120,24 @@ function smarty_function_html_image($params, Smarty_Internal_Template $template)
                 return;
             }
         }
-        if (!isset($params[ 'width' ])) {
-            $width = $_image_data[ 0 ];
+        if (!isset($params['width'])) {
+            $width = $_image_data[0];
         }
-        if (!isset($params[ 'height' ])) {
-            $height = $_image_data[ 1 ];
+        if (!isset($params['height'])) {
+            $height = $_image_data[1];
         }
     }
-    if (isset($params[ 'dpi' ])) {
-        if (strstr($_SERVER[ 'HTTP_USER_AGENT' ], 'Mac')) {
+    if (isset($params['dpi'])) {
+        if (strstr($_SERVER['HTTP_USER_AGENT'], 'Mac')) {
             // FIXME: (rodneyrehm) wrong dpi assumption
             // don't know who thought this up… even if it was true in 1998, it's definitely wrong in 2011.
             $dpi_default = 72;
         } else {
             $dpi_default = 96;
         }
-        $_resize = $dpi_default / $params[ 'dpi' ];
+        $_resize = $dpi_default / $params['dpi'];
         $width = round($width * $_resize);
         $height = round($height * $_resize);
     }
-    return $prefix . '<img src="' . $path_prefix . $file . '" alt="' . $alt . '" width="' . $width . '" height="' .
-           $height . '"' . $extra . ' />' . $suffix;
+    return $prefix . '<img src="' . $path_prefix . $file . '" alt="' . $alt . '" width="' . $width . '" height="' . $height . '"' . $extra . ' />' . $suffix;
 }

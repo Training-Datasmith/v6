@@ -1,26 +1,23 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This helper builds the SandBoxMode object for a /mail/send API call
  */
+namespace Send_Grid\Mail;
 
-namespace SendGrid\Mail;
-
-use SendGrid\Helper\Assert;
-
+use Send_Grid\Helper\Assert;
 /**
  * This class is used to construct a SandBoxMode object for the /mail/send API call
  *
  * @package SendGrid\Mail
  */
-class SandBoxMode implements \JsonSerializable
+class Sand_Box_Mode implements \JsonSerializable
 {
     /**
      * @var bool Indicates if this setting is enabled
      */
     private $enable;
-
     /**
      * Optional constructor
      *
@@ -30,10 +27,9 @@ class SandBoxMode implements \JsonSerializable
     public function __construct($enable = null)
     {
         if (isset($enable)) {
-            $this->setEnable($enable);
+            $this->set_enable($enable);
         }
     }
-
     /**
      * Update the enable setting on a SandBoxMode object
      *
@@ -41,36 +37,28 @@ class SandBoxMode implements \JsonSerializable
      *
      * @throws \SendGrid\Mail\TypeException
      */
-    public function setEnable($enable): void
+    public function set_enable($enable): void
     {
         Assert::boolean($enable, 'enable');
-
         $this->enable = $enable;
     }
-
     /**
      * Retrieve the enable setting on a SandBoxMode object
      *
      * @return bool
      */
-    public function getEnable()
+    public function get_enable()
     {
         return $this->enable;
     }
-
     /**
      * Return an array representing a SandBoxMode object for the Twilio SendGrid API
      *
      * @return null|array
      */
-    #[\ReturnTypeWillChange]
+    #[\Return_Type_Will_Change]
     public function jsonSerialize()
     {
-        return array_filter(
-            [
-                'enable' => $this->getEnable(),
-            ],
-            fn (bool $value) => $value !== null
-        ) ?: null;
+        return array_filter(['enable' => $this->get_enable()], fn(bool $value) => $value !== null) ?: null;
     }
 }

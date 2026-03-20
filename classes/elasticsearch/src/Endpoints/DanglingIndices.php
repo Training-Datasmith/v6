@@ -11,22 +11,19 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Elastic\Elasticsearch\Endpoints;
 
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use Elastic\Elasticsearch\Exception\Client_Response_Exception;
+use Elastic\Elasticsearch\Exception\Missing_Parameter_Exception;
+use Elastic\Elasticsearch\Exception\Server_Response_Exception;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Elastic\Transport\Exception\NoNodeAvailableException;
+use Elastic\Transport\Exception\No_Node_Available_Exception;
 use Http\Promise\Promise;
-
 /**
  * @generated This file is generated, please do not edit
  */
-class DanglingIndices extends AbstractEndpoint
+class Dangling_Indices extends Abstract_Endpoint
 {
     /**
      * Deletes the specified dangling index
@@ -52,19 +49,15 @@ class DanglingIndices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function deleteDanglingIndex(array $params = [])
+    public function delete_dangling_index(array $params = [])
     {
-        $this->checkRequiredParameters(['index_uuid'], $params);
+        $this->check_required_parameters(['index_uuid'], $params);
         $url = '/_dangling/' . $this->encode($params['index_uuid']);
         $method = 'DELETE';
-
-        $url = $this->addQueryString($url, $params, ['accept_data_loss','timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['accept_data_loss', 'timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Imports the specified dangling index
      *
@@ -89,19 +82,15 @@ class DanglingIndices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function importDanglingIndex(array $params = [])
+    public function import_dangling_index(array $params = [])
     {
-        $this->checkRequiredParameters(['index_uuid'], $params);
+        $this->check_required_parameters(['index_uuid'], $params);
         $url = '/_dangling/' . $this->encode($params['index_uuid']);
         $method = 'POST';
-
-        $url = $this->addQueryString($url, $params, ['accept_data_loss','timeout','master_timeout','pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['accept_data_loss', 'timeout', 'master_timeout', 'pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
-
     /**
      * Returns all dangling indices.
      *
@@ -121,15 +110,12 @@ class DanglingIndices extends AbstractEndpoint
      *
      * @return Elasticsearch|Promise
      */
-    public function listDanglingIndices(array $params = [])
+    public function list_dangling_indices(array $params = [])
     {
         $url = '/_dangling';
         $method = 'GET';
-
-        $url = $this->addQueryString($url, $params, ['pretty','human','error_trace','source','filter_path']);
-        $headers = [
-            'Accept' => 'application/json',
-        ];
-        return $this->client->sendRequest($this->createRequest($method, $url, $headers, $params['body'] ?? null));
+        $url = $this->add_query_string($url, $params, ['pretty', 'human', 'error_trace', 'source', 'filter_path']);
+        $headers = ['Accept' => 'application/json'];
+        return $this->client->send_request($this->create_request($method, $url, $headers, $params['body'] ?? null));
     }
 }

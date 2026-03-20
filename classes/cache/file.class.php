@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * CubeCart v6
  * ========================================
@@ -15,8 +15,7 @@ declare(strict_types=1);
 if (!defined('CC_INI_SET')) {
     die('Access Denied');
 }
-require CC_ROOT_DIR.'/classes/cache/cache.class.php';
-
+require CC_ROOT_DIR . '/classes/cache/cache.class.php';
 /**
  * Cache specific class
  *
@@ -35,38 +34,31 @@ class Cache extends Cache_Controler
     protected $_page_cache_usage = 0;
     protected $_page_cache_file_count = 0;
     protected $_file_data_split = "\n--boundary\n";
-
     ##############################################
-
     final protected function __construct()
     {
         $this->_mode = 'File';
-
         //Run the parent constructor
         parent::__construct();
     }
-
     public function __destruct()
     {
         if ($this->_empties_added) {
             $this->write($this->_empties, $this->_empties_id);
         }
     }
-
     /**
      * Setup the instance (singleton)
      *
      * @return instance
      */
-    public static function getInstance(): self
+    public static function get_instance(): self
     {
-        if (!(self::$_instance instanceof self)) {
+        if (!self::$_instance instanceof self) {
             self::$_instance = new self();
         }
-
         return self::$_instance;
     }
-
     //=====[ Public ]=======================================
     /**
      * Clear all the cache
@@ -75,11 +67,10 @@ class Cache extends Cache_Controler
      */
     public function clear($type = ''): bool
     {
-        $this->_clearFileCache();
+        $this->_clear_file_cache();
         clearstatcache();
         return true;
     }
-
     /**
      * Remove a single item of cache
      *
@@ -88,18 +79,16 @@ class Cache extends Cache_Controler
      */
     public function delete($id)
     {
-        $id = shortHash($id, 8, [$this->_empties_id]);
-        $file = $this->_cache_path.$this->_makeName($id);
+        $id = short_hash($id, 8, [$this->_empties_id]);
+        $file = $this->_cache_path . $this->_make_name($id);
         clearstatcache(true, $file);
         if (file_exists($file)) {
             $result = unlink($file);
             clearstatcache(true, $file);
             return $result;
         }
-
         return true;
     }
-
     /**
      * Check to see if the cache file exists
      *
@@ -109,34 +98,30 @@ class Cache extends Cache_Controler
      */
     public function exists($id)
     {
-        if (!$this->status && !$this->statusException($id)) {
+        if (!$this->status && !$this->status_exception($id)) {
             return false;
         }
-        $id = shortHash($id, 8, [$this->_empties_id]);
-        $file = $this->_cache_path.$this->_makeName($id);
+        $id = short_hash($id, 8, [$this->_empties_id]);
+        $file = $this->_cache_path . $this->_make_name($id);
         clearstatcache(true, $file);
-
         return file_exists($file);
     }
-
     /**
      * Get all the cache ids
      *
      * @return array
      */
-    public function getIDs()
+    public function get_i_ds()
     {
         if (empty($this->_ids)) {
-            foreach (glob($this->_cache_path.'*'.$this->_suffix, GLOB_NOSORT) as $file) {
+            foreach (glob($this->_cache_path . '*' . $this->_suffix, GLOB_NOSORT) as $file) {
                 if (str_contains($file, $this->_prefix)) {
                     $this->_ids[] = str_replace([$this->_prefix, $this->_suffix, CC_CACHE_DIR], '', $file);
                 }
             }
         }
-
         return $this->_ids;
     }
-
     /**
      * Get the cache data
      *
@@ -145,25 +130,19 @@ class Cache extends Cache_Controler
      */
     public function read($id, $serialized = true)
     {
-        if (!$this->status && !$this->statusException($id)) {
+        if (!$this->status && !$this->status_exception($id)) {
             return false;
         }
-
-        $id = shortHash($id, 8, [$this->_empties_id]);
-
+        $id = short_hash($id, 8, [$this->_empties_id]);
         if ($this->_empties_id !== $id && isset($this->_empties[$id])) {
             return ['empty' => true, 'data' => $this->_empties[$id]];
         }
-
         if ($this->_empties_id !== $id && isset($this->_dupes[$id])) {
             return $this->_dupes[$id];
         }
-
-        $name = $this->_makeName($id);
-        $file = $this->_cache_path.$name;
-
+        $name = $this->_make_name($id);
+        $file = $this->_cache_path . $name;
         clearstatcache(true, $file);
-
         //Make sure the cache file exists
         if (file_exists($file)) {
             $contents = @file_get_contents($file);
@@ -174,23 +153,19 @@ class Cache extends Cache_Controler
                 @unlink($file);
                 return false;
             }
-
             //Split meta and data
             [$meta, $data] = explode($this->_file_data_split, $contents, 2);
             $meta = unserialize($meta);
-
             //Check to see if the cache is past the experation date
-            if (($meta['time'] + $meta['expire']) <= time()) {
+            if ($meta['time'] + $meta['expire'] <= time()) {
                 unlink($file);
                 return false;
             }
-            $this->_dupes[$id] = ($serialized) ? unserialize($data) : $data;
+            $this->_dupes[$id] = $serialized ? unserialize($data) : $data;
             return $this->_dupes[$id];
         }
-
         return false;
     }
-
     /**
      * Write cache data
      *
@@ -201,11 +176,10 @@ class Cache extends Cache_Controler
      */
     public function write($data, $id, $expire = '', $serialize = true): bool
     {
-        if (!$this->status && !$this->statusException($id)) {
+        if (!$this->status && !$this->status_exception($id)) {
             return false;
         }
-
-        $id = shortHash($id, 8, [$this->_empties_id]);
+        $id = short_hash($id, 8, [$this->_empties_id]);
         if ($this->_empties_id !== $id && empty($data)) {
             if (!isset($this->_empties[$id])) {
                 $this->_empties[$id] = $data;
@@ -213,32 +187,24 @@ class Cache extends Cache_Controler
             }
             return false;
         }
-
         try {
-            $data = ($serialize) ? serialize($data) : $data;
+            $data = $serialize ? serialize($data) : $data;
         } catch (Exception $e) {
-            trigger_error($e->getMessage());
+            trigger_error($e->get_message());
             return false;
         }
-
-        $name = $this->_makeName($id);
-
+        $name = $this->_make_name($id);
         //Create the metadata for the file
-        $meta = [
-            'time'  => time(),
-            'expire' => (!empty($expire) && is_numeric($expire)) ? $expire : $this->_expire,
-        ];
+        $meta = ['time' => time(), 'expire' => !empty($expire) && is_numeric($expire) ? $expire : $this->_expire];
         //Combine the meta and the data
-        $data  = serialize($meta).$this->_file_data_split.$data;
-
+        $data = serialize($meta) . $this->_file_data_split . $data;
         //Write to file
-        if (file_put_contents($this->_cache_path.$name, $data, LOCK_EX)) {
+        if (file_put_contents($this->_cache_path . $name, $data, LOCK_EX)) {
             return true;
         }
         trigger_error('Cache data not written.', E_USER_WARNING);
         return false;
     }
-
     /**
      * Calculates the cache usage
      */
@@ -246,27 +212,19 @@ class Cache extends Cache_Controler
     {
         $cache_size = 0;
         $cache_files = 0;
-        foreach (glob($this->_cache_path.'*', GLOB_NOSORT) as $file) {
+        foreach (glob($this->_cache_path . '*', GLOB_NOSORT) as $file) {
             $cache_size += filesize($file);
             $cache_files++;
         }
-        return 'Cache Used: '.(
-            ($cache_size > 0)
-          ? formatBytes($this->_page_cache_usage, true).' of ' .
-             formatBytes($cache_size, true) .
-             ' ('.number_format((($this->_page_cache_usage / $cache_size) * 100), 2).'%)'
-          : '0%'
-        ).'<br>Hits: '.$this->_page_cache_file_count.' / '.$cache_files;
+        return 'Cache Used: ' . ($cache_size > 0 ? format_bytes($this->_page_cache_usage, true) . ' of ' . format_bytes($cache_size, true) . ' (' . number_format($this->_page_cache_usage / $cache_size * 100, 2) . '%)' : '0%') . '<br>Hits: ' . $this->_page_cache_file_count . ' / ' . $cache_files;
     }
-
     //=====[ Private ]=======================================
-
     /**
      * Get empty cache queries
      */
-    protected function _getEmpties()
+    protected function _get_empties()
     {
-        $this->_setPrefix();
-        $this->_empties = ($this->read($this->_empties_id)) ?: [];
+        $this->_set_prefix();
+        $this->_empties = $this->read($this->_empties_id) ?: [];
     }
 }

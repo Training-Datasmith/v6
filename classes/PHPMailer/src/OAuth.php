@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * PHPMailer - PHP email creation and transport class.
  * PHP Version 5.5.
@@ -20,13 +19,11 @@ declare(strict_types=1);
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.
  */
+namespace Php_Mailer\Php_Mailer;
 
-namespace PHPMailer\PHPMailer;
-
-use League\OAuth2\Client\Grant\RefreshToken;
-use League\OAuth2\Client\Provider\AbstractProvider;
-use League\OAuth2\Client\Token\AccessToken;
-
+use League\O_Auth2\Client\Grant\Refresh_Token;
+use League\O_Auth2\Client\Provider\Abstract_Provider;
+use League\O_Auth2\Client\Token\Access_Token;
 /**
  * OAuth - OAuth2 authentication wrapper class.
  * Uses the oauth2-client package from the League of Extraordinary Packages.
@@ -35,7 +32,7 @@ use League\OAuth2\Client\Token\AccessToken;
  *
  * @author  Marcus Bointon (Synchro/coolbru) <phpmailer@synchromedia.co.uk>
  */
-class OAuth
+class O_Auth
 {
     /**
      * An instance of the League OAuth Client Provider.
@@ -43,43 +40,37 @@ class OAuth
      * @var AbstractProvider
      */
     protected $provider;
-
     /**
      * The current OAuth access token.
      *
      * @var AccessToken
      */
-    protected $oauthToken;
-
+    protected $oauth_token;
     /**
      * The user's email address, usually used as the login ID
      * and also the from address when sending email.
      *
      * @var string
      */
-    protected $oauthUserEmail = '';
-
+    protected $oauth_user_email = '';
     /**
      * The client secret, generated in the app definition of the service you're connecting to.
      *
      * @var string
      */
-    protected $oauthClientSecret = '';
-
+    protected $oauth_client_secret = '';
     /**
      * The client ID, generated in the app definition of the service you're connecting to.
      *
      * @var string
      */
-    protected $oauthClientId = '';
-
+    protected $oauth_client_id = '';
     /**
      * The refresh token, used to obtain new AccessTokens.
      *
      * @var string
      */
-    protected $oauthRefreshToken = '';
-
+    protected $oauth_refresh_token = '';
     /**
      * OAuth constructor.
      *
@@ -89,51 +80,38 @@ class OAuth
     public function __construct(array $options)
     {
         $this->provider = $options['provider'];
-        $this->oauthUserEmail = $options['userName'];
-        $this->oauthClientSecret = $options['clientSecret'];
-        $this->oauthClientId = $options['clientId'];
-        $this->oauthRefreshToken = $options['refreshToken'];
+        $this->oauth_user_email = $options['userName'];
+        $this->oauth_client_secret = $options['clientSecret'];
+        $this->oauth_client_id = $options['clientId'];
+        $this->oauth_refresh_token = $options['refreshToken'];
     }
-
     /**
      * Get a new RefreshToken.
      *
      * @return RefreshToken
      */
-    protected function getGrant()
+    protected function get_grant()
     {
-        return new RefreshToken();
+        return new Refresh_Token();
     }
-
     /**
      * Get a new AccessToken.
      *
      * @return AccessToken
      */
-    protected function getToken()
+    protected function get_token()
     {
-        return $this->provider->getAccessToken(
-            $this->getGrant(),
-            ['refresh_token' => $this->oauthRefreshToken]
-        );
+        return $this->provider->get_access_token($this->get_grant(), ['refresh_token' => $this->oauth_refresh_token]);
     }
-
     /**
      * Generate a base64-encoded OAuth token.
      */
-    public function getOauth64(): string
+    public function get_oauth64(): string
     {
         //Get a new token if it's not available or has expired
-        if (null === $this->oauthToken || $this->oauthToken->hasExpired()) {
-            $this->oauthToken = $this->getToken();
+        if (null === $this->oauth_token || $this->oauth_token->has_expired()) {
+            $this->oauth_token = $this->get_token();
         }
-
-        return base64_encode(
-            'user=' .
-            $this->oauthUserEmail .
-            "\001auth=Bearer " .
-            $this->oauthToken .
-            "\001\001"
-        );
+        return base64_encode('user=' . $this->oauth_user_email . "\x01auth=Bearer " . $this->oauth_token . "\x01\x01");
     }
 }

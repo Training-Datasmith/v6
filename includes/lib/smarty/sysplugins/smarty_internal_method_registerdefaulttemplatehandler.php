@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Method RegisterDefaultTemplateHandler
  *
@@ -11,15 +10,14 @@ declare(strict_types=1);
  * @subpackage PluginsInternal
  * @author     Uwe Tews
  */
-class Smarty_Internal_Method_RegisterDefaultTemplateHandler
+class Smarty_internal_method_register_Default_Template_Handler
 {
     /**
      * Valid for Smarty and template object
      *
      * @var int
      */
-    public $objMap = 3;
-
+    public $obj_map = 3;
     /**
      * Register template default handler
      *
@@ -31,17 +29,16 @@ class Smarty_Internal_Method_RegisterDefaultTemplateHandler
      * @return \Smarty|\Smarty_Internal_Template
      * @throws SmartyException              if $callback is not callable
      */
-    public function registerDefaultTemplateHandler(Smarty_Internal_TemplateBase $obj, $callback)
+    public function register_default_template_handler(Smarty_internal_template_Base $obj, $callback)
     {
-        $smarty = $obj->_getSmartyObj();
+        $smarty = $obj->_get_smarty_obj();
         if (is_callable($callback)) {
             $smarty->default_template_handler_func = $callback;
         } else {
-            throw new SmartyException('Default template handler not callable');
+            throw new Smarty_Exception('Default template handler not callable');
         }
         return $obj;
     }
-
     /**
      * get default content from template or config resource handler
      *
@@ -49,28 +46,21 @@ class Smarty_Internal_Method_RegisterDefaultTemplateHandler
      *
      * @throws \SmartyException
      */
-    public static function _getDefaultTemplate(Smarty_Template_Source $source)
+    public static function _get_default_template(Smarty_Template_Source $source)
     {
-        if ($source->isConfig) {
+        if ($source->is_config) {
             $default_handler = $source->smarty->default_config_handler_func;
         } else {
             $default_handler = $source->smarty->default_template_handler_func;
         }
         $_content = $_timestamp = null;
-        $_return = call_user_func_array(
-            $default_handler,
-            [$source->type, $source->name, &$_content, &$_timestamp, $source->smarty]
-        );
+        $_return = call_user_func_array($default_handler, [$source->type, $source->name, &$_content, &$_timestamp, $source->smarty]);
         if (is_string($_return)) {
             $source->exists = is_file($_return);
             if ($source->exists) {
                 $source->timestamp = filemtime($_return);
             } else {
-                throw new SmartyException(
-                    'Default handler: Unable to load ' .
-                    ($source->isConfig ? 'config' : 'template') .
-                    " default file '{$_return}' for '{$source->type}:{$source->name}'"
-                );
+                throw new Smarty_Exception('Default handler: Unable to load ' . ($source->is_config ? 'config' : 'template') . " default file '{$_return}' for '{$source->type}:{$source->name}'");
             }
             $source->name = $source->filepath = $_return;
             $source->uid = sha1($source->filepath);
@@ -81,10 +71,7 @@ class Smarty_Internal_Method_RegisterDefaultTemplateHandler
             $source->handler = Smarty_Resource::load($source->smarty, 'eval');
         } else {
             $source->exists = false;
-            throw new SmartyException(
-                'Default handler: No ' . ($source->isConfig ? 'config' : 'template') .
-                " default content for '{$source->type}:{$source->name}'"
-            );
+            throw new Smarty_Exception('Default handler: No ' . ($source->is_config ? 'config' : 'template') . " default content for '{$source->type}:{$source->name}'");
         }
     }
 }

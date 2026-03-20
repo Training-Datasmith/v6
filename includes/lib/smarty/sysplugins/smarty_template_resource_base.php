@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Smarty Template Resource Base Object
  *
@@ -17,63 +16,54 @@ abstract class Smarty_Template_Resource_Base
      * @var string
      */
     public $filepath = null;
-
     /**
      * Compiled Timestamp
      *
      * @var integer|bool
      */
     public $timestamp = false;
-
     /**
      * Compiled Existence
      *
      * @var boolean
      */
     public $exists = false;
-
     /**
      * Template Compile Id (Smarty_Internal_Template::$compile_id)
      *
      * @var string
      */
     public $compile_id = null;
-
     /**
      * Compiled Content Loaded
      *
      * @var boolean
      */
     public $processed = false;
-
     /**
      * unique function name for compiled template code
      *
      * @var string
      */
     public $unifunc = '';
-
     /**
      * flag if template does contain nocache code sections
      *
      * @var bool
      */
     public $has_nocache_code = false;
-
     /**
      * resource file dependency
      *
      * @var array
      */
     public $file_dependency = [];
-
     /**
      * Content buffer
      *
      * @var string
      */
     public $content = null;
-
     /**
      * Included sub templates
      * - index name
@@ -82,21 +72,18 @@ abstract class Smarty_Template_Resource_Base
      * @var int[]
      */
     public $includes = [];
-
     /**
      * Flag if this is a cache resource
      *
      * @var bool
      */
-    public $isCache = false;
-
+    public $is_cache = false;
     /**
      * Process resource
      *
      * @param Smarty_Internal_Template $_template template object
      */
     abstract public function process(Smarty_Internal_Template $_template);
-
     /**
      * get rendered template content by calling compiled or cached template code
      *
@@ -105,46 +92,45 @@ abstract class Smarty_Template_Resource_Base
      *
      * @throws \Exception
      */
-    public function getRenderedTemplateCode(Smarty_Internal_Template $_template, $unifunc = null)
+    public function get_rendered_template_code(Smarty_Internal_Template $_template, $unifunc = null)
     {
-        $smarty = &$_template->smarty;
-        $_template->isRenderingCache = $this->isCache;
+        $smarty =& $_template->smarty;
+        $_template->is_rendering_cache = $this->is_cache;
         $level = ob_get_level();
         try {
             if (!isset($unifunc)) {
                 $unifunc = $this->unifunc;
             }
             if (empty($unifunc) || !function_exists($unifunc)) {
-                throw new SmartyException("Invalid compiled template for '{$_template->template_resource}'");
+                throw new Smarty_Exception("Invalid compiled template for '{$_template->template_resource}'");
             }
-            if ($_template->startRenderCallbacks) {
-                foreach ($_template->startRenderCallbacks as $callback) {
+            if ($_template->start_render_callbacks) {
+                foreach ($_template->start_render_callbacks as $callback) {
                     call_user_func($callback, $_template);
                 }
             }
             $unifunc($_template);
-            foreach ($_template->endRenderCallbacks as $callback) {
+            foreach ($_template->end_render_callbacks as $callback) {
                 call_user_func($callback, $_template);
             }
-            $_template->isRenderingCache = false;
+            $_template->is_rendering_cache = false;
         } catch (Exception $e) {
-            $_template->isRenderingCache = false;
+            $_template->is_rendering_cache = false;
             while (ob_get_level() > $level) {
                 ob_end_clean();
             }
             if (isset($smarty->security_policy)) {
-                $smarty->security_policy->endTemplate();
+                $smarty->security_policy->end_template();
             }
             throw $e;
         }
     }
-
     /**
      * Get compiled time stamp
      *
      * @return int
      */
-    public function getTimeStamp()
+    public function get_time_stamp()
     {
         if ($this->exists && !$this->timestamp) {
             $this->timestamp = filemtime($this->filepath);

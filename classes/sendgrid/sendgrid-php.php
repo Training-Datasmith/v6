@@ -1,26 +1,22 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * This file is used to load the Composer autoloader if required.
  */
-
-use SendGrid\Mail\Mail;
-
+use Send_Grid\Mail\Mail;
 // Define path/existence of Composer autoloader
-$composerAutoloadFile = __DIR__ . '/vendor/autoload.php';
-$composerAutoloadFileExists = (is_file($composerAutoloadFile));
-
+$composer_autoload_file = __DIR__ . '/vendor/autoload.php';
+$composer_autoload_file_exists = is_file($composer_autoload_file);
 // Can't locate SendGrid\Mail\Mail class?
 if (!class_exists(Mail::class)) {
     // Suggest to load Composer autoloader of project
-    if (!$composerAutoloadFileExists) {
+    if (!$composer_autoload_file_exists) {
         //  Can't load the Composer autoloader in this project folder
         error_log("Composer autoloader not found. Execute 'composer install' in the project folder first.");
     } else {
         // Load Composer autoloader
-        require_once $composerAutoloadFile;
-
+        require_once $composer_autoload_file;
         // If desired class still not existing
         // Suggest to review the Composer autoloader settings
         error_log('Error finding SendGrid classes. Please review your autoloading configuration.');
